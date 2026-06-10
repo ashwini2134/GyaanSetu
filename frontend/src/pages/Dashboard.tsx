@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { api, type Course, getSubmissionHistory, getEarnedCertificates, type Certificate } from "../api";
+import { api, type Course, getSubmissionHistory } from "../api";
 import { useAuth } from "../auth";
 import { Card, LoadingCard, CourseSearchFilters, NoResultsState } from "../components";
 import { getCourseStats, subscribeToProgressChanges } from "../hooks/useProgress";
 import { useGamification, ACHIEVEMENTS, updateOverallProgress } from "../progress";
-import { CertificateModal } from "../components/CertificateModal";
 
 const IconBook = () => (
   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -99,10 +98,7 @@ export default function Dashboard() {
   const [submissionHistory, setSubmissionHistory] = useState<Record<string, number>>({});
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [earnedCertificates, setEarnedCertificates] = useState<Record<string, Certificate>>({});
-  const [sortBy, setSortBy] = useState<"Latest" | "Oldest" | "Name">("Latest");
-  const [isCertModalOpen, setIsCertModalOpen] = useState(false);
-  const [selectedCertInfo, setSelectedCertInfo] = useState<{ slug: string; title: string; studentName: string } | null>(null);
+
   
   // Use our centralized Gamification hook
   const { xp, achievements: unlockedAchievements, streak, stats, overallProgress } = useGamification();
@@ -134,12 +130,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     setSubmissionHistory(getSubmissionHistory());
-    setEarnedCertificates(getEarnedCertificates());
-    const handler = () => {
-      setEarnedCertificates(getEarnedCertificates());
-    };
-    window.addEventListener("storage", handler);
-    return () => window.removeEventListener("storage", handler);
   }, []);
 
   const [courseStatsMap, setCourseStatsMap] = useState<Record<string, { completed: number; total: number; lecturesCompleted: number }>>({});
@@ -177,16 +167,7 @@ export default function Dashboard() {
       .catch((e: Error) => setErr(e.message));
   }, []);
 
-  const sortedCerts = useMemo(() => {
-    const certList = Object.values(earnedCertificates);
-    if (sortBy === "Latest") {
-      return certList.sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime());
-    } else if (sortBy === "Oldest") {
-      return certList.sort((a, b) => new Date(a.completedAt).getTime() - new Date(b.completedAt).getTime());
-    } else {
-      return certList.sort((a, b) => a.courseTitle.localeCompare(b.courseTitle));
-    }
-  }, [earnedCertificates, sortBy]);
+
 
   const totalCompleted = stats.tasksSubmitted + stats.projectsSolved;
 
@@ -305,6 +286,96 @@ export default function Dashboard() {
           <div className="mb-6 p-4 bg-red-950/30 border border-red-900/50 rounded-xl text-red-300 mx-4 md:mx-0">
             <p className="font-semibold text-sm">Error loading courses</p>
             <p className="text-xs mt-1 opacity-80">{err}</p>
+          </div>
+        )}
+
+        {/* Course Search & Catalog Section */}
+        {courses !== null && (
+          <div className="mb-8 px-4 md:px-0">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <div className="text-white">
+                  <IconBook />
+                </div>
+                <h2 className="text-xl font-bold text-white tracking-tight">Search Courses</h2>
+              </div>
+              <Link
+                to="/courses"
+                className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
+              >
+                View Catalog →
+              </Link>
+            </div>
+
+            <CourseSearchFilters
+              courses={courses}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              onFilteredCoursesChange={setFilteredCourses}
+            />
+
+            {filteredCourses.length === 0 ? (
+              <NoResultsState query={searchQuery} onSelectSuggestion={setSearchQuery} />
+            ) : (
+              <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                {filteredCourses.map((c) => {
+                  const progress = courseStatsMap[c.slug] || { completed: 0, total: 0, lecturesCompleted: 0 };
+                  const percent = progress.total > 0 ? Math.round((progress.completed / progress.total) * 100) : 0;
+                  const isCourseActive = activeCourseId === c.slug;
+                  return (
+                    <Link key={c.id} to={`/course/${c.slug}`} className="group block active:scale-[0.97] transition-all duration-300">
+                      <Card
+                        onClick={() => handleCourseClick(c.slug)}
+                        className={`relative p-6 bg-slate-950/40 border rounded-3xl transition-all duration-300 h-full flex flex-col justify-between overflow-hidden ${
+                          isCourseActive
+                            ? 'border-cyan-500/80 bg-cyan-950/5 scale-[1.02] shadow-lg shadow-cyan-500/10'
+                            : 'border-slate-800/60 hover:shadow-xl hover:shadow-cyan-950/10 hover:border-cyan-500/20'
+                        }`}
+                      >
+                        <div className="flex flex-col gap-4">
+                          <div className="flex flex-col items-center justify-center gap-3">
+                            <div className="relative w-12 h-12 rounded-xl bg-slate-900/60 border border-slate-800/80 flex items-center justify-center flex-shrink-0">
+                              {c.slug === 'cs50p' ? (
+                                <span className="font-bold text-sm text-cyan-400">Py</span>
+                              ) : (
+                                <span className="text-slate-400">
+                                  <IconCourseCard />
+                                </span>
+                              )}
+                              {isCourseActive && (
+                                <span className="absolute inset-0 rounded-xl bg-cyan-400/20 animate-ping pointer-events-none" />
+                              )}
+                            </div>
+                            {/* Metadata Badges */}
+                            <div className="flex gap-1.5 justify-center">
+                              <span className="px-2 py-0.5 rounded-md text-[9px] font-semibold bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                                {c.level}
+                              </span>
+                              <span className="px-2 py-0.5 rounded-md text-[9px] font-semibold bg-slate-800 border border-slate-700 text-slate-300">
+                                {c.category}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="text-center mt-2">
+                            <h3 className="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors">{c.title}</h3>
+                            <p className="text-xs text-slate-400 mt-2 line-clamp-3 leading-relaxed min-h-[48px]">{c.description}</p>
+                          </div>
+                        </div>
+                        <div className="mt-6 space-y-2">
+                          <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400">
+                            <span>Progress</span>
+                            <span className="text-slate-300">{progress.lecturesCompleted} / {progress.total} Lectures ({percent}%)</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden">
+                            <div className="h-full bg-gradient-to-r from-blue-500 via-cyan-400 to-indigo-500 rounded-full transition-all duration-500" style={{ width: `${percent}%` }}></div>
+                          </div>
+                        </div>
+                      </Card>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 
@@ -437,174 +508,9 @@ export default function Dashboard() {
                 </button>
               </div>
 
-              {/* Courses section */}
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-2">
-                    <div className="text-white">
-                      <IconBook />
-                    </div>
-                    <h2 className="text-xl font-bold text-white tracking-tight">Your Courses</h2>
-                  </div>
-                  <Link
-                    to="/courses"
-                    className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
-                  >
-                    View Catalog →
-                  </Link>
-                </div>
 
-                {courses !== null && (
-                  <CourseSearchFilters
-                    courses={courses}
-                    searchQuery={searchQuery}
-                    setSearchQuery={setSearchQuery}
-                    onFilteredCoursesChange={setFilteredCourses}
-                  />
-                )}
 
-                {courses === null ? (
-                  <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
-                    {[1, 2].map((i) => (
-                      <LoadingCard key={i} lines={3} />
-                    ))}
-                  </div>
-                ) : filteredCourses.length === 0 ? (
-                  <NoResultsState query={searchQuery} onSelectSuggestion={setSearchQuery} />
-                ) : (
-                  <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
-                    {filteredCourses.map((c) => {
-                      const progress = courseStatsMap[c.slug] || { completed: 0, total: 0, lecturesCompleted: 0 };
-                      const percent = progress.total > 0 ? Math.round((progress.completed / progress.total) * 100) : 0;
-                      const isCourseActive = activeCourseId === c.slug;
-                      return (
-                        <Link key={c.id} to={`/course/${c.slug}`} className="group block active:scale-[0.97] transition-all duration-300">
-                          <Card
-                            onClick={() => handleCourseClick(c.slug)}
-                            className={`relative p-6 bg-slate-950/40 border rounded-3xl transition-all duration-300 h-full flex flex-col justify-between overflow-hidden ${
-                              isCourseActive
-                                ? 'border-cyan-500/80 bg-cyan-950/5 scale-[1.02] shadow-lg shadow-cyan-500/10'
-                                : 'border-slate-800/60 hover:shadow-xl hover:shadow-cyan-950/10 hover:border-cyan-500/20'
-                            }`}
-                          >
-                            <div className="flex flex-col gap-4">
-                              <div className="flex flex-col items-center justify-center gap-3">
-                                <div className="relative w-12 h-12 rounded-xl bg-slate-900/60 border border-slate-800/80 flex items-center justify-center flex-shrink-0">
-                                  {c.slug === 'cs50p' ? (
-                                    <span className="font-bold text-sm text-cyan-400">Py</span>
-                                  ) : (
-                                    <span className="text-slate-400">
-                                      <IconCourseCard />
-                                    </span>
-                                  )}
-                                  {isCourseActive && (
-                                    <span className="absolute inset-0 rounded-xl bg-cyan-400/20 animate-ping pointer-events-none" />
-                                  )}
-                                </div>
-                                {/* Metadata Badges */}
-                                <div className="flex gap-1.5 justify-center">
-                                  <span className="px-2 py-0.5 rounded-md text-[9px] font-semibold bg-blue-500/10 border border-blue-500/20 text-blue-400">
-                                    {c.level}
-                                  </span>
-                                  <span className="px-2 py-0.5 rounded-md text-[9px] font-semibold bg-slate-800 border border-slate-700 text-slate-300">
-                                    {c.category}
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="text-center mt-2">
-                                <h3 className="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors">{c.title}</h3>
-                                <p className="text-xs text-slate-400 mt-2 line-clamp-3 leading-relaxed min-h-[48px]">{c.description}</p>
-                              </div>
-                            </div>
-                            <div className="mt-6 space-y-2">
-                              <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400">
-                                <span>Progress</span>
-                                <span className="text-slate-300">{progress.lecturesCompleted} / {progress.total} Lectures ({percent}%)</span>
-                              </div>
-                              <div className="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden">
-                                <div className="h-full bg-gradient-to-r from-blue-500 via-cyan-400 to-indigo-500 rounded-full transition-all duration-500" style={{ width: `${percent}%` }}></div>
-                              </div>
-                            </div>
-                          </Card>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
 
-              {/* My Certificates Section */}
-              <div className="mt-10 border-t border-slate-800/60 pt-8">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-                  <div className="flex items-center gap-2">
-                    <div className="text-amber-500">
-                      <IconAward />
-                    </div>
-                    <h2 className="text-xl font-bold text-white tracking-tight">My Certificates</h2>
-                  </div>
-
-                  {/* Sorting Controls */}
-                  {Object.keys(earnedCertificates).length > 0 && (
-                    <div className="flex items-center gap-2 text-xs">
-                      <span className="text-slate-400">Sort by:</span>
-                      <select
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value as "Latest" | "Oldest" | "Name")}
-                        className="px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-300 focus:outline-none focus:border-blue-500/50 cursor-pointer"
-                      >
-                        <option value="Latest">Latest Earned</option>
-                        <option value="Oldest">Oldest Earned</option>
-                        <option value="Name">Course Name</option>
-                      </select>
-                    </div>
-                  )}
-                </div>
-
-                {/* List of Earned Certificates */}
-                {Object.keys(earnedCertificates).length === 0 ? (
-                  <div className="text-center py-8 px-6 bg-slate-950/20 border border-slate-900/50 rounded-3xl">
-                    <p className="text-sm text-slate-400">No certificates earned yet.</p>
-                    <p className="text-xs text-slate-500 mt-1">Complete 100% of any course to unlock and download your certificate.</p>
-                  </div>
-                ) : (
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    {sortedCerts.map((cert) => (
-                      <div
-                        key={cert.courseSlug}
-                        onClick={() => {
-                          setSelectedCertInfo({
-                            slug: cert.courseSlug,
-                            title: cert.courseTitle,
-                            studentName: cert.studentName
-                          });
-                          setIsCertModalOpen(true);
-                        }}
-                        className="group relative p-5 bg-slate-950/40 border border-slate-800/60 rounded-3xl hover:border-amber-500/30 hover:bg-slate-900/20 transition-all duration-300 cursor-pointer flex flex-col justify-between"
-                      >
-                        <div className="flex items-start gap-4 mb-4">
-                          <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                            <IconAward />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <h3 className="text-sm font-bold text-white group-hover:text-amber-400 transition-colors truncate">
-                              {cert.courseTitle}
-                            </h3>
-                            <p className="text-xs text-slate-400 mt-1">
-                              Completed on: <span className="text-slate-300 font-medium">{new Date(cert.completedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                            </p>
-                            <p className="text-[10px] text-slate-500 font-mono mt-1.5 truncate">
-                              ID: {cert.certificateId}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="self-end text-[10px] font-bold text-amber-500 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20 group-hover:bg-amber-500 group-hover:text-slate-950 transition-all duration-200">
-                          View Certificate
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
             </div>
 
             {/* Right Panel: Achievements */}
@@ -719,17 +625,6 @@ export default function Dashboard() {
           </Card>
         </div>
       </div>
-      {isCertModalOpen && selectedCertInfo && (
-        <CertificateModal
-          courseSlug={selectedCertInfo.slug}
-          courseTitle={selectedCertInfo.title}
-          studentName={selectedCertInfo.studentName}
-          onClose={() => {
-            setIsCertModalOpen(false);
-            setSelectedCertInfo(null);
-          }}
-        />
-      )}
     </div>
   );
 }
