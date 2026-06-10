@@ -183,14 +183,16 @@ export default function QuizEngine({ quizId = 'default', questions, onComplete }
           </div>
         )}
 
-        <button
-          onClick={handleRestart}
-          className={`inline-flex items-center gap-2 text-sm font-semibold text-white px-6 py-3 rounded-xl transition-all ${
-            passed ? 'bg-green-600 hover:bg-green-500' : 'bg-orange-600 hover:bg-orange-500'
-          }`}
-        >
-          Retry Quiz
-        </button>
+        {score < total && (
+          <button
+            onClick={handleRestart}
+            className={`inline-flex items-center gap-2 text-sm font-semibold text-white px-6 py-3 rounded-xl transition-all ${
+              passed ? 'bg-green-600 hover:bg-green-500' : 'bg-orange-600 hover:bg-orange-500'
+            }`}
+          >
+            Retry Quiz
+          </button>
+        )}
       </div>
     );
   }
