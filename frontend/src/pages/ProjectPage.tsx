@@ -38,7 +38,7 @@ export default function ProjectPage() {
     loadProjects();
   }, [slug, number]);
 
-  const courseTitle = slug === "cs50p" ? "CS50 Python" : slug === "cs50ai" ? "CS50 AI" : slug?.toUpperCase();
+  const courseTitle = slug === "cs50p" ? "CS50 Python" : slug === "cs50ai" ? "AI" : slug?.toUpperCase();
 
   // Helper to determine project status
   const getProjectStatus = (projectId: string) => {

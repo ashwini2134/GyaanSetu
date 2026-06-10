@@ -4,7 +4,7 @@ In this project, you’ll use [TensorFlow](https://www.tensorflow.org/) to bui
 
 Several such data sets exist, but for this project, we’ll use the [German Traffic Sign Recognition Benchmark](https://benchmark.ini.rub.de/?section=gtsrb&subsection=news) (GTSRB) dataset, which contains thousands of images of 43 different kinds of road signs.
 
-## [**Getting Started**](https://cs50.harvard.edu/ai/projects/5/traffic/#getting-started)
+## [Getting Started](https://cs50.harvard.edu/ai/projects/5/traffic/#getting-started)
 
 - Download the distribution code from https://cdn.cs50.net/ai/2023/x/projects/5/traffic.zip and unzip it.
 - Download the [data set](https://cdn.cs50.net/ai/2023/x/projects/5/gtsrb.zip) for this project and unzip it. Move the resulting `gtsrb` directory inside of your `traffic` directory.

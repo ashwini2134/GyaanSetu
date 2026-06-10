@@ -1,4 +1,4 @@
-## [**Specification**]
+## [Specification]
 
 Complete the implementations of `player`, `actions`, `result`, `winner`, `terminal`, `utility`, and `minimax`.
 

@@ -13,43 +13,51 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "What is Optimization & Hill Climbing",
-          "body": "Optimization means finding the best solution among many possible options. Hill Climbing is the simplest approach — always move toward a better nearby option.",
+          "title": "What is What is Optimization & Hill Climbing?",
+          "body": "Optimization means finding the best solution among many possible options. Hill Climbing is the simplest approach \u2014 always move toward a better nearby option.",
           "bullets": [
             "Optimization = finding the best solution (cheapest, fastest, most accurate)",
             "Real example: finding the cheapest flight with fewest stops",
             "Hill Climbing: start somewhere, always step toward a better neighbor",
-            "Problem: Hill Climbing can get stuck at a local best that is not the global best"
-          ]
+            "Problem: Hill Climbing can get stuck at a local best that is not the global best",
+            "This concept is fundamental to AI development."
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "Optimization Concept",
-          "accentColor": "blue",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "⛰️",
-            "title": "Climbing a hill in thick fog",
-            "description": "you can only see one step ahead, always step upward"
+          "title": "Think of It",
+          "accentColor": "purple",
+          "analogy": {
+            "title": "Real Life Analogy",
+            "description": "Think of it like a familiar real-world scenario.",
+            "image": "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "text",
-            "flowSteps": null,
-            "textContent": "Current state → Check neighbors → Move to best neighbor → Repeat"
+          "visual": {
+            "title": "Optimization Concept",
+            "type": "flow_diagram",
+            "flowSteps": [
+              "Current state \u2192 Check neighbors \u2192 Move to best neighbor \u2192 Repeat"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "best = max(neighbors)\ncurrent = best",
+          "code": {
             "language": "python",
-            "output": ""
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
         },
         {
           "type": "reflection",
           "question": "Can Hill Climbing always find the absolute best solution?",
           "answer": "No, it can get stuck at a local best."
+        },
+        {
+          "type": "practice",
+          "title": "Practice Exercise",
+          "instructions": "Write a simple Python script demonstrating What is Optimization & Hill Climbing.",
+          "starterCode": "# Write your code here\n",
+          "solution": "# Example solution\nprint('Done')",
+          "hint": "Start by defining the main function."
         }
       ]
     },
@@ -59,44 +67,51 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "Simulated Annealing & Constraint Satisfaction",
+          "title": "What is Simulated Annealing & Constraint Satisfaction?",
           "body": "Simulated Annealing fixes Hill Climbing by occasionally accepting a worse option to escape being stuck. Constraint Satisfaction Problems have rules the solution must follow.",
           "bullets": [
-            "Simulated Annealing: sometimes accept a worse option — like shaking a puzzle to unstick pieces",
+            "Simulated Annealing: sometimes accept a worse option \u2014 like shaking a puzzle to unstick pieces",
             "As time goes on, accept worse options less often (temperature cools down)",
             "CSP: a problem where the solution must satisfy a set of constraints (rules)",
-            "CSP example: exam scheduling — no student should have two exams at the same time",
-            "Sudoku is a classic CSP — every row, column, box must have digits 1-9 with no repeats"
-          ]
+            "CSP example: exam scheduling \u2014 no student should have two exams at the same time",
+            "Sudoku is a classic CSP \u2014 every row, column, box must have digits 1-9 with no repeats"
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "CSP Example",
+          "title": "Think of It",
           "accentColor": "purple",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "📅",
-            "title": "Exam timetable",
-            "description": "must schedule all exams so no student has a clash"
+          "analogy": {
+            "title": "Real Life Analogy",
+            "description": "Think of it like a familiar real-world scenario.",
+            "image": "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "text",
-            "flowSteps": null,
-            "textContent": "Variables + Domains + Constraints → Solution"
+          "visual": {
+            "title": "CSP Example",
+            "type": "flow_diagram",
+            "flowSteps": [
+              "Variables + Domains + Constraints \u2192 Solution"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "# Sudoku: each row must contain 1-9 with no repeats",
+          "code": {
             "language": "python",
-            "output": ""
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
         },
         {
           "type": "reflection",
           "question": "Is Sudoku an example of a Constraint Satisfaction Problem?",
           "answer": "Yes, the digits must satisfy strict row, column, and box constraints."
+        },
+        {
+          "type": "practice",
+          "title": "Practice Exercise",
+          "instructions": "Write a simple Python script demonstrating Simulated Annealing & Constraint Satisfaction.",
+          "starterCode": "# Write your code here\n",
+          "solution": "# Example solution\nprint('Done')",
+          "hint": "Start by defining the main function."
         }
       ]
     },
@@ -106,47 +121,49 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "Optimization Steps",
+          "title": "What is Optimization Steps?",
           "body": "How to optimize solutions.",
           "bullets": [
-            "Step 1: Define your problem — what are you trying to optimize?",
+            "Step 1: Define your problem \u2014 what are you trying to optimize?",
             "Step 2: Choose a starting solution",
-            "Step 3: Check neighboring solutions — is any better?",
+            "Step 3: Check neighboring solutions \u2014 is any better?",
             "Step 4: Move to the better solution (Hill Climbing) or sometimes move to worse (Simulated Annealing)",
             "Step 5: Repeat until no improvement found"
-          ]
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "Optimization Flow",
-          "accentColor": "green",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "🔄",
-            "title": "Iterative Improvement",
-            "description": "Checking neighbors"
+          "title": "Think of It",
+          "accentColor": "purple",
+          "analogy": {
+            "title": "Real Life Analogy",
+            "description": "Think of it like a familiar real-world scenario.",
+            "image": "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Flow Diagram",
-            "visualType": "flow_diagram",
+          "visual": {
+            "title": "Optimization Flow",
+            "type": "flow_diagram",
             "flowSteps": [
               "Start",
-              "↓",
+              "\u2193",
               "Evaluate",
-              "↓",
+              "\u2193",
               "Check Neighbors",
-              "↓",
-              "Better? Yes → Move / No → Done"
-            ],
-            "textContent": null
+              "\u2193",
+              "Better? Yes \u2192 Move / No \u2192 Done"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "# See example above",
+          "code": {
             "language": "python",
-            "output": ""
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
+        },
+        {
+          "type": "reflection",
+          "question": "Is Getting Started always the best approach?",
+          "answer": "Not always! It depends on the specific problem and constraints."
         },
         {
           "type": "practice",
@@ -171,7 +188,7 @@
       },
       {
         "emoji": "",
-        "text": "Hill Climbing can get stuck at a local best — not always the global best"
+        "text": "Hill Climbing can get stuck at a local best \u2014 not always the global best"
       },
       {
         "emoji": "",

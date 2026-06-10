@@ -33,11 +33,13 @@ export default function PracticeCard({ block, onAttempt, onComplete }: PracticeC
   const handleRun = (_code: string, output: string, error: string | null) => {
     onAttempt?.();
     setAttempts(a => a + 1);
+    setShowHint(true);
   };
 
   const handleSubmit = (_code: string, output: string, error: string | null) => {
     onAttempt?.();
     setAttempts(a => a + 1);
+    setShowSolution(true);
     if (!error && block.expectedOutput && output.trim() === block.expectedOutput.trim()) {
       setPassed(true);
       onComplete?.();
@@ -49,6 +51,8 @@ export default function PracticeCard({ block, onAttempt, onComplete }: PracticeC
     try { localStorage.removeItem(saveKey); } catch {}
     setAttempts(0);
     setPassed(false);
+    setShowHint(false);
+    setShowSolution(false);
   };
 
   if (!open) {
@@ -134,23 +138,7 @@ export default function PracticeCard({ block, onAttempt, onComplete }: PracticeC
           onReset={handleReset}
         />
 
-        {/* Action buttons */}
-        <div className="flex items-center gap-2 flex-wrap">
-          {!passed && (
-            <button
-              onClick={() => setShowHint(v => !v)}
-              className="text-xs font-medium text-blue-400 hover:text-blue-300 px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 transition-all"
-            >
-              {showHint ? 'Hide Hint' : 'Hint'}
-            </button>
-          )}
-          <button
-            onClick={() => setShowSolution(v => !v)}
-            className="text-xs font-medium text-slate-400 hover:text-slate-200 px-3 py-1.5 rounded-lg bg-slate-700/40 hover:bg-slate-700/70 border border-slate-700/40 transition-all"
-          >
-            {showSolution ? 'Hide Solution' : 'Show Solution'}
-          </button>
-        </div>
+        {/* Action buttons removed — triggered via Run/Submit now */}
 
         {/* Hint box */}
         {showHint && block.hint && (

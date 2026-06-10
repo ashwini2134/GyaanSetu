@@ -46,10 +46,22 @@ export interface VisualizationPanel {
 export interface ConceptVisualizationBlock {
   type: 'concept_visualization';
   title: string;
-  accentColor: 'blue' | 'purple' | 'green' | 'orange';
-  leftPanel: VisualizationPanel;
-  centerPanel: VisualizationPanel;
-  rightPanel: VisualizationPanel;
+  accentColor: 'blue' | 'purple' | 'green' | 'orange' | 'amber';
+  analogy: {
+    title: string;
+    description: string;
+    image: string;
+  };
+  visual: {
+    title: string;
+    type: 'storage_box' | 'recipe_book' | 'flow_diagram' | 'text';
+    flowSteps?: string[];
+  };
+  code: {
+    language: string;
+    code: string;
+    output?: string;
+  };
 }
 
 // ── Visual Aid ──────────────────────────────────────────────────────────────

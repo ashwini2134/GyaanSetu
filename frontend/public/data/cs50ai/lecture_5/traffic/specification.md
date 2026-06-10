@@ -14,7 +14,7 @@ Complete the implementation of `load_data` and `get_model` in `traffic.py`.
         - different pool sizes for pooling layers
         - different numbers and sizes of hidden layers
         - dropout
-- In a separate file called *README.md*, document (in at least a paragraph or two) your experimentation process. What did you try? What worked well? What didn’t work well? What did you notice?
+- In a separate file called README.md, document (in at least a paragraph or two) your experimentation process. What did you try? What worked well? What didn’t work well? What did you notice?
 
 Ultimately, much of this project is about exploring documentation and investigating different options in `cv2` and `tensorflow` and seeing what results you get when you try them!
 

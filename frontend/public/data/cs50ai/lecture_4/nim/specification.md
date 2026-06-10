@@ -7,7 +7,7 @@ The `get_q_value` function should accept as input a `state` and `action` a
 
 The `update_q_value` function takes a state `state`, an action `action`, an existing Q value `old_q`, a current reward `reward`, and an estimate of future rewards `future_rewards`, and updates the Q-value for the state/action pair according to the Q-learning formula.
 
-- Recall that the Q-learning formula is: `Q(s, a) <- old value estimate + alpha * (new value estimate - old value estimate)`
+- Recall that the Q-learning formula is: `Q(s, a) <- old value estimate + alpha  (new value estimate - old value estimate)`
 - Recall that `alpha` is the learning rate associated with the `NimAI` object.
 - The old value estimate is just the existing Q-value for the state/action pair. The new value estimate should be the sum of the current reward and the estimated future reward.
 

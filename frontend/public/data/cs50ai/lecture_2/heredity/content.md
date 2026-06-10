@@ -134,11 +134,11 @@ def joint_probability(people, one_gene, two_genes, have_trait):
     Compute and return a joint probability.
 
     The probability returned should be the probability that
-        * everyone in set `one_gene` has one copy of the gene, and
-        * everyone in set `two_genes` has two copies of the gene, and
-        * everyone not in `one_gene` or `two_gene` does not have the gene, and
-        * everyone in set `have_trait` has the trait, and
-        * everyone not in set` have_trait` does not have the trait.
+         everyone in set `one_gene` has one copy of the gene, and
+         everyone in set `two_genes` has two copies of the gene, and
+         everyone not in `one_gene` or `two_gene` does not have the gene, and
+         everyone in set `have_trait` has the trait, and
+         everyone not in set` have_trait` does not have the trait.
     """
 
     probability = 1
@@ -151,19 +151,19 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         father = people[person]['father']
 
         if not (mother or father):
-            probability *= PROBS['gene'][genes]
+            probability = PROBS['gene'][genes]
         else:
             m = prob_helper(mother, one_gene, two_genes)
             f = prob_helper(father, one_gene, two_genes)
 
             if genes == 1:
-                probability *= (1 - m) * f + (1 - f) * m
+                probability = (1 - m)  f + (1 - f)  m
             elif genes == 2:
-                probability *= m * f
+                probability = m  f
             else:
-                probability *= (1 - m) * (1 - f)
+                probability = (1 - m)  (1 - f)
 
-        probability *= PROBS['trait'][genes][trait]
+        probability = PROBS['trait'][genes][trait]
 
     return probability
 
@@ -242,16 +242,16 @@ Lily:
     True: 0.0000
     False: 1.0000`
 
-## [**When to Do It**](https://cs50.harvard.edu/ai/projects/2/heredity/#when-to-do-it)
+## [When to Do It](https://cs50.harvard.edu/ai/projects/2/heredity/#when-to-do-it)
 
 By [Friday, January 1, 2027 at 5:29 AM GMT+5:30](https://time.cs50.io/20261231T235900Z)
 
-## [**How to Get Help**](https://cs50.harvard.edu/ai/projects/2/heredity/#how-to-get-help)
+## [How to Get Help](https://cs50.harvard.edu/ai/projects/2/heredity/#how-to-get-help)
 
 1. Ask questions via [Ed](https://cs50.edx.org/ed)!
 2. Ask questions via any of CS50’s [communities](https://cs50.harvard.edu/ai/communities/)!
 
-## [**Background**](https://cs50.harvard.edu/ai/projects/2/heredity/#background)
+## [Background](https://cs50.harvard.edu/ai/projects/2/heredity/#background)
 
 Mutated versions of the [GJB2 gene](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1285178/) are one of the leading causes of hearing impairment in newborns. Each person carries two versions of the gene, so each person has the potential to possess either 0, 1, or 2 copies of the hearing impairment version GJB2. Unless a person undergoes genetic testing, though, it’s not so easy to know how many copies of mutated GJB2 a person has. This is some “hidden state”: information that has an effect that we can observe (hearing impairment), but that we don’t necessarily directly know. After all, some people might have 1 or 2 copies of mutated GJB2 but not exhibit hearing impairment, while others might have no copies of mutated GJB2 yet still exhibit hearing impairment.
 
@@ -267,11 +267,11 @@ Each person in the family has a `Gene` random variable representing how many c
 
 Your task in this project is to use this model to make inferences about a population. Given information about people, who their parents are, and whether they have a particular observable trait (e.g. hearing loss) caused by a given gene, your AI will infer the probability distribution for each person’s genes, as well as the probability distribution for whether any person will exhibit the trait in question.
 
-## [**Getting Started**](https://cs50.harvard.edu/ai/projects/2/heredity/#getting-started)
+## [Getting Started](https://cs50.harvard.edu/ai/projects/2/heredity/#getting-started)
 
 - Download the distribution code from https://cdn.cs50.net/ai/2023/x/projects/2/heredity.zip and unzip it.
 
-## [**Understanding**](https://cs50.harvard.edu/ai/projects/2/heredity/#understanding)
+## [Understanding](https://cs50.harvard.edu/ai/projects/2/heredity/#understanding)
 
 Take a look at one of the sample data sets in the `data` directory by opening up `data/family0.csv` (you can open it up in a text editor, or in a spreadsheet application like Google Sheets, Excel, or Apple Numbers). Notice that the first row defines the columns for this CSV file: `name`, `mother`, `father`, and `trait`. The next row indicates that Harry has Lily as a mother, James as a father, and the empty cell for `trait` means we don’t know whether Harry has the trait or not. James, meanwhile, has no parents listed in the data set (as indicated by the empty cells for `mother` and `father`), and does exhibit the trait (as indicated by the `1` in the `trait` cell). Lily, on the other hand, also has no parents listed in the data set, but does not exhibit the trait (as indicated by the `0` in the `trait` cell).
 
@@ -293,7 +293,7 @@ If unfamiliar, this `probabilities` dictionary is created using a Python [dic
 
 Ultimately, we’re looking to calculate these probabilities based on some evidence: given that we know certain people do or do not exhibit the trait, we’d like to determine these probabilities. Recall from lecture that we can calculate a conditional probability by summing up all of the joint probabilities that satisfy the evidence, and then normalize those probabilities so that they each sum to 1. Your task in this project is to implement three functions to do just that: `joint_probability` to compute a joint probability, `update` to add the newly computed joint probability to the existing probability distribution, and then `normalize` to ensure all probability distributions sum to 1 at the end.
 
-## [**Specification**](https://cs50.harvard.edu/ai/projects/2/heredity/#specification)
+## [Specification](https://cs50.harvard.edu/ai/projects/2/heredity/#specification)
 
 Complete the implementations of `joint_probability`, `update`, and `normalize`.
 
@@ -332,7 +332,7 @@ The `normalize` function updates a dictionary of probabilities such that each 
 
 You should not modify anything else in `heredity.py` other than the three functions the specification calls for you to implement, though you may write additional functions and/or import other Python standard library modules. You may also import `numpy` or `pandas`, if familiar with them, but you should not use any other third-party Python modules.
 
-### [**Example Joint Probability**](https://cs50.harvard.edu/ai/projects/2/heredity/#example-joint-probability)
+### [Example Joint Probability](https://cs50.harvard.edu/ai/projects/2/heredity/#example-joint-probability)
 
 To help you think about how to calculate joint probabilities, we’ve included below an example.
 
@@ -346,21 +346,21 @@ Consider the following value for `people`:
 
 We will here show the calculation of `joint_probability(people, {"Harry"}, {"James"}, {"James"})`. Based on the arguments, `one_gene` is `{"Harry"}`, `two_genes` is `{"James"}`, and `have_trait` is `{"James"}`. This therefore represents the probability that: Lily has 0 copies of the gene and does not have the trait, Harry has 1 copy of the gene and does not have the trait, and James has 2 copies of the gene and does have the trait.
 
-We start with Lily (the order that we consider people does not matter, so long as we multiply the correct values together, since multiplication is commutative). Lily has 0 copies of the gene with probability `0.96` (this is `PROBS["gene"][0]`). Given that she has 0 copies of the gene, she doesn’t have the trait with probability `0.99` (this is `PROBS["trait"][0][False]`). Thus, the probability that she has 0 copies of the gene and she doesn’t have the trait is `0.96 * 0.99 = 0.9504`.
+We start with Lily (the order that we consider people does not matter, so long as we multiply the correct values together, since multiplication is commutative). Lily has 0 copies of the gene with probability `0.96` (this is `PROBS["gene"][0]`). Given that she has 0 copies of the gene, she doesn’t have the trait with probability `0.99` (this is `PROBS["trait"][0][False]`). Thus, the probability that she has 0 copies of the gene and she doesn’t have the trait is `0.96  0.99 = 0.9504`.
 
-Next, we consider James. James has 2 copies of the gene with probability `0.01` (this is `PROBS["gene"][2]`). Given that he has 2 copies of the gene, the probability that he does have the trait is `0.65`. Thus, the probability that he has 2 copies of the gene and he does have the trait is `0.01 * 0.65 = 0.0065`.
+Next, we consider James. James has 2 copies of the gene with probability `0.01` (this is `PROBS["gene"][2]`). Given that he has 2 copies of the gene, the probability that he does have the trait is `0.65`. Thus, the probability that he has 2 copies of the gene and he does have the trait is `0.01  0.65 = 0.0065`.
 
-Finally, we consider Harry. What’s the probability that Harry has 1 copy of the gene? There are two ways this can happen. Either he gets the gene from his mother and not his father, or he gets the gene from his father and not his mother. His mother Lily has 0 copies of the gene, so Harry will get the gene from his mother with probability `0.01` (this is `PROBS["mutation"]`), since the only way to get the gene from his mother is if it mutated; conversely, Harry will not get the gene from his mother with probability `0.99`. His father James has 2 copies of the gene, so Harry will get the gene from his father with probability `0.99` (this is `1 - PROBS["mutation"]`), but will get the gene from his mother with probability `0.01` (the chance of a mutation). Both of these cases can be added together to get `0.99 * 0.99 + 0.01 * 0.01 = 0.9802`, the probability that Harry has 1 copy of the gene.
+Finally, we consider Harry. What’s the probability that Harry has 1 copy of the gene? There are two ways this can happen. Either he gets the gene from his mother and not his father, or he gets the gene from his father and not his mother. His mother Lily has 0 copies of the gene, so Harry will get the gene from his mother with probability `0.01` (this is `PROBS["mutation"]`), since the only way to get the gene from his mother is if it mutated; conversely, Harry will not get the gene from his mother with probability `0.99`. His father James has 2 copies of the gene, so Harry will get the gene from his father with probability `0.99` (this is `1 - PROBS["mutation"]`), but will get the gene from his mother with probability `0.01` (the chance of a mutation). Both of these cases can be added together to get `0.99  0.99 + 0.01  0.01 = 0.9802`, the probability that Harry has 1 copy of the gene.
 
-Given that Harry has 1 copy of the gene, the probability that he does not have the trait is `0.44` (this is `PROBS["trait"][1][False]`). So the probability that Harry has 1 copy of the gene and does not have the trait is `0.9802 * 0.44 = 0.431288`.
+Given that Harry has 1 copy of the gene, the probability that he does not have the trait is `0.44` (this is `PROBS["trait"][1][False]`). So the probability that Harry has 1 copy of the gene and does not have the trait is `0.9802  0.44 = 0.431288`.
 
-Therefore, the entire joint probability is just the result of multiplying all of these values for each of the three people: `0.9504 * 0.0065 * 0.431288 = 0.0026643247488`.
+Therefore, the entire joint probability is just the result of multiplying all of these values for each of the three people: `0.9504  0.0065  0.431288 = 0.0026643247488`.
 
-## [**Hints**](https://cs50.harvard.edu/ai/projects/2/heredity/#hints)
+## [Hints](https://cs50.harvard.edu/ai/projects/2/heredity/#hints)
 
 - Recall that to compute a joint probability of multiple events, you can do so by multiplying those probabilities together. But remember that for any child, the probability of them having a certain number of genes is conditional on what genes their parents have.
 
-## [**Testing**](https://cs50.harvard.edu/ai/projects/2/heredity/#testing)
+## [Testing](https://cs50.harvard.edu/ai/projects/2/heredity/#testing)
 
 If you’d like, you can execute the below (after [setting up `check50`](https://cs50.readthedocs.io/projects/check50/en/latest/index.html) on your system) to evaluate the correctness of your code. This isn’t obligatory; you can simply submit following the steps at the end of this specification, and these same tests will run on our server. Either way, be sure to compile and test it yourself as well!
 
@@ -370,11 +370,11 @@ Execute the below to evaluate the style of your code using `style50`.
 
 `style50 heredity.py`
 
-Remember that **you may not import any modules** (other than those in the Python standard library) **other than those explicitly authorized herein**. Doing so will not only prevent `check50` from running, but will also prevent `submit50` from scoring your assignment, since it uses `check50`. If that happens, you’ve likely imported something disallowed or otherwise modified the distribution code in an unauthorized manner, per the specification. There are certainly tools out there that trivialize some of these projects, but that’s not the goal here; you’re learning things at a lower level. If we don’t say here that you can use them, you can’t use them.
+Remember that you may not import any modules (other than those in the Python standard library) other than those explicitly authorized herein. Doing so will not only prevent `check50` from running, but will also prevent `submit50` from scoring your assignment, since it uses `check50`. If that happens, you’ve likely imported something disallowed or otherwise modified the distribution code in an unauthorized manner, per the specification. There are certainly tools out there that trivialize some of these projects, but that’s not the goal here; you’re learning things at a lower level. If we don’t say here that you can use them, you can’t use them.
 
-## [**How to Submit**](https://cs50.harvard.edu/ai/projects/2/heredity/#how-to-submit)
+## [How to Submit](https://cs50.harvard.edu/ai/projects/2/heredity/#how-to-submit)
 
-1. Visit [this link](https://submit.cs50.io/invites/d03c31aef1984c29b5e7b268c3a87b7b), log in with your GitHub account, and click **Authorize cs50**. Then, check the box indicating that you’d like to grant course staff access to your submissions, and click **Join course**.
+1. Visit [this link](https://submit.cs50.io/invites/d03c31aef1984c29b5e7b268c3a87b7b), log in with your GitHub account, and click Authorize cs50. Then, check the box indicating that you’d like to grant course staff access to your submissions, and click Join course.
 2. [Install Git](https://git-scm.com/downloads) and, optionally, [install `submit50`](https://cs50.readthedocs.io/submit50/).
 3. If you’ve installed `submit50`, execute
     
@@ -383,6 +383,6 @@ Remember that **you may not import any modules** (other than those in the Pyth
     Otherwise, using Git, push your work to `https://github.com/me50/USERNAME.git`, where `USERNAME` is your GitHub username, on a branch called `ai50/projects/2024/x/heredity`.
     
 
-If you submit your code directly using Git, rather than `submit50`, **do not** include files or folders other than those you are actually instructed to modify in the specification above. (That is to say, don’t upload your entire directory!)
+If you submit your code directly using Git, rather than `submit50`, do not include files or folders other than those you are actually instructed to modify in the specification above. (That is to say, don’t upload your entire directory!)
 
 Work should be graded within five minutes. You can then go to https://cs50.me/cs50ai to view your current progress!

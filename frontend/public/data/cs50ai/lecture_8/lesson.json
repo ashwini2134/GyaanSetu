@@ -13,43 +13,51 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "AI Bias & Privacy",
+          "title": "What is AI Bias & Privacy?",
           "body": "AI can be unfair and invasive if not built carefully. Bias and privacy are two of the biggest ethical challenges.",
           "bullets": [
-            "AI Bias — when training data reflects unfairness, AI inherits and amplifies it",
+            "AI Bias \u2014 when training data reflects unfairness, AI inherits and amplifies it",
             "Example: a hiring AI trained on historical male-dominated data may reject female applicants unfairly",
-            "Privacy — AI systems collect and process massive amounts of personal data",
-            "Your data (searches, clicks, location) is used to train and improve AI systems"
-          ]
+            "Privacy \u2014 AI systems collect and process massive amounts of personal data",
+            "Your data (searches, clicks, location) is used to train and improve AI systems",
+            "This concept is fundamental to AI development."
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "Bias Concept",
-          "accentColor": "blue",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "⚖️",
-            "title": "Learning from one group",
-            "description": "If you only learn from one group of people, your opinions will be skewed"
+          "title": "Think of It",
+          "accentColor": "purple",
+          "analogy": {
+            "title": "Real Life Analogy",
+            "description": "Think of it like a familiar real-world scenario.",
+            "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "text",
-            "flowSteps": null,
-            "textContent": "Biased data → Biased model → Unfair predictions"
+          "visual": {
+            "title": "Bias Concept",
+            "type": "flow_diagram",
+            "flowSteps": [
+              "Biased data \u2192 Biased model \u2192 Unfair predictions"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "# If training data has 90% male engineers, model may rate males higher",
+          "code": {
             "language": "python",
-            "output": ""
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
         },
         {
           "type": "reflection",
           "question": "Can AI be unfair even if no one intentionally programmed it to be unfair?",
           "answer": "Yes, because it learns biases inherently present in the training data."
+        },
+        {
+          "type": "practice",
+          "title": "Practice Exercise",
+          "instructions": "Write a simple Python script demonstrating AI Bias & Privacy.",
+          "starterCode": "# Write your code here\n",
+          "solution": "# Example solution\nprint('Done')",
+          "hint": "Start by defining the main function."
         }
       ]
     },
@@ -59,45 +67,52 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "Hallucinations, Deepfakes & Accountability",
+          "title": "What is Hallucinations, Deepfakes & Accountability?",
           "body": "AI can generate false information confidently and create fake media. Accountability asks who is responsible when AI causes harm.",
           "bullets": [
-            "AI Hallucinations — AI confidently stating things that are factually wrong",
-            "Why hallucinations happen — model predicts plausible-sounding text, not verified facts",
-            "Deepfakes — AI-generated fake videos or audio that can spread misinformation",
-            "Transparency — people should always know when they are interacting with AI",
-            "Accountability — who is responsible when AI makes a harmful decision?",
-            "Fairness — AI should perform equally well for all groups of people"
-          ]
+            "AI Hallucinations \u2014 AI confidently stating things that are factually wrong",
+            "Why hallucinations happen \u2014 model predicts plausible-sounding text, not verified facts",
+            "Deepfakes \u2014 AI-generated fake videos or audio that can spread misinformation",
+            "Transparency \u2014 people should always know when they are interacting with AI",
+            "Accountability \u2014 who is responsible when AI makes a harmful decision?",
+            "Fairness \u2014 AI should perform equally well for all groups of people"
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "Hallucination Concept",
+          "title": "Think of It",
           "accentColor": "purple",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "🙋",
-            "title": "Confident student",
-            "description": "who makes up answers they do not know"
+          "analogy": {
+            "title": "Real Life Analogy",
+            "description": "Think of it like a familiar real-world scenario.",
+            "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "text",
-            "flowSteps": null,
-            "textContent": "LLM predicts next word → sounds correct → may be factually wrong"
+          "visual": {
+            "title": "Hallucination Concept",
+            "type": "flow_diagram",
+            "flowSteps": [
+              "LLM predicts next word \u2192 sounds correct \u2192 may be factually wrong"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "# Always verify AI outputs — especially for medical, legal, financial topics",
+          "code": {
             "language": "python",
-            "output": ""
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
         },
         {
           "type": "reflection",
           "question": "Should you always verify important facts that an AI gives you?",
           "answer": "Absolutely, because AI can confidently hallucinate incorrect information."
+        },
+        {
+          "type": "practice",
+          "title": "Practice Exercise",
+          "instructions": "Write a simple Python script demonstrating Hallucinations, Deepfakes & Accountability.",
+          "starterCode": "# Write your code here\n",
+          "solution": "# Example solution\nprint('Done')",
+          "hint": "Start by defining the main function."
         }
       ]
     },
@@ -107,54 +122,56 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "Ethical Steps",
+          "title": "What is Ethical Steps?",
           "body": "How to use AI ethically.",
           "bullets": [
-            "Step 1: Always verify AI outputs before using them — especially for important decisions",
+            "Step 1: Always verify AI outputs before using them \u2014 especially for important decisions",
             "Step 2: Check if training data is diverse and representative",
-            "Step 3: Be transparent — tell users when AI is involved",
-            "Step 4: Assign accountability — define who is responsible for AI decisions",
-            "Step 5: Report harmful AI uses — do not misuse AI tools"
-          ]
+            "Step 3: Be transparent \u2014 tell users when AI is involved",
+            "Step 4: Assign accountability \u2014 define who is responsible for AI decisions",
+            "Step 5: Report harmful AI uses \u2014 do not misuse AI tools"
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "Responsible Use Flow",
-          "accentColor": "green",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "🛡️",
-            "title": "Ethical workflow",
-            "description": "Ensuring AI is safe"
+          "title": "Think of It",
+          "accentColor": "purple",
+          "analogy": {
+            "title": "Real Life Analogy",
+            "description": "Think of it like a familiar real-world scenario.",
+            "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Flow Diagram",
-            "visualType": "flow_diagram",
+          "visual": {
+            "title": "Responsible Use Flow",
+            "type": "flow_diagram",
             "flowSteps": [
               "Use AI",
-              "↓",
+              "\u2193",
               "Verify Output",
-              "↓",
+              "\u2193",
               "Check for Bias",
-              "↓",
+              "\u2193",
               "Be Transparent",
-              "↓",
+              "\u2193",
               "Assign Accountability"
-            ],
-            "textContent": null
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "# See example above",
+          "code": {
             "language": "python",
-            "output": ""
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
+        },
+        {
+          "type": "reflection",
+          "question": "Is Getting Started always the best approach?",
+          "answer": "Not always! It depends on the specific problem and constraints."
         },
         {
           "type": "practice",
           "title": "Practice Exercise",
-          "instructions": "Find a real news story about AI causing harm — identify which ethical issue it relates to and write 3 sentences",
+          "instructions": "Find a real news story about AI causing harm \u2014 identify which ethical issue it relates to and write 3 sentences",
           "starterCode": "# Write your summary\n",
           "solution": "# Discuss bias, privacy, or hallucination",
           "hint": "Look up recent AI news."

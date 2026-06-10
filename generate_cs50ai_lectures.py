@@ -140,7 +140,7 @@ LECTURES.append({
              "centerPanel": {"label": "Step 2", "visualType": "flow_diagram",
                              "flowSteps": ["Collect Data", "↓", "Train Model", "↓", "Make Predictions"]},
              "rightPanel": {"label": "Step 3", "emoji": "🎯", "title": "Use AI", "description": "The trained model makes intelligent decisions on new inputs"}},
-            exp("The CS50 AI Journey",
+            exp("The AI Journey",
                 "This course covers 7 core AI topics you'll explore in upcoming lectures.",
                 ["**Search** — finding paths from start to goal (GPS, puzzles)",
                  "**Knowledge** — representing facts and reasoning with logic",

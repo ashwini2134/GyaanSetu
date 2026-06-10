@@ -77,7 +77,8 @@ function LockedLectureView({ slug, lectureNumber, courseTitle }: { slug: string;
 function LegacyLecturePage({ slug, lectureNumber }: { slug: string; lectureNumber: number }) {
   const navigate = useNavigate();
   const [content, setContent] = useState('');
-  const courseTitle = slug === 'cs50p' ? 'CS50 Python' : slug === 'cs50ai' ? 'CS50 AI' : slug.toUpperCase();
+  const courseTitle = slug === 'cs50p' ? 'CS50 Python' : slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
+  const [retakingQuiz, setRetakingQuiz] = useState(false);
 
   useEffect(() => {
     const base = import.meta.env.BASE_URL ?? '/';
@@ -108,22 +109,29 @@ function LegacyLecturePage({ slug, lectureNumber }: { slug: string; lectureNumbe
 export default function LecturePage() {
   const { slug, number } = useParams<{ slug: string; number: string }>();
   const navigate = useNavigate();
-  const lectureNumber = Number(number ?? 0);
+  const lectureNumber = parseInt(number ?? '0', 10);
+  const [retakingQuiz, setRetakingQuiz] = useState(false);
+  const [openProblemIndex, setOpenProblemIndex] = useState<number>(-1);
+  const [openSimilarIndex, setOpenSimilarIndex] = useState<number>(-1);
 
   const { lessonData, loading, error } = useLessonData(slug, lectureNumber);
-  const {
-    progress,
-    markSectionVisited,
-    markPracticeAttempted,
-    markPracticeCompleted,
-    markQuizCompleted,
-    markProblemCompleted,
-    markHandsOnTaskCompleted,
-    markLectureCompleted,
+  const { 
+    progress, markSectionVisited, markPracticeAttempted, markPracticeCompleted, 
+    markQuizCompleted, markProblemCompleted, markHandsOnTaskCompleted, markLectureCompleted
   } = useProgress(slug, lectureNumber);
 
   const [currentPageIdx, setCurrentPageIdx] = useState(0);
   const [allLectures, setAllLectures] = useState<Array<{ number: number; title: string }>>([]);
+  const [hasResumed, setHasResumed] = useState(false);
+  const visitedRef = useRef<Set<number>>(new Set());
+
+  // Reset state when navigating to a different lecture
+  useEffect(() => {
+    setCurrentPageIdx(0);
+    setHasResumed(false);
+    visitedRef.current.clear();
+    setRetakingQuiz(false);
+  }, [slug, lectureNumber]);
 
   // Load lecture list for prev/next lecture navigation
   useEffect(() => {
@@ -163,49 +171,80 @@ export default function LecturePage() {
   }, [pages.length, currentPageIdx]);
 
   // Resume from last visited section when re-entering a lecture
+
   useEffect(() => {
     if (!lessonData || !pages.length) return;
-    const lastId = progress.lastSection;
-    if (!lastId || lastId === 'overview') return;
-
-    const idx = pages.findIndex(p => {
-      if (p.type === 'section') return lessonData.sections[p.index]?.id === lastId;
-      return p.type === lastId;
-    });
-    if (idx > 0) {
-      setCurrentPageIdx(idx);
+    
+    let targetIdx = currentPageIdx;
+    
+    // First run: attempt to resume
+    if (!hasResumed) {
+      setHasResumed(true);
+      const lastId = progress.lastSection;
+      if (lastId && lastId !== 'overview' && lastId !== 'summary') {
+        const idx = pages.findIndex(p => {
+          if (p.type === 'section') return lessonData.sections[p.index]?.id === lastId;
+          return p.type === lastId;
+        });
+        if (idx > 0) {
+          setCurrentPageIdx(idx);
+          targetIdx = idx; // Update our local ref so we mark the correct one visited
+        }
+      }
     }
-  }, [lessonData, pages, progress.lastSection]);
 
-  // Mark sections visited on navigation — guard against Strict Mode double-fire
-  const visitedRef = useRef<Set<number>>(new Set());
-  useEffect(() => {
-    const page = pages[currentPageIdx];
-    if (!page || !lessonData) return;
-    // Already visited this page index this mount — skip to prevent loops
-    if (visitedRef.current.has(currentPageIdx)) return;
-    visitedRef.current.add(currentPageIdx);
+    // Now mark as visited
+    const page = pages[targetIdx];
+    if (!page) return;
+    if (visitedRef.current.has(targetIdx)) return;
+    visitedRef.current.add(targetIdx);
+    
+    // If we've reached the summary page, auto-mark the lecture as completed
+    if (page.type === 'summary') {
+      // markLectureCompleted(); // REMOVED: Only mark completed if all sections are done
+    }
+
     if (page.type === 'section') {
       markSectionVisited(lessonData.sections[page.index].id);
     } else {
       markSectionVisited(page.type);
     }
-  }, [currentPageIdx, pages, lessonData, markSectionVisited]);
+
+    // Trigger auto-complete check after marking section as visited
+    setTimeout(() => {
+      if (slug) {
+        tryAutoCompleteLecture(
+          slug, 
+          lectureNumber, 
+          lessonData.sections.length, 
+          lessonData.problems?.length ?? 0, 
+          (lessonData.quiz?.length ?? 0) > 0
+        );
+      }
+    }, 0);
+  }, [lessonData, pages, progress.lastSection, hasResumed, currentPageIdx, markSectionVisited, slug, lectureNumber]);
 
   // Compute status for each page item
   const pageStatuses: PageStatus[] = useMemo(() => {
     return pages.map((page, idx) => {
-      if (idx < currentPageIdx) return 'completed';
       if (idx === currentPageIdx) return 'current';
-      return 'upcoming';
+      
+      const id = pageId(page, lessonData?.sections ?? []);
+      let isVisited = false;
+      if (id === 'quiz') isVisited = progress.quizCompleted;
+      else if (id === 'problems') isVisited = progress.problemsCompleted.length > 0;
+      else if (id === 'summary') isVisited = progress.lectureCompleted;
+      else isVisited = !!progress.sections[id]?.visited;
+
+      return isVisited ? 'completed' : 'upcoming';
     });
-  }, [pages, currentPageIdx]);
+  }, [pages, currentPageIdx, progress, lessonData]);
 
   if (!slug) return null;
 
   // Show locked view
   if (unlocked === false) {
-    const courseTitle = slug === 'cs50p' ? 'CS50 Python' : slug === 'cs50ai' ? 'CS50 AI' : slug.toUpperCase();
+    const courseTitle = slug === 'cs50p' ? 'CS50 Python' : slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
     return <LockedLectureView slug={slug} lectureNumber={lectureNumber} courseTitle={courseTitle} />;
   }
 
@@ -229,7 +268,7 @@ export default function LecturePage() {
 
   const prevLecture = allLectures.find(l => l.number === lectureNumber - 1);
   const nextLecture = allLectures.find(l => l.number === lectureNumber + 1);
-  const courseTitle = slug === 'cs50p' ? 'CS50 Python' : slug === 'cs50ai' ? 'CS50 AI' : slug.toUpperCase();
+  const courseTitle = slug === 'cs50p' ? 'CS50 Python' : slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
   const quiz = lessonData.quiz ?? [];
   const problems: CodingProblem[] = lessonData.problems ?? [];
   const summary = lessonData.summary;
@@ -266,6 +305,15 @@ export default function LecturePage() {
         {/* Left nav panel */}
         <aside className="hidden md:flex flex-shrink-0 w-56 flex-col border-r border-slate-700/30 bg-slate-900/60 overflow-y-auto">
           <div className="p-3 space-y-0.5">
+            <button
+              onClick={() => navigate(`/course/${slug}`)}
+              className="w-full mb-4 px-3 py-2 flex items-center gap-2 text-sm font-medium text-slate-300 bg-slate-800/50 hover:bg-slate-700/50 hover:text-white rounded-lg transition-colors border border-slate-700/50"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Back to Course
+            </button>
             {pages.map((page, idx) => {
               const status = pageStatuses[idx];
               const id = pageId(page, lessonData.sections);
@@ -338,24 +386,46 @@ export default function LecturePage() {
                     </span>
                     Quiz
                   </h2>
-                  {progress.quizCompleted && (
-                    <div className="flex items-center gap-2 text-sm text-green-400 bg-green-900/20 border border-green-700/30 rounded-xl px-4 py-2">
-                      <CheckCircle size={16} />
-                      Quiz completed — Score: {progress.quizScore}/{quiz.length}
+                  
+                  {progress.quizCompleted && progress.quizScore === quiz.length ? (
+                    <div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-600/10 to-slate-800/40 p-8 text-center space-y-4">
+                      <div className="w-16 h-16 rounded-2xl bg-emerald-600/20 flex items-center justify-center mx-auto">
+                        <CheckCircle size={32} className="text-emerald-400" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-white">Yay! You got a perfect score! 🎉</p>
+                        <p className="text-slate-400 mt-2">You have completely mastered this section.</p>
+                      </div>
                     </div>
-                  )}
-                  <QuizEngine
-                    questions={quiz}
-                    onComplete={(score, total) => {
-                      markQuizCompleted(score, total);
-                      if (score / total >= 0.7) {
-                        markSectionVisited('quiz');
-                        if (slug && lessonData) {
-                          tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, problems.length, quiz.length > 0);
+                  ) : progress.quizCompleted && !retakingQuiz ? (
+                    <div className="rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-600/10 to-slate-800/40 p-8 text-center space-y-4">
+                      <div>
+                        <p className="text-xl font-bold text-white">Quiz Completed</p>
+                        <p className="text-slate-400 mt-2">You scored {progress.quizScore} out of {quiz.length}.</p>
+                      </div>
+                      <button
+                        onClick={() => setRetakingQuiz(true)}
+                        className="inline-flex items-center gap-2 text-sm font-semibold text-white px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 transition-all"
+                      >
+                        Retake Quiz
+                      </button>
+                    </div>
+                  ) : (
+                    <QuizEngine
+                      quizId={`${lessonData.id}-quiz`}
+                      questions={quiz}
+                      onComplete={(score, total) => {
+                        setRetakingQuiz(false);
+                        markQuizCompleted(score, total);
+                        if (score / total >= 0.7) {
+                          markSectionVisited('quiz');
+                          if (slug && lessonData) {
+                            tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, problems.length, quiz.length > 0);
+                          }
                         }
-                      }
-                    }}
-                  />
+                      }}
+                    />
+                  )}
                 </div>
               </section>
             )}
@@ -383,6 +453,8 @@ export default function LecturePage() {
                         key={problem.id}
                         problem={problem}
                         index={i}
+                        isOpen={openProblemIndex === i}
+                        onOpenChange={(isOpen) => setOpenProblemIndex(isOpen ? i : -1)}
                         completed={progress.problemsCompleted.includes(problem.id)}
                         onComplete={(id) => {
                           markProblemCompleted(id);
@@ -391,10 +463,50 @@ export default function LecturePage() {
                           if (slug && lessonData) {
                             tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, problems.length, quiz.length > 0);
                           }
+                          // Automatically open next problem if it exists
+                          if (i + 1 < problems.length) {
+                            setTimeout(() => setOpenProblemIndex(i + 1), 1500); // Small delay to let them see success
+                          }
                         }}
                       />
                     ))}
                   </div>
+
+                  {problems.length > 0 && (() => {
+                    const similarProblems = [
+                      { ...problems[0], id: `${problems[0].id}_sim1`, title: problems[0].title.replace('Basic ', 'Advanced ').replace('Simple ', 'Complex ') + ' (Similar A)' },
+                      { ...problems[0], id: `${problems[0].id}_sim2`, title: problems[0].title + ' (Similar B)' }
+                    ];
+
+                    return (
+                      <div className="mt-8 pt-6 border-t border-slate-700/30">
+                        <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                          <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          </svg>
+                          Similar Questions
+                        </h3>
+                        <div className="space-y-3">
+                          {similarProblems.map((problem, i) => (
+                            <ProblemCard
+                              key={problem.id}
+                              problem={problem}
+                              index={i}
+                              isOpen={openSimilarIndex === i}
+                              onOpenChange={(isOpen) => setOpenSimilarIndex(isOpen ? i : -1)}
+                              completed={progress.problemsCompleted.includes(problem.id)}
+                              onComplete={(id) => {
+                                markProblemCompleted(id);
+                                if (i + 1 < similarProblems.length) {
+                                  setTimeout(() => setOpenSimilarIndex(i + 1), 1500);
+                                }
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               </section>
             )}

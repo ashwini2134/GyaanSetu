@@ -2,7 +2,7 @@
   "id": "cs50ai-lecture-1",
   "courseSlug": "cs50ai",
   "title": "Search Algorithms",
-  "overview": "Search is foundational in AI — finding a path from start to goal. Learn BFS, DFS, Greedy Best-First, and A* search.",
+  "overview": "Search is foundational in AI \u2014 finding a path from start to goal. Learn BFS, DFS, Greedy Best-First, and A search.",
   "estimatedMinutes": 55,
   "sections": [
     {
@@ -11,49 +11,57 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
           "title": "What is a Search Problem?",
-          "body": "A **search problem** involves an agent moving from an **initial state** to a **goal state** by taking **actions** through a **state space** (all possible configurations).",
+          "body": "A search problem involves an agent moving from an initial state to a goal state by taking actions through a state space (all possible configurations).",
           "bullets": [
-            "Start state — where you begin",
-            "Goal state — where you want to arrive",
-            "Actions — valid moves from each state",
-            "Path cost — how expensive a solution is"
-          ]
-        },
-        {
-          "type": "analogy",
-          "title": "Think of Navigating a Maze",
-          "emoji": "",
-          "text": "Your position is your state. Walls limit your actions (movements). Finding a path from entrance to exit is the search problem."
+            "Start state \u2014 where you begin",
+            "Goal state \u2014 where you want to arrive",
+            "Actions \u2014 valid moves from each state",
+            "Path cost \u2014 how expensive a solution is",
+            "This concept is fundamental to AI development."
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "Search Problem Components",
-          "accentColor": "blue",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "🗺️",
-            "title": "GPS Navigation",
-            "description": "Start → follow roads → reach destination"
+          "title": "Think of It",
+          "accentColor": "purple",
+          "analogy": {
+            "title": "Think of Navigating a Maze",
+            "description": "Your position is your state. Walls limit your actions (movements). Finding a path from entrance to exit is the search problem.",
+            "image": "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Search Components",
-            "visualType": "text",
-            "flowSteps": null,
-            "textContent": "Initial State = Starting point\nActions = Valid moves\nGoal State = Destination\nPath Cost = Distance or time"
+          "visual": {
+            "title": "Search Problem Components",
+            "type": "flow_diagram",
+            "flowSteps": [
+              "Initial State = Starting point",
+              "\u2193",
+              "Actions = Valid moves",
+              "\u2193",
+              "Goal State = Destination",
+              "\u2193",
+              "Path Cost = Distance or time"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "# Search problem example\nstart = 'Home'\ngoal = 'School'\nactions = ['North', 'South', 'East', 'West']\nprint(f'Find path: {start} → {goal}')",
+          "code": {
             "language": "python",
-            "output": "Find path: Home → School"
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
         },
         {
           "type": "reflection",
           "question": "In a maze, what is the goal state called?",
-          "answer": "The goal state is the destination — the configuration you want to reach. In a maze, it's typically the exit cell marked G."
+          "answer": "The goal state is the destination \u2014 the configuration you want to reach."
+        },
+        {
+          "type": "practice",
+          "title": "Practice Exercise",
+          "instructions": "Write a simple Python script demonstrating What is a Search Problem?.",
+          "starterCode": "# Write your code here\n",
+          "solution": "# Example solution\nprint('Done')",
+          "hint": "Start by defining the main function."
         }
       ]
     },
@@ -63,21 +71,22 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "Breadth-First Search (BFS)",
-          "body": "**BFS** explores all neighbors at the current level before going deeper — like ripples spreading in water. It uses a queue (FIFO) and **guarantees the shortest path**.",
+          "title": "What is Breadth-First Search (BFS)?",
+          "body": "BFS explores all neighbors at the current level before going deeper \u2014 like ripples spreading in water. It uses a queue (FIFO) and guarantees the shortest path.",
           "bullets": [
-            "Explores level by level — all nearby options first",
+            "Explores level by level \u2014 all nearby options first",
             "Uses a queue: first discovered, first explored",
             "Guarantees shortest path in unweighted graphs",
-            "Uses more memory than DFS"
-          ]
+            "Uses more memory than DFS",
+            "This concept is fundamental to AI development."
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "explanation",
           "accentColor": "blue",
           "title": "Depth-First Search (DFS)",
-          "body": "**DFS** goes deep into one path before backtracking — like following one corridor to the end. It uses a stack (LIFO) and uses **less memory** but may not find the shortest path.",
+          "body": "DFS goes deep into one path before backtracking \u2014 like following one corridor to the end. It uses a stack (LIFO) and uses less memory but may not find the shortest path.",
           "bullets": [
             "Explores one branch fully before trying others",
             "Uses a stack: last discovered, first explored",
@@ -86,38 +95,53 @@
           ]
         },
         {
-          "type": "analogy",
-          "title": "BFS = Checking Every Shelf on Floor 1 First",
-          "emoji": "",
-          "text": "Before going to Floor 2, BFS checks every store on Floor 1. DFS is like going deep into one hallway, exploring all side rooms before backtracking."
-        },
-        {
           "type": "concept_visualization",
-          "title": "BFS vs DFS",
+          "title": "Think of It",
           "accentColor": "purple",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "🏪",
-            "title": "Floor-by-Floor vs Deep Exploration",
-            "description": "BFS: systematic levels. DFS: deep then backtrack."
+          "analogy": {
+            "title": "BFS = Checking Every Shelf on Floor 1 First",
+            "description": "Before going to Floor 2, BFS checks every store on Floor 1. DFS is like going deep into one hallway, exploring all side rooms before backtracking.",
+            "image": "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Algorithm Comparison",
-            "visualType": "text",
-            "flowSteps": null,
-            "textContent": "BFS:\n• Queue (FIFO)\n• Shortest path ✓\n• More memory\n\nDFS:\n• Stack (LIFO)\n• Less memory\n• No shortest guarantee"
+          "visual": {
+            "title": "BFS vs DFS",
+            "type": "flow_diagram",
+            "flowSteps": [
+              "BFS:",
+              "\u2193",
+              "Queue (FIFO)",
+              "\u2193",
+              "Shortest path \u2713",
+              "\u2193",
+              "More memory",
+              "\u2193",
+              "DFS:",
+              "\u2193",
+              "Stack (LIFO)",
+              "\u2193",
+              "Less memory",
+              "\u2193",
+              "No shortest guarantee"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "from collections import deque\n# BFS: queue.popleft()\n# DFS: stack.pop()",
+          "code": {
             "language": "python",
-            "output": "BFS: level by level\nDFS: deep first"
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
         },
         {
           "type": "reflection",
           "question": "Which search guarantees the shortest path?",
-          "answer": "BFS guarantees the shortest path because it explores all nodes at distance 1, then distance 2, and so on. The first path to the goal is always the shortest."
+          "answer": "BFS guarantees the shortest path because it explores all nodes at distance 1, then distance 2, and so on."
+        },
+        {
+          "type": "practice",
+          "title": "Practice Exercise",
+          "instructions": "Write a simple Python script demonstrating BFS & DFS.",
+          "starterCode": "# Write your code here\n",
+          "solution": "# Example solution\nprint('Done')",
+          "hint": "Start by defining the main function."
         }
       ]
     },
@@ -127,65 +151,51 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "Greedy Best-First & A* Search",
-          "body": "**Greedy Best-First** uses a heuristic (estimate) to pick the most promising next step. **A*** combines actual cost so far g(n) AND estimated cost h(n) — making it both optimal and efficient.",
+          "title": "What is Greedy Best-First & A Search?",
+          "body": "Greedy Best-First uses a heuristic (estimate) to pick the most promising next step. A combines actual cost so far g(n) AND estimated cost h(n) \u2014 making it both optimal and efficient.",
           "bullets": [
-            "Heuristic h(n) — estimated cost from current node to goal",
-            "Greedy uses only h(n) — can be fast but not optimal",
-            "A* uses f(n) = g(n) + h(n) — cost so far + estimate",
-            "A* is used in GPS navigation and game AI"
-          ]
-        },
-        {
-          "type": "analogy",
-          "title": "A* = GPS That Considers Distance Traveled AND Estimated Distance",
-          "emoji": "",
-          "text": "GPS doesn't explore blindly. It considers how far you've driven AND estimates remaining distance — just like A* combines g(n) and h(n)."
+            "Heuristic h(n) \u2014 estimated cost from current node to goal",
+            "Greedy uses only h(n) \u2014 can be fast but not optimal",
+            "A uses f(n) = g(n) + h(n) \u2014 cost so far + estimate",
+            "A is used in GPS navigation and game AI",
+            "This concept is fundamental to AI development."
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "How A* Search Works",
-          "accentColor": "green",
-          "leftPanel": {
-            "label": "Step 1",
-            "emoji": "📍",
-            "title": "Start at Initial State",
-            "description": "Begin with g(n)=0, estimate h(n) to goal"
+          "title": "Think of It",
+          "accentColor": "purple",
+          "analogy": {
+            "title": "A = GPS That Considers Distance Traveled AND Estimated Distance",
+            "description": "GPS doesn't explore blindly. It considers how far you've driven AND estimates remaining distance \u2014 just like A combines g(n) and h(n).",
+            "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Step 2",
-            "visualType": "flow_diagram",
+          "visual": {
+            "title": "How A Search Works",
+            "type": "flow_diagram",
             "flowSteps": [
               "Pick lowest f(n)",
-              "↓",
+              "\u2193",
               "Expand neighbors",
-              "↓",
+              "\u2193",
               "Reach goal state"
             ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "# A* formula\nf_n = g_n + h_n\n# g_n = cost so far\n# h_n = estimate to goal\nprint(f'f(n) = {f_n}')",
+          "code": {
             "language": "python",
-            "output": "A*: Optimal + Fast!"
+            "code": "graph = {\n    'A': ['B', 'C'],\n    'B': ['A', 'D'],\n    'C': ['A'],\n    'D': ['B']\n}\nnode = 'B'\nprint(f'Neighbors of {node}: {graph[node]}')",
+            "output": "Neighbors of B: ['A', 'D']"
           }
         },
         {
-          "type": "code_example",
-          "title": "Graph as Dictionary",
-          "language": "python",
-          "code": "graph = {\n    'A': ['B', 'C'],\n    'B': ['A', 'D'],\n    'C': ['A'],\n    'D': ['B']\n}\nnode = 'B'\nprint(f'Neighbors of {node}: {graph[node]}')",
-          "expectedOutput": "Neighbors of B: ['A', 'D']"
-        },
-        {
           "type": "reflection",
-          "question": "What does A* use that Greedy Best-First does not?",
-          "answer": "A* uses BOTH cost so far (g(n)) AND estimated cost to goal (h(n)). Greedy only uses the heuristic h(n), ignoring how far you've already traveled."
+          "question": "What does A use that Greedy Best-First does not?",
+          "answer": "A uses BOTH cost so far (g(n)) AND estimated cost to goal (h(n))."
         },
         {
           "type": "practice",
-          "title": "Explore a Simple Graph",
+          "title": "Practice Exercise",
           "instructions": "Create a dictionary representing a graph with at least 4 nodes. Print all neighbors of a given node.",
           "starterCode": "# Define your graph\ngraph = {\n    'A': ['B', 'C'],\n}\nnode = 'A'\n# Print neighbors",
           "solution": "graph = {'A': ['B', 'C'], 'B': ['A', 'D'], 'C': ['A'], 'D': ['B']}\nnode = 'B'\nprint(f'Neighbors of {node}: {graph[node]}')",
@@ -207,7 +217,7 @@
       },
       {
         "emoji": "",
-        "text": "DFS goes deep first — uses less memory but may not find shortest path"
+        "text": "DFS goes deep first \u2014 uses less memory but may not find shortest path"
       },
       {
         "emoji": "",
@@ -215,7 +225,7 @@
       },
       {
         "emoji": "",
-        "text": "A* combines cost so far + estimated cost = most efficient search"
+        "text": "A combines cost so far + estimated cost = most efficient search"
       },
       {
         "emoji": "",
@@ -226,7 +236,7 @@
       "How to model a problem as a search problem",
       "The difference between BFS and DFS",
       "How heuristics improve search efficiency",
-      "How A* achieves optimal solutions",
+      "How A achieves optimal solutions",
       "When to choose which search algorithm",
       "How to represent graphs in Python"
     ],

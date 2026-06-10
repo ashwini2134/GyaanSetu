@@ -31,7 +31,13 @@ export default function CoursePage() {
   const [lectures, setLectures] = useState<Lecture[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+<<<<<<< HEAD
   const courseTitle = slug === "cs50p" ? "CS50 Python" : slug === "cs50ai" ? "CS50 AI" : slug?.toUpperCase() ?? "";
+=======
+  const [isCertModalOpen, setIsCertModalOpen] = useState(false);
+
+  const courseTitle = slug === "cs50p" ? "CS50 Python" : slug === "cs50ai" ? "AI" : slug?.toUpperCase() ?? "";
+>>>>>>> de99a76a3ac0c4654b31265192f4c3a59ce6390a
   const lectureCount = lectures?.length ?? 0;
 
   // Subscribe to progress changes for real-time UI updates
@@ -138,10 +144,10 @@ export default function CoursePage() {
           )}
 
           {/* ── Hero Section ── */}
-          <div className="rounded-2xl border border-slate-700/30 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm p-6">
-            <div className="flex flex-col lg:flex-row gap-6">
-              <div className="flex-1">
-                <nav className="flex items-center gap-2 text-xs text-slate-400 mb-4">
+          <div className="rounded-2xl border border-slate-700/30 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm p-6 text-center">
+            <div className="flex flex-col gap-6 items-center">
+              <div className="flex-1 flex flex-col items-center">
+                <nav className="flex items-center gap-2 text-xs text-slate-400 mb-4 justify-center">
                   <button onClick={() => navigate("/")} className="text-blue-400 hover:text-blue-300 transition-colors">Dashboard</button>
                   <span className="text-slate-600">/</span>
                   <span className="text-slate-400">Courses</span>
@@ -150,7 +156,7 @@ export default function CoursePage() {
                 </nav>
 
                 <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">{courseTitle}</h1>
-                <p className="text-sm text-slate-400 leading-relaxed mb-5">
+                <p className="text-sm text-slate-400 leading-relaxed mb-5 max-w-2xl">
                   Learn Python from basics to advanced with hands-on projects and quizzes.
                 </p>
 

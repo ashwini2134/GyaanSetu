@@ -13,43 +13,51 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "What is a Neural Network",
+          "title": "What is What is a Neural Network?",
           "body": "A neural network is a system of connected nodes inspired by how the human brain works.",
           "bullets": [
             "Human neurons pass electrical signals; AI nodes pass numbers",
             "Each node takes inputs, multiplies by weights, adds them up, produces output",
-            "Layers: Input Layer (receives data) → Hidden Layers (processes) → Output Layer (gives result)",
-            "Training adjusts weights over thousands of examples until outputs are correct"
-          ]
+            "Layers: Input Layer (receives data) \u2192 Hidden Layers (processes) \u2192 Output Layer (gives result)",
+            "Training adjusts weights over thousands of examples until outputs are correct",
+            "This concept is fundamental to AI development."
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "NN Concept",
-          "accentColor": "blue",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "📝",
-            "title": "A team passing notes",
-            "description": "each person processes the note and passes to the next"
+          "title": "Think of It",
+          "accentColor": "purple",
+          "analogy": {
+            "title": "Real Life Analogy",
+            "description": "Think of it like a familiar real-world scenario.",
+            "image": "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "text",
-            "flowSteps": null,
-            "textContent": "Input × Weight → Sum → Activation → Output"
+          "visual": {
+            "title": "NN Concept",
+            "type": "flow_diagram",
+            "flowSteps": [
+              "Input \u00d7 Weight \u2192 Sum \u2192 Activation \u2192 Output"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "output = (input1 * w1) + (input2 * w2)\nif output > 0.5:\n    print('Pass')",
+          "code": {
             "language": "python",
-            "output": ""
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
         },
         {
           "type": "reflection",
           "question": "Does a neural network learn by adjusting its weights during training?",
           "answer": "Yes, adjusting weights reduces the error and trains the model."
+        },
+        {
+          "type": "practice",
+          "title": "Practice Exercise",
+          "instructions": "Write a simple Python script demonstrating What is a Neural Network.",
+          "starterCode": "# Write your code here\n",
+          "solution": "# Example solution\nprint('Done')",
+          "hint": "Start by defining the main function."
         }
       ]
     },
@@ -59,44 +67,51 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "Deep Learning & CNNs",
+          "title": "What is Deep Learning & CNNs?",
           "body": "Deep Learning uses neural networks with many hidden layers. CNNs are specialized for images.",
           "bullets": [
             "Deep Learning = neural networks with many hidden layers",
             "More layers = ability to learn more complex patterns",
-            "CNNs (Convolutional Neural Networks) — specialized for recognizing patterns in images",
+            "CNNs (Convolutional Neural Networks) \u2014 specialized for recognizing patterns in images",
             "Real-world uses: face unlock on phones, voice recognition (Alexa, Siri), medical image diagnosis",
-            "Why neural networks need lots of data — more examples = better and more reliable learning"
-          ]
+            "Why neural networks need lots of data \u2014 more examples = better and more reliable learning"
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "CNN Processing",
+          "title": "Think of It",
           "accentColor": "purple",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "👁️",
-            "title": "Your eye",
-            "description": "processes raw light → edges → shapes → objects in layers"
+          "analogy": {
+            "title": "Real Life Analogy",
+            "description": "Think of it like a familiar real-world scenario.",
+            "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "text",
-            "flowSteps": null,
-            "textContent": "Image pixels → CNN layers → Pattern detection → Classification"
+          "visual": {
+            "title": "CNN Processing",
+            "type": "flow_diagram",
+            "flowSteps": [
+              "Image pixels \u2192 CNN layers \u2192 Pattern detection \u2192 Classification"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "# CNN detects edges first, then shapes, then full objects",
+          "code": {
             "language": "python",
-            "output": ""
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
         },
         {
           "type": "reflection",
           "question": "Do self-driving cars use neural networks to recognize what they see on the road?",
           "answer": "Yes, they use advanced CNNs to process camera feeds and detect objects."
+        },
+        {
+          "type": "practice",
+          "title": "Practice Exercise",
+          "instructions": "Write a simple Python script demonstrating Deep Learning & CNNs.",
+          "starterCode": "# Write your code here\n",
+          "solution": "# Example solution\nprint('Done')",
+          "hint": "Start by defining the main function."
         }
       ]
     },
@@ -106,54 +121,56 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "NN Steps",
+          "title": "What is NN Steps?",
           "body": "Building a neural network.",
           "bullets": [
-            "Step 1: Define input — what data goes into the network (numbers, image pixels, text)",
-            "Step 2: Set up layers — input layer, hidden layers, output layer",
-            "Step 3: Initialize weights — start with random numbers",
-            "Step 4: Train — feed examples, compare output to correct answer, adjust weights",
-            "Step 5: Test — give new unseen data, measure accuracy"
-          ]
+            "Step 1: Define input \u2014 what data goes into the network (numbers, image pixels, text)",
+            "Step 2: Set up layers \u2014 input layer, hidden layers, output layer",
+            "Step 3: Initialize weights \u2014 start with random numbers",
+            "Step 4: Train \u2014 feed examples, compare output to correct answer, adjust weights",
+            "Step 5: Test \u2014 give new unseen data, measure accuracy"
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "Layer Flow",
-          "accentColor": "green",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "➡️",
-            "title": "Forward pass",
-            "description": "Data moving through layers"
+          "title": "Think of It",
+          "accentColor": "purple",
+          "analogy": {
+            "title": "Real Life Analogy",
+            "description": "Think of it like a familiar real-world scenario.",
+            "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Flow Diagram",
-            "visualType": "flow_diagram",
+          "visual": {
+            "title": "Layer Flow",
+            "type": "flow_diagram",
             "flowSteps": [
               "Input Layer",
-              "↓",
+              "\u2193",
               "Hidden Layer 1",
-              "↓",
+              "\u2193",
               "Hidden Layer 2",
-              "↓",
+              "\u2193",
               "Output Layer",
-              "↓",
+              "\u2193",
               "Prediction"
-            ],
-            "textContent": null
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "# See example above",
+          "code": {
             "language": "python",
-            "output": ""
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
+        },
+        {
+          "type": "reflection",
+          "question": "Is Getting Started always the best approach?",
+          "answer": "Not always! It depends on the specific problem and constraints."
         },
         {
           "type": "practice",
           "title": "Practice Exercise",
-          "instructions": "Draw a simple 3-layer neural network for predicting if a student passes — inputs: attendance and marks",
+          "instructions": "Draw a simple 3-layer neural network for predicting if a student passes \u2014 inputs: attendance and marks",
           "starterCode": "# Draw/describe your network\n",
           "solution": "# Input layer (2 nodes) -> Hidden layer -> Output layer (1 node)",
           "hint": "Ensure nodes are connected."
@@ -173,7 +190,7 @@
       },
       {
         "emoji": "",
-        "text": "Layers: Input → Hidden → Output"
+        "text": "Layers: Input \u2192 Hidden \u2192 Output"
       },
       {
         "emoji": "",
@@ -185,7 +202,7 @@
       },
       {
         "emoji": "",
-        "text": "CNNs specialize in image recognition — used in face unlock, medical scans"
+        "text": "CNNs specialize in image recognition \u2014 used in face unlock, medical scans"
       }
     ],
     "whatYouLearned": [

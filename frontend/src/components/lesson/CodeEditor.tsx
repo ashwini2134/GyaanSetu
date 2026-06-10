@@ -166,52 +166,7 @@ export default function CodeEditor({
               </svg>
             </button>
           )}
-          {showRunButton && !readOnly && (
-            <button
-              onClick={handleRun}
-              disabled={running}
-              className="px-3 py-1 text-[10px] font-semibold text-white rounded bg-green-600/80 hover:bg-green-600 disabled:opacity-50 transition-all flex items-center gap-1"
-            >
-              {running ? (
-                <>
-                  <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Running
-                </>
-              ) : (
-                <>
-                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                  Run
-                </>
-              )}
-            </button>
-          )}
-          {showSubmitButton && !readOnly && (
-            <button
-              onClick={handleSubmit}
-              disabled={running}
-              className="px-3 py-1 text-[10px] font-semibold text-white rounded bg-blue-600 hover:bg-blue-500 disabled:opacity-50 transition-all flex items-center gap-1"
-            >
-              {running ? (
-                <>
-                  <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Running...
-                </>
-              ) : (
-                <>
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Submit
-                </>
-              )}
-            </button>
-          )}
+          {/* Removed Run and Submit buttons from here */}
         </div>
       </div>
 
@@ -242,6 +197,65 @@ export default function CodeEditor({
           wordWrap: 'on',
         }}
       />
+
+      {/* Action Bar (Run/Submit) */}
+      {(!readOnly && (showRunButton || showSubmitButton)) && (
+        <div className="flex items-center justify-between px-4 py-3 bg-slate-800/30 border-t border-slate-700/40">
+          <div>
+            {showRunButton && (
+              <button
+                onClick={handleRun}
+                disabled={running}
+                className="px-4 py-2 text-xs font-semibold text-white rounded-lg bg-slate-700 hover:bg-slate-600 border border-slate-600 disabled:opacity-50 transition-all flex items-center gap-2"
+              >
+                {running ? (
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                )}
+                {running ? 'Running...' : 'Run Code'}
+              </button>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                if (output === null && !runError) handleRun();
+                // If it already ran, this acts as a focus to the console output
+                // But generally clicking it will just run the code to get output in the console.
+              }}
+              className="px-4 py-2 text-xs font-semibold text-slate-300 rounded-lg bg-slate-700/50 hover:bg-slate-700 border border-slate-600/50 transition-all flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l3 3-3 3m5 0h3M4 17h16a2 2 0 002-2V5a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              Console
+            </button>
+            {showSubmitButton && (
+              <button
+                onClick={handleSubmit}
+                disabled={running}
+                className="px-4 py-2 text-xs font-semibold text-white rounded-lg bg-blue-600 hover:bg-blue-500 shadow-lg shadow-blue-500/20 disabled:opacity-50 transition-all flex items-center gap-2"
+              >
+                {running ? (
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
+                {running ? 'Submitting...' : 'Submit Solution'}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Output */}
       {(output !== null || hasError) && (

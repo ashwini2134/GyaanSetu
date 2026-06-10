@@ -8,6 +8,6 @@ How will we represent the states and actions inside of a Python program? A “st
 
 Recall that the key formula for Q-learning is below. Every time we are in a state `s` and take an action `a`, we can update the Q-value `Q(s, a)` according to:
 
-`Q(s, a) <- Q(s, a) + alpha * (new value estimate - old value estimate)`
+`Q(s, a) <- Q(s, a) + alpha  (new value estimate - old value estimate)`
 
 In the above formula, `alpha` is the learning rate (how much we value new information compared to information we already have). The `new value estimate` represents the sum of the reward received for the current action and the estimate of all the future rewards that the player will receive. The `old value estimate` is just the existing value for `Q(s, a)`. By applying this formula every time our AI takes a new action, over time our AI will start to learn which actions are better in any state.

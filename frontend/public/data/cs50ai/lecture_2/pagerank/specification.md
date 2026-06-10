@@ -1,4 +1,4 @@
-Many students have had issues with the autograders on this assignment because of how their dictionaries are constructed (that is to say, *improperly*). It is imperative that you read this specification carefully and implement its requirements **exactly**.
+Many students have had issues with the autograders on this assignment because of how their dictionaries are constructed (that is to say, improperly). It is imperative that you read this specification carefully and implement its requirements exactly.
 
 Complete the implementation of `transition_model`, `sample_pagerank`, and `iterate_pagerank`.
 
