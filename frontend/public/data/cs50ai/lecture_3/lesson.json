@@ -3,7 +3,7 @@
   "courseSlug": "cs50ai",
   "number": 3,
   "title": "Probability & Uncertainty",
-  "overview": "The real world is rarely certain \u2014 AI uses probability to handle situations that are not clearly True or False",
+  "overview": "The real world is rarely certain — AI uses probability to handle situations that are not clearly True or False",
   "estimatedMinutes": 60,
   "nextUp": "Optimization",
   "sections": [
@@ -14,7 +14,7 @@
         {
           "type": "explanation",
           "title": "What is Probability Basics?",
-          "body": "The real world is rarely certain \u2014 AI uses probability to handle situations that are not clearly True or False",
+          "body": "The real world is rarely certain — AI uses probability to handle situations that are not clearly True or False",
           "bullets": [
             "Probability is a number between 0 and 1 showing how likely something is",
             "0 = impossible, 1 = certain, 0.7 = 70% likely",
@@ -25,25 +25,24 @@
           "accentColor": "blue"
         },
         {
-          "type": "concept_visualization",
-          "title": "Think of It",
-          "accentColor": "purple",
+          "type": "think_of",
           "analogy": {
-            "title": "Real Life Analogy",
-            "description": "Think of it like a familiar real-world scenario.",
-            "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80"
+            "title": "Think of Probability as a Weather Forecast",
+            "description": "70% chance of rain doesn't mean it will rain — it means out of 100 similar days, it rained on 70. AI uses probability to handle uncertainty and make smart guesses with incomplete information.",
+            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
+            "emoji": "💡"
           },
-          "visual": {
-            "title": "Probability Concept",
-            "type": "flow_diagram",
-            "flowSteps": [
-              "Probability scale 0 \u2192 1"
-            ]
+          "visualization": {
+            "type": "function_machine",
+            "title": "Probability = Handling Uncertainty",
+            "inputLabel": "Evidence",
+            "processLabel": "Probability Model",
+            "outputLabel": "Likelihood"
           },
           "code": {
             "language": "python",
-            "code": "# Code example\nprint(\"Hello AI\")",
-            "output": "Hello AI"
+            "code": "# Weather prediction: probability\ncloudy = 0.6\nrain_given_cloudy = 0.8\np_rain = cloudy * rain_given_cloudy\nprint(f\"P(rain) = {p_rain:.0%}\")",
+            "output": "P(rain) = 48%"
           }
         },
         {
@@ -68,9 +67,9 @@
         {
           "type": "explanation",
           "title": "What is Conditional Probability & Bayes Theorem?",
-          "body": "Conditional probability asks \u2014 what is the chance of X given that Y already happened? Bayes Theorem lets AI update its belief when new evidence arrives.",
+          "body": "Conditional probability asks — what is the chance of X given that Y already happened? Bayes Theorem lets AI update its belief when new evidence arrives.",
           "bullets": [
-            "Conditional probability: P(A|B) \u2014 probability of A given B is already true",
+            "Conditional probability: P(A|B) — probability of A given B is already true",
             "Example: probability of wet roads given it rained = very high",
             "Bayes Theorem updates probability when new evidence arrives",
             "Spam filter example: AI updates its confidence that an email is spam as it reads more words",
@@ -79,25 +78,24 @@
           "accentColor": "blue"
         },
         {
-          "type": "concept_visualization",
-          "title": "Think of It",
-          "accentColor": "purple",
+          "type": "think_of",
           "analogy": {
-            "title": "Real Life Analogy",
-            "description": "Think of it like a familiar real-world scenario.",
-            "image": "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&q=80"
+            "title": "Think of Bayes' Rule as Updating Your Belief",
+            "description": "Before a test you have a prior belief. The test gives evidence. Bayes' Rule tells you how to update: P(disease | positive) = how likely you have the disease after seeing a positive result.",
+            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
+            "emoji": "💡"
           },
-          "visual": {
-            "title": "Bayes in Action",
-            "type": "flow_diagram",
-            "flowSteps": [
-              "Prior belief + New evidence \u2192 Updated belief"
-            ]
+          "visualization": {
+            "type": "function_machine",
+            "title": "Bayes' Rule = Belief Update",
+            "inputLabel": "Prior Belief",
+            "processLabel": "New Evidence",
+            "outputLabel": "Updated Belief"
           },
           "code": {
             "language": "python",
-            "code": "# Code example\nprint(\"Hello AI\")",
-            "output": "Hello AI"
+            "code": "# Bayes: was that email spam?\nprior = 0.3\nsensitivity = 0.8\nfalse_pos = 0.1\nposterior = (prior * sensitivity) / (prior * sensitivity + (1 - prior) * false_pos)\nprint(f\"P(spam | 'free') = {posterior:.0%}\")",
+            "output": "P(spam | 'free') = 77%"
           }
         },
         {
@@ -133,33 +131,24 @@
           "accentColor": "blue"
         },
         {
-          "type": "concept_visualization",
-          "title": "Think of It",
-          "accentColor": "purple",
+          "type": "think_of",
           "analogy": {
-            "title": "Real Life Analogy",
-            "description": "Think of it like a familiar real-world scenario.",
-            "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80"
+            "title": "Think of Probability Flow as a Branching Path",
+            "description": "Every decision branches into possibilities. The chance of reaching the end is the product of all choices along the path — like flipping heads three times in a row. Probability trees map every possible outcome.",
+            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
+            "emoji": "💡"
           },
-          "visual": {
-            "title": "Probability Flow",
-            "type": "flow_diagram",
-            "flowSteps": [
-              "Prior Belief",
-              "\u2193",
-              "New Evidence",
-              "\u2193",
-              "Bayes Update",
-              "\u2193",
-              "Updated Belief",
-              "\u2193",
-              "Decision"
-            ]
+          "visualization": {
+            "type": "decision_branch",
+            "title": "Probability Tree",
+            "condition": "Flip coin?",
+            "trueLabel": "Heads (50%)",
+            "falseLabel": "Tails (50%)"
           },
           "code": {
             "language": "python",
-            "code": "# Code example\nprint(\"Hello AI\")",
-            "output": "Hello AI"
+            "code": "# Probability tree: coin flips\np = 0.5 ** 3\nprint(f\"P(HHH) = {p:.0%}\")\nprint(f\"P(at least 1 H) = {1 - 0.5**3:.0%}\")",
+            "output": "P(HHH) = 12%\nP(at least 1 H) = 88%"
           }
         },
         {
@@ -186,7 +175,7 @@
       },
       {
         "emoji": "",
-        "text": "Real world decisions are rarely 100% certain \u2014 AI uses probability"
+        "text": "Real world decisions are rarely 100% certain — AI uses probability"
       },
       {
         "emoji": "",

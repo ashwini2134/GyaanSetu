@@ -168,7 +168,7 @@ export default function ProblemCard({ problem, index, completed, onComplete, isO
     setAllPassed(true);
     setShowCompletion(true);
     onComplete?.(problem.id);
-    setTimeout(() => setShowCompletion(false), 2000);
+    setTimeout(() => setShowCompletion(false), 1500);
   };
 
   const diffCls = DIFF_COLOR[problem.difficulty] ?? DIFF_COLOR.easy;
@@ -198,9 +198,18 @@ export default function ProblemCard({ problem, index, completed, onComplete, isO
               {problem.title}
             </p>
           </div>
-          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border capitalize ${diffCls}`}>
-            {problem.difficulty}
-          </span>
+          {allPassed ? (
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full border flex items-center gap-1 text-emerald-400 bg-emerald-500/10 border-emerald-500/20">
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              Solved
+            </span>
+          ) : (
+            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border capitalize ${diffCls}`}>
+              {problem.difficulty}
+            </span>
+          )}
           <svg className="w-4 h-4 text-slate-500 group-hover:text-blue-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
           </svg>
@@ -212,14 +221,17 @@ export default function ProblemCard({ problem, index, completed, onComplete, isO
   return (
     <div className={`rounded-2xl border overflow-hidden relative ${allPassed ? 'border-emerald-500/25' : 'border-slate-700/30'}`}>
       {showCompletion && (
-        <div className="absolute inset-0 z-10 bg-emerald-900/20 backdrop-blur-[1px] flex items-center justify-center animate-in fade-in duration-300">
-          <div className="flex flex-col items-center gap-2">
+        <div className="absolute inset-0 z-10 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center animate-in fade-in zoom-in duration-500">
+          <div className="flex flex-col items-center gap-3 text-center px-6">
             <div className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center animate-bounce">
               <svg className="w-8 h-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p className="text-emerald-300 font-semibold text-sm">Problem Solved!</p>
+            <div>
+              <p className="text-lg font-bold text-white">Problem Solved</p>
+              <p className="text-sm text-slate-400 mt-1">Great job!</p>
+            </div>
           </div>
         </div>
       )}

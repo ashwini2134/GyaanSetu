@@ -29,42 +29,30 @@
           "text": "You press A3 (parameters), the machine runs its code (function body), and out comes a snack (return value). You don't care HOW it works inside — just press the button and get the result."
         },
         {
-          "type": "concept_visualization",
-          "title": "Think Of A Function As A Vending Machine",
-          "accentColor": "orange",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "🏪",
+          "type": "think_of",
+          "analogy": {
             "title": "Vending Machine",
-            "description": "Insert coins (input) → Press button (call) → Get item (output)"
+            "description": "Insert coins (input) → Press button (call) → Get item (output)",
+            "emoji": "🏪",
+            "image": "https://images.unsplash.com/photo-1618506557292-ec1862b3c506?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "flow_diagram",
-            "varName": null,
-            "varValue": null,
-            "flowSteps": [
-              "Input (Arguments)",
-              "↓",
-              "Function (Process)",
-              "↓",
-              "Output (Return Value)"
-            ],
-            "textContent": null
+          "visualization": {
+            "type": "function_machine",
+            "title": "Function = Recipe",
+            "inputLabel": "Input",
+            "processLabel": "Function Call",
+            "outputLabel": "Return Value"
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "def add(a, b):\n    return a + b\n\nresult = add(3, 5)\nprint(result)",
+          "code": {
             "language": "python",
+            "code": "def add(a, b):\n    return a + b\n\nprint(add(3, 5))",
             "output": "8"
           }
         },
         {
           "type": "reflection",
           "question": "Does every function need a return statement? What happens if you don't include one?",
-          "answer": "No, a function does not need a return statement. If you don't include return, the function still runs its code but returns None (Python's way of saying 'nothing'). It's like a vending machine that takes your money and lights up but doesn't actually give you anything — the process happens, but there's no output.",
-          "followupCode": null,
-          "followupOutput": null
+          "answer": "No, a function does not need a return statement. If you don't include return, the function still runs its code but returns None (Python's way of saying 'nothing'). It's like a vending machine that takes your money and lights up but doesn't actually give you anything — the process happens, but there's no output."
         },
         {
           "type": "code_example",

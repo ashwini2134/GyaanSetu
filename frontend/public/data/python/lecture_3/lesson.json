@@ -56,36 +56,30 @@
           ]
         },
         {
-          "type": "concept_visualization",
-          "title": "Think Of PEMDAS As Math's Rulebook",
-          "accentColor": "orange",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "📏",
+          "type": "think_of",
+          "analogy": {
             "title": "The Order Rulebook",
-            "description": "PEMDAS tells Python which math operation to perform first"
+            "description": "PEMDAS tells Python which math operation to perform first",
+            "emoji": "📏",
+            "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "text",
-            "varName": null,
-            "varValue": null,
-            "flowSteps": null,
-            "textContent": "P → Parentheses first\nE → Exponents next\nMD → Multiply/Divide left to right\nAS → Add/Subtract left to right"
+          "visualization": {
+            "type": "function_machine",
+            "title": "Operator Precedence",
+            "inputLabel": "Expression",
+            "processLabel": "PEMDAS Rules",
+            "outputLabel": "Result"
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "result = (2 + 3) * 4\nprint(result)\nresult2 = 2 + 3 * 4\nprint(result2)",
+          "code": {
             "language": "python",
-            "output": "20\n14"
+            "code": "result = 2 + 3 * 4\nprint(result)",
+            "output": "14"
           }
         },
         {
           "type": "reflection",
           "question": "Does Python always calculate left to right no matter what?",
-          "answer": "No! Python follows PEMDAS rules, not simple left-to-right. In 2 + 3 * 4, multiplication happens first (3 * 4 = 12), then addition (2 + 12 = 14). If you want addition first, use parentheses: (2 + 3) * 4 = 20.",
-          "followupCode": null,
-          "followupOutput": null
+          "answer": "No! Python follows PEMDAS rules, not simple left-to-right. In 2 + 3 * 4, multiplication happens first (3 * 4 = 12), then addition (2 + 12 = 14). If you want addition first, use parentheses: (2 + 3) * 4 = 20."
         },
         {
           "type": "code_example",
@@ -93,11 +87,6 @@
           "language": "python",
           "code": "print(2 + 3 * 4)\nprint((2 + 3) * 4)\nprint(10 - 2 * 3 + 1)\nprint(10 + 2 ** 3)",
           "expectedOutput": "14\n20\n5\n18"
-        },
-        {
-          "type": "reflection",
-          "question": "What do you think 7 // 2 and 7 % 2 will give? How are they related?",
-          "answer": "7 // 2 = 3 (floor division), 7 % 2 = 1 (remainder). They are related: 7 = (2 × 3) + 1."
         },
         {
           "type": "practice",
@@ -176,36 +165,30 @@
           "text": "Two guards at a door. With and: both must say yes. With or: if either says yes, you enter. With not: the guard says the opposite."
         },
         {
-          "type": "concept_visualization",
-          "title": "Think Of and / or As Gatekeepers",
-          "accentColor": "purple",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "🚧",
+          "type": "think_of",
+          "analogy": {
             "title": "Gatekeepers",
-            "description": "and = BOTH must pass. or = AT LEAST ONE must pass."
+            "description": "and = BOTH must pass. or = AT LEAST ONE must pass.",
+            "emoji": "🚧",
+            "image": "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "text",
-            "varName": null,
-            "varValue": null,
-            "flowSteps": null,
-            "textContent": "and: Both True → True\nor: At least one True → True\nnot: True ↔ False"
+          "visualization": {
+            "type": "decision_branch",
+            "title": "Logical Operators",
+            "condition": "and / or",
+            "trueLabel": "Pass",
+            "falseLabel": "Fail"
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "age = 20\nhas_id = True\nprint(age >= 18 and has_id)\nprint(age < 18 or not has_id)",
+          "code": {
             "language": "python",
-            "output": "True\nFalse"
+            "code": "age = 20\nprint(age >= 18 and age < 60)",
+            "output": "True"
           }
         },
         {
           "type": "reflection",
           "question": "If you are 17 years old (age = 17) and have an ID (has_id = True), does age >= 18 and has_id evaluate to True?",
-          "answer": "No! The 'and' gatekeeper requires BOTH conditions to be True. age >= 18 is False (you're 17), so even though has_id is True, the whole expression is False. With 'or', only one needs to be True.",
-          "followupCode": null,
-          "followupOutput": null
+          "answer": "No! The 'and' gatekeeper requires BOTH conditions to be True. age >= 18 is False (you're 17), so even though has_id is True, the whole expression is False. With 'or', only one needs to be True."
         },
         {
           "type": "code_example",

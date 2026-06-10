@@ -1,14 +1,16 @@
 import type { LessonSection, ContentBlock } from '../../types/lesson';
 import ConceptVisualizationCard from './ConceptVisualizationCard';
+import ThinkOfSection from './ThinkOfSection';
 import VisualAidCard from './VisualAidCard';
-import CodeExampleCard from './CodeExampleCard';
+import InteractiveTryIt from './InteractiveTryIt';
 import ReflectionCard from './ReflectionCard';
 import PracticeCard from './PracticeCard';
+import { renderMarkdown } from '../../utils/renderContent';
 import * as LucideIcons from 'lucide-react';
 
 function TextBlock({ block }: { block: Extract<ContentBlock, { type: 'text' }> }) {
   return (
-    <p className="text-sm text-slate-300 leading-relaxed">{block.content}</p>
+    <p className="text-sm text-slate-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(block.content) }} />
   );
 }
 
@@ -37,7 +39,7 @@ function ExplanationBlock({ block }: { block: Extract<ContentBlock, { type: 'exp
         <div className="flex-1">
           {block.title && <p className="text-sm font-semibold text-slate-200 mb-1">{block.title}</p>}
           <p className="text-sm text-slate-300 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: block.body.replace(/\*\*(.+?)\*\*/g, '<strong class="text-white">$1</strong>').replace(/`(.+?)`/g, '<code class="text-blue-300 font-mono text-xs bg-slate-800 px-1 py-0.5 rounded">$1</code>') }}
+            dangerouslySetInnerHTML={{ __html: renderMarkdown(block.body) }}
           />
         </div>
       </div>
@@ -48,7 +50,7 @@ function ExplanationBlock({ block }: { block: Extract<ContentBlock, { type: 'exp
               <svg className={`w-4 h-4 ${iconCls} mt-0.5 flex-shrink-0`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              {b}
+              <span dangerouslySetInnerHTML={{ __html: renderMarkdown(b) }} />
             </li>
           ))}
         </ul>
@@ -71,7 +73,7 @@ function AnalogyBlock({ block }: { block: Extract<ContentBlock, { type: 'analogy
         )}
         <div>
           <p className="text-xs font-semibold text-amber-300 uppercase tracking-wider mb-1">{block.title}</p>
-          <p className="text-sm text-slate-300 leading-relaxed">{block.text}</p>
+          <p className="text-sm text-slate-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(block.text) }} />
         </div>
       </div>
     </div>
@@ -88,10 +90,12 @@ function renderBlock(block: ContentBlock, _sectionId: string, onAttempt?: () => 
       return <AnalogyBlock block={block} />;
     case 'concept_visualization':
       return <ConceptVisualizationCard block={block} />;
+    case 'think_of':
+      return <ThinkOfSection block={block} />;
     case 'visual_aid':
       return <VisualAidCard block={block} />;
     case 'code_example':
-      return <CodeExampleCard block={block} />;
+      return <InteractiveTryIt block={block} />;
     case 'reflection':
       return <ReflectionCard block={block} />;
     case 'practice':

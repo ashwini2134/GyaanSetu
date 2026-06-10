@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import type { ReflectionBlock } from '../../types/lesson';
+import { renderMarkdown } from '../../utils/renderContent';
 
 export default function ReflectionCard({ block }: { block: ReflectionBlock }) {
   const [revealed, setRevealed] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const isLong = block.answer.split('\n').length > 2 || block.answer.length > 200;
 
   return (
     <div className="rounded-2xl border border-purple-500/20 bg-gradient-to-br from-purple-600/10 to-slate-800/40 backdrop-blur-sm p-5">
@@ -14,7 +17,7 @@ export default function ReflectionCard({ block }: { block: ReflectionBlock }) {
         </div>
         <div className="flex-1">
           <p className="text-xs font-semibold text-purple-300 uppercase tracking-wider mb-1">Is This Correct?</p>
-          <p className="text-sm text-slate-300 leading-relaxed">{block.question}</p>
+          <p className="text-sm text-slate-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(block.question) }} />
 
           {!revealed ? (
             <button
@@ -25,7 +28,15 @@ export default function ReflectionCard({ block }: { block: ReflectionBlock }) {
             </button>
           ) : (
             <div className="mt-3 p-4 rounded-xl bg-slate-900/60 border border-slate-700/30 space-y-2">
-              <p className="text-sm text-slate-200 leading-relaxed">{block.answer}</p>
+              <div className={`text-sm text-slate-200 leading-relaxed ${!expanded && isLong ? 'line-clamp-2' : ''}`} dangerouslySetInnerHTML={{ __html: renderMarkdown(block.answer) }} />
+              {isLong && (
+                <button
+                  onClick={() => setExpanded(!expanded)}
+                  className="text-[11px] text-purple-400 hover:text-purple-300 transition-colors"
+                >
+                  {expanded ? 'Show less' : 'Read more'}
+                </button>
+              )}
               {block.followupCode && (
                 <div className="mt-2 rounded-xl bg-[#0d1117] border border-slate-700/40 overflow-hidden">
                   <div className="px-3 py-1 bg-slate-800/40 border-b border-slate-700/30">

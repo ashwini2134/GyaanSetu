@@ -51,6 +51,11 @@
           "solution": "print(1, 2, 3, 4, 5, sep=\" → \")",
           "hint": "Put your numbers as separate arguments to print(). Set sep=\" → \" with the arrow symbol.",
           "expectedOutput": "1 → 2 → 3 → 4 → 5"
+        },
+        {
+          "type": "reflection",
+          "question": "Does this concept make sense so far? Try to explain it in your own words.",
+          "answer": "If you can explain this concept to someone else, you have understood it well. Practice with the exercises below to reinforce your learning."
         }
       ]
     },
@@ -77,36 +82,30 @@
           "text": "You ask a question (the prompt), then wait for the person to answer (type and press Enter). The receptionist (input()) hands you the answer on a piece of paper (a string). If you need it as a number, you must convert it yourself."
         },
         {
-          "type": "concept_visualization",
-          "title": "Think Of input() As A Receptionist",
-          "accentColor": "green",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "🧑‍💼",
+          "type": "think_of",
+          "analogy": {
             "title": "Receptionist",
-            "description": "Receptionist asks a question, waits for your answer, then tells the program"
+            "description": "Receptionist asks a question, waits for your answer, then tells the program",
+            "emoji": "🧑‍💼",
+            "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "text",
-            "varName": null,
-            "varValue": null,
-            "flowSteps": null,
-            "textContent": "input():\n1. Displays a prompt\n2. Pauses and waits\n3. Captures what you type\n4. Returns it as a string"
+          "visualization": {
+            "type": "function_machine",
+            "title": "User Input Flow",
+            "inputLabel": "Input",
+            "processLabel": "Function",
+            "outputLabel": "Output"
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "name = input('Enter your name: ')\nprint('Hello, ' + name + '!')",
+          "code": {
             "language": "python",
-            "output": "Enter your name: Alice\nHello, Alice!"
+            "code": "name = input(\"Enter name: \")\nprint(f\"Hello, {name}!\")",
+            "output": "Enter name: Alice\nHello, Alice!"
           }
         },
         {
           "type": "reflection",
           "question": "Does input() let the program continue running while waiting for the user to type something?",
-          "answer": "No! input() pauses the program completely and waits. The program sits at that line and does nothing else until the user presses Enter. This is like a receptionist who stops everything to listen to your question before continuing their work.",
-          "followupCode": null,
-          "followupOutput": null
+          "answer": "No! input() pauses the program completely and waits. The program sits at that line and does nothing else until the user presses Enter. This is like a receptionist who stops everything to listen to your question before continuing their work."
         },
         {
           "type": "code_example",
@@ -128,11 +127,6 @@
           "language": "python",
           "code": "age = int(input(\"Enter your age: \"))\nprint(f\"You are {age} years old\")",
           "expectedOutput": "Enter your age: 20\nYou are 20 years old"
-        },
-        {
-          "type": "reflection",
-          "question": "What happens if the user types 'twenty' instead of 20, and you try int(input())?",
-          "answer": "Python gives a ValueError because 'twenty' cannot be converted to an integer. This is called an exception."
         },
         {
           "type": "practice",
@@ -161,36 +155,41 @@
           ]
         },
         {
-          "type": "concept_visualization",
-          "title": "Think Of f-Strings As Fill-In-The-Blank Templates",
-          "accentColor": "blue",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "📝",
+          "type": "think_of",
+          "analogy": {
             "title": "Fill-In-The-Blank",
-            "description": "Write the sentence with blanks { }, then fill them with variable values"
+            "description": "Write the sentence with blanks { }, then fill them with variable values",
+            "emoji": "📝",
+            "image": "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "text",
-            "varName": null,
-            "varValue": null,
-            "flowSteps": null,
-            "textContent": "f\"Hello, {name}!\"\nThe {name} gets replaced\nwith the variable value"
+          "visualization": {
+            "type": "key_value",
+            "title": "Template → Filled",
+            "pairs": [
+              {
+                "key": "name",
+                "value": "Alice"
+              },
+              {
+                "key": "age",
+                "value": "25"
+              },
+              {
+                "key": "city",
+                "value": "Chennai"
+              }
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "name = 'Bob'\nage = 25\nprint(f'{name} is {age} years old')",
+          "code": {
             "language": "python",
-            "output": "Bob is 25 years old"
+            "code": "name = \"Alice\"\nprint(f\"Hello, {name}!\")",
+            "output": "Hello, Alice!"
           }
         },
         {
           "type": "reflection",
           "question": "Does f'Hello, {name}' work the same as f'Hello, {name}' with double quotes?",
-          "answer": "Yes! f-strings work with both single quotes f'...' and double quotes f\"...\". The f before the quote tells Python this is a special string where {curly braces} are replaced with variable values.",
-          "followupCode": null,
-          "followupOutput": null
+          "answer": "Yes! f-strings work with both single quotes f'...' and double quotes f\"...\". The f before the quote tells Python this is a special string where {curly braces} are replaced with variable values."
         },
         {
           "type": "code_example",

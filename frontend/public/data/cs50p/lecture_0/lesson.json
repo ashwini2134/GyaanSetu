@@ -27,6 +27,11 @@
         {
           "type": "text",
           "content": "Programming is about telling a computer what to do, step by step. Variables give us a way to remember information, and functions give us a way to organize our instructions into reusable blocks. Let's explore both."
+        },
+        {
+          "type": "reflection",
+          "question": "Does this concept make sense so far? Try to explain it in your own words.",
+          "answer": "If you can explain this concept to someone else, you have understood it well. Practice with the exercises below to reinforce your learning."
         }
       ]
     },
@@ -47,25 +52,22 @@
           "text": "Imagine a physical storage box with a label on it. The label is the variable name. What's inside the box is the value. You can open the box to look inside, replace what's stored, or use its contents in a recipe — all by referring to the label."
         },
         {
-          "type": "concept_visualization",
-          "title": "Variables Store Data",
-          "accentColor": "blue",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "",
+          "type": "think_of",
+          "analogy": {
             "title": "A Labeled Storage Box",
-            "description": "You put something inside and give it a name so you can find it later."
+            "description": "You put something inside and give it a name so you can find it later.",
+            "emoji": "💡",
+            "image": "https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Variable = Container",
-            "visualType": "storage_box",
+          "visualization": {
+            "type": "storage_box",
+            "title": "Variable = Container",
             "varName": "name",
             "varValue": "\"Lakshanya\""
           },
-          "rightPanel": {
-            "label": "Python Code",
-            "code": "name = \"Lakshanya\"\nprint(name)",
+          "code": {
             "language": "python",
+            "code": "name = \"Lakshanya\"\nprint(name)",
             "output": "Lakshanya"
           }
         },
@@ -130,24 +132,24 @@
           "text": "A recipe is a set of steps written once that you can follow many times to make the same dish. You don't rewrite the recipe each time — you just say 'make pasta' and follow the steps. Functions work exactly the same way."
         },
         {
-          "type": "concept_visualization",
-          "title": "Functions Are Reusable Recipes",
-          "accentColor": "purple",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "",
+          "type": "think_of",
+          "analogy": {
             "title": "A Recipe Book",
-            "description": "A recipe is a set of steps you write once and follow many times — just like a function."
+            "description": "A recipe is a set of steps you write once and follow many times — just like a function.",
+            "emoji": "💡",
+            "image": "https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Function = Reusable Recipe",
-            "visualType": "recipe_book"
+          "visualization": {
+            "type": "function_machine",
+            "title": "Function = Reusable Recipe",
+            "inputLabel": "Input",
+            "processLabel": "AI Model",
+            "outputLabel": "Output"
           },
-          "rightPanel": {
-            "label": "Python Code",
-            "code": "def greet():\n    print(\"Hello!\")\n\ngreet()\ngreet()",
+          "code": {
             "language": "python",
-            "output": "Hello!\nHello!"
+            "code": "def greet():\n    print(\"Hi!\")\n\ngreet()",
+            "output": "Hi!"
           }
         },
         {
@@ -226,6 +228,11 @@
           "solution": "name = \"Lakshanya\"\ncity = \"Chennai\"\n\nprint(f\"{name} lives in {city}.\")",
           "hint": "Use f\"{name} lives in {city}.\" inside print(). Make sure your variables have values assigned first.",
           "expectedOutput": "Lakshanya lives in Chennai."
+        },
+        {
+          "type": "reflection",
+          "question": "Does this concept make sense so far? Try to explain it in your own words.",
+          "answer": "If you can explain this concept to someone else, you have understood it well. Practice with the exercises below to reinforce your learning."
         }
       ]
     }

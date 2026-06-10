@@ -46,8 +46,7 @@ function LockedLectureView({ slug, lectureNumber, courseTitle }: { slug: string;
         </div>
         <h2 className="text-2xl font-bold text-white mb-3">Lecture Locked</h2>
         <p className="text-slate-400 text-sm mb-6">
-          Complete the previous lecture first to unlock this one.
-          You need to view the theory, submit the quiz, and complete the hands-on task.
+          Complete all sections of the current lecture to unlock the next lecture.
         </p>
         <div className="space-y-3">
           {prevLecture !== null && (
@@ -123,6 +122,7 @@ export default function LecturePage() {
   const [currentPageIdx, setCurrentPageIdx] = useState(0);
   const [allLectures, setAllLectures] = useState<Array<{ number: number; title: string }>>([]);
   const [hasResumed, setHasResumed] = useState(false);
+  const [showAllCompleted, setShowAllCompleted] = useState(false);
   const visitedRef = useRef<Set<number>>(new Set());
 
   // Reset state when navigating to a different lecture
@@ -131,6 +131,7 @@ export default function LecturePage() {
     setHasResumed(false);
     visitedRef.current.clear();
     setRetakingQuiz(false);
+    setShowAllCompleted(false);
   }, [slug, lectureNumber]);
 
   // Load lecture list for prev/next lecture navigation
@@ -199,9 +200,11 @@ export default function LecturePage() {
     if (visitedRef.current.has(targetIdx)) return;
     visitedRef.current.add(targetIdx);
     
-    // If we've reached the summary page, auto-mark the lecture as completed
-    if (page.type === 'summary') {
-      // markLectureCompleted(); // REMOVED: Only mark completed if all sections are done
+    // Check if lecture can be auto-completed when summary is reached
+    if (page.type === 'summary' && slug && lessonData) {
+      const totalProblems = (lessonData.problems ?? []).length;
+      const hasQuiz = (lessonData.quiz ?? []).length > 0;
+      tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, totalProblems, hasQuiz);
     }
 
     if (page.type === 'section') {
@@ -287,23 +290,32 @@ export default function LecturePage() {
   return (
     <div className="w-full flex flex-col" style={{ height: 'calc(100vh - 64px)' }}>
       {/* ── Top Bar ── */}
-      <div className="flex-shrink-0 flex items-center justify-between border-b border-slate-700/20 px-6 py-3 bg-slate-900/40 backdrop-blur-sm">
-        <nav className="flex items-center gap-2 text-xs text-slate-400">
+      <div className="flex-shrink-0 flex items-center justify-between border-b border-slate-700/20 px-4 py-2 bg-slate-900/40 backdrop-blur-sm">
+        <nav className="flex items-center gap-2 text-sm text-slate-400">
           <button onClick={() => navigate('/')} className="text-blue-400 hover:text-blue-300 transition-colors">Dashboard</button>
+          <span className="text-slate-600">/</span>
+          <button onClick={() => navigate('/courses')} className="text-blue-400 hover:text-blue-300 transition-colors">Courses</button>
           <span className="text-slate-600">/</span>
           <button onClick={() => navigate(`/course/${slug}`)} className="text-blue-400 hover:text-blue-300 transition-colors">{courseTitle}</button>
           <span className="text-slate-600">/</span>
           <span className="text-white font-medium">{lessonData.title}</span>
         </nav>
-        <div className="flex items-center gap-3 text-xs text-slate-400">
-          <span>{currentPageIdx + 1} / {pages.length}</span>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate(`/course/${slug}`)}
+            className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition-colors"
+          >
+            <ArrowLeft size={14} />
+            Back to Course
+          </button>
+          <span className="text-xs text-slate-500">{currentPageIdx + 1} / {pages.length}</span>
         </div>
       </div>
 
       {/* ── Body: nav panel + content ── */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left nav panel */}
-        <aside className="hidden md:flex flex-shrink-0 w-56 flex-col border-r border-slate-700/30 bg-slate-900/60 overflow-y-auto">
+        <aside className="hidden md:flex self-start flex-shrink-0 w-56 flex-col border-r border-slate-700/30 bg-slate-900/60 rounded-br-xl">
           <div className="p-3 space-y-0.5">
             <button
               onClick={() => navigate(`/course/${slug}`)}
@@ -331,13 +343,11 @@ export default function LecturePage() {
                 >
                   {/* Status indicator */}
                   <span className="w-4 h-4 flex items-center justify-center flex-shrink-0">
-                    {status === 'completed' && (
+                    {progress.sections[id]?.visited ? (
                       <CheckCircle size={14} className="text-green-400" />
-                    )}
-                    {status === 'current' && (
+                    ) : status === 'current' ? (
                       <span className="w-2 h-2 rounded-full bg-blue-400" />
-                    )}
-                    {status === 'upcoming' && (
+                    ) : (
                       <span className="w-2 h-2 rounded-full bg-slate-600" />
                     )}
                   </span>
@@ -345,17 +355,6 @@ export default function LecturePage() {
                 </button>
               );
             })}
-          </div>
-          {/* Completion status */}
-          <div className="mt-auto p-3 border-t border-slate-700/30">
-            <div className="text-[10px] text-slate-500 space-y-1">
-              <div className="flex justify-between">
-                <span>Quiz</span>
-                <span className={progress.quizCompleted ? 'text-green-400' : 'text-slate-600'}>
-                  {progress.quizCompleted ? '✓' : '—'}
-                </span>
-              </div>
-            </div>
           </div>
         </aside>
 
@@ -457,15 +456,22 @@ export default function LecturePage() {
                         onOpenChange={(isOpen) => setOpenProblemIndex(isOpen ? i : -1)}
                         completed={progress.problemsCompleted.includes(problem.id)}
                         onComplete={(id) => {
+                          const alreadySolved = progress.problemsCompleted.includes(id);
                           markProblemCompleted(id);
                           markSectionVisited('problems');
                           markHandsOnTaskCompleted();
                           if (slug && lessonData) {
                             tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, problems.length, quiz.length > 0);
                           }
-                          // Automatically open next problem if it exists
-                          if (i + 1 < problems.length) {
-                            setTimeout(() => setOpenProblemIndex(i + 1), 1500); // Small delay to let them see success
+                          if (!alreadySolved) {
+                            if (progress.problemsCompleted.length + 1 >= problems.length) {
+                              setTimeout(() => {
+                                setOpenProblemIndex(-1);
+                                setShowAllCompleted(true);
+                              }, 1500);
+                            } else if (i + 1 < problems.length) {
+                              setTimeout(() => setOpenProblemIndex(i + 1), 1500);
+                            }
                           }
                         }}
                       />
@@ -511,6 +517,40 @@ export default function LecturePage() {
               </section>
             )}
 
+            {showAllCompleted && (
+              <div className="fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-300">
+                <div className="max-w-md w-full mx-4 p-8 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-emerald-500/30 text-center space-y-6 animate-in zoom-in duration-500">
+                  <div className="w-20 h-20 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center mx-auto">
+                    <svg className="w-10 h-10 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-white">🎉 All Problems Completed</p>
+                    <p className="text-sm text-slate-400 mt-2">You successfully completed all practice problems in this lecture.</p>
+                  </div>
+                  <div className="flex gap-3 justify-center">
+                    <button
+                      onClick={() => setShowAllCompleted(false)}
+                      className="text-sm font-medium px-5 py-2.5 rounded-xl border border-slate-600/50 text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all"
+                    >
+                      Review Solutions
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowAllCompleted(false);
+                        const summaryIdx = pages.findIndex(p => p.type === 'summary');
+                        if (summaryIdx >= 0) setCurrentPageIdx(summaryIdx);
+                      }}
+                      className="text-sm font-medium px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-all"
+                    >
+                      Continue to Summary
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {currentPage?.type === 'summary' && (
               <section id="section-summary">
                 <SummaryCard
@@ -518,8 +558,14 @@ export default function LecturePage() {
                   lectureTitle={lessonData.title}
                   nextLectureTitle={nextLecture?.title}
                   onNext={() => {
-                    markLectureCompleted();
-                    if (nextLecture) navigate(`/course/${slug}/lecture/${nextLecture.number}`);
+                    const sectionsVisited = Object.values(progress.sections).filter(s => s.visited).length;
+                    const allSectionsDone = sectionsVisited >= lessonData.sections.length;
+                    const quizDone = !quiz.length || progress.quizCompleted;
+                    const problemsDone = progress.problemsCompleted.length >= problems.length;
+                    if (allSectionsDone && quizDone && problemsDone) {
+                      markLectureCompleted();
+                      if (nextLecture) navigate(`/course/${slug}/lecture/${nextLecture.number}`);
+                    }
                   }}
                 />
               </section>

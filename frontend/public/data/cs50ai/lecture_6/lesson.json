@@ -18,32 +18,35 @@
           "bullets": [
             "Human neurons pass electrical signals; AI nodes pass numbers",
             "Each node takes inputs, multiplies by weights, adds them up, produces output",
-            "Layers: Input Layer (receives data) \u2192 Hidden Layers (processes) \u2192 Output Layer (gives result)",
+            "Layers: Input Layer (receives data) → Hidden Layers (processes) → Output Layer (gives result)",
             "Training adjusts weights over thousands of examples until outputs are correct",
             "This concept is fundamental to AI development."
           ],
           "accentColor": "blue"
         },
         {
-          "type": "concept_visualization",
-          "title": "Think of It",
-          "accentColor": "purple",
+          "type": "think_of",
           "analogy": {
-            "title": "Real Life Analogy",
-            "description": "Think of it like a familiar real-world scenario.",
-            "image": "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&q=80"
+            "title": "Think of Neural Networks as a Team of Detectives",
+            "description": "Each detective specializes in one clue — an edge, a color, a shape. Together they combine findings to solve the case. Each neuron detects one pattern; layers combine them to recognize complex objects.",
+            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
+            "emoji": "💡"
           },
-          "visual": {
-            "title": "NN Concept",
-            "type": "flow_diagram",
-            "flowSteps": [
-              "Input \u00d7 Weight \u2192 Sum \u2192 Activation \u2192 Output"
+          "visualization": {
+            "type": "hub_spoke",
+            "title": "Neuron = Pattern Detector",
+            "centerLabel": "Input",
+            "branches": [
+              "Neuron 1: Edges",
+              "Neuron 2: Shapes",
+              "Neuron 3: Objects",
+              "Neuron 4: Faces"
             ]
           },
           "code": {
             "language": "python",
-            "code": "# Code example\nprint(\"Hello AI\")",
-            "output": "Hello AI"
+            "code": "# Single neuron: weighted sum + activation\ninputs = [0.5, 0.8, 0.2]\nweights = [0.4, -0.3, 0.6]\noutput = sum(i * w for i, w in zip(inputs, weights))\nprint(f\"Neuron output: {output:.2f}\")\nprint(\"Activated!\" if output > 0 else \"Not activated\")",
+            "output": "Neuron output: 0.08\nActivated!"
           }
         },
         {
@@ -72,32 +75,35 @@
           "bullets": [
             "Deep Learning = neural networks with many hidden layers",
             "More layers = ability to learn more complex patterns",
-            "CNNs (Convolutional Neural Networks) \u2014 specialized for recognizing patterns in images",
+            "CNNs (Convolutional Neural Networks) — specialized for recognizing patterns in images",
             "Real-world uses: face unlock on phones, voice recognition (Alexa, Siri), medical image diagnosis",
-            "Why neural networks need lots of data \u2014 more examples = better and more reliable learning"
+            "Why neural networks need lots of data — more examples = better and more reliable learning"
           ],
           "accentColor": "blue"
         },
         {
-          "type": "concept_visualization",
-          "title": "Think of It",
-          "accentColor": "purple",
+          "type": "think_of",
           "analogy": {
-            "title": "Real Life Analogy",
-            "description": "Think of it like a familiar real-world scenario.",
-            "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80"
+            "title": "Think of CNN as a Magnifying Glass Scanning a Photo",
+            "description": "A magnifying glass slides across a photo, examining small patches at a time. Each patch reveals local patterns: edges → textures → objects. CNNs convolve filters across images to detect visual features.",
+            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
+            "emoji": "💡"
           },
-          "visual": {
-            "title": "CNN Processing",
-            "type": "flow_diagram",
-            "flowSteps": [
-              "Image pixels \u2192 CNN layers \u2192 Pattern detection \u2192 Classification"
+          "visualization": {
+            "type": "sequence",
+            "title": "CNN Processing Layers",
+            "items": [
+              "Input Image",
+              "Edge Detect",
+              "Texture Detect",
+              "Object Detect",
+              "Classify"
             ]
           },
           "code": {
             "language": "python",
-            "code": "# Code example\nprint(\"Hello AI\")",
-            "output": "Hello AI"
+            "code": "# CNN-style: sliding window convolution\nimage = [1, 0, 1, 0, 1, 0, 1, 0]\nfilter = [1, -1]\noutput = []\nfor i in range(len(image) - 1):\n    output.append(image[i] * filter[0] + image[i+1] * filter[1])\nprint(f\"Convolved: {output}\")",
+            "output": "Convolved: [1, -1, 1, -1, 1, -1, 1]"
           }
         },
         {
@@ -124,42 +130,36 @@
           "title": "What is NN Steps?",
           "body": "Building a neural network.",
           "bullets": [
-            "Step 1: Define input \u2014 what data goes into the network (numbers, image pixels, text)",
-            "Step 2: Set up layers \u2014 input layer, hidden layers, output layer",
-            "Step 3: Initialize weights \u2014 start with random numbers",
-            "Step 4: Train \u2014 feed examples, compare output to correct answer, adjust weights",
-            "Step 5: Test \u2014 give new unseen data, measure accuracy"
+            "Step 1: Define input — what data goes into the network (numbers, image pixels, text)",
+            "Step 2: Set up layers — input layer, hidden layers, output layer",
+            "Step 3: Initialize weights — start with random numbers",
+            "Step 4: Train — feed examples, compare output to correct answer, adjust weights",
+            "Step 5: Test — give new unseen data, measure accuracy"
           ],
           "accentColor": "blue"
         },
         {
-          "type": "concept_visualization",
-          "title": "Think of It",
-          "accentColor": "purple",
+          "type": "think_of",
           "analogy": {
-            "title": "Real Life Analogy",
-            "description": "Think of it like a familiar real-world scenario.",
-            "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80"
+            "title": "Think of Neural Network Layers as a Factory Assembly Line",
+            "description": "Raw materials enter. Each station transforms the product. Early stations handle simple tasks, later ones build complex assemblies. Information flows forward through network layers, each building on the last.",
+            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
+            "emoji": "💡"
           },
-          "visual": {
-            "title": "Layer Flow",
-            "type": "flow_diagram",
-            "flowSteps": [
+          "visualization": {
+            "type": "sequence",
+            "title": "Network Layer Flow",
+            "items": [
               "Input Layer",
-              "\u2193",
               "Hidden Layer 1",
-              "\u2193",
               "Hidden Layer 2",
-              "\u2193",
-              "Output Layer",
-              "\u2193",
-              "Prediction"
+              "Output Layer"
             ]
           },
           "code": {
             "language": "python",
-            "code": "# Code example\nprint(\"Hello AI\")",
-            "output": "Hello AI"
+            "code": "# Forward pass through layers\ndef layer(inputs, weights, bias):\n    return [max(0, sum(i*w for i,w in zip(inputs, w_row)) + b) for w_row, b in zip(weights, bias)]\n\nx = [1, 0, 1]\nw1 = [[0.5, -0.2, 0.1], [-0.3, 0.8, -0.1]]\nb1 = [0, 0]\nh1 = layer(x, w1, b1)\nprint(f\"After layer 1: {h1}\")",
+            "output": "After layer 1: [0.6, 0]"
           }
         },
         {
@@ -170,7 +170,7 @@
         {
           "type": "practice",
           "title": "Practice Exercise",
-          "instructions": "Draw a simple 3-layer neural network for predicting if a student passes \u2014 inputs: attendance and marks",
+          "instructions": "Draw a simple 3-layer neural network for predicting if a student passes — inputs: attendance and marks",
           "starterCode": "# Draw/describe your network\n",
           "solution": "# Input layer (2 nodes) -> Hidden layer -> Output layer (1 node)",
           "hint": "Ensure nodes are connected."
@@ -190,7 +190,7 @@
       },
       {
         "emoji": "",
-        "text": "Layers: Input \u2192 Hidden \u2192 Output"
+        "text": "Layers: Input → Hidden → Output"
       },
       {
         "emoji": "",
@@ -202,7 +202,7 @@
       },
       {
         "emoji": "",
-        "text": "CNNs specialize in image recognition \u2014 used in face unlock, medical scans"
+        "text": "CNNs specialize in image recognition — used in face unlock, medical scans"
       }
     ],
     "whatYouLearned": [

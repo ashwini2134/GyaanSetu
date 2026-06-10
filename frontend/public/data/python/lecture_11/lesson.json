@@ -23,36 +23,31 @@
           ]
         },
         {
-          "type": "concept_visualization",
-          "title": "Think Of A String As A Chain Of Characters",
-          "accentColor": "blue",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "⛓️",
+          "type": "think_of",
+          "analogy": {
             "title": "Chain of Characters",
-            "description": "Each character has a position. You can access individual links."
+            "description": "Each character has a position. You can access individual links.",
+            "emoji": "⛓️",
+            "image": "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "text",
-            "varName": null,
-            "varValue": null,
-            "flowSteps": null,
-            "textContent": "String = ordered sequence of characters:\n• Each character has an index\n• Index starts at 0\n• Access with [ ] brackets"
+          "visualization": {
+            "type": "string_beads",
+            "title": "String Indexing",
+            "inputLabel": "Input",
+            "processLabel": "Function",
+            "outputLabel": "Output",
+            "text": "Hello"
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "word = 'Python'\nprint(word[0])\nprint(word[-1])\nprint(word[1:4])",
+          "code": {
             "language": "python",
-            "output": "P\nn\nyth"
+            "code": "word = \"Python\"\nprint(word[0])",
+            "output": "P"
           }
         },
         {
           "type": "reflection",
           "question": "What does word[-1] give you for word = 'Python'?",
-          "answer": "word[-1] gives you 'n', the last character. Negative indices count from the end of the string: -1 is the last character, -2 is the second-to-last, and so on. It's like asking 'what's the last link in the chain?' without having to count all the links first.",
-          "followupCode": null,
-          "followupOutput": null
+          "answer": "word[-1] gives you 'n', the last character. Negative indices count from the end of the string: -1 is the last character, -2 is the second-to-last, and so on. It's like asking 'what's the last link in the chain?' without having to count all the links first."
         },
         {
           "type": "code_example",
@@ -112,36 +107,28 @@
           ]
         },
         {
-          "type": "concept_visualization",
-          "title": "Think Of String Methods As Editing Tools",
-          "accentColor": "purple",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "🛠️",
+          "type": "think_of",
+          "analogy": {
             "title": "Editing Tools",
-            "description": "Each method transforms the string in a specific way"
+            "description": "Each method transforms the string in a specific way",
+            "emoji": "🛠️",
+            "image": "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "text",
-            "varName": null,
-            "varValue": null,
-            "flowSteps": null,
-            "textContent": ".upper() → ALL CAPS\n.lower() → all lowercase\n.strip() → removes spaces\n.split() → breaks into list"
+          "visualization": {
+            "type": "string_beads",
+            "title": "String Methods",
+            "text": "Hello World"
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "msg = '  Hello World  '\nprint(msg.strip())\nprint(msg.strip().upper())",
+          "code": {
             "language": "python",
-            "output": "Hello World\nHELLO WORLD"
+            "code": "msg = \"  Hello  \"\nprint(msg.strip())",
+            "output": "Hello"
           }
         },
         {
           "type": "reflection",
           "question": "Does calling msg.upper() permanently change the original msg variable?",
-          "answer": "No! String methods return a NEW string — they don't modify the original. If you want to keep the change, you must store it back: msg = msg.upper(). This is because strings in Python are immutable (cannot be changed after creation).",
-          "followupCode": null,
-          "followupOutput": null
+          "answer": "No! String methods return a NEW string — they don't modify the original. If you want to keep the change, you must store it back: msg = msg.upper(). This is because strings in Python are immutable (cannot be changed after creation)."
         },
         {
           "type": "code_example",

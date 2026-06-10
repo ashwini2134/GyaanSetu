@@ -1,16 +1,36 @@
 import os
 import json
-import random
 
 DATA_DIR = 'frontend/public/data/cs50ai'
 
-IMAGE_URLS = [
-    "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&q=80",
-    "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80",
-    "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80",
-    "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80",
-    "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&q=80"
-]
+# Each analogy maps to an image that visually represents it (never programming screenshots)
+ANALOGY_IMAGES = {
+    "ai as a very fast": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80",
+    "teaching a dog tricks": "https://images.unsplash.com/photo-1504826260979-242151ee45b7?w=800&q=80",
+    "navigating a maze": "https://images.unsplash.com/photo-1606664514175-79e37e5b7c43?w=800&q=80",
+    "checking every shelf": "https://images.unsplash.com/photo-1553413077-190dd3050e4f?w=800&q=80",
+    "gps that considers": "https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=80",
+    "truth table": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&q=80",
+    "inference engine": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
+    "bayes theorem": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&q=80",
+    "hill climbing": "https://images.unsplash.com/photo-1518717520416-7c76f2acc503?w=800&q=80",
+    "supervised learning": "https://images.unsplash.com/photo-1553882809-a4f57e595701?w=800&q=80",
+    "neural network": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80",
+    "nlp": "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&q=80",
+    "tokenization": "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&q=80",
+    "ai bias": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
+    "deepfakes": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
+    "hallucinations": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
+}
+
+def get_analogy_image(title):
+    """Find the correct image for a CS50 AI analogy."""
+    title_lower = title.lower()
+    for key, url in ANALOGY_IMAGES.items():
+        if key in title_lower:
+            return url
+    # Fallback: use a general learning/thinking image
+    return "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80"
 
 def make_question_bullets(existing_bullets, text):
     bullets = existing_bullets if existing_bullets else [text]
@@ -70,7 +90,7 @@ def process_section(section):
         "analogy": {
             "title": analogy.get('title', 'Real Life Analogy'),
             "description": analogy.get('text', 'Think of it like a familiar real-world scenario.'),
-            "image": random.choice(IMAGE_URLS)
+            "image": get_analogy_image(analogy.get('title', ''))
         },
         "visual": {
             "title": concept.get('title', 'Concept Visualized'),

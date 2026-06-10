@@ -92,10 +92,7 @@ export default function Dashboard() {
   const [submissionHistory, setSubmissionHistory] = useState<Record<string, number>>({});
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-<<<<<<< HEAD
-=======
 
->>>>>>> de99a76a3ac0c4654b31265192f4c3a59ce6390a
   
   // Use our centralized Gamification hook
   const { xp, achievements: unlockedAchievements, streak, stats, overallProgress } = useGamification();
@@ -164,11 +161,6 @@ export default function Dashboard() {
       .catch((e: Error) => setErr(e.message));
   }, []);
 
-<<<<<<< HEAD
-=======
-
-
->>>>>>> de99a76a3ac0c4654b31265192f4c3a59ce6390a
   const totalCompleted = stats.tasksSubmitted + stats.projectsSolved;
 
   // Get last 7 days for streak heatmap
@@ -511,10 +503,6 @@ export default function Dashboard() {
 
 
 
-<<<<<<< HEAD
-
-=======
->>>>>>> de99a76a3ac0c4654b31265192f4c3a59ce6390a
             </div>
 
             {/* Right Panel: Achievements */}

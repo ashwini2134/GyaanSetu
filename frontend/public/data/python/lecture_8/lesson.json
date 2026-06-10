@@ -29,36 +29,29 @@
           "text": "Once sealed with coordinates inside, you can read them but not change them. Tuples work the same — great for fixed data like RGB colors or dates."
         },
         {
-          "type": "concept_visualization",
-          "title": "Think Of A Tuple As A Sealed Envelope",
-          "accentColor": "purple",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "✉️",
+          "type": "think_of",
+          "analogy": {
             "title": "Sealed Envelope",
-            "description": "Once sealed, contents cannot change. Safe and tamper-proof."
+            "description": "Once sealed, contents cannot change. Safe and tamper-proof.",
+            "emoji": "✉️",
+            "image": "https://images.unsplash.com/photo-1649019489428-70f505daacd6?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "text",
-            "varName": null,
-            "varValue": null,
-            "flowSteps": null,
-            "textContent": "Tuple = Sealed Envelope:\n• Create once with ( )\n• Contents are fixed\n• Cannot add/remove/change"
+          "visualization": {
+            "type": "storage_box",
+            "title": "Immutable Container",
+            "varName": "coords",
+            "varValue": "(10, 20)"
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "coords = (10, 20)\nprint(coords[0])\n# coords[0] = 5  ← Error!",
+          "code": {
             "language": "python",
+            "code": "coords = (10, 20)\nprint(coords[0])",
             "output": "10"
           }
         },
         {
           "type": "reflection",
           "question": "Can you change the first value of coords = (10, 20) by writing coords[0] = 5?",
-          "answer": "No! Tuples are immutable — once created, their contents cannot change. Trying coords[0] = 5 would give an error. This is the whole point of a tuple: it guarantees the data stays the same, like a sealed envelope.",
-          "followupCode": null,
-          "followupOutput": null
+          "answer": "No! Tuples are immutable — once created, their contents cannot change. Trying coords[0] = 5 would give an error. This is the whole point of a tuple: it guarantees the data stays the same, like a sealed envelope."
         },
         {
           "type": "code_example",
@@ -112,36 +105,30 @@
           ]
         },
         {
-          "type": "concept_visualization",
-          "title": "Think Of A Set As A Bag Of Unique Marbles",
-          "accentColor": "blue",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "🎒",
+          "type": "think_of",
+          "analogy": {
             "title": "Bag Of Unique Items",
-            "description": "Every marble appears only once. No duplicates allowed."
+            "description": "Every marble appears only once. No duplicates allowed.",
+            "emoji": "🎒",
+            "image": "https://images.unsplash.com/photo-1544457070-4cd773b4d71e?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "text",
-            "varName": null,
-            "varValue": null,
-            "flowSteps": null,
-            "textContent": "Set = Unique Collection:\n• No duplicate items\n• Unordered (no index)\n• Fast membership testing"
+          "visualization": {
+            "type": "sequence",
+            "title": "Unique Set Elements",
+            "items": [
+              "{1, 2, 3}"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "numbers = {1, 2, 2, 3, 3, 3}\nprint(numbers)\nprint(2 in numbers)",
+          "code": {
             "language": "python",
-            "output": "{1, 2, 3}\nTrue"
+            "code": "numbers = {1, 2, 2, 3}\nprint(numbers)",
+            "output": "{1, 2, 3}"
           }
         },
         {
           "type": "reflection",
           "question": "If you create a set with {1, 2, 2, 3, 3, 3}, how many items will it contain?",
-          "answer": "The set will contain 3 items: {1, 2, 3}. All duplicates are automatically removed because a set only stores unique values. This is like having a bag of marbles where you toss out any duplicates — only one of each color remains.",
-          "followupCode": null,
-          "followupOutput": null
+          "answer": "The set will contain 3 items: {1, 2, 3}. All duplicates are automatically removed because a set only stores unique values. This is like having a bag of marbles where you toss out any duplicates — only one of each color remains."
         },
         {
           "type": "code_example",

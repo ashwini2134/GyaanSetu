@@ -28,36 +28,34 @@
           "text": "You load clothes, set the timer, and the machine repeats the cycle until time runs out. A for loop processes each item in a list automatically."
         },
         {
-          "type": "concept_visualization",
-          "title": "Think Of A For Loop As A Washing Machine Cycle",
-          "accentColor": "blue",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "🧺",
+          "type": "think_of",
+          "analogy": {
             "title": "Washing Machine Cycle",
-            "description": "The machine runs through each step automatically for every item"
+            "description": "The machine runs through each step automatically for every item",
+            "emoji": "🧺",
+            "image": "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "text",
-            "varName": null,
-            "varValue": null,
-            "flowSteps": null,
-            "textContent": "For each item in the list:\n1. Take the next item\n2. Process it\n3. Move to the next\n4. Repeat until done"
+          "visualization": {
+            "type": "loop_cycle",
+            "title": "Loop Iteration",
+            "loopLabel": "Repeat",
+            "loopSteps": [
+              "Start",
+              "Wash",
+              "Check",
+              "Repeat"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "for i in range(3):\n    print(f'Wash cycle {i + 1}')",
+          "code": {
             "language": "python",
-            "output": "Wash cycle 1\nWash cycle 2\nWash cycle 3"
+            "code": "for i in range(3):\n    print(f\"Cycle {i+1}\")",
+            "output": "Cycle 1\nCycle 2\nCycle 3"
           }
         },
         {
           "type": "reflection",
           "question": "If you use for i in range(3), does the loop body run 3 times or 4 times?",
-          "answer": "The loop body runs exactly 3 times — for i = 0, 1, and 2. range(3) gives you the numbers 0, 1, 2 (three numbers total). The loop stops after processing the last number, just like a washing machine stops after its final spin cycle.",
-          "followupCode": null,
-          "followupOutput": null
+          "answer": "The loop body runs exactly 3 times — for i = 0, 1, and 2. range(3) gives you the numbers 0, 1, 2 (three numbers total). The loop stops after processing the last number, just like a washing machine stops after its final spin cycle."
         },
         {
           "type": "code_example",
@@ -114,6 +112,11 @@
           "solution": "for i in range(1, 11):\n    print(i)",
           "hint": "Use range(1, 11) — range stops before the end value.",
           "expectedOutput": "1\n2\n3\n4\n5\n6\n7\n8\n9\n10"
+        },
+        {
+          "type": "reflection",
+          "question": "Does this concept make sense so far? Try to explain it in your own words.",
+          "answer": "If you can explain this concept to someone else, you have understood it well. Practice with the exercises below to reinforce your learning."
         }
       ]
     },
@@ -146,6 +149,11 @@
           "starterCode": "num = int(input(\"Enter a number: \"))\nfor i in range(1, 11):\n    print(f\"{num} x {i} = \")",
           "solution": "num = int(input(\"Enter a number: \"))\nfor i in range(1, 11):\n    print(f\"{num} x {i} = {num * i}\")",
           "hint": "Loop from 1 to 10. Inside the loop, print num * i."
+        },
+        {
+          "type": "reflection",
+          "question": "Does this concept make sense so far? Try to explain it in your own words.",
+          "answer": "If you can explain this concept to someone else, you have understood it well. Practice with the exercises below to reinforce your learning."
         }
       ]
     }

@@ -29,36 +29,35 @@
           "text": "You write items in order: first eggs, then milk, then bread. You can add items, remove items, or check what's at position 2. Python lists work exactly the same way."
         },
         {
-          "type": "concept_visualization",
-          "title": "Think Of A List As A Shopping List",
-          "accentColor": "blue",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "🛒",
+          "type": "think_of",
+          "analogy": {
             "title": "Shopping List",
-            "description": "Items in order. Add, remove, or access by position."
+            "description": "Items in order. Add, remove, or access by position.",
+            "emoji": "🛒",
+            "image": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "text",
-            "varName": null,
-            "varValue": null,
-            "flowSteps": null,
-            "textContent": "A list is an ordered collection:\n• Items stay in order\n• Access by position (index)\n• Add/remove items anytime"
+          "visualization": {
+            "type": "sequence",
+            "title": "Ordered List",
+            "inputLabel": "Input",
+            "processLabel": "Function",
+            "outputLabel": "Output",
+            "items": [
+              "Item 1",
+              "Item 2",
+              "Item 3"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "fruits = ['apple', 'banana', 'cherry']\nprint(fruits[0])\nfruits.append('date')\nprint(fruits)",
+          "code": {
             "language": "python",
-            "output": "apple\n['apple', 'banana', 'cherry', 'date']"
+            "code": "fruits = [\"apple\", \"banana\", \"mango\"]\nfor f in fruits:\n    print(f)",
+            "output": "apple\nbanana\nmango"
           }
         },
         {
           "type": "reflection",
           "question": "Does fruits[0] give you the first item or the last item in the list?",
-          "answer": "fruits[0] gives you the first item ('apple'). In Python, indexing starts at 0, not 1. So index 0 = first item, index 1 = second, and so on. This is like saying 'position 0' on your shopping list is the very first item you wrote down.",
-          "followupCode": null,
-          "followupOutput": null
+          "answer": "fruits[0] gives you the first item ('apple'). In Python, indexing starts at 0, not 1. So index 0 = first item, index 1 = second, and so on. This is like saying 'position 0' on your shopping list is the very first item you wrote down."
         },
         {
           "type": "code_example",
@@ -109,6 +108,11 @@
           "solution": "nums = [10, 20, 30, 40, 50]\nprint(f\"First: {nums[0]}\")\nprint(f\"Last: {nums[-1]}\")\nprint(f\"Middle: {nums[2]}\")",
           "hint": "Use index 0 for first, -1 for last, and len(nums)//2 for middle.",
           "expectedOutput": "First: 10\nLast: 50\nMiddle: 30"
+        },
+        {
+          "type": "reflection",
+          "question": "Does this concept make sense so far? Try to explain it in your own words.",
+          "answer": "If you can explain this concept to someone else, you have understood it well. Practice with the exercises below to reinforce your learning."
         }
       ]
     },
@@ -149,6 +153,11 @@
           "starterCode": "marks = [78, 92, 85, 63, 88]\nmarks.append()\nmarks.remove()\nmarks.sort()\nprint(f\"Marks: {marks}\")\nprint(f\"Average: {sum(marks)//len(marks)}\")",
           "solution": "marks = [78, 92, 85, 63, 88]\nmarks.append(95)\nmarks.remove(min(marks))\nmarks.sort()\nprint(f\"Marks: {marks}\")\nprint(f\"Average: {sum(marks)//len(marks)}\")",
           "hint": "Use append() to add, min(marks) with remove() for lowest, sort() to sort."
+        },
+        {
+          "type": "reflection",
+          "question": "Does this concept make sense so far? Try to explain it in your own words.",
+          "answer": "If you can explain this concept to someone else, you have understood it well. Practice with the exercises below to reinforce your learning."
         }
       ]
     }

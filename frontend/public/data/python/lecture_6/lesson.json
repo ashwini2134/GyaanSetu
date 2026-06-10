@@ -28,36 +28,34 @@
           "text": "While waiting for a friend: check for messages. No message → wait. Message arrives → stop. The while loop checks a condition and keeps going until it changes."
         },
         {
-          "type": "concept_visualization",
-          "title": "Think Of A While Loop As Checking Your Phone",
-          "accentColor": "green",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "📱",
+          "type": "think_of",
+          "analogy": {
             "title": "Checking Your Phone",
-            "description": "Keep checking until there are no more notifications"
+            "description": "Keep checking until there are no more notifications",
+            "emoji": "📱",
+            "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "text",
-            "varName": null,
-            "varValue": null,
-            "flowSteps": null,
-            "textContent": "while condition is True:\n    Do something\n    Update the condition\nStop when condition becomes False"
+          "visualization": {
+            "type": "loop_cycle",
+            "title": "While Loop",
+            "loopLabel": "Repeat until done",
+            "loopSteps": [
+              "Check",
+              "Any Left?",
+              "Process",
+              "Repeat"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "count = 3\nwhile count > 0:\n    print(f'{count} notifications left')\n    count -= 1\nprint('All caught up!')",
+          "code": {
             "language": "python",
-            "output": "3 notifications left\n2 notifications left\n1 notifications left\nAll caught up!"
+            "code": "count = 3\nwhile count > 0:\n    print(f\"{count} left\")\n    count -= 1",
+            "output": "3 left\n2 left\n1 left"
           }
         },
         {
           "type": "reflection",
           "question": "What happens if you forget to update count inside the while loop?",
-          "answer": "The loop would run forever! If count never decreases, the condition count > 0 stays True forever. This is called an infinite loop. It's like checking your phone for notifications, but the number never goes down — you'd be stuck checking forever. Always update the variable that controls the condition.",
-          "followupCode": null,
-          "followupOutput": null
+          "answer": "The loop would run forever! If count never decreases, the condition count > 0 stays True forever. This is called an infinite loop. It's like checking your phone for notifications, but the number never goes down — you'd be stuck checking forever. Always update the variable that controls the condition."
         },
         {
           "type": "code_example",
@@ -77,11 +75,6 @@
             "Use break to exit early if needed",
             "Press Ctrl+C to stop a running program"
           ]
-        },
-        {
-          "type": "reflection",
-          "question": "What happens if you forget to update the counter inside a while loop?",
-          "answer": "The condition never becomes False, creating an infinite loop. The program runs forever until you force-stop it with Ctrl+C."
         },
         {
           "type": "practice",
@@ -141,6 +134,11 @@
           "starterCode": "secret = 7\nwhile True:\n    guess = int(input(\"Guess (1-10): \"))\n    if guess == secret:\n        print(\"Correct!\")\n        \n    else:\n        print(\"Wrong!\")",
           "solution": "secret = 7\nwhile True:\n    guess = int(input(\"Guess (1-10): \"))\n    if guess == secret:\n        print(\"Correct! You got it!\")\n        break\n    else:\n        print(\"Wrong, try again.\")",
           "hint": "Use while True for infinite loop, break when guessed correctly."
+        },
+        {
+          "type": "reflection",
+          "question": "Does this concept make sense so far? Try to explain it in your own words.",
+          "answer": "If you can explain this concept to someone else, you have understood it well. Practice with the exercises below to reinforce your learning."
         }
       ]
     }

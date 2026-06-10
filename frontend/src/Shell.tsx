@@ -85,7 +85,7 @@ export default function Shell() {
 
   const handleCourseClick = () => {
     setSidebarOpen(false);
-    // Collapse sidebar with a tiny delay so the navigation happens first
+    setCoursesOpen(false);
     setTimeout(() => setExpanded(false), 100);
   };
 
@@ -160,14 +160,14 @@ export default function Shell() {
               end
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) =>
-                `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2'}`
+                `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`
               }
               title="Dashboard"
             >
               <span className="w-5 h-5 flex items-center justify-center flex-shrink-0">
                 <LayoutDashboard size={18} />
               </span>
-              <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'}`}>
+              <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>
                 Dashboard
               </span>
             </NavLink>
@@ -177,13 +177,13 @@ export default function Shell() {
               <button
                 onClick={() => expanded && setCoursesOpen((o) => !o)}
                 onMouseEnter={() => !expanded && setExpanded(true)}
-                className={`${navLinkBase} ${expanded ? '' : 'justify-center px-2'} w-full ${navLinkInactive}`}
+                className={`${navLinkBase} ${onCoursePage ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
                 title="Courses"
               >
                 <span className="w-5 h-5 flex items-center justify-center flex-shrink-0">
                   <BookOpen size={18} />
                 </span>
-                <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'}`}>
+                <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>
                   Courses
                 </span>
                 <span className={`transition-all duration-200 overflow-hidden flex-shrink-0 flex items-center ${expanded ? 'w-4 opacity-100' : 'w-0 opacity-0'}`}>
@@ -239,14 +239,14 @@ export default function Shell() {
               to="/leaderboard"
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) =>
-                `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2'}`
+                `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`
               }
               title="Leaderboard"
             >
               <span className="w-5 h-5 flex items-center justify-center flex-shrink-0">
                 <Trophy size={18} />
               </span>
-              <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'}`}>
+              <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>
                 Leaderboard
               </span>
             </NavLink>

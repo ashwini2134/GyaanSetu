@@ -14,7 +14,7 @@
         {
           "type": "explanation",
           "title": "What is What is Optimization & Hill Climbing?",
-          "body": "Optimization means finding the best solution among many possible options. Hill Climbing is the simplest approach \u2014 always move toward a better nearby option.",
+          "body": "Optimization means finding the best solution among many possible options. Hill Climbing is the simplest approach — always move toward a better nearby option.",
           "bullets": [
             "Optimization = finding the best solution (cheapest, fastest, most accurate)",
             "Real example: finding the cheapest flight with fewest stops",
@@ -25,25 +25,24 @@
           "accentColor": "blue"
         },
         {
-          "type": "concept_visualization",
-          "title": "Think of It",
-          "accentColor": "purple",
+          "type": "think_of",
           "analogy": {
-            "title": "Real Life Analogy",
-            "description": "Think of it like a familiar real-world scenario.",
-            "image": "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&q=80"
+            "title": "Think of Optimization as Packing a Suitcase",
+            "description": "Limited space but want the most valuable items. Each has weight and value. Goal: maximize value without exceeding capacity — the classic knapsack problem that optimization algorithms solve.",
+            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
+            "emoji": "💡"
           },
-          "visual": {
-            "title": "Optimization Concept",
-            "type": "flow_diagram",
-            "flowSteps": [
-              "Current state \u2192 Check neighbors \u2192 Move to best neighbor \u2192 Repeat"
-            ]
+          "visualization": {
+            "type": "function_machine",
+            "title": "Optimization = Best Choice",
+            "inputLabel": "Constraints",
+            "processLabel": "Optimizer",
+            "outputLabel": "Best Solution"
           },
           "code": {
             "language": "python",
-            "code": "# Code example\nprint(\"Hello AI\")",
-            "output": "Hello AI"
+            "code": "# Knapsack: pack most value\nitems = [(\"laptop\", 3, 1000), (\"phone\", 1, 800), (\"book\", 2, 50)]\ncap = 4\nbest = []\nfor name, w, v in sorted(items, key=lambda x: -x[2]/x[1]):\n    if w <= cap:\n        best.append(name)\n        cap -= w\nprint(f\"Pack: {', '.join(best)}\")",
+            "output": "Pack: phone, laptop"
           }
         },
         {
@@ -70,34 +69,44 @@
           "title": "What is Simulated Annealing & Constraint Satisfaction?",
           "body": "Simulated Annealing fixes Hill Climbing by occasionally accepting a worse option to escape being stuck. Constraint Satisfaction Problems have rules the solution must follow.",
           "bullets": [
-            "Simulated Annealing: sometimes accept a worse option \u2014 like shaking a puzzle to unstick pieces",
+            "Simulated Annealing: sometimes accept a worse option — like shaking a puzzle to unstick pieces",
             "As time goes on, accept worse options less often (temperature cools down)",
             "CSP: a problem where the solution must satisfy a set of constraints (rules)",
-            "CSP example: exam scheduling \u2014 no student should have two exams at the same time",
-            "Sudoku is a classic CSP \u2014 every row, column, box must have digits 1-9 with no repeats"
+            "CSP example: exam scheduling — no student should have two exams at the same time",
+            "Sudoku is a classic CSP — every row, column, box must have digits 1-9 with no repeats"
           ],
           "accentColor": "blue"
         },
         {
-          "type": "concept_visualization",
-          "title": "Think of It",
-          "accentColor": "purple",
+          "type": "think_of",
           "analogy": {
-            "title": "Real Life Analogy",
-            "description": "Think of it like a familiar real-world scenario.",
-            "image": "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&q=80"
+            "title": "Think of CSP as a Classroom Seating Chart",
+            "description": "Each seat is a variable with a domain of students. Constraints: chatty pairs can't sit together. Constraint satisfaction problems assign values to variables while respecting all constraints.",
+            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
+            "emoji": "💡"
           },
-          "visual": {
-            "title": "CSP Example",
-            "type": "flow_diagram",
-            "flowSteps": [
-              "Variables + Domains + Constraints \u2192 Solution"
+          "visualization": {
+            "type": "key_value",
+            "title": "CSP: Variables → Values",
+            "pairs": [
+              {
+                "key": "Seat 1",
+                "value": "Alice"
+              },
+              {
+                "key": "Seat 2",
+                "value": "Charlie"
+              },
+              {
+                "key": "Seat 3",
+                "value": "Bob"
+              }
             ]
           },
           "code": {
             "language": "python",
-            "code": "# Code example\nprint(\"Hello AI\")",
-            "output": "Hello AI"
+            "code": "# CSP: no enemies adjacent\nenemies = {\"Alice\": {\"Bob\"}, \"Bob\": {\"Alice\", \"Charlie\"}, \"Charlie\": {\"Bob\"}}\nseats = [\"Alice\", \"Charlie\", \"Bob\"]\nfor i in range(len(seats)-1):\n    if seats[i+1] in enemies[seats[i]]:\n        print(f\"Conflict at positions {i},{i+1}\")\n        break\nelse:\n    print(\"No seating conflicts!\")",
+            "output": "No seating conflicts!"
           }
         },
         {
@@ -124,40 +133,37 @@
           "title": "What is Optimization Steps?",
           "body": "How to optimize solutions.",
           "bullets": [
-            "Step 1: Define your problem \u2014 what are you trying to optimize?",
+            "Step 1: Define your problem — what are you trying to optimize?",
             "Step 2: Choose a starting solution",
-            "Step 3: Check neighboring solutions \u2014 is any better?",
+            "Step 3: Check neighboring solutions — is any better?",
             "Step 4: Move to the better solution (Hill Climbing) or sometimes move to worse (Simulated Annealing)",
             "Step 5: Repeat until no improvement found"
           ],
           "accentColor": "blue"
         },
         {
-          "type": "concept_visualization",
-          "title": "Think of It",
-          "accentColor": "purple",
+          "type": "think_of",
           "analogy": {
-            "title": "Real Life Analogy",
-            "description": "Think of it like a familiar real-world scenario.",
-            "image": "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&q=80"
+            "title": "Think of Optimization Flow as a Delivery Route",
+            "description": "A driver must visit all stops while minimizing total distance. Each decision affects the next — the optimal route visits every point in the shortest possible path, like the traveling salesman problem.",
+            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
+            "emoji": "💡"
           },
-          "visual": {
-            "title": "Optimization Flow",
-            "type": "flow_diagram",
-            "flowSteps": [
-              "Start",
-              "\u2193",
-              "Evaluate",
-              "\u2193",
-              "Check Neighbors",
-              "\u2193",
-              "Better? Yes \u2192 Move / No \u2192 Done"
+          "visualization": {
+            "type": "sequence",
+            "title": "Route Optimization",
+            "items": [
+              "Warehouse",
+              "Stop A",
+              "Stop B",
+              "Stop C",
+              "Return"
             ]
           },
           "code": {
             "language": "python",
-            "code": "# Code example\nprint(\"Hello AI\")",
-            "output": "Hello AI"
+            "code": "# Shortest delivery route\nstops = {\"WH\": {\"A\": 5, \"B\": 10}, \"A\": {\"B\": 3, \"C\": 8}, \"B\": {\"C\": 2}, \"C\": {\"WH\": 7}}\nroute = [\"WH\", \"A\", \"B\", \"C\", \"WH\"]\ntotal = sum(stops[route[i]][route[i+1]] for i in range(len(route)-1))\nprint(f\"Total: {total} km\")",
+            "output": "Total: 22 km"
           }
         },
         {
@@ -188,7 +194,7 @@
       },
       {
         "emoji": "",
-        "text": "Hill Climbing can get stuck at a local best \u2014 not always the global best"
+        "text": "Hill Climbing can get stuck at a local best — not always the global best"
       },
       {
         "emoji": "",

@@ -31,13 +31,7 @@ export default function CoursePage() {
   const [lectures, setLectures] = useState<Lecture[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
-<<<<<<< HEAD
   const courseTitle = slug === "cs50p" ? "CS50 Python" : slug === "cs50ai" ? "CS50 AI" : slug?.toUpperCase() ?? "";
-=======
-  const [isCertModalOpen, setIsCertModalOpen] = useState(false);
-
-  const courseTitle = slug === "cs50p" ? "CS50 Python" : slug === "cs50ai" ? "AI" : slug?.toUpperCase() ?? "";
->>>>>>> de99a76a3ac0c4654b31265192f4c3a59ce6390a
   const lectureCount = lectures?.length ?? 0;
 
   // Subscribe to progress changes for real-time UI updates

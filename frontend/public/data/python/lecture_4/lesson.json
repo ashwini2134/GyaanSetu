@@ -29,36 +29,30 @@
           "text": "Green light (True) → you go. Red light (False) → you stop. The if statement checks the condition and decides whether to run the code or skip it."
         },
         {
-          "type": "concept_visualization",
-          "title": "Think Of If/Else As A Traffic Light",
-          "accentColor": "green",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "🚦",
+          "type": "think_of",
+          "analogy": {
             "title": "Traffic Light",
-            "description": "Green → GO, Red → STOP. The condition decides which path to take."
+            "description": "Green → GO, Red → STOP. The condition decides which path to take.",
+            "emoji": "🚦",
+            "image": "https://images.unsplash.com/photo-1557404763-69708cd8b9ce?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "text",
-            "varName": null,
-            "varValue": null,
-            "flowSteps": null,
-            "textContent": "if condition == True → run code inside if\nif condition == False → skip to else"
+          "visualization": {
+            "type": "decision_branch",
+            "title": "Decision Branching",
+            "condition": "Condition?",
+            "trueLabel": "True Path",
+            "falseLabel": "False Path"
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "light = 'green'\nif light == 'green':\n    print('Go!')\nelse:\n    print('Stop!')",
+          "code": {
             "language": "python",
-            "output": "Go!"
+            "code": "light = \"green\"\nif light == \"green\":\n    print(\"Go\")\nelse:\n    print(\"Stop\")",
+            "output": "Go"
           }
         },
         {
           "type": "reflection",
           "question": "Does an if/else statement always run both the if block and the else block?",
-          "answer": "No! An if/else runs exactly ONE of the two blocks — never both. If the condition is True, the if block runs and the else block is skipped. If the condition is False, the if block is skipped and the else block runs. Like a traffic light, it's either green or red — not both at the same time.",
-          "followupCode": null,
-          "followupOutput": null
+          "answer": "No! An if/else runs exactly ONE of the two blocks — never both. If the condition is True, the if block runs and the else block is skipped. If the condition is False, the if block is skipped and the else block runs. Like a traffic light, it's either green or red — not both at the same time."
         },
         {
           "type": "code_example",
@@ -142,6 +136,11 @@
           "starterCode": "marks = int(input(\"Enter marks: \"))\nif marks >= 90:\n    \nelif \nelif \nelif \nelse:",
           "solution": "marks = int(input(\"Enter marks: \"))\nif marks >= 90:\n    print(\"Grade: A\")\nelif marks >= 80:\n    print(\"Grade: B\")\nelif marks >= 70:\n    print(\"Grade: C\")\nelif marks >= 60:\n    print(\"Grade: D\")\nelse:\n    print(\"Grade: F\")",
           "hint": "Check the highest grade first (>= 90), then work down."
+        },
+        {
+          "type": "reflection",
+          "question": "Does this concept make sense so far? Try to explain it in your own words.",
+          "answer": "If you can explain this concept to someone else, you have understood it well. Practice with the exercises below to reinforce your learning."
         }
       ]
     }

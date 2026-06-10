@@ -29,59 +29,29 @@
           "text": "Imagine jars with labels. One jar labeled 'sugar' contains sugar. Another labeled 'flour' contains flour. You look at the label to know what's inside. In Python, the label is the variable name and the contents is the value."
         },
         {
-          "type": "concept_visualization",
-          "title": "Think Of A Variable As A Labeled Storage Box",
-          "accentColor": "blue",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "🏷️",
+          "type": "think_of",
+          "analogy": {
             "title": "Labeled Storage Box",
-            "description": "Each box has a label and holds one item"
+            "description": "Each box has a label and holds one item",
+            "emoji": "🏷️",
+            "image": "https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "storage_box",
+          "visualization": {
+            "type": "storage_box",
+            "title": "Variable Container",
             "varName": "name",
-            "varValue": "\"Lakshanya\"",
-            "flowSteps": null,
-            "textContent": null
+            "varValue": "\"Lakshanya\""
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "name = 'Lakshanya'\nprint(name)",
+          "code": {
             "language": "python",
-            "output": "Lakshanya"
+            "code": "name = \"Alice\"\nprint(name)",
+            "output": "Alice"
           }
         },
         {
           "type": "reflection",
           "question": "After writing name = 'Lakshanya', does the variable name store the word 'name' or the value 'Lakshanya'?",
-          "answer": "The variable name stores the value 'Lakshanya'. Think of it like a box labeled 'name' that contains the item 'Lakshanya'. The label (variable name) helps you find the box, but the content is the actual value you stored.",
-          "followupCode": null,
-          "followupOutput": null
-        },
-        {
-          "type": "concept_visualization",
-          "title": "Variables Store Data",
-          "accentColor": "blue",
-          "leftPanel": {
-            "label": "Real Life",
-            "emoji": "",
-            "title": "Labeled Storage",
-            "description": "A box labeled 'age' stores the number 20 inside it."
-          },
-          "centerPanel": {
-            "label": "Variable",
-            "visualType": "storage_box",
-            "varName": "age",
-            "varValue": "20"
-          },
-          "rightPanel": {
-            "label": "Python Code",
-            "code": "age = 20\nprint(age)",
-            "language": "python",
-            "output": "20"
-          }
+          "answer": "The variable name stores the value 'Lakshanya'. Think of it like a box labeled 'name' that contains the item 'Lakshanya'. The label (variable name) helps you find the box, but the content is the actual value you stored."
         },
         {
           "type": "explanation",
@@ -108,11 +78,6 @@
           "language": "python",
           "code": "score = 0\nprint(score)\n\nscore = score + 10\nprint(score)\n\nscore = score + 5\nprint(score)",
           "expectedOutput": "0\n10\n15"
-        },
-        {
-          "type": "reflection",
-          "question": "What would happen if you used a number as the first character of a variable name, like 1st_name = \"John\"?",
-          "answer": "Python would show a SyntaxError because variable names cannot start with a number."
         },
         {
           "type": "practice",
@@ -142,59 +107,32 @@
           ]
         },
         {
-          "type": "concept_visualization",
-          "title": "Think Of Data Types As Different Containers",
-          "accentColor": "purple",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "📦",
+          "type": "think_of",
+          "analogy": {
             "title": "Different Containers",
-            "description": "Each container type holds specific kinds of items"
+            "description": "Each container type holds specific kinds of items",
+            "emoji": "📦",
+            "image": "https://images.unsplash.com/photo-1544457070-4cd773b4d71e?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "text",
-            "varName": null,
-            "varValue": null,
-            "flowSteps": null,
-            "textContent": "int → stores whole numbers (42)\nfloat → stores decimals (3.14)\nstr → stores text ('Hello')\nbool → stores True/False"
+          "visualization": {
+            "type": "sequence",
+            "title": "Different Data Types",
+            "items": [
+              "Text",
+              "Number",
+              "Boolean"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "age = 20\npi = 3.14\nname = 'Alice'\nis_student = True\nprint(age, pi, name, is_student)",
+          "code": {
             "language": "python",
-            "output": "20 3.14 Alice True"
+            "code": "text = \"Hello\"\nnumber = 42\nprint(text, number)",
+            "output": "Hello 42"
           }
         },
         {
           "type": "reflection",
           "question": "Can you put text inside an int container? For example, int_name = 'Alice'.",
-          "answer": "No! An int container only holds whole numbers. If you try age = 'Alice', Python will treat it as text (a string), not a number. The type matters because Python behaves differently with each type — you can do math with ints but not with strings.",
-          "followupCode": null,
-          "followupOutput": null
-        },
-        {
-          "type": "concept_visualization",
-          "title": "The Four Basic Data Types",
-          "accentColor": "purple",
-          "leftPanel": {
-            "label": "int",
-            "emoji": "",
-            "title": "Whole Numbers",
-            "description": "42, 0, -7, 1000 — no decimal point"
-          },
-          "centerPanel": {
-            "label": "float",
-            "emoji": "",
-            "title": "Decimal Numbers",
-            "description": "3.14, 2.5, -0.001, 99.9"
-          },
-          "rightPanel": {
-            "label": "str & bool",
-            "emoji": "",
-            "title": "Text & Logic",
-            "description": "str: \"hello\", \"Python\", \"42\"\nbool: True, False"
-          }
+          "answer": "No! An int container only holds whole numbers. If you try age = 'Alice', Python will treat it as text (a string), not a number. The type matters because Python behaves differently with each type — you can do math with ints but not with strings."
         },
         {
           "type": "code_example",
@@ -216,38 +154,6 @@
           ]
         },
         {
-          "type": "concept_visualization",
-          "title": "Think Of Type Conversion As Repackaging",
-          "accentColor": "green",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "🔄",
-            "title": "Repackaging Items",
-            "description": "Change the container type while preserving the value"
-          },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "text",
-            "varName": null,
-            "varValue": null,
-            "flowSteps": null,
-            "textContent": "\"42\" (str) → int(\"42\") → 42 (int)\n42 (int) → float(42) → 42.0 (float)"
-          },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "print(int('42') + 8)\nprint(float(42))",
-            "language": "python",
-            "output": "50\n42.0"
-          }
-        },
-        {
-          "type": "reflection",
-          "question": "If you have '42' (a string) and you call int('42'), does the original '42' string change permanently?",
-          "answer": "No! Type conversion creates a new value in the new type. The original string '42' still exists as a string if you stored it in a variable. Python does not modify the original — it just converts it temporarily for the operation.",
-          "followupCode": null,
-          "followupOutput": null
-        },
-        {
           "type": "code_example",
           "title": "Type Conversion in Action",
           "language": "python",
@@ -260,11 +166,6 @@
           "language": "python",
           "code": "# This causes an error:\n# print(\"Age: \" + 20)\n\n# This works:\nprint(\"Age: \" + str(20))\n\n# So does this:\nprint(f\"Age: {20}\")",
           "expectedOutput": "Age: 20\nAge: 20"
-        },
-        {
-          "type": "reflection",
-          "question": "What do you think happens when you add string \"10\" and integer 10 together? Try: \"10\" + 10",
-          "answer": "Python gives a TypeError. You cannot add a string and an integer directly. You must convert one to the other's type first using int() or str()."
         },
         {
           "type": "practice",
@@ -306,6 +207,11 @@
           "starterCode": "name = \"\"\nage = \ncollege = \"\"\n\n# Print profile card",
           "solution": "name = \"Lakshanya\"\nage = 20\ncollege = \"SRM University\"\n\nprint(\"Name: \" + name + \", Age: \" + str(age) + \", College: \" + college)",
           "hint": "Use + to join strings. Convert numbers to strings with str() before concatenating."
+        },
+        {
+          "type": "reflection",
+          "question": "Does this concept make sense so far? Try to explain it in your own words.",
+          "answer": "If you can explain this concept to someone else, you have understood it well. Practice with the exercises below to reinforce your learning."
         }
       ]
     }

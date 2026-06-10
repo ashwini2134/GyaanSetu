@@ -64,6 +64,62 @@ export interface ConceptVisualizationBlock {
   };
 }
 
+export type ThinkOfVisualType =
+  | 'storage_box'
+  | 'sequence'
+  | 'function_machine'
+  | 'loop_cycle'
+  | 'key_value'
+  | 'decision_branch'
+  | 'blueprint_object'
+  | 'string_beads'
+  | 'hub_spoke'
+  | 'light_switch';
+
+export interface ThinkOfBlock {
+  type: 'think_of';
+  analogy: {
+    title: string;
+    description: string;
+    image?: string;
+    emoji?: string;
+  };
+  visualization: {
+    type: ThinkOfVisualType;
+    title: string;
+    varName?: string;
+    varValue?: string;
+    items?: string[];
+    inputLabel?: string;
+    processLabel?: string;
+    outputLabel?: string;
+    loopLabel?: string;
+    loopSteps?: string[];
+    pairs?: Array<{ key: string; value: string }>;
+    condition?: string;
+    trueLabel?: string;
+    falseLabel?: string;
+    className?: string;
+    properties?: Array<{ name: string; type: string }>;
+    text?: string;
+    boolValue?: boolean;
+    centerLabel?: string;
+    branches?: string[];
+  };
+  code: {
+    language: string;
+    code: string;
+    output?: string;
+  };
+  reflection: {
+    question: string;
+    answer: string;
+    options?: string[];
+    followupCode?: string;
+    followupOutput?: string;
+  };
+}
+
 // ── Visual Aid ──────────────────────────────────────────────────────────────
 
 export type VisualAidKind =
@@ -114,6 +170,7 @@ export type ContentBlock =
   | ExplanationBlock
   | AnalogyBlock
   | ConceptVisualizationBlock
+  | ThinkOfBlock
   | VisualAidBlock
   | CodeExampleBlock
   | ReflectionBlock

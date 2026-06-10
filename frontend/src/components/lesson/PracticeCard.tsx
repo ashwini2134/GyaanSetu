@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { PracticeBlock } from '../../types/lesson';
 import CodeEditor from './CodeEditor';
+import { renderMarkdown } from '../../utils/renderContent';
 
 interface PracticeCardProps {
   block: PracticeBlock;
@@ -14,9 +15,9 @@ export default function PracticeCard({ block, onAttempt, onComplete }: PracticeC
   const saveKey = `${SAVE_PREFIX}${block.title}`;
   const [open, setOpen] = useState(false);
   const [showHint, setShowHint] = useState(false);
-  const [showSolution, setShowSolution] = useState(false);
   const [passed, setPassed] = useState(false);
   const [attempts, setAttempts] = useState(0);
+  const [toast, setToast] = useState(false);
 
   const [savedCode, setSavedCode] = useState<string | null>(null);
   useEffect(() => {
@@ -30,7 +31,7 @@ export default function PracticeCard({ block, onAttempt, onComplete }: PracticeC
     try { localStorage.setItem(saveKey, code); } catch {}
   }, [saveKey]);
 
-  const handleRun = (_code: string, output: string, error: string | null) => {
+  const handleRun = () => {
     onAttempt?.();
     setAttempts(a => a + 1);
     setShowHint(true);
@@ -39,12 +40,20 @@ export default function PracticeCard({ block, onAttempt, onComplete }: PracticeC
   const handleSubmit = (_code: string, output: string, error: string | null) => {
     onAttempt?.();
     setAttempts(a => a + 1);
-    setShowSolution(true);
     if (!error && block.expectedOutput && output.trim() === block.expectedOutput.trim()) {
       setPassed(true);
       onComplete?.();
     }
+    saveCode(_code);
+    setToast(true);
+    setOpen(false);
   };
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(false), 2500);
+    return () => clearTimeout(timer);
+  }, [toast]);
 
   const handleReset = () => {
     setSavedCode(null);
@@ -52,7 +61,6 @@ export default function PracticeCard({ block, onAttempt, onComplete }: PracticeC
     setAttempts(0);
     setPassed(false);
     setShowHint(false);
-    setShowSolution(false);
   };
 
   if (!open) {
@@ -67,7 +75,7 @@ export default function PracticeCard({ block, onAttempt, onComplete }: PracticeC
           <div className="flex-1">
             <p className="text-xs font-semibold text-amber-300 uppercase tracking-wider mb-1">Practice Exercise</p>
             <p className="text-sm font-medium text-slate-200 mb-1">{block.title}</p>
-            <p className="text-sm text-slate-300 leading-relaxed">{block.instructions}</p>
+            <p className="text-sm text-slate-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(block.instructions) }} />
             <button
               onClick={() => setOpen(true)}
               className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-white px-4 py-2 rounded-lg bg-amber-600/80 hover:bg-amber-600 transition-all"
@@ -85,6 +93,18 @@ export default function PracticeCard({ block, onAttempt, onComplete }: PracticeC
     <div className={`rounded-2xl border backdrop-blur-sm overflow-hidden ${
       passed ? 'border-green-500/30 bg-gradient-to-br from-green-600/10 to-slate-800/40' : 'border-amber-500/20 bg-gradient-to-br from-amber-600/10 to-slate-800/40'
     }`}>
+      {/* Toast notification */}
+      {toast && (
+        <div className="fixed top-4 right-4 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-slate-800 border border-slate-600 shadow-xl">
+            <svg className="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="text-sm font-medium text-slate-200">✓ Submitted</span>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="px-5 py-3 bg-slate-800/40 border-b border-slate-700/20 flex items-center justify-between">
         <div>
@@ -112,7 +132,7 @@ export default function PracticeCard({ block, onAttempt, onComplete }: PracticeC
         {/* Problem Statement */}
         <div className="p-3 rounded-xl bg-slate-900/50 border border-slate-700/30">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Instructions</p>
-          <p className="text-sm text-slate-200 leading-relaxed">{block.instructions}</p>
+          <p className="text-sm text-slate-200 leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(block.instructions) }} />
         </div>
 
         {/* Expected Output */}
@@ -138,23 +158,10 @@ export default function PracticeCard({ block, onAttempt, onComplete }: PracticeC
           onReset={handleReset}
         />
 
-        {/* Action buttons removed — triggered via Run/Submit now */}
-
-        {/* Hint box */}
         {showHint && block.hint && (
           <div className="p-3 rounded-xl bg-blue-900/20 border border-blue-700/30">
             <p className="text-xs font-semibold text-blue-400 mb-1">Hint</p>
             <p className="text-sm text-slate-300">{block.hint}</p>
-          </div>
-        )}
-
-        {/* Solution */}
-        {showSolution && block.solution && (
-          <div className="rounded-xl bg-[#0d1117] border border-slate-700/40 overflow-hidden">
-            <div className="flex items-center px-4 py-2 bg-slate-800/40 border-b border-slate-700/30">
-              <span className="text-[11px] text-slate-500 font-medium uppercase tracking-wider">Solution</span>
-            </div>
-            <pre className="p-4 text-sm text-slate-200 font-mono leading-relaxed">{block.solution}</pre>
           </div>
         )}
       </div>

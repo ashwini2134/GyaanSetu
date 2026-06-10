@@ -65,11 +65,12 @@ function checkLectureCompletion(
 
   const sectionsVisited = Object.values(prev.sections).filter(s => s.visited).length;
 
-  const allSectionsDone = sectionsVisited >= totalSections;
+  const allSectionsVisited = sectionsVisited >= totalSections;
   const quizDone = !hasQuiz || prev.quizCompleted;
   const problemsDone = prev.problemsCompleted.length >= totalProblems;
+  const summaryReached = prev.lastSection === 'summary';
 
-  if (allSectionsDone && quizDone && problemsDone) {
+  if (allSectionsVisited && quizDone && problemsDone && summaryReached) {
     all[key] = { ...prev, lectureCompleted: true, handsOnTaskCompleted: true };
     writeAll(all);
   }

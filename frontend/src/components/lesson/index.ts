@@ -1,6 +1,8 @@
 export { default as CodeEditor } from './CodeEditor';
 export { default as ConceptVisualizationCard } from './ConceptVisualizationCard';
-export { default as CodeExampleCard } from './CodeExampleCard';
+export { default as ThinkOfSection } from './ThinkOfSection';
+export { default as InteractiveTryIt } from './InteractiveTryIt';
+export { default as CodeExampleCard } from './InteractiveTryIt';
 export { default as ReflectionCard } from './ReflectionCard';
 export { default as PracticeCard } from './PracticeCard';
 export { default as QuizEngine } from './QuizEngine';

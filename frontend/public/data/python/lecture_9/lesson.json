@@ -29,36 +29,41 @@
           "text": "You look up a person's name (the key) to find their phone number (the value). Each name is unique. You search by name directly — that's how Python dictionaries work."
         },
         {
-          "type": "concept_visualization",
-          "title": "Think Of A Dictionary As A Phone Book",
-          "accentColor": "green",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "📞",
+          "type": "think_of",
+          "analogy": {
             "title": "Phone Book",
-            "description": "Look up a name (key) to find the number (value)."
+            "description": "Look up a name (key) to find the number (value).",
+            "emoji": "📞",
+            "image": "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "text",
-            "varName": null,
-            "varValue": null,
-            "flowSteps": null,
-            "textContent": "Dictionary = Key→Value Pairs:\n• Keys are unique labels\n• Each key maps to a value\n• Fast lookup by key"
+          "visualization": {
+            "type": "key_value",
+            "title": "Name → Number Mapping",
+            "pairs": [
+              {
+                "key": "Alice",
+                "value": "555-1234"
+              },
+              {
+                "key": "Bob",
+                "value": "555-5678"
+              },
+              {
+                "key": "Charlie",
+                "value": "555-9012"
+              }
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "phone = {'Alice': '123', 'Bob': '456'}\nprint(phone['Alice'])\nphone['Charlie'] = '789'\nprint(phone)",
+          "code": {
             "language": "python",
-            "output": "123\n{'Alice': '123', 'Bob': '456', 'Charlie': '789'}"
+            "code": "phone = {\"Alice\": \"123\", \"Bob\": \"456\"}\nprint(phone[\"Alice\"])",
+            "output": "123"
           }
         },
         {
           "type": "reflection",
           "question": "Can two people have the same phone number in a dictionary? Can two keys have the same value?",
-          "answer": "Yes! Values can be duplicated. Two different keys (people) could have the same value (phone number). But the keys themselves must be unique — you cannot have two 'Alice' entries. It's like a real phone book: two people can share a number, but you can't have two listings for Alice.",
-          "followupCode": null,
-          "followupOutput": null
+          "answer": "Yes! Values can be duplicated. Two different keys (people) could have the same value (phone number). But the keys themselves must be unique — you cannot have two 'Alice' entries. It's like a real phone book: two people can share a number, but you can't have two listings for Alice."
         },
         {
           "type": "code_example",
@@ -166,6 +171,11 @@
               "desc": "\"New York\""
             }
           ]
+        },
+        {
+          "type": "reflection",
+          "question": "Does this concept make sense so far? Try to explain it in your own words.",
+          "answer": "If you can explain this concept to someone else, you have understood it well. Practice with the exercises below to reinforce your learning."
         }
       ]
     }

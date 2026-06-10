@@ -3,12 +3,56 @@
 for every 'Think Of' analogy, followed by 'Is This Correct?' reflection cards.
 Replaces all old process_flow / architecture_diagram / memory_layout / lifecycle_diagram
 visual_aid kinds with meaningful educational content.
+
+IMPORTANT: Every analogy image must visually represent the analogy itself
+(never use generic programming screenshots). The image field is the actual
+Unsplash URL that matches the analogy concept.
 """
 import json, os
 
 BASE = "frontend/public/data/python"
 
+# Analogy title keywords → matching visually representative Unsplash images
+ANALOGY_IMAGES = {
+    "recipe": "https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=800&q=80",
+    "swiss army": "https://images.unsplash.com/photo-1615127717889-8945dba1f05a?w=800&q=80",
+    "toolbox": "https://images.unsplash.com/photo-1707185312114-16837728e5fb?w=800&q=80",
+    "kitchen": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80",
+    "labeled storage": "https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=800&q=80",
+    "labeled jar": "https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=800&q=80",
+    "containers": "https://images.unsplash.com/photo-1544457070-4cd773b4d71e?w=800&q=80",
+    "repackaging": "https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=800&q=80",
+    "receptionist": "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&q=80",
+    "fill-in-the-blank": "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&q=80",
+    "rulebook": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&q=80",
+    "gatekeeper": "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80",
+    "traffic light": "https://images.unsplash.com/photo-1557404763-69708cd8b9ce?w=800&q=80",
+    "washing machine": "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=800&q=80",
+    "checking your phone": "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=800&q=80",
+    "shopping list": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&q=80",
+    "shopping": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&q=80",
+    "sealed envelope": "https://images.unsplash.com/photo-1649019489428-70f505daacd6?w=800&q=80",
+    "bag of unique": "https://images.unsplash.com/photo-1544457070-4cd773b4d71e?w=800&q=80",
+    "phone book": "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=800&q=80",
+    "vending machine": "https://images.unsplash.com/photo-1618506557292-ec1862b3c506?w=800&q=80",
+    "chain": "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=800&q=80",
+    "editing tools": "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=800&q=80",
+    "notebook": "https://images.unsplash.com/photo-1517842645767-c639042777db?w=800&q=80",
+    "installing python": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80",
+    "setting": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80",
+}
+
+def get_analogy_image(title):
+    """Look up the correct visual image for an analogy title."""
+    title_lower = title.lower()
+    for key, url in ANALOGY_IMAGES.items():
+        if key in title_lower:
+            return url
+    return None
+
 def cv(title, left, center, right, color="blue"):
+    # Auto-detect the matching analogy image from the title
+    image_url = get_analogy_image(title) or get_analogy_image(left.get("title", "")) or left.get("image")
     return {
         "type": "concept_visualization",
         "title": title,
@@ -18,6 +62,7 @@ def cv(title, left, center, right, color="blue"):
             "emoji": left.get("emoji", "💡"),
             "title": left.get("title", ""),
             "description": left.get("desc", ""),
+            "image": image_url,
         },
         "centerPanel": {
             "label": "Programming Concept",

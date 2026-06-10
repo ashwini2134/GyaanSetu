@@ -29,36 +29,30 @@
           "text": "Writing in a notebook saves information even after you close it. Open it tomorrow and the information is still there. File handling does the same for your programs."
         },
         {
-          "type": "concept_visualization",
-          "title": "Think Of File Handling As A Notebook",
-          "accentColor": "blue",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "emoji": "📓",
+          "type": "think_of",
+          "analogy": {
             "title": "Notebook",
-            "description": "Open it, read/write pages, close it when done."
+            "description": "Open it, read/write pages, close it when done.",
+            "emoji": "📓",
+            "image": "https://images.unsplash.com/photo-1517842645767-c639042777db?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "text",
-            "varName": null,
-            "varValue": null,
-            "flowSteps": null,
-            "textContent": "File = Notebook:\n1. Open: file = open('notes.txt', 'r')\n2. Read/Write: content = file.read()\n3. Close: file.close()"
+          "visualization": {
+            "type": "function_machine",
+            "title": "File Operations",
+            "inputLabel": "Open File",
+            "processLabel": "Read / Write",
+            "outputLabel": "Close File"
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "with open('notes.txt', 'w') as f:\n    f.write('Hello, file!')\nwith open('notes.txt', 'r') as f:\n    print(f.read())",
+          "code": {
             "language": "python",
-            "output": "Hello, file!"
+            "code": "with open(\"notes.txt\", \"w\") as f:\n    f.write(\"Hello\")",
+            "output": ""
           }
         },
         {
           "type": "reflection",
           "question": "What happens if you forget to close a file after writing to it?",
-          "answer": "The data you wrote might not be saved! Python buffers writes in memory for efficiency, and close() flushes that buffer to disk. Using 'with open(...) as f:' is safer because Python automatically closes the file for you — even if an error occurs. It's like always remembering to close your notebook after writing so you don't lose your notes.",
-          "followupCode": null,
-          "followupOutput": null
+          "answer": "The data you wrote might not be saved! Python buffers writes in memory for efficiency, and close() flushes that buffer to disk. Using 'with open(...) as f:' is safer because Python automatically closes the file for you — even if an error occurs. It's like always remembering to close your notebook after writing so you don't lose your notes."
         }
       ]
     },
@@ -110,6 +104,11 @@
           "starterCode": "with open(\"students.txt\", \"w\") as f:\n    f.write(\"Alice\\nBob\\nCharlie\\n\")\n\nwith open(\"students.txt\", \"r\") as f:\n    for name in f:\n        print(f\"Hello, {name.strip()}!\")",
           "solution": "with open(\"students.txt\", \"w\") as f:\n    f.write(\"Alice\\nBob\\nCharlie\\n\")\n\nwith open(\"students.txt\", \"r\") as f:\n    for name in f:\n        print(f\"Hello, {name.strip()}!\")",
           "hint": "Use strip() on each line to remove the newline character."
+        },
+        {
+          "type": "reflection",
+          "question": "Does this concept make sense so far? Try to explain it in your own words.",
+          "answer": "If you can explain this concept to someone else, you have understood it well. Practice with the exercises below to reinforce your learning."
         }
       ]
     },
@@ -143,6 +142,11 @@
           "starterCode": "filename = input(\"Filename: \")\nn1 = input(\"Note 1: \")\nn2 = input(\"Note 2: \")\nn3 = input(\"Note 3: \")\n\nwith open(filename, \"w\") as f:\n    f.write(n1 + \"\\n\")\n    f.write(n2 + \"\\n\")\n    f.write(n3 + \"\\n\")\n\nwith open(filename, \"r\") as f:\n    for i, line in enumerate(f, 1):\n        print(f\"{i}. {line}\", end=\"\")",
           "solution": "filename = input(\"Filename: \")\nn1 = input(\"Note 1: \")\nn2 = input(\"Note 2: \")\nn3 = input(\"Note 3: \")\nwith open(filename, \"w\") as f:\n    f.write(n1 + \"\\n\")\n    f.write(n2 + \"\\n\")\n    f.write(n3 + \"\\n\")\nwith open(filename, \"r\") as f:\n    for i, line in enumerate(f, 1):\n        print(f\"{i}. {line}\", end=\"\")",
           "hint": "Use \"w\" mode. Add \\\\n at the end of each line when writing."
+        },
+        {
+          "type": "reflection",
+          "question": "Does this concept make sense so far? Try to explain it in your own words.",
+          "answer": "If you can explain this concept to someone else, you have understood it well. Practice with the exercises below to reinforce your learning."
         }
       ]
     }
