@@ -179,7 +179,7 @@ export default function LecturePage() {
     if (!hasResumed) {
       setHasResumed(true);
       const lastId = progress.lastSection;
-      if (lastId && lastId !== 'overview') {
+      if (lastId && lastId !== 'overview' && lastId !== 'summary') {
         const idx = pages.findIndex(p => {
           if (p.type === 'section') return lessonData.sections[p.index]?.id === lastId;
           return p.type === lastId;
@@ -197,6 +197,11 @@ export default function LecturePage() {
     if (visitedRef.current.has(targetIdx)) return;
     visitedRef.current.add(targetIdx);
     
+    // If we've reached the summary page, auto-mark the lecture as completed
+    if (page.type === 'summary') {
+      markLectureCompleted();
+    }
+
     if (page.type === 'section') {
       markSectionVisited(lessonData.sections[page.index].id);
     } else {
