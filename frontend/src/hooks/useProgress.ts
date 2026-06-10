@@ -64,9 +64,8 @@ function checkLectureCompletion(
   if (!prev || prev.lectureCompleted) return;
 
   const sectionsVisited = Object.values(prev.sections).filter(s => s.visited).length;
-  const practicesCompleted = Object.values(prev.sections).filter(s => s.practiceCompleted).length;
 
-  const allSectionsDone = sectionsVisited >= totalSections && practicesCompleted >= totalSections;
+  const allSectionsDone = sectionsVisited >= totalSections;
   const quizDone = !hasQuiz || prev.quizCompleted;
   const problemsDone = prev.problemsCompleted.length >= totalProblems;
 

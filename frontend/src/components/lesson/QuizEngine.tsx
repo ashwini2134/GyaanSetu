@@ -26,6 +26,7 @@ export default function QuizEngine({ quizId = 'default', questions, onComplete }
   const [submitted, setSubmitted] = useState(false);
   const [activeQuestions, setActiveQuestions] = useState<QuizQuestion[]>(questions);
   const [history, setHistory] = useState<AttemptRecord[]>([]);
+  const [viewHistoryIdx, setViewHistoryIdx] = useState<number>(0);
 
   useEffect(() => {
     try {
@@ -80,6 +81,7 @@ export default function QuizEngine({ quizId = 'default', questions, onComplete }
       
       const updatedHistory = [...history, newAttempt];
       setHistory(updatedHistory);
+      setViewHistoryIdx(updatedHistory.length - 1);
       try {
         localStorage.setItem(`lms:quiz_history:${quizId}`, JSON.stringify(updatedHistory));
       } catch {}
@@ -127,89 +129,85 @@ export default function QuizEngine({ quizId = 'default', questions, onComplete }
   if (phase === 'result') {
     const pct = Math.round((score / total) * 100);
     const passed = pct >= 70;
+    
+    // Safety check for viewHistoryIdx
+    const currentAtt = history[viewHistoryIdx] ?? history[history.length - 1];
+
     return (
-      <div className={`rounded-2xl border p-6 text-center space-y-5 ${passed ? 'border-green-500/25 bg-gradient-to-br from-green-600/10 to-slate-800/40' : 'border-orange-500/25 bg-gradient-to-br from-orange-600/10 to-slate-800/40'}`}>
-        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto ${passed ? 'bg-green-600/20' : 'bg-orange-600/20'}`}>
-          <span className="text-3xl">{passed ? <PartyPopper size={32} className="text-green-400" /> : <Book size={32} className="text-orange-400" />}</span>
-        </div>
-        <div>
-          <p className="text-2xl font-bold text-white">{pct}%</p>
-          <p className={`text-sm font-medium mt-1 ${passed ? 'text-green-300' : 'text-orange-300'}`}>
-            {passed ? 'Great job!' : 'Keep studying!'}
-          </p>
-          <p className="text-sm text-slate-400 mt-1">{score} of {total} correct</p>
-        </div>
-
-        {/* Review answers */}
-        <div className="space-y-3 text-left">
-          {activeQuestions.map((q, i) => {
-            const userAns = answers[i] ?? '';
-            const correct = userAns === q.answer;
-            return (
-              <div key={i} className={`p-4 rounded-xl border ${correct ? 'border-green-700/30 bg-green-900/10' : 'border-red-700/30 bg-red-900/10'}`}>
-                <p className="text-xs font-semibold text-slate-400 mb-1">Q{i + 1}</p>
-                <p className="text-sm text-slate-200 mb-2 whitespace-pre-line">{q.question}</p>
-                <p className={`text-xs font-medium ${correct ? 'text-green-400' : 'text-red-400'}`}>
-                  Your answer: {userAns || '(skipped)'}
-                </p>
-                {!correct && <p className="text-xs text-green-400">Correct: {q.answer}</p>}
-                {q.explanation && <p className="text-xs text-slate-400 mt-1">{q.explanation}</p>}
-              </div>
-            );
-          })}
+      <div className={`rounded-2xl border p-6 text-center space-y-6 ${passed ? 'border-green-500/25 bg-gradient-to-br from-green-600/10 to-slate-800/40' : 'border-orange-500/25 bg-gradient-to-br from-orange-600/10 to-slate-800/40'}`}>
+        {/* Top Header: Score & Retake */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-700/30 pb-6">
+          <div className="flex items-center gap-4">
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${passed ? 'bg-green-600/20 text-green-400' : 'bg-orange-600/20 text-orange-400'}`}>
+              {passed ? <PartyPopper size={28} /> : <Book size={28} />}
+            </div>
+            <div className="text-left">
+              <p className="text-3xl font-bold text-white">{score}/{total}</p>
+              <p className={`text-sm font-medium ${passed ? 'text-green-300' : 'text-orange-300'}`}>
+                {passed ? 'Great job!' : 'Keep studying!'}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={handleRestart}
+            className={`inline-flex items-center gap-2 text-sm font-semibold text-white px-6 py-3 rounded-xl transition-all shadow-lg ${
+              passed ? 'bg-green-600 hover:bg-green-500 shadow-green-900/20' : 'bg-orange-600 hover:bg-orange-500 shadow-orange-900/20'
+            }`}
+          >
+            Retake Quiz
+          </button>
         </div>
 
-        {/* Attempt History */}
-        {history.length > 0 && (
-          <div className="mt-8 pt-6 border-t border-slate-700/30 text-left">
-            <h4 className="text-sm font-bold text-white mb-4">Attempt History</h4>
-            <div className="space-y-6">
-              {history.map((att, i) => (
-                <div key={att.id} className="p-4 rounded-xl bg-slate-900/60 border border-slate-700/40">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm font-semibold text-slate-200">Attempt {i + 1} <span className="ml-2 text-xs font-normal text-slate-400">({att.score}/{att.total})</span></span>
-                    <span className="text-xs text-slate-500">{new Date(att.timestamp).toLocaleString()}</span>
-                  </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs">
-                      <thead>
-                        <tr className="border-b border-slate-700/50 text-slate-400">
-                          <th className="pb-2 font-semibold">Question No.</th>
-                          <th className="pb-2 font-semibold">Status</th>
-                          <th className="pb-2 font-semibold">User's Answer</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-800/50">
-                        {att.details.map((d, j) => (
-                          <tr key={j} className="text-slate-300">
-                            <td className="py-2">Q{d.qNum}</td>
-                            <td className="py-2">
-                              {d.passed ? (
-                                <span className="inline-flex items-center gap-1 text-green-400">✅ Passed</span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1 text-red-400">❌ Failed</span>
-                              )}
-                            </td>
-                            <td className="py-2 whitespace-pre-wrap">{d.userAns || '(skipped)'}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+        {/* Attempt History List */}
+        {currentAtt && (
+          <div className="text-left">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="text-base font-bold text-white">Quiz History</h4>
+              <span className="text-xs font-medium text-slate-400">
+                Attempt {viewHistoryIdx + 1} of {history.length}
+              </span>
+            </div>
+            
+            <div className="space-y-3">
+              {currentAtt.details.map((d, j) => (
+                <div key={j} className="flex items-start gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-700/40 text-sm">
+                  <span className="font-semibold text-slate-300 w-6">Q{d.qNum}</span>
+                  <span className={`w-12 font-medium ${d.passed ? 'text-green-400' : 'text-red-400'}`}>
+                    {d.passed ? 'Pass' : 'Fail'}
+                  </span>
+                  <span className="text-slate-400">—</span>
+                  <span className="text-slate-200 flex-1">
+                    <span className="text-slate-500 mr-2">Answer:</span>
+                    {d.userAns || '(skipped)'}
+                  </span>
                 </div>
               ))}
             </div>
+
+            {/* Pagination */}
+            {history.length > 1 && (
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-700/30">
+                <button
+                  onClick={() => setViewHistoryIdx(i => Math.max(0, i - 1))}
+                  disabled={viewHistoryIdx === 0}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Previous
+                </button>
+                <span className="text-xs text-slate-500">
+                  {new Date(currentAtt.timestamp).toLocaleString()}
+                </span>
+                <button
+                  onClick={() => setViewHistoryIdx(i => Math.min(history.length - 1, i + 1))}
+                  disabled={viewHistoryIdx === history.length - 1}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </div>
         )}
-
-        <button
-          onClick={handleRestart}
-          className={`inline-flex items-center gap-2 text-sm font-semibold text-white px-6 py-3 rounded-xl transition-all ${
-            passed ? 'bg-green-600 hover:bg-green-500' : 'bg-orange-600 hover:bg-orange-500'
-          }`}
-        >
-          Retake Quiz
-        </button>
       </div>
     );
   }

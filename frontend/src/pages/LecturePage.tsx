@@ -112,6 +112,7 @@ export default function LecturePage() {
   const lectureNumber = parseInt(number ?? '0', 10);
   const [retakingQuiz, setRetakingQuiz] = useState(false);
   const [openProblemIndex, setOpenProblemIndex] = useState<number>(-1);
+  const [openSimilarIndex, setOpenSimilarIndex] = useState<number>(-1);
 
   const { lessonData, loading, error } = useLessonData(slug, lectureNumber);
   const { 
@@ -200,7 +201,7 @@ export default function LecturePage() {
     
     // If we've reached the summary page, auto-mark the lecture as completed
     if (page.type === 'summary') {
-      markLectureCompleted();
+      // markLectureCompleted(); // REMOVED: Only mark completed if all sections are done
     }
 
     if (page.type === 'section') {
@@ -208,7 +209,20 @@ export default function LecturePage() {
     } else {
       markSectionVisited(page.type);
     }
-  }, [lessonData, pages, progress.lastSection, hasResumed, currentPageIdx, markSectionVisited]);
+
+    // Trigger auto-complete check after marking section as visited
+    setTimeout(() => {
+      if (slug) {
+        tryAutoCompleteLecture(
+          slug, 
+          lectureNumber, 
+          lessonData.sections.length, 
+          lessonData.problems?.length ?? 0, 
+          (lessonData.quiz?.length ?? 0) > 0
+        );
+      }
+    }, 0);
+  }, [lessonData, pages, progress.lastSection, hasResumed, currentPageIdx, markSectionVisited, slug, lectureNumber]);
 
   // Compute status for each page item
   const pageStatuses: PageStatus[] = useMemo(() => {
@@ -291,6 +305,15 @@ export default function LecturePage() {
         {/* Left nav panel */}
         <aside className="hidden md:flex flex-shrink-0 w-56 flex-col border-r border-slate-700/30 bg-slate-900/60 overflow-y-auto">
           <div className="p-3 space-y-0.5">
+            <button
+              onClick={() => navigate(`/course/${slug}`)}
+              className="w-full mb-4 px-3 py-2 flex items-center gap-2 text-sm font-medium text-slate-300 bg-slate-800/50 hover:bg-slate-700/50 hover:text-white rounded-lg transition-colors border border-slate-700/50"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Back to Course
+            </button>
             {pages.map((page, idx) => {
               const status = pageStatuses[idx];
               const id = pageId(page, lessonData.sections);
@@ -449,26 +472,41 @@ export default function LecturePage() {
                     ))}
                   </div>
 
-                  {problems.length > 0 && (
-                    <div className="mt-8 pt-6 border-t border-slate-700/30">
-                      <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-                        <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                        Similar Questions
-                      </h3>
-                      <div className="space-y-3">
-                        <div className="p-4 rounded-xl border border-slate-700/30 bg-slate-800/20 hover:bg-slate-800/40 transition-colors cursor-pointer flex justify-between items-center group">
-                          <span className="text-sm text-blue-400 group-hover:text-blue-300">1. {problems[0].title.replace('Basic ', 'Advanced ').replace('Simple ', 'Complex ')} (Optional)</span>
-                          <span className="text-xs text-slate-500 bg-slate-800/50 px-2 py-1 rounded">Practice</span>
-                        </div>
-                        <div className="p-4 rounded-xl border border-slate-700/30 bg-slate-800/20 hover:bg-slate-800/40 transition-colors cursor-pointer flex justify-between items-center group">
-                          <span className="text-sm text-blue-400 group-hover:text-blue-300">2. {problems[0].title} via standard library (Optional)</span>
-                          <span className="text-xs text-slate-500 bg-slate-800/50 px-2 py-1 rounded">Practice</span>
+                  {problems.length > 0 && (() => {
+                    const similarProblems = [
+                      { ...problems[0], id: `${problems[0].id}_sim1`, title: problems[0].title.replace('Basic ', 'Advanced ').replace('Simple ', 'Complex ') + ' (Similar A)' },
+                      { ...problems[0], id: `${problems[0].id}_sim2`, title: problems[0].title + ' (Similar B)' }
+                    ];
+
+                    return (
+                      <div className="mt-8 pt-6 border-t border-slate-700/30">
+                        <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                          <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          </svg>
+                          Similar Questions
+                        </h3>
+                        <div className="space-y-3">
+                          {similarProblems.map((problem, i) => (
+                            <ProblemCard
+                              key={problem.id}
+                              problem={problem}
+                              index={i}
+                              isOpen={openSimilarIndex === i}
+                              onOpenChange={(isOpen) => setOpenSimilarIndex(isOpen ? i : -1)}
+                              completed={progress.problemsCompleted.includes(problem.id)}
+                              onComplete={(id) => {
+                                markProblemCompleted(id);
+                                if (i + 1 < similarProblems.length) {
+                                  setTimeout(() => setOpenSimilarIndex(i + 1), 1500);
+                                }
+                              }}
+                            />
+                          ))}
                         </div>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
                 </div>
               </section>
             )}

@@ -96,7 +96,7 @@ export default function ConceptVisualizationCard({ block }: { block: ConceptVisu
           <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider">
             Real-Life Analogy
           </p>
-          <div className="rounded-xl overflow-hidden border border-slate-700/30 aspect-video relative">
+          <div className="flex-1 rounded-xl overflow-hidden border border-slate-700/30 relative">
             <img src={block.analogy.image} alt={block.analogy.title} className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-3">
