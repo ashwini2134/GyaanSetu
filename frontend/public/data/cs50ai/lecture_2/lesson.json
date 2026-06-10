@@ -3,7 +3,7 @@
   "courseSlug": "cs50ai",
   "number": 2,
   "title": "Knowledge & Logic",
-  "overview": "Logic is how AI knows things — through rules and True/False statements, not common sense",
+  "overview": "Logic is how AI knows things \u2014 through rules and True/False statements, not common sense",
   "estimatedMinutes": 60,
   "nextUp": "Probability & Uncertainty",
   "sections": [
@@ -15,12 +15,12 @@
           "type": "explanation",
           "accentColor": "blue",
           "title": "Propositional Logic",
-          "body": "Logic is how AI knows things — through rules and True/False statements, not common sense",
+          "body": "Logic is how AI knows things \u2014 through rules and True/False statements, not common sense",
           "bullets": [
             "Propositional logic uses statements that are either True or False",
-            "AND — both sides must be True for result to be True",
-            "OR — at least one side must be True",
-            "NOT — reverses the value (NOT True = False)"
+            "AND \u2014 both sides must be True for result to be True",
+            "OR \u2014 at least one side must be True",
+            "NOT \u2014 reverses the value (NOT True = False)"
           ]
         },
         {
@@ -29,14 +29,16 @@
           "accentColor": "blue",
           "leftPanel": {
             "label": "Real Life Analogy",
-            "emoji": "🚦",
             "title": "A traffic light",
-            "description": "Red means Stop (True), Green means Go (False for stop)"
+            "description": "Red means Stop (True), Green means Go (False for stop)",
+            "icon": "Star"
           },
           "centerPanel": {
             "label": "Programming Concept",
-            "visualType": "text",
-            "flowSteps": null,
+            "visualType": "flow_diagram",
+            "flowSteps": [
+              "AND / OR / NOT operators"
+            ],
             "textContent": "AND / OR / NOT operators"
           },
           "rightPanel": {
@@ -50,6 +52,11 @@
           "type": "reflection",
           "question": "Is it true that AND returns True only when both sides are True?",
           "answer": "Yes, AND requires both conditions to be true."
+        },
+        {
+          "type": "practice",
+          "title": "Try It: Hands-on Practice",
+          "description": "Let's put what we just learned into practice! Play around with the concepts below."
         }
       ]
     },
@@ -75,15 +82,17 @@
           "accentColor": "purple",
           "leftPanel": {
             "label": "Real Life Analogy",
-            "emoji": "🩺",
             "title": "A doctor's rulebook",
-            "description": "if symptom A and symptom B then diagnosis C"
+            "description": "if symptom A and symptom B then diagnosis C",
+            "icon": "Star"
           },
           "centerPanel": {
             "label": "Programming Concept",
-            "visualType": "text",
-            "flowSteps": null,
-            "textContent": "Knowledge Base + IF-THEN rules → Inference engine → Conclusion"
+            "visualType": "flow_diagram",
+            "flowSteps": [
+              "Knowledge Base + IF-THEN rules \u2192 Inference engine \u2192 Conclusion"
+            ],
+            "textContent": "Knowledge Base + IF-THEN rules \u2192 Inference engine \u2192 Conclusion"
           },
           "rightPanel": {
             "label": "Code Example",
@@ -95,7 +104,12 @@
         {
           "type": "reflection",
           "question": "Can AI figure out new facts just from existing rules without being told directly?",
-          "answer": "Yes, that's exactly what inference is—deriving new facts logically."
+          "answer": "Yes, that's exactly what inference is\u2014deriving new facts logically."
+        },
+        {
+          "type": "practice",
+          "title": "Try It: Hands-on Practice",
+          "description": "Let's put what we just learned into practice! Play around with the concepts below."
         }
       ]
     },
@@ -109,10 +123,10 @@
           "title": "How AI Uses Logic",
           "body": "Follow these steps to build a logical reasoning system.",
           "bullets": [
-            "Step 1: Define your facts — what is True and what is False in your world",
-            "Step 2: Write IF-THEN rules — connect facts to conclusions",
-            "Step 3: Build a Knowledge Base — store all facts and rules together",
-            "Step 4: Run Inference — AI combines facts and rules to reach new conclusions"
+            "Step 1: Define your facts \u2014 what is True and what is False in your world",
+            "Step 2: Write IF-THEN rules \u2014 connect facts to conclusions",
+            "Step 3: Build a Knowledge Base \u2014 store all facts and rules together",
+            "Step 4: Run Inference \u2014 AI combines facts and rules to reach new conclusions"
           ]
         },
         {
@@ -121,20 +135,20 @@
           "accentColor": "green",
           "leftPanel": {
             "label": "Real Life Analogy",
-            "emoji": "💡",
             "title": "Systematic reasoning",
-            "description": "Combining rules and facts logically"
+            "description": "Combining rules and facts logically",
+            "icon": "Star"
           },
           "centerPanel": {
             "label": "Flow Diagram",
             "visualType": "flow_diagram",
             "flowSteps": [
               "Facts + Rules",
-              "↓",
+              "\u2193",
               "Knowledge Base",
-              "↓",
+              "\u2193",
               "Inference Engine",
-              "↓",
+              "\u2193",
               "New Conclusion"
             ],
             "textContent": null
@@ -150,6 +164,11 @@
           "type": "reflection",
           "question": "Do you need to tell AI every possible answer, or can it figure some out from rules?",
           "answer": "It can figure out new answers using inference."
+        },
+        {
+          "type": "practice",
+          "title": "Try It: Hands-on Practice",
+          "description": "Let's put what we just learned into practice! Play around with the concepts below."
         },
         {
           "type": "practice",
@@ -182,7 +201,7 @@
       },
       {
         "emoji": "",
-        "text": "Inference derives new facts from existing ones — like solving a puzzle"
+        "text": "Inference derives new facts from existing ones \u2014 like solving a puzzle"
       },
       {
         "emoji": "",

@@ -4,6 +4,7 @@ import VisualAidCard from './VisualAidCard';
 import CodeExampleCard from './CodeExampleCard';
 import ReflectionCard from './ReflectionCard';
 import PracticeCard from './PracticeCard';
+import * as LucideIcons from 'lucide-react';
 
 function TextBlock({ block }: { block: Extract<ContentBlock, { type: 'text' }> }) {
   return (
@@ -57,12 +58,15 @@ function ExplanationBlock({ block }: { block: Extract<ContentBlock, { type: 'exp
 }
 
 function AnalogyBlock({ block }: { block: Extract<ContentBlock, { type: 'analogy' }> }) {
+  // Try to find the icon from LucideIcons, fallback to Zap if not found
+  const IconComponent = (LucideIcons as any)[block.icon ?? ''] || LucideIcons.Zap;
+  
   return (
     <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-600/8 to-slate-800/40 p-5">
       <div className="flex items-start gap-3">
-        {block.emoji && (
+        {block.icon && (
           <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-xl flex-shrink-0">
-            {block.emoji}
+            <IconComponent className="w-5 h-5 text-amber-400" />
           </div>
         )}
         <div>

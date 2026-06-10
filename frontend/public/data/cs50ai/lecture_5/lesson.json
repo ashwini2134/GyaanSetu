@@ -19,7 +19,7 @@
           "bullets": [
             "Traditional programming: rules + data = answers",
             "Machine Learning: data + correct answers = rules (AI figures out the rules itself)",
-            "Supervised Learning: training with labeled examples — input + correct output given",
+            "Supervised Learning: training with labeled examples \u2014 input + correct output given",
             "Classification: predict a category (spam or not spam, pass or fail)",
             "Regression: predict a number (house price, student score)"
           ]
@@ -30,15 +30,17 @@
           "accentColor": "blue",
           "leftPanel": {
             "label": "Real Life Analogy",
-            "emoji": "👶",
             "title": "Showing a child flashcards",
-            "description": "with correct answers until they learn to recognize them"
+            "description": "with correct answers until they learn to recognize them",
+            "icon": "Star"
           },
           "centerPanel": {
             "label": "Programming Concept",
-            "visualType": "text",
-            "flowSteps": null,
-            "textContent": "Training data (input + label) → Model learns pattern → Predict new inputs"
+            "visualType": "flow_diagram",
+            "flowSteps": [
+              "Training data (input + label) \u2192 Model learns pattern \u2192 Predict new inputs"
+            ],
+            "textContent": "Training data (input + label) \u2192 Model learns pattern \u2192 Predict new inputs"
           },
           "rightPanel": {
             "label": "Code Example",
@@ -51,6 +53,11 @@
           "type": "reflection",
           "question": "In supervised learning, does AI need to be given the correct answers during training?",
           "answer": "Yes, supervised learning requires labeled data with correct answers to learn the patterns."
+        },
+        {
+          "type": "practice",
+          "title": "Try It: Hands-on Practice",
+          "description": "Let's put what we just learned into practice! Play around with the concepts below."
         }
       ]
     },
@@ -64,10 +71,10 @@
           "title": "Unsupervised & Reinforcement Learning",
           "body": "Not all learning needs labels. Unsupervised learning finds patterns on its own. Reinforcement learning learns by trying and getting rewards.",
           "bullets": [
-            "Unsupervised Learning: finds patterns with no labels — grouping similar customers",
+            "Unsupervised Learning: finds patterns with no labels \u2014 grouping similar customers",
             "Clustering: grouping similar data points together automatically",
             "Reinforcement Learning: AI tries an action, gets a reward or penalty, learns over time",
-            "Example: chess AI learns by playing millions of games — rewarded for winning",
+            "Example: chess AI learns by playing millions of games \u2014 rewarded for winning",
             "Overfitting: model memorizes training data but fails on new data"
           ]
         },
@@ -77,15 +84,17 @@
           "accentColor": "purple",
           "leftPanel": {
             "label": "Real Life Analogy",
-            "emoji": "🐕",
             "title": "Training a dog",
-            "description": "reward for correct behavior, ignore wrong behavior"
+            "description": "reward for correct behavior, ignore wrong behavior",
+            "icon": "Star"
           },
           "centerPanel": {
             "label": "Programming Concept",
-            "visualType": "text",
-            "flowSteps": null,
-            "textContent": "Action → Environment → Reward → Update policy → Repeat"
+            "visualType": "flow_diagram",
+            "flowSteps": [
+              "Action \u2192 Environment \u2192 Reward \u2192 Update policy \u2192 Repeat"
+            ],
+            "textContent": "Action \u2192 Environment \u2192 Reward \u2192 Update policy \u2192 Repeat"
           },
           "rightPanel": {
             "label": "Code Example",
@@ -98,6 +107,11 @@
           "type": "reflection",
           "question": "Does reinforcement learning need labeled training data?",
           "answer": "No, it learns through trial and error using rewards and penalties instead of explicit labels."
+        },
+        {
+          "type": "practice",
+          "title": "Try It: Hands-on Practice",
+          "description": "Let's put what we just learned into practice! Play around with the concepts below."
         }
       ]
     },
@@ -111,11 +125,11 @@
           "title": "ML Steps",
           "body": "The Machine Learning workflow.",
           "bullets": [
-            "Step 1: Collect data — gather examples of inputs and correct outputs",
-            "Step 2: Clean data — remove errors, fill missing values",
-            "Step 3: Train model — feed data to algorithm, it learns the pattern",
-            "Step 4: Test model — give it new unseen data, check accuracy",
-            "Step 5: Predict — use trained model on real-world inputs"
+            "Step 1: Collect data \u2014 gather examples of inputs and correct outputs",
+            "Step 2: Clean data \u2014 remove errors, fill missing values",
+            "Step 3: Train model \u2014 feed data to algorithm, it learns the pattern",
+            "Step 4: Test model \u2014 give it new unseen data, check accuracy",
+            "Step 5: Predict \u2014 use trained model on real-world inputs"
           ]
         },
         {
@@ -124,22 +138,22 @@
           "accentColor": "green",
           "leftPanel": {
             "label": "Real Life Analogy",
-            "emoji": "🔄",
             "title": "Workflow",
-            "description": "Data to Predictions"
+            "description": "Data to Predictions",
+            "icon": "Star"
           },
           "centerPanel": {
             "label": "Flow Diagram",
             "visualType": "flow_diagram",
             "flowSteps": [
               "Collect Data",
-              "↓",
+              "\u2193",
               "Clean",
-              "↓",
+              "\u2193",
               "Train",
-              "↓",
+              "\u2193",
               "Test",
-              "↓",
+              "\u2193",
               "Predict"
             ],
             "textContent": null
@@ -154,7 +168,7 @@
         {
           "type": "practice",
           "title": "Practice Exercise",
-          "instructions": "Classify each example — Supervised / Unsupervised / Reinforcement: spam filter, Netflix recommendations, chess AI, customer grouping",
+          "instructions": "Classify each example \u2014 Supervised / Unsupervised / Reinforcement: spam filter, Netflix recommendations, chess AI, customer grouping",
           "starterCode": "# Write your classifications\n",
           "solution": "# Example: spam filter -> Supervised",
           "hint": "Think about whether labels or rewards are present."
@@ -170,7 +184,7 @@
       },
       {
         "emoji": "",
-        "text": "Supervised learning uses labeled data — input + correct output"
+        "text": "Supervised learning uses labeled data \u2014 input + correct output"
       },
       {
         "emoji": "",

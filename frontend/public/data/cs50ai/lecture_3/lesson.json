@@ -3,7 +3,7 @@
   "courseSlug": "cs50ai",
   "number": 3,
   "title": "Probability & Uncertainty",
-  "overview": "The real world is rarely certain — AI uses probability to handle situations that are not clearly True or False",
+  "overview": "The real world is rarely certain \u2014 AI uses probability to handle situations that are not clearly True or False",
   "estimatedMinutes": 60,
   "nextUp": "Optimization",
   "sections": [
@@ -15,7 +15,7 @@
           "type": "explanation",
           "accentColor": "blue",
           "title": "Probability Basics",
-          "body": "The real world is rarely certain — AI uses probability to handle situations that are not clearly True or False",
+          "body": "The real world is rarely certain \u2014 AI uses probability to handle situations that are not clearly True or False",
           "bullets": [
             "Probability is a number between 0 and 1 showing how likely something is",
             "0 = impossible, 1 = certain, 0.7 = 70% likely",
@@ -29,15 +29,17 @@
           "accentColor": "blue",
           "leftPanel": {
             "label": "Real Life Analogy",
-            "emoji": "🌤️",
             "title": "Weather forecast",
-            "description": "70% chance of rain means likely but not certain"
+            "description": "70% chance of rain means likely but not certain",
+            "icon": "Star"
           },
           "centerPanel": {
             "label": "Programming Concept",
-            "visualType": "text",
-            "flowSteps": null,
-            "textContent": "Probability scale 0 → 1"
+            "visualType": "flow_diagram",
+            "flowSteps": [
+              "Probability scale 0 \u2192 1"
+            ],
+            "textContent": "Probability scale 0 \u2192 1"
           },
           "rightPanel": {
             "label": "Code Example",
@@ -50,6 +52,11 @@
           "type": "reflection",
           "question": "Is a probability of 0.9 more certain than a probability of 0.5?",
           "answer": "Yes, 0.9 means 90% likely, which is much more certain than 50% (0.5)."
+        },
+        {
+          "type": "practice",
+          "title": "Try It: Hands-on Practice",
+          "description": "Let's put what we just learned into practice! Play around with the concepts below."
         }
       ]
     },
@@ -61,9 +68,9 @@
           "type": "explanation",
           "accentColor": "blue",
           "title": "Conditional Probability & Bayes Theorem",
-          "body": "Conditional probability asks — what is the chance of X given that Y already happened? Bayes Theorem lets AI update its belief when new evidence arrives.",
+          "body": "Conditional probability asks \u2014 what is the chance of X given that Y already happened? Bayes Theorem lets AI update its belief when new evidence arrives.",
           "bullets": [
-            "Conditional probability: P(A|B) — probability of A given B is already true",
+            "Conditional probability: P(A|B) \u2014 probability of A given B is already true",
             "Example: probability of wet roads given it rained = very high",
             "Bayes Theorem updates probability when new evidence arrives",
             "Spam filter example: AI updates its confidence that an email is spam as it reads more words"
@@ -75,19 +82,21 @@
           "accentColor": "purple",
           "leftPanel": {
             "label": "Real Life Analogy",
-            "emoji": "🏥",
             "title": "A doctor updating their diagnosis",
-            "description": "as each new test result comes in"
+            "description": "as each new test result comes in",
+            "icon": "Star"
           },
           "centerPanel": {
             "label": "Programming Concept",
-            "visualType": "text",
-            "flowSteps": null,
-            "textContent": "Prior belief + New evidence → Updated belief"
+            "visualType": "flow_diagram",
+            "flowSteps": [
+              "Prior belief + New evidence \u2192 Updated belief"
+            ],
+            "textContent": "Prior belief + New evidence \u2192 Updated belief"
           },
           "rightPanel": {
             "label": "Code Example",
-            "code": "# If email has 'free money' → increase spam probability",
+            "code": "# If email has 'free money' \u2192 increase spam probability",
             "language": "python",
             "output": ""
           }
@@ -96,6 +105,11 @@
           "type": "reflection",
           "question": "Does Bayes Theorem allow AI to change its mind when it gets new information?",
           "answer": "Yes, it provides a mathematical way to update beliefs based on new evidence."
+        },
+        {
+          "type": "practice",
+          "title": "Try It: Hands-on Practice",
+          "description": "Let's put what we just learned into practice! Play around with the concepts below."
         }
       ]
     },
@@ -121,22 +135,22 @@
           "accentColor": "green",
           "leftPanel": {
             "label": "Real Life Analogy",
-            "emoji": "🔄",
             "title": "Updating Belief",
-            "description": "Iteratively refining confidence"
+            "description": "Iteratively refining confidence",
+            "icon": "Star"
           },
           "centerPanel": {
             "label": "Flow Diagram",
             "visualType": "flow_diagram",
             "flowSteps": [
               "Prior Belief",
-              "↓",
+              "\u2193",
               "New Evidence",
-              "↓",
+              "\u2193",
               "Bayes Update",
-              "↓",
+              "\u2193",
               "Updated Belief",
-              "↓",
+              "\u2193",
               "Decision"
             ],
             "textContent": null
@@ -167,7 +181,7 @@
       },
       {
         "emoji": "",
-        "text": "Real world decisions are rarely 100% certain — AI uses probability"
+        "text": "Real world decisions are rarely 100% certain \u2014 AI uses probability"
       },
       {
         "emoji": "",

@@ -101,6 +101,10 @@ export default function ProblemCard({ problem, index, completed, onComplete }: P
     } catch {}
   }, [saveKey]);
 
+  useEffect(() => {
+    if (completed) setAllPassed(true);
+  }, [completed]);
+
   const handleSave = (code: string) => {
     try {
       localStorage.setItem(saveKey, code);

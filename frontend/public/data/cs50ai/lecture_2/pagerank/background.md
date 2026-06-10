@@ -6,7 +6,7 @@ But this definition isn’t perfect: if someone wants to make their page seem mo
 
 For that reason, the PageRank algorithm was created by Google’s co-founders (including Larry Page, for whom the algorithm was named). In PageRank’s algorithm, a website is more important if it is linked to by other important websites, and links from less important websites have their links weighted less. This definition seems a bit circular, but it turns out that there are multiple strategies for calculating these rankings.
 
-### [**Random Surfer Model**](https://cs50.harvard.edu/ai/projects/2/pagerank/#random-surfer-model)
+### [Random Surfer Model](https://cs50.harvard.edu/ai/projects/2/pagerank/#random-surfer-model)
 
 One way to think about PageRank is with the random surfer model, which considers the behavior of a hypothetical surfer on the internet who clicks on links at random. Consider the corpus of web pages below, where an arrow between two pages indicates a link from one page to another.
 
@@ -30,7 +30,7 @@ To ensure we can always get to somewhere else in the corpus of web pages, we’l
 
 Our random surfer now starts by choosing a page at random, and then, for each additional sample we’d like to generate, chooses a link from the current page at random with probability `d`, and chooses any page at random with probability `1 - d`. If we keep track of how many times each page has shown up as a sample, we can treat the proportion of states that were on a given page as its PageRank.
 
-### [**Iterative Algorithm**](https://cs50.harvard.edu/ai/projects/2/pagerank/#iterative-algorithm)
+### [Iterative Algorithm](https://cs50.harvard.edu/ai/projects/2/pagerank/#iterative-algorithm)
 
 We can also define a page’s PageRank using a recursive mathematical expression. Let `PR(p)` be the PageRank of a given page `p`: the probability that a random surfer ends up on that page. How do we define `PR(p)`? Well, we know there are two ways that a random surfer could end up on the page:
 

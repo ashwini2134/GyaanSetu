@@ -1,4 +1,5 @@
 import type { ConceptVisualizationBlock } from '../../types/lesson';
+import * as LucideIcons from 'lucide-react';
 
 const ACCENT = {
   blue:   { bg: 'from-blue-600/15 to-blue-900/10', border: 'border-blue-500/25', label: 'text-blue-300', shadow: 'shadow-[0_8px_32px_rgba(59,130,246,0.35)]', gradFrom: 'from-blue-500', gradTo: 'to-blue-700', border2: 'border-blue-400/30' },
@@ -82,6 +83,8 @@ export default function ConceptVisualizationCard({ block }: { block: ConceptVisu
     return <p className="text-sm text-slate-300 text-center">{cp.textContent}</p>;
   };
 
+  const LeftIcon = (LucideIcons as any)[block.leftPanel.icon ?? ''] || LucideIcons.Zap;
+
   return (
     <div className="rounded-2xl border border-slate-700/30 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm p-6">
       <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-5 text-center">
@@ -94,9 +97,9 @@ export default function ConceptVisualizationCard({ block }: { block: ConceptVisu
             {block.leftPanel.label}
           </p>
           <div className="flex flex-col items-center text-center">
-            {block.leftPanel.emoji && (
-              <div className="w-16 h-16 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-3xl mb-3">
-                {block.leftPanel.emoji}
+            {block.leftPanel.icon && (
+              <div className="w-16 h-16 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center mb-3">
+                <LeftIcon className="w-8 h-8 text-amber-400" />
               </div>
             )}
             {block.leftPanel.title && (

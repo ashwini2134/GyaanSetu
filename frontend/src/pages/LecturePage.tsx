@@ -78,6 +78,7 @@ function LegacyLecturePage({ slug, lectureNumber }: { slug: string; lectureNumbe
   const navigate = useNavigate();
   const [content, setContent] = useState('');
   const courseTitle = slug === 'cs50p' ? 'CS50 Python' : slug === 'cs50ai' ? 'CS50 AI' : slug.toUpperCase();
+  const [retakingQuiz, setRetakingQuiz] = useState(false);
 
   useEffect(() => {
     const base = import.meta.env.BASE_URL ?? '/';
@@ -108,22 +109,27 @@ function LegacyLecturePage({ slug, lectureNumber }: { slug: string; lectureNumbe
 export default function LecturePage() {
   const { slug, number } = useParams<{ slug: string; number: string }>();
   const navigate = useNavigate();
-  const lectureNumber = Number(number ?? 0);
+  const lectureNumber = parseInt(number ?? '0', 10);
+  const [retakingQuiz, setRetakingQuiz] = useState(false);
 
   const { lessonData, loading, error } = useLessonData(slug, lectureNumber);
-  const {
-    progress,
-    markSectionVisited,
-    markPracticeAttempted,
-    markPracticeCompleted,
-    markQuizCompleted,
-    markProblemCompleted,
-    markHandsOnTaskCompleted,
-    markLectureCompleted,
+  const { 
+    progress, markSectionVisited, markPracticeAttempted, markPracticeCompleted, 
+    markQuizCompleted, markProblemCompleted, markHandsOnTaskCompleted, markLectureCompleted
   } = useProgress(slug, lectureNumber);
 
   const [currentPageIdx, setCurrentPageIdx] = useState(0);
   const [allLectures, setAllLectures] = useState<Array<{ number: number; title: string }>>([]);
+  const [hasResumed, setHasResumed] = useState(false);
+  const visitedRef = useRef<Set<number>>(new Set());
+
+  // Reset state when navigating to a different lecture
+  useEffect(() => {
+    setCurrentPageIdx(0);
+    setHasResumed(false);
+    visitedRef.current.clear();
+    setRetakingQuiz(false);
+  }, [slug, lectureNumber]);
 
   // Load lecture list for prev/next lecture navigation
   useEffect(() => {
@@ -163,34 +169,40 @@ export default function LecturePage() {
   }, [pages.length, currentPageIdx]);
 
   // Resume from last visited section when re-entering a lecture
+
   useEffect(() => {
     if (!lessonData || !pages.length) return;
-    const lastId = progress.lastSection;
-    if (!lastId || lastId === 'overview') return;
-
-    const idx = pages.findIndex(p => {
-      if (p.type === 'section') return lessonData.sections[p.index]?.id === lastId;
-      return p.type === lastId;
-    });
-    if (idx > 0) {
-      setCurrentPageIdx(idx);
+    
+    let targetIdx = currentPageIdx;
+    
+    // First run: attempt to resume
+    if (!hasResumed) {
+      setHasResumed(true);
+      const lastId = progress.lastSection;
+      if (lastId && lastId !== 'overview') {
+        const idx = pages.findIndex(p => {
+          if (p.type === 'section') return lessonData.sections[p.index]?.id === lastId;
+          return p.type === lastId;
+        });
+        if (idx > 0) {
+          setCurrentPageIdx(idx);
+          targetIdx = idx; // Update our local ref so we mark the correct one visited
+        }
+      }
     }
-  }, [lessonData, pages, progress.lastSection]);
 
-  // Mark sections visited on navigation — guard against Strict Mode double-fire
-  const visitedRef = useRef<Set<number>>(new Set());
-  useEffect(() => {
-    const page = pages[currentPageIdx];
-    if (!page || !lessonData) return;
-    // Already visited this page index this mount — skip to prevent loops
-    if (visitedRef.current.has(currentPageIdx)) return;
-    visitedRef.current.add(currentPageIdx);
+    // Now mark as visited
+    const page = pages[targetIdx];
+    if (!page) return;
+    if (visitedRef.current.has(targetIdx)) return;
+    visitedRef.current.add(targetIdx);
+    
     if (page.type === 'section') {
       markSectionVisited(lessonData.sections[page.index].id);
     } else {
       markSectionVisited(page.type);
     }
-  }, [currentPageIdx, pages, lessonData, markSectionVisited]);
+  }, [lessonData, pages, progress.lastSection, hasResumed, currentPageIdx, markSectionVisited]);
 
   // Compute status for each page item
   const pageStatuses: PageStatus[] = useMemo(() => {
@@ -338,24 +350,45 @@ export default function LecturePage() {
                     </span>
                     Quiz
                   </h2>
-                  {progress.quizCompleted && (
-                    <div className="flex items-center gap-2 text-sm text-green-400 bg-green-900/20 border border-green-700/30 rounded-xl px-4 py-2">
-                      <CheckCircle size={16} />
-                      Quiz completed — Score: {progress.quizScore}/{quiz.length}
+                  
+                  {progress.quizCompleted && progress.quizScore === quiz.length ? (
+                    <div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-600/10 to-slate-800/40 p-8 text-center space-y-4">
+                      <div className="w-16 h-16 rounded-2xl bg-emerald-600/20 flex items-center justify-center mx-auto">
+                        <CheckCircle size={32} className="text-emerald-400" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-white">Yay! You got a perfect score! 🎉</p>
+                        <p className="text-slate-400 mt-2">You have completely mastered this section.</p>
+                      </div>
                     </div>
-                  )}
-                  <QuizEngine
-                    questions={quiz}
-                    onComplete={(score, total) => {
-                      markQuizCompleted(score, total);
-                      if (score / total >= 0.7) {
-                        markSectionVisited('quiz');
-                        if (slug && lessonData) {
-                          tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, problems.length, quiz.length > 0);
+                  ) : progress.quizCompleted && !retakingQuiz ? (
+                    <div className="rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-600/10 to-slate-800/40 p-8 text-center space-y-4">
+                      <div>
+                        <p className="text-xl font-bold text-white">Quiz Completed</p>
+                        <p className="text-slate-400 mt-2">You scored {progress.quizScore} out of {quiz.length}.</p>
+                      </div>
+                      <button
+                        onClick={() => setRetakingQuiz(true)}
+                        className="inline-flex items-center gap-2 text-sm font-semibold text-white px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 transition-all"
+                      >
+                        Retake Quiz
+                      </button>
+                    </div>
+                  ) : (
+                    <QuizEngine
+                      questions={quiz}
+                      onComplete={(score, total) => {
+                        setRetakingQuiz(false);
+                        markQuizCompleted(score, total);
+                        if (score / total >= 0.7) {
+                          markSectionVisited('quiz');
+                          if (slug && lessonData) {
+                            tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, problems.length, quiz.length > 0);
+                          }
                         }
-                      }
-                    }}
-                  />
+                      }}
+                    />
+                  )}
                 </div>
               </section>
             )}

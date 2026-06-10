@@ -15,7 +15,7 @@
           "type": "explanation",
           "accentColor": "blue",
           "title": "What is Optimization & Hill Climbing",
-          "body": "Optimization means finding the best solution among many possible options. Hill Climbing is the simplest approach — always move toward a better nearby option.",
+          "body": "Optimization means finding the best solution among many possible options. Hill Climbing is the simplest approach \u2014 always move toward a better nearby option.",
           "bullets": [
             "Optimization = finding the best solution (cheapest, fastest, most accurate)",
             "Real example: finding the cheapest flight with fewest stops",
@@ -29,15 +29,17 @@
           "accentColor": "blue",
           "leftPanel": {
             "label": "Real Life Analogy",
-            "emoji": "⛰️",
             "title": "Climbing a hill in thick fog",
-            "description": "you can only see one step ahead, always step upward"
+            "description": "you can only see one step ahead, always step upward",
+            "icon": "Star"
           },
           "centerPanel": {
             "label": "Programming Concept",
-            "visualType": "text",
-            "flowSteps": null,
-            "textContent": "Current state → Check neighbors → Move to best neighbor → Repeat"
+            "visualType": "flow_diagram",
+            "flowSteps": [
+              "Current state \u2192 Check neighbors \u2192 Move to best neighbor \u2192 Repeat"
+            ],
+            "textContent": "Current state \u2192 Check neighbors \u2192 Move to best neighbor \u2192 Repeat"
           },
           "rightPanel": {
             "label": "Code Example",
@@ -50,6 +52,11 @@
           "type": "reflection",
           "question": "Can Hill Climbing always find the absolute best solution?",
           "answer": "No, it can get stuck at a local best."
+        },
+        {
+          "type": "practice",
+          "title": "Try It: Hands-on Practice",
+          "description": "Let's put what we just learned into practice! Play around with the concepts below."
         }
       ]
     },
@@ -63,11 +70,11 @@
           "title": "Simulated Annealing & Constraint Satisfaction",
           "body": "Simulated Annealing fixes Hill Climbing by occasionally accepting a worse option to escape being stuck. Constraint Satisfaction Problems have rules the solution must follow.",
           "bullets": [
-            "Simulated Annealing: sometimes accept a worse option — like shaking a puzzle to unstick pieces",
+            "Simulated Annealing: sometimes accept a worse option \u2014 like shaking a puzzle to unstick pieces",
             "As time goes on, accept worse options less often (temperature cools down)",
             "CSP: a problem where the solution must satisfy a set of constraints (rules)",
-            "CSP example: exam scheduling — no student should have two exams at the same time",
-            "Sudoku is a classic CSP — every row, column, box must have digits 1-9 with no repeats"
+            "CSP example: exam scheduling \u2014 no student should have two exams at the same time",
+            "Sudoku is a classic CSP \u2014 every row, column, box must have digits 1-9 with no repeats"
           ]
         },
         {
@@ -76,15 +83,17 @@
           "accentColor": "purple",
           "leftPanel": {
             "label": "Real Life Analogy",
-            "emoji": "📅",
             "title": "Exam timetable",
-            "description": "must schedule all exams so no student has a clash"
+            "description": "must schedule all exams so no student has a clash",
+            "icon": "Star"
           },
           "centerPanel": {
             "label": "Programming Concept",
-            "visualType": "text",
-            "flowSteps": null,
-            "textContent": "Variables + Domains + Constraints → Solution"
+            "visualType": "flow_diagram",
+            "flowSteps": [
+              "Variables + Domains + Constraints \u2192 Solution"
+            ],
+            "textContent": "Variables + Domains + Constraints \u2192 Solution"
           },
           "rightPanel": {
             "label": "Code Example",
@@ -97,6 +106,11 @@
           "type": "reflection",
           "question": "Is Sudoku an example of a Constraint Satisfaction Problem?",
           "answer": "Yes, the digits must satisfy strict row, column, and box constraints."
+        },
+        {
+          "type": "practice",
+          "title": "Try It: Hands-on Practice",
+          "description": "Let's put what we just learned into practice! Play around with the concepts below."
         }
       ]
     },
@@ -110,9 +124,9 @@
           "title": "Optimization Steps",
           "body": "How to optimize solutions.",
           "bullets": [
-            "Step 1: Define your problem — what are you trying to optimize?",
+            "Step 1: Define your problem \u2014 what are you trying to optimize?",
             "Step 2: Choose a starting solution",
-            "Step 3: Check neighboring solutions — is any better?",
+            "Step 3: Check neighboring solutions \u2014 is any better?",
             "Step 4: Move to the better solution (Hill Climbing) or sometimes move to worse (Simulated Annealing)",
             "Step 5: Repeat until no improvement found"
           ]
@@ -123,21 +137,21 @@
           "accentColor": "green",
           "leftPanel": {
             "label": "Real Life Analogy",
-            "emoji": "🔄",
             "title": "Iterative Improvement",
-            "description": "Checking neighbors"
+            "description": "Checking neighbors",
+            "icon": "Star"
           },
           "centerPanel": {
             "label": "Flow Diagram",
             "visualType": "flow_diagram",
             "flowSteps": [
               "Start",
-              "↓",
+              "\u2193",
               "Evaluate",
-              "↓",
+              "\u2193",
               "Check Neighbors",
-              "↓",
-              "Better? Yes → Move / No → Done"
+              "\u2193",
+              "Better? Yes \u2192 Move / No \u2192 Done"
             ],
             "textContent": null
           },
@@ -171,7 +185,7 @@
       },
       {
         "emoji": "",
-        "text": "Hill Climbing can get stuck at a local best — not always the global best"
+        "text": "Hill Climbing can get stuck at a local best \u2014 not always the global best"
       },
       {
         "emoji": "",

@@ -15,16 +15,16 @@
           "type": "explanation",
           "accentColor": "blue",
           "title": "What You Have Learned",
-          "body": "You have completed the full CS50 AI journey — from Search to Language. This week you will apply everything to build a real project.",
+          "body": "You have completed the full CS50 AI journey \u2014 from Search to Language. This week you will apply everything to build a real project.",
           "bullets": [
-            "Week 0: Search — BFS, DFS, A* — AI finding paths and solutions",
-            "Week 1: Knowledge & Logic — IF-THEN rules, inference, knowledge base",
-            "Week 2: Uncertainty — probability, Bayes Theorem, spam filters",
-            "Week 3: Optimization — Hill Climbing, Simulated Annealing, CSP",
-            "Week 4: Machine Learning — supervised, unsupervised, reinforcement",
-            "Week 5: Neural Networks — layers, weights, deep learning, CNNs",
-            "Week 6: NLP — tokenization, embeddings, LLMs, transformers",
-            "Week 7: Ethics — bias, privacy, hallucinations, accountability"
+            "Week 0: Search \u2014 BFS, DFS, A \u2014 AI finding paths and solutions",
+            "Week 1: Knowledge & Logic \u2014 IF-THEN rules, inference, knowledge base",
+            "Week 2: Uncertainty \u2014 probability, Bayes Theorem, spam filters",
+            "Week 3: Optimization \u2014 Hill Climbing, Simulated Annealing, CSP",
+            "Week 4: Machine Learning \u2014 supervised, unsupervised, reinforcement",
+            "Week 5: Neural Networks \u2014 layers, weights, deep learning, CNNs",
+            "Week 6: NLP \u2014 tokenization, embeddings, LLMs, transformers",
+            "Week 7: Ethics \u2014 bias, privacy, hallucinations, accountability"
           ]
         },
         {
@@ -33,15 +33,17 @@
           "accentColor": "blue",
           "leftPanel": {
             "label": "Real Life Analogy",
-            "emoji": "👨‍🍳",
             "title": "Cooking a meal",
-            "description": "You have learned all the ingredients — now it is time to cook a full meal"
+            "description": "You have learned all the ingredients \u2014 now it is time to cook a full meal",
+            "icon": "Star"
           },
           "centerPanel": {
             "label": "Programming Concept",
-            "visualType": "text",
-            "flowSteps": null,
-            "textContent": "All 8 weeks of AI concepts → Applied in one real project"
+            "visualType": "flow_diagram",
+            "flowSteps": [
+              "All 8 weeks of AI concepts \u2192 Applied in one real project"
+            ],
+            "textContent": "All 8 weeks of AI concepts \u2192 Applied in one real project"
           },
           "rightPanel": {
             "label": "Code Example",
@@ -54,6 +56,11 @@
           "type": "reflection",
           "question": "Is the final project a chance to apply what you have learned to a real problem?",
           "answer": "Yes, it combines the theories into an actual application."
+        },
+        {
+          "type": "practice",
+          "title": "Try It: Hands-on Practice",
+          "description": "Let's put what we just learned into practice! Play around with the concepts below."
         }
       ]
     },
@@ -67,10 +74,10 @@
           "title": "Choose Your Project",
           "body": "Choose one of the 4 project options. Each uses a different AI concept from the course.",
           "bullets": [
-            "Option 1: AI Chatbot — uses NLP and prompt engineering to answer questions on a topic",
-            "Option 2: AI Story Generator — user gives characters and setting; AI generates a short story",
-            "Option 3: AI Resume Builder — user inputs details; AI formats and generates a professional resume",
-            "Option 4: Search Visualizer — a diagram or slide showing how BFS and DFS solve the same maze differently"
+            "Option 1: AI Chatbot \u2014 uses NLP and prompt engineering to answer questions on a topic",
+            "Option 2: AI Story Generator \u2014 user gives characters and setting; AI generates a short story",
+            "Option 3: AI Resume Builder \u2014 user inputs details; AI formats and generates a professional resume",
+            "Option 4: Search Visualizer \u2014 a diagram or slide showing how BFS and DFS solve the same maze differently"
           ]
         },
         {
@@ -79,15 +86,17 @@
           "accentColor": "purple",
           "leftPanel": {
             "label": "Real Life Analogy",
-            "emoji": "🎓",
             "title": "Final exam project",
-            "description": "pick the one that interests you most"
+            "description": "pick the one that interests you most",
+            "icon": "Star"
           },
           "centerPanel": {
             "label": "Programming Concept",
-            "visualType": "text",
-            "flowSteps": null,
-            "textContent": "Choose concept → Define input/output → Build → Reflect → Present"
+            "visualType": "flow_diagram",
+            "flowSteps": [
+              "Choose concept \u2192 Define input/output \u2192 Build \u2192 Reflect \u2192 Present"
+            ],
+            "textContent": "Choose concept \u2192 Define input/output \u2192 Build \u2192 Reflect \u2192 Present"
           },
           "rightPanel": {
             "label": "Code Example",
@@ -100,6 +109,11 @@
           "type": "reflection",
           "question": "Should your project clearly show which AI concept from the course it uses?",
           "answer": "Yes, clearly identifying the AI mechanism is a key requirement."
+        },
+        {
+          "type": "practice",
+          "title": "Try It: Hands-on Practice",
+          "description": "Let's put what we just learned into practice! Play around with the concepts below."
         }
       ]
     },
@@ -115,10 +129,10 @@
           "bullets": [
             "Step 1: Choose your project from the 4 options",
             "Step 2: Identify which AI concept it uses (search, ML, NLP, etc.)",
-            "Step 3: Define input — what does the user provide?",
-            "Step 4: Define output — what does the AI produce?",
+            "Step 3: Define input \u2014 what does the user provide?",
+            "Step 4: Define output \u2014 what does the AI produce?",
             "Step 5: Identify one ethical consideration relevant to your project",
-            "Step 6: Write a short reflection — what surprised you about how AI actually works?"
+            "Step 6: Write a short reflection \u2014 what surprised you about how AI actually works?"
           ]
         },
         {
@@ -127,24 +141,24 @@
           "accentColor": "green",
           "leftPanel": {
             "label": "Real Life Analogy",
-            "emoji": "🚀",
             "title": "Building phase",
-            "description": "Executing your plan"
+            "description": "Executing your plan",
+            "icon": "Star"
           },
           "centerPanel": {
             "label": "Flow Diagram",
             "visualType": "flow_diagram",
             "flowSteps": [
               "Choose Project",
-              "↓",
+              "\u2193",
               "Define Input/Output",
-              "↓",
+              "\u2193",
               "Build",
-              "↓",
+              "\u2193",
               "Add Ethical Consideration",
-              "↓",
+              "\u2193",
               "Reflect",
-              "↓",
+              "\u2193",
               "Submit"
             ],
             "textContent": null
@@ -171,7 +185,7 @@
     "keyTakeaways": [
       {
         "emoji": "",
-        "text": "You have completed 8 weeks of AI concepts — Search, Logic, Probability, Optimization, ML, Neural Networks, NLP, Ethics"
+        "text": "You have completed 8 weeks of AI concepts \u2014 Search, Logic, Probability, Optimization, ML, Neural Networks, NLP, Ethics"
       },
       {
         "emoji": "",
@@ -191,12 +205,12 @@
       },
       {
         "emoji": "",
-        "text": "Reflection is as important as the code — think about what surprised you"
+        "text": "Reflection is as important as the code \u2014 think about what surprised you"
       }
     ],
     "whatYouLearned": [
       "What AI, ML, and Deep Learning are and how they differ",
-      "How AI searches for solutions using BFS, DFS, and A*",
+      "How AI searches for solutions using BFS, DFS, and A",
       "How AI uses logic, probability, and optimization",
       "How Machine Learning and Neural Networks work",
       "How NLP and LLMs understand and generate language",
