@@ -186,12 +186,14 @@ export default function Shell() {
                 <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'}`}>
                   Courses
                 </span>
-                <ChevronDown
-                  size={16}
-                  className={`text-slate-500 transition-all duration-200 flex-shrink-0 ${
-                    coursesOpen ? "rotate-0" : "-rotate-90"
-                  } ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'}`}
-                />
+                <span className={`transition-all duration-200 overflow-hidden flex-shrink-0 flex items-center ${expanded ? 'w-4 opacity-100' : 'w-0 opacity-0'}`}>
+                  <ChevronDown
+                    size={16}
+                    className={`text-slate-500 transition-transform duration-200 flex-shrink-0 ${
+                      coursesOpen ? "rotate-0" : "-rotate-90"
+                    }`}
+                  />
+                </span>
               </button>
 
               <div

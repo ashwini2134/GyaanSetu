@@ -213,11 +213,18 @@ export default function LecturePage() {
   // Compute status for each page item
   const pageStatuses: PageStatus[] = useMemo(() => {
     return pages.map((page, idx) => {
-      if (idx < currentPageIdx) return 'completed';
       if (idx === currentPageIdx) return 'current';
-      return 'upcoming';
+      
+      const id = pageId(page, lessonData?.sections ?? []);
+      let isVisited = false;
+      if (id === 'quiz') isVisited = progress.quizCompleted;
+      else if (id === 'problems') isVisited = progress.problemsCompleted.length > 0;
+      else if (id === 'summary') isVisited = progress.lectureCompleted;
+      else isVisited = !!progress.sections[id]?.visited;
+
+      return isVisited ? 'completed' : 'upcoming';
     });
-  }, [pages, currentPageIdx]);
+  }, [pages, currentPageIdx, progress, lessonData]);
 
   if (!slug) return null;
 
@@ -441,6 +448,27 @@ export default function LecturePage() {
                       />
                     ))}
                   </div>
+
+                  {problems.length > 0 && (
+                    <div className="mt-8 pt-6 border-t border-slate-700/30">
+                      <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                        <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Similar Questions
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="p-4 rounded-xl border border-slate-700/30 bg-slate-800/20 hover:bg-slate-800/40 transition-colors cursor-pointer flex justify-between items-center group">
+                          <span className="text-sm text-blue-400 group-hover:text-blue-300">1. {problems[0].title.replace('Basic ', 'Advanced ').replace('Simple ', 'Complex ')} (Optional)</span>
+                          <span className="text-xs text-slate-500 bg-slate-800/50 px-2 py-1 rounded">Practice</span>
+                        </div>
+                        <div className="p-4 rounded-xl border border-slate-700/30 bg-slate-800/20 hover:bg-slate-800/40 transition-colors cursor-pointer flex justify-between items-center group">
+                          <span className="text-sm text-blue-400 group-hover:text-blue-300">2. {problems[0].title} via standard library (Optional)</span>
+                          <span className="text-xs text-slate-500 bg-slate-800/50 px-2 py-1 rounded">Practice</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </section>
             )}

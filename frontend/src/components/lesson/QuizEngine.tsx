@@ -15,7 +15,7 @@ interface AttemptRecord {
   timestamp: number;
   score: number;
   total: number;
-  details: { qNum: number; passed: boolean }[];
+  details: { qNum: number; passed: boolean; userAns: string }[];
 }
 
 export default function QuizEngine({ quizId = 'default', questions, onComplete }: QuizEngineProps) {
@@ -67,7 +67,7 @@ export default function QuizEngine({ quizId = 'default', questions, onComplete }
       
       const details = activeQuestions.map((q, i) => {
         const userAns = i === current ? selected! : (answers[i] ?? '');
-        return { qNum: i + 1, passed: userAns === q.answer };
+        return { qNum: i + 1, passed: userAns === q.answer, userAns };
       });
       
       const newAttempt: AttemptRecord = {
@@ -163,19 +163,38 @@ export default function QuizEngine({ quizId = 'default', questions, onComplete }
         {history.length > 0 && (
           <div className="mt-8 pt-6 border-t border-slate-700/30 text-left">
             <h4 className="text-sm font-bold text-white mb-4">Attempt History</h4>
-            <div className="space-y-3">
+            <div className="space-y-6">
               {history.map((att, i) => (
-                <div key={att.id} className="p-3 rounded-lg bg-slate-900/60 border border-slate-700/40">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-medium text-slate-300">Attempt {i + 1}</span>
+                <div key={att.id} className="p-4 rounded-xl bg-slate-900/60 border border-slate-700/40">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm font-semibold text-slate-200">Attempt {i + 1} <span className="ml-2 text-xs font-normal text-slate-400">({att.score}/{att.total})</span></span>
                     <span className="text-xs text-slate-500">{new Date(att.timestamp).toLocaleString()}</span>
                   </div>
-                  <div className="flex gap-2 flex-wrap">
-                    {att.details.map((d, j) => (
-                      <span key={j} className={`px-2 py-0.5 rounded text-[10px] font-medium ${d.passed ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
-                        Q{d.qNum} — {d.passed ? 'Pass' : 'Fail'}
-                      </span>
-                    ))}
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="border-b border-slate-700/50 text-slate-400">
+                          <th className="pb-2 font-semibold">Question No.</th>
+                          <th className="pb-2 font-semibold">Status</th>
+                          <th className="pb-2 font-semibold">User's Answer</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/50">
+                        {att.details.map((d, j) => (
+                          <tr key={j} className="text-slate-300">
+                            <td className="py-2">Q{d.qNum}</td>
+                            <td className="py-2">
+                              {d.passed ? (
+                                <span className="inline-flex items-center gap-1 text-green-400">✅ Passed</span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-red-400">❌ Failed</span>
+                              )}
+                            </td>
+                            <td className="py-2 whitespace-pre-wrap">{d.userAns || '(skipped)'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               ))}
@@ -183,16 +202,14 @@ export default function QuizEngine({ quizId = 'default', questions, onComplete }
           </div>
         )}
 
-        {score < total && (
-          <button
-            onClick={handleRestart}
-            className={`inline-flex items-center gap-2 text-sm font-semibold text-white px-6 py-3 rounded-xl transition-all ${
-              passed ? 'bg-green-600 hover:bg-green-500' : 'bg-orange-600 hover:bg-orange-500'
-            }`}
-          >
-            Retry Quiz
-          </button>
-        )}
+        <button
+          onClick={handleRestart}
+          className={`inline-flex items-center gap-2 text-sm font-semibold text-white px-6 py-3 rounded-xl transition-all ${
+            passed ? 'bg-green-600 hover:bg-green-500' : 'bg-orange-600 hover:bg-orange-500'
+          }`}
+        >
+          Retake Quiz
+        </button>
       </div>
     );
   }
