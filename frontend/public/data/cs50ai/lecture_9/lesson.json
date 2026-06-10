@@ -3,7 +3,7 @@
   "courseSlug": "cs50ai",
   "number": 9,
   "title": "Final Project",
-  "overview": "You have completed the full CS50 AI journey. This week you will apply everything to build a real project.",
+  "overview": "You have completed the full AI journey. This week you will apply everything to build a real project.",
   "estimatedMinutes": 60,
   "nextUp": null,
   "sections": [
@@ -13,9 +13,8 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "What You Have Learned",
-          "body": "You have completed the full CS50 AI journey \u2014 from Search to Language. This week you will apply everything to build a real project.",
+          "title": "What is What You Have Learned?",
+          "body": "You have completed the full AI journey \u2014 from Search to Language. This week you will apply everything to build a real project.",
           "bullets": [
             "Week 0: Search \u2014 BFS, DFS, A \u2014 AI finding paths and solutions",
             "Week 1: Knowledge & Logic \u2014 IF-THEN rules, inference, knowledge base",
@@ -23,33 +22,30 @@
             "Week 3: Optimization \u2014 Hill Climbing, Simulated Annealing, CSP",
             "Week 4: Machine Learning \u2014 supervised, unsupervised, reinforcement",
             "Week 5: Neural Networks \u2014 layers, weights, deep learning, CNNs",
-            "Week 6: NLP \u2014 tokenization, embeddings, LLMs, transformers",
-            "Week 7: Ethics \u2014 bias, privacy, hallucinations, accountability"
-          ]
+            "Week 6: NLP \u2014 tokenization, embeddings, LLMs, transformers"
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "CS50 AI Journey",
-          "accentColor": "blue",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "title": "Cooking a meal",
-            "description": "You have learned all the ingredients \u2014 now it is time to cook a full meal",
-            "icon": "Star"
+          "title": "Think of It",
+          "accentColor": "purple",
+          "analogy": {
+            "title": "Real Life Analogy",
+            "description": "Think of it like a familiar real-world scenario.",
+            "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "flow_diagram",
+          "visual": {
+            "title": "AI Journey",
+            "type": "flow_diagram",
             "flowSteps": [
               "All 8 weeks of AI concepts \u2192 Applied in one real project"
-            ],
-            "textContent": "All 8 weeks of AI concepts \u2192 Applied in one real project"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "# Your project will use at least one AI concept from this course",
+          "code": {
             "language": "python",
-            "output": ""
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
         },
         {
@@ -59,8 +55,11 @@
         },
         {
           "type": "practice",
-          "title": "Try It: Hands-on Practice",
-          "description": "Let's put what we just learned into practice! Play around with the concepts below."
+          "title": "Practice Exercise",
+          "instructions": "Write a simple Python script demonstrating What You Have Learned.",
+          "starterCode": "# Write your code here\n",
+          "solution": "# Example solution\nprint('Done')",
+          "hint": "Start by defining the main function."
         }
       ]
     },
@@ -70,39 +69,37 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "Choose Your Project",
+          "title": "What is Choose Your Project?",
           "body": "Choose one of the 4 project options. Each uses a different AI concept from the course.",
           "bullets": [
             "Option 1: AI Chatbot \u2014 uses NLP and prompt engineering to answer questions on a topic",
             "Option 2: AI Story Generator \u2014 user gives characters and setting; AI generates a short story",
             "Option 3: AI Resume Builder \u2014 user inputs details; AI formats and generates a professional resume",
-            "Option 4: Search Visualizer \u2014 a diagram or slide showing how BFS and DFS solve the same maze differently"
-          ]
+            "Option 4: Search Visualizer \u2014 a diagram or slide showing how BFS and DFS solve the same maze differently",
+            "This concept is fundamental to AI development."
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "Project Options",
+          "title": "Think of It",
           "accentColor": "purple",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "title": "Final exam project",
-            "description": "pick the one that interests you most",
-            "icon": "Star"
+          "analogy": {
+            "title": "Real Life Analogy",
+            "description": "Think of it like a familiar real-world scenario.",
+            "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "flow_diagram",
+          "visual": {
+            "title": "Project Options",
+            "type": "flow_diagram",
             "flowSteps": [
               "Choose concept \u2192 Define input/output \u2192 Build \u2192 Reflect \u2192 Present"
-            ],
-            "textContent": "Choose concept \u2192 Define input/output \u2192 Build \u2192 Reflect \u2192 Present"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "# Chatbot: input = user question, output = AI answer",
+          "code": {
             "language": "python",
-            "output": ""
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
         },
         {
@@ -112,8 +109,11 @@
         },
         {
           "type": "practice",
-          "title": "Try It: Hands-on Practice",
-          "description": "Let's put what we just learned into practice! Play around with the concepts below."
+          "title": "Practice Exercise",
+          "instructions": "Write a simple Python script demonstrating Choose Your Project.",
+          "starterCode": "# Write your code here\n",
+          "solution": "# Example solution\nprint('Done')",
+          "hint": "Start by defining the main function."
         }
       ]
     },
@@ -123,8 +123,7 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "Project Steps",
+          "title": "What is Project Steps?",
           "body": "Follow these steps to complete the project.",
           "bullets": [
             "Step 1: Choose your project from the 4 options",
@@ -133,21 +132,21 @@
             "Step 4: Define output \u2014 what does the AI produce?",
             "Step 5: Identify one ethical consideration relevant to your project",
             "Step 6: Write a short reflection \u2014 what surprised you about how AI actually works?"
-          ]
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "Project Workflow",
-          "accentColor": "green",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "title": "Building phase",
-            "description": "Executing your plan",
-            "icon": "Star"
+          "title": "Think of It",
+          "accentColor": "purple",
+          "analogy": {
+            "title": "Real Life Analogy",
+            "description": "Think of it like a familiar real-world scenario.",
+            "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Flow Diagram",
-            "visualType": "flow_diagram",
+          "visual": {
+            "title": "Project Workflow",
+            "type": "flow_diagram",
             "flowSteps": [
               "Choose Project",
               "\u2193",
@@ -160,15 +159,18 @@
               "Reflect",
               "\u2193",
               "Submit"
-            ],
-            "textContent": null
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "# See example above",
+          "code": {
             "language": "python",
-            "output": ""
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
+        },
+        {
+          "type": "reflection",
+          "question": "Is Getting Started always the best approach?",
+          "answer": "Not always! It depends on the specific problem and constraints."
         },
         {
           "type": "practice",

@@ -463,7 +463,7 @@ export default function CodingProjectPage() {
         <div className="flex-shrink-0 p-5 border-b border-slate-800/80 bg-[#0c1015]/60">
           <div className="flex items-center justify-between gap-4 mb-3">
             <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">
-              {slug === "cs50p" ? "CS50 Python" : "CS50 AI"} • Lecture {number}
+              {slug === "cs50p" ? "CS50 Python" : "AI"} • Lecture {number}
             </span>
             
             {/* Problem Navigation Links */}

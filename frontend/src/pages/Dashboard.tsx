@@ -488,10 +488,10 @@ export default function Dashboard() {
                             }`}
                           >
                             <div className="flex flex-col gap-4">
-                              <div className="flex items-center justify-between">
-                                <div className="relative w-10 h-10 rounded-xl bg-slate-900/60 border border-slate-800/80 flex items-center justify-center flex-shrink-0">
+                              <div className="flex flex-col items-center justify-center gap-3">
+                                <div className="relative w-12 h-12 rounded-xl bg-slate-900/60 border border-slate-800/80 flex items-center justify-center flex-shrink-0">
                                   {c.slug === 'cs50p' ? (
-                                    <span className="font-bold text-xs text-cyan-400">Py</span>
+                                    <span className="font-bold text-sm text-cyan-400">Py</span>
                                   ) : (
                                     <span className="text-slate-400">
                                       <IconCourseCard />
@@ -502,7 +502,7 @@ export default function Dashboard() {
                                   )}
                                 </div>
                                 {/* Metadata Badges */}
-                                <div className="flex gap-1.5">
+                                <div className="flex gap-1.5 justify-center">
                                   <span className="px-2 py-0.5 rounded-md text-[9px] font-semibold bg-blue-500/10 border border-blue-500/20 text-blue-400">
                                     {c.level}
                                   </span>
@@ -511,7 +511,7 @@ export default function Dashboard() {
                                   </span>
                                 </div>
                               </div>
-                              <div>
+                              <div className="text-center mt-2">
                                 <h3 className="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors">{c.title}</h3>
                                 <p className="text-xs text-slate-400 mt-2 line-clamp-3 leading-relaxed min-h-[48px]">{c.description}</p>
                               </div>

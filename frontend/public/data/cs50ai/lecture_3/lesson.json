@@ -13,50 +13,51 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "Probability Basics",
+          "title": "What is Probability Basics?",
           "body": "The real world is rarely certain \u2014 AI uses probability to handle situations that are not clearly True or False",
           "bullets": [
             "Probability is a number between 0 and 1 showing how likely something is",
             "0 = impossible, 1 = certain, 0.7 = 70% likely",
             "Every day examples: 70% chance of rain, 50% chance of heads on a coin flip",
-            "AI uses probability to make decisions even when it is not 100% sure"
-          ]
+            "AI uses probability to make decisions even when it is not 100% sure",
+            "This concept is fundamental to AI development."
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "Probability Concept",
-          "accentColor": "blue",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "title": "Weather forecast",
-            "description": "70% chance of rain means likely but not certain",
-            "icon": "Star"
+          "title": "Think of It",
+          "accentColor": "purple",
+          "analogy": {
+            "title": "Real Life Analogy",
+            "description": "Think of it like a familiar real-world scenario.",
+            "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "flow_diagram",
+          "visual": {
+            "title": "Probability Concept",
+            "type": "flow_diagram",
             "flowSteps": [
               "Probability scale 0 \u2192 1"
-            ],
-            "textContent": "Probability scale 0 \u2192 1"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "import random\nflip = random.random()\nif flip > 0.5:\n    print('Heads')",
+          "code": {
             "language": "python",
-            "output": ""
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
         },
         {
           "type": "reflection",
           "question": "Is a probability of 0.9 more certain than a probability of 0.5?",
-          "answer": "Yes, 0.9 means 90% likely, which is much more certain than 50% (0.5)."
+          "answer": "Yes, 0."
         },
         {
           "type": "practice",
-          "title": "Try It: Hands-on Practice",
-          "description": "Let's put what we just learned into practice! Play around with the concepts below."
+          "title": "Practice Exercise",
+          "instructions": "Write a simple Python script demonstrating Probability Basics.",
+          "starterCode": "# Write your code here\n",
+          "solution": "# Example solution\nprint('Done')",
+          "hint": "Start by defining the main function."
         }
       ]
     },
@@ -66,39 +67,37 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "Conditional Probability & Bayes Theorem",
+          "title": "What is Conditional Probability & Bayes Theorem?",
           "body": "Conditional probability asks \u2014 what is the chance of X given that Y already happened? Bayes Theorem lets AI update its belief when new evidence arrives.",
           "bullets": [
             "Conditional probability: P(A|B) \u2014 probability of A given B is already true",
             "Example: probability of wet roads given it rained = very high",
             "Bayes Theorem updates probability when new evidence arrives",
-            "Spam filter example: AI updates its confidence that an email is spam as it reads more words"
-          ]
+            "Spam filter example: AI updates its confidence that an email is spam as it reads more words",
+            "This concept is fundamental to AI development."
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "Bayes in Action",
+          "title": "Think of It",
           "accentColor": "purple",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "title": "A doctor updating their diagnosis",
-            "description": "as each new test result comes in",
-            "icon": "Star"
+          "analogy": {
+            "title": "Real Life Analogy",
+            "description": "Think of it like a familiar real-world scenario.",
+            "image": "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "flow_diagram",
+          "visual": {
+            "title": "Bayes in Action",
+            "type": "flow_diagram",
             "flowSteps": [
               "Prior belief + New evidence \u2192 Updated belief"
-            ],
-            "textContent": "Prior belief + New evidence \u2192 Updated belief"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "# If email has 'free money' \u2192 increase spam probability",
+          "code": {
             "language": "python",
-            "output": ""
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
         },
         {
@@ -108,8 +107,11 @@
         },
         {
           "type": "practice",
-          "title": "Try It: Hands-on Practice",
-          "description": "Let's put what we just learned into practice! Play around with the concepts below."
+          "title": "Practice Exercise",
+          "instructions": "Write a simple Python script demonstrating Conditional Probability & Bayes Theorem.",
+          "starterCode": "# Write your code here\n",
+          "solution": "# Example solution\nprint('Done')",
+          "hint": "Start by defining the main function."
         }
       ]
     },
@@ -119,29 +121,29 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "Steps for Probability",
+          "title": "What is Steps for Probability?",
           "body": "Using probability in practice involves these steps.",
           "bullets": [
             "Step 1: Assign a starting probability to your belief (prior)",
             "Step 2: Observe new evidence",
             "Step 3: Update your probability using Bayes Theorem",
-            "Step 4: Make a decision based on the updated probability"
-          ]
+            "Step 4: Make a decision based on the updated probability",
+            "This concept is fundamental to AI development."
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "Probability Flow",
-          "accentColor": "green",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "title": "Updating Belief",
-            "description": "Iteratively refining confidence",
-            "icon": "Star"
+          "title": "Think of It",
+          "accentColor": "purple",
+          "analogy": {
+            "title": "Real Life Analogy",
+            "description": "Think of it like a familiar real-world scenario.",
+            "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Flow Diagram",
-            "visualType": "flow_diagram",
+          "visual": {
+            "title": "Probability Flow",
+            "type": "flow_diagram",
             "flowSteps": [
               "Prior Belief",
               "\u2193",
@@ -152,15 +154,18 @@
               "Updated Belief",
               "\u2193",
               "Decision"
-            ],
-            "textContent": null
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "# See example above",
+          "code": {
             "language": "python",
-            "output": ""
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
+        },
+        {
+          "type": "reflection",
+          "question": "Is Getting Started always the best approach?",
+          "answer": "Not always! It depends on the specific problem and constraints."
         },
         {
           "type": "practice",

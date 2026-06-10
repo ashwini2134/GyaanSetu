@@ -13,8 +13,7 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "What is Machine Learning & Supervised Learning",
+          "title": "What is What is Machine Learning & Supervised Learning?",
           "body": "Machine Learning is AI that learns rules from examples instead of being told the rules directly.",
           "bullets": [
             "Traditional programming: rules + data = answers",
@@ -22,31 +21,29 @@
             "Supervised Learning: training with labeled examples \u2014 input + correct output given",
             "Classification: predict a category (spam or not spam, pass or fail)",
             "Regression: predict a number (house price, student score)"
-          ]
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "ML Concept",
-          "accentColor": "blue",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "title": "Showing a child flashcards",
-            "description": "with correct answers until they learn to recognize them",
-            "icon": "Star"
+          "title": "Think of It",
+          "accentColor": "purple",
+          "analogy": {
+            "title": "Real Life Analogy",
+            "description": "Think of it like a familiar real-world scenario.",
+            "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "flow_diagram",
+          "visual": {
+            "title": "ML Concept",
+            "type": "flow_diagram",
             "flowSteps": [
               "Training data (input + label) \u2192 Model learns pattern \u2192 Predict new inputs"
-            ],
-            "textContent": "Training data (input + label) \u2192 Model learns pattern \u2192 Predict new inputs"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "# Input: email text, Label: spam/not spam\n# Model learns which words predict spam",
+          "code": {
             "language": "python",
-            "output": ""
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
         },
         {
@@ -56,8 +53,11 @@
         },
         {
           "type": "practice",
-          "title": "Try It: Hands-on Practice",
-          "description": "Let's put what we just learned into practice! Play around with the concepts below."
+          "title": "Practice Exercise",
+          "instructions": "Write a simple Python script demonstrating What is Machine Learning & Supervised Learning.",
+          "starterCode": "# Write your code here\n",
+          "solution": "# Example solution\nprint('Done')",
+          "hint": "Start by defining the main function."
         }
       ]
     },
@@ -67,8 +67,7 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "Unsupervised & Reinforcement Learning",
+          "title": "What is Unsupervised & Reinforcement Learning?",
           "body": "Not all learning needs labels. Unsupervised learning finds patterns on its own. Reinforcement learning learns by trying and getting rewards.",
           "bullets": [
             "Unsupervised Learning: finds patterns with no labels \u2014 grouping similar customers",
@@ -76,31 +75,29 @@
             "Reinforcement Learning: AI tries an action, gets a reward or penalty, learns over time",
             "Example: chess AI learns by playing millions of games \u2014 rewarded for winning",
             "Overfitting: model memorizes training data but fails on new data"
-          ]
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "Reinforcement Learning",
+          "title": "Think of It",
           "accentColor": "purple",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "title": "Training a dog",
-            "description": "reward for correct behavior, ignore wrong behavior",
-            "icon": "Star"
+          "analogy": {
+            "title": "Real Life Analogy",
+            "description": "Think of it like a familiar real-world scenario.",
+            "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "flow_diagram",
+          "visual": {
+            "title": "Reinforcement Learning",
+            "type": "flow_diagram",
             "flowSteps": [
               "Action \u2192 Environment \u2192 Reward \u2192 Update policy \u2192 Repeat"
-            ],
-            "textContent": "Action \u2192 Environment \u2192 Reward \u2192 Update policy \u2192 Repeat"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "# Chess AI: win = +1 reward, lose = -1 reward, learn from millions of games",
+          "code": {
             "language": "python",
-            "output": ""
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
         },
         {
@@ -110,8 +107,11 @@
         },
         {
           "type": "practice",
-          "title": "Try It: Hands-on Practice",
-          "description": "Let's put what we just learned into practice! Play around with the concepts below."
+          "title": "Practice Exercise",
+          "instructions": "Write a simple Python script demonstrating Unsupervised & Reinforcement Learning.",
+          "starterCode": "# Write your code here\n",
+          "solution": "# Example solution\nprint('Done')",
+          "hint": "Start by defining the main function."
         }
       ]
     },
@@ -121,8 +121,7 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "ML Steps",
+          "title": "What is ML Steps?",
           "body": "The Machine Learning workflow.",
           "bullets": [
             "Step 1: Collect data \u2014 gather examples of inputs and correct outputs",
@@ -130,21 +129,21 @@
             "Step 3: Train model \u2014 feed data to algorithm, it learns the pattern",
             "Step 4: Test model \u2014 give it new unseen data, check accuracy",
             "Step 5: Predict \u2014 use trained model on real-world inputs"
-          ]
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "ML Pipeline",
-          "accentColor": "green",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "title": "Workflow",
-            "description": "Data to Predictions",
-            "icon": "Star"
+          "title": "Think of It",
+          "accentColor": "purple",
+          "analogy": {
+            "title": "Real Life Analogy",
+            "description": "Think of it like a familiar real-world scenario.",
+            "image": "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Flow Diagram",
-            "visualType": "flow_diagram",
+          "visual": {
+            "title": "ML Pipeline",
+            "type": "flow_diagram",
             "flowSteps": [
               "Collect Data",
               "\u2193",
@@ -155,15 +154,18 @@
               "Test",
               "\u2193",
               "Predict"
-            ],
-            "textContent": null
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "# See example above",
+          "code": {
             "language": "python",
-            "output": ""
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
+        },
+        {
+          "type": "reflection",
+          "question": "Is Getting Started always the best approach?",
+          "answer": "Not always! It depends on the specific problem and constraints."
         },
         {
           "type": "practice",

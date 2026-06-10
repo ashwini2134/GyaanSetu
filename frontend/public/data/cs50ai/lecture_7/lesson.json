@@ -13,39 +13,37 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "What is NLP & Tokenization",
+          "title": "What is What is NLP & Tokenization?",
           "body": "NLP is AI understanding, processing, and generating human language.",
           "bullets": [
             "NLP = Natural Language Processing \u2014 AI working with human language",
             "Why language is hard for AI \u2014 same word can mean very different things depending on context",
             "Tokenization \u2014 splitting text into individual words or parts AI can process",
-            "Bag of Words \u2014 representing text by counting how often each word appears"
-          ]
+            "Bag of Words \u2014 representing text by counting how often each word appears",
+            "This concept is fundamental to AI development."
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "Tokenization",
-          "accentColor": "blue",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "title": "Puzzle pieces",
-            "description": "Breaking a sentence into puzzle pieces before solving it",
-            "icon": "Star"
+          "title": "Think of It",
+          "accentColor": "purple",
+          "analogy": {
+            "title": "Real Life Analogy",
+            "description": "Think of it like a familiar real-world scenario.",
+            "image": "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "flow_diagram",
+          "visual": {
+            "title": "Tokenization",
+            "type": "flow_diagram",
             "flowSteps": [
               "Sentence \u2192 Tokenizer \u2192 [\"I\", \"love\", \"Python\"] \u2192 Count words"
-            ],
-            "textContent": "Sentence \u2192 Tokenizer \u2192 [\"I\", \"love\", \"Python\"] \u2192 Count words"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "words = 'I love Python'.split()\nprint(words)",
+          "code": {
             "language": "python",
-            "output": ""
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
         },
         {
@@ -55,8 +53,11 @@
         },
         {
           "type": "practice",
-          "title": "Try It: Hands-on Practice",
-          "description": "Let's put what we just learned into practice! Play around with the concepts below."
+          "title": "Practice Exercise",
+          "instructions": "Write a simple Python script demonstrating What is NLP & Tokenization.",
+          "starterCode": "# Write your code here\n",
+          "solution": "# Example solution\nprint('Done')",
+          "hint": "Start by defining the main function."
         }
       ]
     },
@@ -66,8 +67,7 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "Word Embeddings & Large Language Models",
+          "title": "What is Word Embeddings & Large Language Models?",
           "body": "Word embeddings represent words as numbers. LLMs are very large neural networks trained on massive text.",
           "bullets": [
             "Word Embeddings \u2014 words represented as numbers so AI can find similarities",
@@ -75,31 +75,29 @@
             "Language Models predict the next word given the previous words",
             "LLMs (Large Language Models) \u2014 trained on massive text data (GPT, Gemini, Claude)",
             "Transformers \u2014 the architecture behind modern LLMs \u2014 processes all words at once"
-          ]
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "Word Embeddings Concept",
+          "title": "Think of It",
           "accentColor": "purple",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "title": "Extremely well-read person",
-            "description": "who has read the entire internet",
-            "icon": "Star"
+          "analogy": {
+            "title": "Real Life Analogy",
+            "description": "Think of it like a familiar real-world scenario.",
+            "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "flow_diagram",
+          "visual": {
+            "title": "Word Embeddings Concept",
+            "type": "flow_diagram",
             "flowSteps": [
               "Words \u2192 Numbers (vectors) \u2192 Similar words are close together on a map"
-            ],
-            "textContent": "Words \u2192 Numbers (vectors) \u2192 Similar words are close together on a map"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "# 'king' - 'man' + 'woman' \u2248 'queen' in vector space",
+          "code": {
             "language": "python",
-            "output": ""
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
         },
         {
@@ -109,8 +107,11 @@
         },
         {
           "type": "practice",
-          "title": "Try It: Hands-on Practice",
-          "description": "Let's put what we just learned into practice! Play around with the concepts below."
+          "title": "Practice Exercise",
+          "instructions": "Write a simple Python script demonstrating Word Embeddings & Large Language Models.",
+          "starterCode": "# Write your code here\n",
+          "solution": "# Example solution\nprint('Done')",
+          "hint": "Start by defining the main function."
         }
       ]
     },
@@ -120,8 +121,7 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "NLP Steps",
+          "title": "What is NLP Steps?",
           "body": "How text is processed by LLMs.",
           "bullets": [
             "Step 1: Take raw text input from user",
@@ -129,21 +129,21 @@
             "Step 3: Convert tokens to numbers (word embeddings)",
             "Step 4: Feed into language model",
             "Step 5: Model predicts next token \u2192 generates output text"
-          ]
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "LLM Generation",
-          "accentColor": "green",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "title": "Text generation",
-            "description": "Creating intelligent text",
-            "icon": "Star"
+          "title": "Think of It",
+          "accentColor": "purple",
+          "analogy": {
+            "title": "Real Life Analogy",
+            "description": "Think of it like a familiar real-world scenario.",
+            "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Flow Diagram",
-            "visualType": "flow_diagram",
+          "visual": {
+            "title": "LLM Generation",
+            "type": "flow_diagram",
             "flowSteps": [
               "Raw Text",
               "\u2193",
@@ -154,15 +154,18 @@
               "Language Model",
               "\u2193",
               "Generated Output"
-            ],
-            "textContent": null
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "# See example above",
+          "code": {
             "language": "python",
-            "output": ""
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
+        },
+        {
+          "type": "reflection",
+          "question": "Is Getting Started always the best approach?",
+          "answer": "Not always! It depends on the specific problem and constraints."
         },
         {
           "type": "practice",

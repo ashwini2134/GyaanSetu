@@ -13,39 +13,37 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "Propositional Logic",
+          "title": "What is Propositional Logic?",
           "body": "Logic is how AI knows things \u2014 through rules and True/False statements, not common sense",
           "bullets": [
             "Propositional logic uses statements that are either True or False",
             "AND \u2014 both sides must be True for result to be True",
             "OR \u2014 at least one side must be True",
-            "NOT \u2014 reverses the value (NOT True = False)"
-          ]
+            "NOT \u2014 reverses the value (NOT True = False)",
+            "This concept is fundamental to AI development."
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "Propositional Logic in Practice",
-          "accentColor": "blue",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "title": "A traffic light",
-            "description": "Red means Stop (True), Green means Go (False for stop)",
-            "icon": "Star"
+          "title": "Think of It",
+          "accentColor": "purple",
+          "analogy": {
+            "title": "Real Life Analogy",
+            "description": "Think of it like a familiar real-world scenario.",
+            "image": "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "flow_diagram",
+          "visual": {
+            "title": "Propositional Logic in Practice",
+            "type": "flow_diagram",
             "flowSteps": [
               "AND / OR / NOT operators"
-            ],
-            "textContent": "AND / OR / NOT operators"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "if raining and outside:\n    print('Get wet')",
+          "code": {
             "language": "python",
-            "output": ""
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
         },
         {
@@ -55,8 +53,11 @@
         },
         {
           "type": "practice",
-          "title": "Try It: Hands-on Practice",
-          "description": "Let's put what we just learned into practice! Play around with the concepts below."
+          "title": "Practice Exercise",
+          "instructions": "Write a simple Python script demonstrating Propositional Logic.",
+          "starterCode": "# Write your code here\n",
+          "solution": "# Example solution\nprint('Done')",
+          "hint": "Start by defining the main function."
         }
       ]
     },
@@ -66,39 +67,37 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "Knowledge Base & Inference",
+          "title": "What is Knowledge Base & Inference?",
           "body": "AI stores facts and rules in a Knowledge Base and uses Inference to derive new facts",
           "bullets": [
             "A Knowledge Base is a collection of facts and rules AI uses to reason",
             "Inference means deriving new facts from existing ones",
             "IF-THEN rules: If it is raining AND I am outside, THEN I get wet",
-            "Real-world uses: medical diagnosis systems, FAQ chatbots, Google Knowledge Panel"
-          ]
+            "Real-world uses: medical diagnosis systems, FAQ chatbots, Google Knowledge Panel",
+            "This concept is fundamental to AI development."
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "Inference Engine",
+          "title": "Think of It",
           "accentColor": "purple",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "title": "A doctor's rulebook",
-            "description": "if symptom A and symptom B then diagnosis C",
-            "icon": "Star"
+          "analogy": {
+            "title": "Real Life Analogy",
+            "description": "Think of it like a familiar real-world scenario.",
+            "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "flow_diagram",
+          "visual": {
+            "title": "Inference Engine",
+            "type": "flow_diagram",
             "flowSteps": [
               "Knowledge Base + IF-THEN rules \u2192 Inference engine \u2192 Conclusion"
-            ],
-            "textContent": "Knowledge Base + IF-THEN rules \u2192 Inference engine \u2192 Conclusion"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "if fever and cough:\n    print('Possible flu')",
+          "code": {
             "language": "python",
-            "output": ""
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
         },
         {
@@ -108,8 +107,11 @@
         },
         {
           "type": "practice",
-          "title": "Try It: Hands-on Practice",
-          "description": "Let's put what we just learned into practice! Play around with the concepts below."
+          "title": "Practice Exercise",
+          "instructions": "Write a simple Python script demonstrating Knowledge Base & Inference.",
+          "starterCode": "# Write your code here\n",
+          "solution": "# Example solution\nprint('Done')",
+          "hint": "Start by defining the main function."
         }
       ]
     },
@@ -119,29 +121,29 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "How AI Uses Logic",
+          "title": "What is How AI Uses Logic?",
           "body": "Follow these steps to build a logical reasoning system.",
           "bullets": [
             "Step 1: Define your facts \u2014 what is True and what is False in your world",
             "Step 2: Write IF-THEN rules \u2014 connect facts to conclusions",
             "Step 3: Build a Knowledge Base \u2014 store all facts and rules together",
-            "Step 4: Run Inference \u2014 AI combines facts and rules to reach new conclusions"
-          ]
+            "Step 4: Run Inference \u2014 AI combines facts and rules to reach new conclusions",
+            "This concept is fundamental to AI development."
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "Inference Flow",
-          "accentColor": "green",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "title": "Systematic reasoning",
-            "description": "Combining rules and facts logically",
-            "icon": "Star"
+          "title": "Think of It",
+          "accentColor": "purple",
+          "analogy": {
+            "title": "Real Life Analogy",
+            "description": "Think of it like a familiar real-world scenario.",
+            "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Flow Diagram",
-            "visualType": "flow_diagram",
+          "visual": {
+            "title": "Inference Flow",
+            "type": "flow_diagram",
             "flowSteps": [
               "Facts + Rules",
               "\u2193",
@@ -150,25 +152,18 @@
               "Inference Engine",
               "\u2193",
               "New Conclusion"
-            ],
-            "textContent": null
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "# See example above",
+          "code": {
             "language": "python",
-            "output": ""
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
         },
         {
           "type": "reflection",
           "question": "Do you need to tell AI every possible answer, or can it figure some out from rules?",
           "answer": "It can figure out new answers using inference."
-        },
-        {
-          "type": "practice",
-          "title": "Try It: Hands-on Practice",
-          "description": "Let's put what we just learned into practice! Play around with the concepts below."
         },
         {
           "type": "practice",

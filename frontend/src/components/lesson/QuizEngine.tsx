@@ -1,20 +1,38 @@
 import { PartyPopper, Book } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { QuizQuestion } from '../../types/lesson';
 
 interface QuizEngineProps {
+  quizId?: string;
   questions: QuizQuestion[];
   onComplete?: (score: number, total: number) => void;
 }
 
 type Phase = 'start' | 'question' | 'result';
 
-export default function QuizEngine({ questions, onComplete }: QuizEngineProps) {
+interface AttemptRecord {
+  id: string;
+  timestamp: number;
+  score: number;
+  total: number;
+  details: { qNum: number; passed: boolean }[];
+}
+
+export default function QuizEngine({ quizId = 'default', questions, onComplete }: QuizEngineProps) {
   const [phase, setPhase] = useState<Phase>('start');
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [activeQuestions, setActiveQuestions] = useState<QuizQuestion[]>(questions);
+  const [history, setHistory] = useState<AttemptRecord[]>([]);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(`lms:quiz_history:${quizId}`);
+      if (saved) setHistory(JSON.parse(saved));
+    } catch {}
+  }, [quizId]);
 
   if (!questions.length) {
     return (
@@ -24,8 +42,8 @@ export default function QuizEngine({ questions, onComplete }: QuizEngineProps) {
     );
   }
 
-  const total = questions.length;
-  const score = Object.entries(answers).filter(([i, a]) => a === questions[Number(i)].answer).length;
+  const total = activeQuestions.length;
+  const score = Object.entries(answers).filter(([i, a]) => a === activeQuestions[Number(i)].answer).length;
 
   const handleSelect = (opt: string) => {
     if (submitted) return;
@@ -45,7 +63,27 @@ export default function QuizEngine({ questions, onComplete }: QuizEngineProps) {
       setSubmitted(false);
     } else {
       const finalScore = Object.entries({ ...answers, [current]: selected! })
-        .filter(([i, a]) => a === questions[Number(i)].answer).length;
+        .filter(([i, a]) => a === activeQuestions[Number(i)].answer).length;
+      
+      const details = activeQuestions.map((q, i) => {
+        const userAns = i === current ? selected! : (answers[i] ?? '');
+        return { qNum: i + 1, passed: userAns === q.answer };
+      });
+      
+      const newAttempt: AttemptRecord = {
+        id: Math.random().toString(36).substring(7),
+        timestamp: Date.now(),
+        score: finalScore,
+        total,
+        details
+      };
+      
+      const updatedHistory = [...history, newAttempt];
+      setHistory(updatedHistory);
+      try {
+        localStorage.setItem(`lms:quiz_history:${quizId}`, JSON.stringify(updatedHistory));
+      } catch {}
+
       onComplete?.(finalScore, total);
       setPhase('result');
     }
@@ -56,6 +94,11 @@ export default function QuizEngine({ questions, onComplete }: QuizEngineProps) {
     setSelected(null);
     setAnswers({});
     setSubmitted(false);
+    
+    // Jumble questions
+    const shuffled = [...questions].sort(() => Math.random() - 0.5);
+    setActiveQuestions(shuffled);
+    
     setPhase('question');
   };
 
@@ -99,7 +142,7 @@ export default function QuizEngine({ questions, onComplete }: QuizEngineProps) {
 
         {/* Review answers */}
         <div className="space-y-3 text-left">
-          {questions.map((q, i) => {
+          {activeQuestions.map((q, i) => {
             const userAns = answers[i] ?? '';
             const correct = userAns === q.answer;
             return (
@@ -116,6 +159,30 @@ export default function QuizEngine({ questions, onComplete }: QuizEngineProps) {
           })}
         </div>
 
+        {/* Attempt History */}
+        {history.length > 0 && (
+          <div className="mt-8 pt-6 border-t border-slate-700/30 text-left">
+            <h4 className="text-sm font-bold text-white mb-4">Attempt History</h4>
+            <div className="space-y-3">
+              {history.map((att, i) => (
+                <div key={att.id} className="p-3 rounded-lg bg-slate-900/60 border border-slate-700/40">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-slate-300">Attempt {i + 1}</span>
+                    <span className="text-xs text-slate-500">{new Date(att.timestamp).toLocaleString()}</span>
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    {att.details.map((d, j) => (
+                      <span key={j} className={`px-2 py-0.5 rounded text-[10px] font-medium ${d.passed ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                        Q{d.qNum} — {d.passed ? 'Pass' : 'Fail'}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <button
           onClick={handleRestart}
           className={`inline-flex items-center gap-2 text-sm font-semibold text-white px-6 py-3 rounded-xl transition-all ${
@@ -128,7 +195,7 @@ export default function QuizEngine({ questions, onComplete }: QuizEngineProps) {
     );
   }
 
-  const q = questions[current];
+  const q = activeQuestions[current];
   const isCorrect = submitted && selected === q.answer;
 
   return (
@@ -137,10 +204,10 @@ export default function QuizEngine({ questions, onComplete }: QuizEngineProps) {
       <div className="flex items-center justify-between">
         <span className="text-xs font-semibold text-slate-400">Question {current + 1} of {total}</span>
         <div className="flex gap-1">
-          {questions.map((_, i) => (
+          {activeQuestions.map((_, i) => (
             <div key={i} className={`w-2 h-2 rounded-full transition-all ${
               i < current
-                ? (answers[i] === questions[i].answer ? 'bg-green-500' : 'bg-red-500')
+                ? (answers[i] === activeQuestions[i].answer ? 'bg-green-500' : 'bg-red-500')
                 : i === current ? 'bg-blue-500 scale-125' : 'bg-slate-600'
             }`} />
           ))}

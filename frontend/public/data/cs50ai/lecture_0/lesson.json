@@ -11,35 +11,29 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
           "title": "What is Artificial Intelligence?",
           "body": "Artificial Intelligence (AI) is the field of computer science focused on building systems that perform tasks normally requiring human thinking \u2014 learning, reasoning, recognizing patterns, and making decisions.",
           "bullets": [
             "Computers performing tasks that need human intelligence",
             "Examples: playing chess, recognizing faces, translating languages",
             "AI powers spam filters, voice assistants, and recommendation systems",
-            "Not about robots \u2014 about intelligent problem-solving"
-          ]
-        },
-        {
-          "type": "analogy",
-          "title": "Think of AI as a Very Fast, Tireless Assistant",
-          "text": "Imagine an assistant who never sleeps, processes millions of examples instantly, and follows rules or learns from examples. That's AI \u2014 you give it data or instructions, and it performs tasks intelligently.",
-          "icon": "Zap"
+            "Not about robots \u2014 about intelligent problem-solving",
+            "This concept is fundamental to AI development."
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "concept_visualization",
-          "title": "AI: Computers That Think",
-          "accentColor": "blue",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "title": "Smart Assistant",
-            "description": "Fast, tireless, learns from examples",
-            "icon": "Star"
+          "title": "Think of It",
+          "accentColor": "purple",
+          "analogy": {
+            "title": "Think of AI as a Very Fast, Tireless Assistant",
+            "description": "Imagine an assistant who never sleeps, processes millions of examples instantly, and follows rules or learns from examples. That's AI \u2014 you give it data or instructions, and it performs tasks intelligently.",
+            "image": "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Programming Concept",
-            "visualType": "flow_diagram",
+          "visual": {
+            "title": "AI: Computers That Think",
+            "type": "flow_diagram",
             "flowSteps": [
               "Computers performing tasks that require human-like thinking:",
               "\u2193",
@@ -50,27 +44,26 @@
               "Filtering spam",
               "\u2193",
               "Recommending movies"
-            ],
-            "textContent": "Computers performing tasks that require human-like thinking:\n\u2022 Playing chess\n\u2022 Recognizing faces\n\u2022 Filtering spam\n\u2022 Recommending movies"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "# AI in daily life\n# Gmail spam filter\n# Google Maps routing\n# Netflix recommendations\n# Siri / Alexa\nprint('AI is everywhere!')",
+          "code": {
             "language": "python",
-            "output": "All powered by AI!"
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
         },
         {
           "type": "reflection",
           "question": "Is your basic desk calculator a form of AI? Why or why not?",
-          "answer": "Nope! A calculator just follows hardcoded math rules. AI is special because it can learn, adapt, or make decisions on its own.",
-          "followupCode": "# Calculator: NOT AI\nresult = 5 + 3\n\n# Spam filter: IS AI\n# Learns from examples, adapts to new spam",
-          "followupOutput": "Calculator: 8\nAI adapts over time"
+          "answer": "Nope! A calculator just follows hardcoded math rules."
         },
         {
           "type": "practice",
-          "title": "Try It: Hands-on Practice",
-          "description": "Let's put what we just learned into practice! Play around with the concepts below."
+          "title": "Practice Exercise",
+          "instructions": "Write a simple Python script demonstrating What is AI?.",
+          "starterCode": "# Write your code here\n",
+          "solution": "# Example solution\nprint('Done')",
+          "hint": "Start by defining the main function."
         }
       ]
     },
@@ -80,49 +73,16 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "AI vs Machine Learning vs Deep Learning",
+          "title": "What is AI vs Machine Learning vs Deep Learning?",
           "body": "These three terms are related but describe different levels of the AI field.",
           "bullets": [
             "AI \u2014 broadest umbrella: any technique making computers appear intelligent",
             "Machine Learning (ML) \u2014 subset of AI: learns rules from data instead of being programmed",
-            "Deep Learning (DL) \u2014 subset of ML: uses brain-like neural networks with many layers"
-          ]
-        },
-        {
-          "type": "analogy",
-          "title": "Think of ML as Teaching a Dog Tricks",
-          "text": "You don't write every rule \u2014 you show examples and reward correct behavior. The dog learns patterns. ML works the same way: show data, let the computer find patterns.",
-          "icon": "Zap"
-        },
-        {
-          "type": "concept_visualization",
-          "title": "The AI Hierarchy",
-          "accentColor": "purple",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "title": "Teaching by Reward",
-            "description": "Show examples, reward correct behavior",
-            "icon": "Star"
-          },
-          "centerPanel": {
-            "label": "Nested Categories",
-            "visualType": "flow_diagram",
-            "flowSteps": [
-              "AI (broadest)",
-              "\u2193",
-              "\u2514\u2500\u2500 Machine Learning",
-              "\u2193",
-              "\u2514\u2500\u2500 Deep Learning (neural networks)"
-            ],
-            "textContent": "AI (broadest)\n  \u2514\u2500\u2500 Machine Learning\n        \u2514\u2500\u2500 Deep Learning (neural networks)"
-          },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "# Hierarchy check\nterm = 'neural network layers'\nif 'layer' in term:\n    print('Deep Learning')\n    print('Also ML and AI')",
-            "language": "python",
-            "output": "Deep Learning\nAlso ML and AI"
-          }
+            "Deep Learning (DL) \u2014 subset of ML: uses brain-like neural networks with many layers",
+            "This concept is fundamental to AI development.",
+            "It helps optimize performance and accuracy."
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "explanation",
@@ -136,55 +96,43 @@
           ]
         },
         {
-          "type": "analogy",
-          "title": "Think of DL as Layers in the Human Eye",
-          "text": "Your eye has layers of cells \u2014 each layer detects edges, shapes, then objects. Deep Learning uses similar layered processing to understand complex data like images.",
-          "icon": "Zap"
-        },
-        {
           "type": "concept_visualization",
-          "title": "Narrow vs General AI",
+          "title": "Think of It",
           "accentColor": "purple",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "title": "The Specialist",
-            "description": "Excels at one task, can't do everything",
-            "icon": "Star"
+          "analogy": {
+            "title": "Think of ML as Teaching a Dog Tricks",
+            "description": "You don't write every rule \u2014 you show examples and reward correct behavior. The dog learns patterns. ML works the same way: show data, let the computer find patterns.",
+            "image": "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&q=80"
           },
-          "centerPanel": {
-            "label": "Today's AI",
-            "visualType": "flow_diagram",
+          "visual": {
+            "title": "The AI Hierarchy",
+            "type": "flow_diagram",
             "flowSteps": [
-              "Narrow AI (Today):",
+              "AI (broadest)",
               "\u2193",
-              "\u2713 Chess engine",
+              "\u2514\u2500\u2500 Machine Learning",
               "\u2193",
-              "\u2713 Spam filter",
-              "\u2193",
-              "\u2713 Voice assistant",
-              "\u2193",
-              "\u2713 Face recognition",
-              "\u2193",
-              "General AI: Not yet!"
-            ],
-            "textContent": "Narrow AI (Today):\n\u2713 Chess engine\n\u2713 Spam filter\n\u2713 Voice assistant\n\u2713 Face recognition\n\nGeneral AI: Not yet!"
+              "\u2514\u2500\u2500 Deep Learning (neural networks)"
+            ]
           },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "# Narrow AI example\nai_task = 'recommend movies'\n# Can ONLY do this one task well\nprint(f'AI specializes in: {ai_task}')",
+          "code": {
             "language": "python",
-            "output": "AI specializes in: recommend movies"
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
           }
         },
         {
           "type": "reflection",
           "question": "Which is the broadest term: AI, ML, or DL?",
-          "answer": "AI is the broadest. ML is a subset of AI. DL is a subset of ML. Think of nesting dolls \u2014 AI contains ML contains DL."
+          "answer": "AI is the broadest."
         },
         {
           "type": "practice",
-          "title": "Try It: Hands-on Practice",
-          "description": "Let's put what we just learned into practice! Play around with the concepts below."
+          "title": "Practice Exercise",
+          "instructions": "Write a simple Python script demonstrating AI vs ML vs DL.",
+          "starterCode": "# Write your code here\n",
+          "solution": "# Example solution\nprint('Done')",
+          "hint": "Start by defining the main function."
         }
       ]
     },
@@ -194,71 +142,21 @@
       "blocks": [
         {
           "type": "explanation",
-          "accentColor": "blue",
-          "title": "AI in the Real World",
+          "title": "What is AI in the Real World?",
           "body": "AI isn't future technology \u2014 it's already embedded in tools you use every day.",
           "bullets": [
             "Spam filters \u2014 learn which emails are junk from millions of examples",
             "Google Maps \u2014 uses search and optimization to find fastest routes",
             "Netflix \u2014 recommends shows using machine learning on your history",
-            "Voice assistants \u2014 understand speech using NLP and ML"
-          ]
-        },
-        {
-          "type": "concept_visualization",
-          "title": "How AI Works in Practice",
-          "accentColor": "green",
-          "leftPanel": {
-            "label": "Real Life Analogy",
-            "title": "Daily Tools",
-            "description": "Maps, music, email, shopping",
-            "icon": "Star"
-          },
-          "centerPanel": {
-            "label": "Step-by-Step Flow",
-            "visualType": "text",
-            "flowSteps": null,
-            "textContent": null
-          },
-          "rightPanel": {
-            "label": "Code Example",
-            "code": "# Step 1: Collect data\n# Step 2: Train a model\n# Step 3: Make predictions\nprint('Data \u2192 Model \u2192 Prediction')",
-            "language": "python",
-            "output": "Data \u2192 Model \u2192 Prediction"
-          }
-        },
-        {
-          "type": "concept_visualization",
-          "title": "The AI Pipeline",
-          "accentColor": "green",
-          "leftPanel": {
-            "label": "Step 1",
-            "title": "Collect Data",
-            "description": "Gather examples the AI can learn from",
-            "icon": "Star"
-          },
-          "centerPanel": {
-            "label": "Step 2",
-            "visualType": "flow_diagram",
-            "flowSteps": [
-              "Collect Data",
-              "\u2193",
-              "Train Model",
-              "\u2193",
-              "Make Predictions"
-            ]
-          },
-          "rightPanel": {
-            "label": "Step 3",
-            "emoji": "\ud83c\udfaf",
-            "title": "Use AI",
-            "description": "The trained model makes intelligent decisions on new inputs"
-          }
+            "Voice assistants \u2014 understand speech using NLP and ML",
+            "This concept is fundamental to AI development."
+          ],
+          "accentColor": "blue"
         },
         {
           "type": "explanation",
           "accentColor": "blue",
-          "title": "The CS50 AI Journey",
+          "title": "The AI Journey",
           "body": "This course covers 7 core AI topics you'll explore in upcoming lectures.",
           "bullets": [
             "Search \u2014 finding paths from start to goal (GPS, puzzles)",
@@ -271,18 +169,33 @@
           ]
         },
         {
+          "type": "concept_visualization",
+          "title": "Think of It",
+          "accentColor": "purple",
+          "analogy": {
+            "title": "Real Life Analogy",
+            "description": "Think of it like a familiar real-world scenario.",
+            "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80"
+          },
+          "visual": {
+            "title": "How AI Works in Practice",
+            "type": "text",
+            "flowSteps": null
+          },
+          "code": {
+            "language": "python",
+            "code": "# Code example\nprint(\"Hello AI\")",
+            "output": "Hello AI"
+          }
+        },
+        {
           "type": "reflection",
           "question": "Which AI topic would a voice assistant like Alexa use?",
-          "answer": "Multiple! NLP to understand speech, ML to personalize responses, Search to find answers, and Uncertainty to handle ambiguous requests. Real AI combines many techniques."
+          "answer": "Multiple! NLP to understand speech, ML to personalize responses, Search to find answers, and Uncertainty to handle ambiguous requests."
         },
         {
           "type": "practice",
-          "title": "Try It: Hands-on Practice",
-          "description": "Let's put what we just learned into practice! Play around with the concepts below."
-        },
-        {
-          "type": "practice",
-          "title": "Identify AI Around You",
+          "title": "Practice Exercise",
           "instructions": "Write a Python program that prints 3 AI tools you use daily and one sentence about what each does.",
           "starterCode": "# List 3 AI tools you use\nprint('1. ')\nprint('2. ')\nprint('3. ')",
           "solution": "print('1. Google Maps - finds fastest routes using search')\nprint('2. Spotify - recommends songs using ML')\nprint('3. Gmail - filters spam using AI')",
@@ -316,7 +229,7 @@
       },
       {
         "emoji": "",
-        "text": "The CS50 AI path covers: Search, Knowledge, Uncertainty, Optimization, Learning, Neural Nets, Language"
+        "text": "The AI path covers: Search, Knowledge, Uncertainty, Optimization, Learning, Neural Nets, Language"
       }
     ],
     "whatYouLearned": [

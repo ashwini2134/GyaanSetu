@@ -77,7 +77,7 @@ function LockedLectureView({ slug, lectureNumber, courseTitle }: { slug: string;
 function LegacyLecturePage({ slug, lectureNumber }: { slug: string; lectureNumber: number }) {
   const navigate = useNavigate();
   const [content, setContent] = useState('');
-  const courseTitle = slug === 'cs50p' ? 'CS50 Python' : slug === 'cs50ai' ? 'CS50 AI' : slug.toUpperCase();
+  const courseTitle = slug === 'cs50p' ? 'CS50 Python' : slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
   const [retakingQuiz, setRetakingQuiz] = useState(false);
 
   useEffect(() => {
@@ -111,6 +111,7 @@ export default function LecturePage() {
   const navigate = useNavigate();
   const lectureNumber = parseInt(number ?? '0', 10);
   const [retakingQuiz, setRetakingQuiz] = useState(false);
+  const [openProblemIndex, setOpenProblemIndex] = useState<number>(-1);
 
   const { lessonData, loading, error } = useLessonData(slug, lectureNumber);
   const { 
@@ -222,7 +223,7 @@ export default function LecturePage() {
 
   // Show locked view
   if (unlocked === false) {
-    const courseTitle = slug === 'cs50p' ? 'CS50 Python' : slug === 'cs50ai' ? 'CS50 AI' : slug.toUpperCase();
+    const courseTitle = slug === 'cs50p' ? 'CS50 Python' : slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
     return <LockedLectureView slug={slug} lectureNumber={lectureNumber} courseTitle={courseTitle} />;
   }
 
@@ -246,7 +247,7 @@ export default function LecturePage() {
 
   const prevLecture = allLectures.find(l => l.number === lectureNumber - 1);
   const nextLecture = allLectures.find(l => l.number === lectureNumber + 1);
-  const courseTitle = slug === 'cs50p' ? 'CS50 Python' : slug === 'cs50ai' ? 'CS50 AI' : slug.toUpperCase();
+  const courseTitle = slug === 'cs50p' ? 'CS50 Python' : slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
   const quiz = lessonData.quiz ?? [];
   const problems: CodingProblem[] = lessonData.problems ?? [];
   const summary = lessonData.summary;
@@ -381,6 +382,7 @@ export default function LecturePage() {
                     </div>
                   ) : (
                     <QuizEngine
+                      quizId={`${lessonData.id}-quiz`}
                       questions={quiz}
                       onComplete={(score, total) => {
                         setRetakingQuiz(false);
@@ -421,6 +423,8 @@ export default function LecturePage() {
                         key={problem.id}
                         problem={problem}
                         index={i}
+                        isOpen={openProblemIndex === i}
+                        onOpenChange={(isOpen) => setOpenProblemIndex(isOpen ? i : -1)}
                         completed={progress.problemsCompleted.includes(problem.id)}
                         onComplete={(id) => {
                           markProblemCompleted(id);
@@ -428,6 +432,10 @@ export default function LecturePage() {
                           markHandsOnTaskCompleted();
                           if (slug && lessonData) {
                             tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, problems.length, quiz.length > 0);
+                          }
+                          // Automatically open next problem if it exists
+                          if (i + 1 < problems.length) {
+                            setTimeout(() => setOpenProblemIndex(i + 1), 1500); // Small delay to let them see success
                           }
                         }}
                       />

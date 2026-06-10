@@ -70,85 +70,85 @@ export default function ConceptVisualizationCard({ block }: { block: ConceptVisu
   const accent = ACCENT[block.accentColor] ?? ACCENT.blue;
 
   const renderCenter = () => {
-    const { centerPanel: cp } = block;
-    if (cp.visualType === 'storage_box') {
-      return <StorageBoxVisual varName={cp.varName} varValue={cp.varValue} accent={accent} />;
+    const { visual } = block;
+    if (visual.type === 'storage_box') {
+      return <StorageBoxVisual accent={accent} />;
     }
-    if (cp.visualType === 'recipe_book') {
+    if (visual.type === 'recipe_book') {
       return <RecipeBookVisual accent={accent} />;
     }
-    if (cp.visualType === 'flow_diagram') {
-      return <FlowDiagramVisual steps={cp.flowSteps} accent={accent} />;
+    if (visual.type === 'flow_diagram') {
+      return <FlowDiagramVisual steps={visual.flowSteps} accent={accent} />;
     }
-    return <p className="text-sm text-slate-300 text-center">{cp.textContent}</p>;
+    return <p className="text-sm text-slate-300 text-center">{visual.title}</p>;
   };
 
-  const LeftIcon = (LucideIcons as any)[block.leftPanel.icon ?? ''] || LucideIcons.Zap;
-
   return (
-    <div className="rounded-2xl border border-slate-700/30 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm p-6">
-      <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-5 text-center">
-        {block.title}
-      </p>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {/* Left panel */}
-        <div className="p-5 rounded-xl bg-slate-900/60 border border-slate-700/30">
-          <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider mb-3">
-            {block.leftPanel.label}
+    <div className="rounded-2xl border border-slate-700/30 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm overflow-hidden">
+      <div className={`p-4 bg-gradient-to-r ${accent.gradFrom} ${accent.gradTo} border-b border-slate-700/30`}>
+        <p className="text-xs text-white font-bold uppercase tracking-wider text-center">
+          {block.title}
+        </p>
+      </div>
+      <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Panel 1: Analogy */}
+        <div className="flex flex-col gap-4">
+          <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider">
+            Real-Life Analogy
           </p>
-          <div className="flex flex-col items-center text-center">
-            {block.leftPanel.icon && (
-              <div className="w-16 h-16 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center mb-3">
-                <LeftIcon className="w-8 h-8 text-amber-400" />
-              </div>
-            )}
-            {block.leftPanel.title && (
-              <p className="text-sm font-medium text-slate-200 mb-1">{block.leftPanel.title}</p>
-            )}
-            {block.leftPanel.description && (
-              <p className="text-xs text-slate-400">{block.leftPanel.description}</p>
-            )}
+          <div className="rounded-xl overflow-hidden border border-slate-700/30 aspect-video relative">
+            <img src={block.analogy.image} alt={block.analogy.title} className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-3">
+              <p className="text-sm font-bold text-white mb-1">{block.analogy.title}</p>
+              <p className="text-xs text-slate-300">{block.analogy.description}</p>
+            </div>
           </div>
         </div>
 
-        {/* Center panel */}
-        <div className={`p-5 rounded-xl bg-gradient-to-br ${accent.bg} border ${accent.border} flex flex-col items-center justify-center min-h-[220px]`}>
-          <p className={`text-[11px] ${accent.label} font-semibold uppercase tracking-wider mb-4`}>
-            {block.centerPanel.label}
+        {/* Panel 2: Visual */}
+        <div className="flex flex-col gap-4">
+          <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider">
+            Programming Concept
           </p>
-          {renderCenter()}
+          <div className={`flex-1 rounded-xl bg-gradient-to-br ${accent.bg} border ${accent.border} flex flex-col items-center justify-center p-4`}>
+            <p className={`text-xs ${accent.label} font-bold mb-4 text-center`}>
+              {block.visual.title}
+            </p>
+            {renderCenter()}
+          </div>
         </div>
 
-        {/* Right panel */}
-        <div className="p-5 rounded-xl bg-slate-900/60 border border-slate-700/30">
-          <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider mb-3">
-            {block.rightPanel.label}
+        {/* Panel 3: Code */}
+        <div className="flex flex-col gap-4">
+          <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider">
+            Code Example
           </p>
-          {block.rightPanel.code && (
-            <>
-              <div className="rounded-xl bg-[#0d1117] border border-slate-700/40 overflow-hidden">
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800/40 border-b border-slate-700/30">
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
-                  <span className="ml-2 text-[10px] text-slate-500 font-medium uppercase">
-                    {block.rightPanel.language ?? 'python'}
-                  </span>
+          <div className="flex-1 rounded-xl bg-[#0d1117] border border-slate-700/40 flex flex-col overflow-hidden">
+            <div className="flex items-center gap-1.5 px-3 py-2 bg-slate-800/40 border-b border-slate-700/30">
+              <span className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
+              <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
+              <span className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
+              <span className="ml-2 text-[10px] text-slate-500 font-medium uppercase">
+                {block.code.language}
+              </span>
+            </div>
+            <div className="p-4 flex-1 overflow-y-auto">
+              <pre className="text-sm leading-relaxed font-mono">
+                <code className="text-slate-200">{block.code.code}</code>
+              </pre>
+            </div>
+            {block.code.output && (
+              <div className="mt-auto border-t border-slate-700/30 bg-slate-900/80">
+                <div className="px-3 py-1 bg-slate-800/40 border-b border-slate-700/30">
+                  <span className="text-[10px] text-slate-500 font-medium uppercase">Output</span>
                 </div>
-                <pre className="p-4 text-sm leading-relaxed font-mono">
-                  <code className="text-slate-200">{block.rightPanel.code}</code>
-                </pre>
+                <div className="p-3">
+                  <pre className="text-xs text-green-400 font-mono">{block.code.output}</pre>
+                </div>
               </div>
-              {block.rightPanel.output !== undefined && (
-                <div className="mt-2 rounded-xl bg-slate-900/80 border border-slate-700/30 overflow-hidden">
-                  <div className="px-3 py-1 bg-slate-800/40 border-b border-slate-700/30">
-                    <span className="text-[10px] text-slate-500 font-medium uppercase">Output</span>
-                  </div>
-                  <pre className="p-3 text-sm text-green-400 font-mono">{block.rightPanel.output}</pre>
-                </div>
-              )}
-            </>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>
