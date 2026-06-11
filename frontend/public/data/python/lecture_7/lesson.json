@@ -33,7 +33,7 @@
           "analogy": {
             "title": "Shopping List",
             "description": "Items in order. Add, remove, or access by position.",
-            "emoji": "\ud83d\uded2",
+            "emoji": "🛒",
             "image": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&q=80"
           },
           "visualization": {
@@ -50,11 +50,6 @@
             "code": "fruits = [\"apple\", \"banana\", \"mango\"]\nfor f in fruits:\n    print(f)",
             "output": "apple\nbanana\nmango"
           }
-        },
-        {
-          "type": "reflection",
-          "question": "Does fruits[0] give you the first item or the last item in the list?",
-          "answer": "fruits[0] gives you the first item ('apple'). In Python, indexing starts at 0, not 1. So index 0 = first item, index 1 = second, and so on. This is like saying 'position 0' on your shopping list is the very first item you wrote down."
         },
         {
           "type": "code_example",
@@ -123,10 +118,10 @@
           "title": "Working with List Methods",
           "body": "Lists have built-in **methods** that let you modify and analyze them.",
           "bullets": [
-            "append(item) \u2014 adds item to the end",
-            "remove(item) \u2014 removes the first occurrence",
-            "sort() \u2014 sorts in ascending order",
-            "len(list) \u2014 returns the number of items"
+            "append(item) — adds item to the end",
+            "remove(item) — removes the first occurrence",
+            "sort() — sorts in ascending order",
+            "len(list) — returns the number of items"
           ]
         },
         {
@@ -135,13 +130,6 @@
           "language": "python",
           "code": "tasks = [\"study\", \"exercise\", \"code\"]\nprint(tasks)\ntasks.append(\"read\")\nprint(tasks)\ntasks.remove(\"exercise\")\nprint(tasks)\ntasks[0] = \"review\"\nprint(tasks)\nprint(f\"Total: {len(tasks)}\")",
           "expectedOutput": "['study', 'exercise', 'code']\n['study', 'exercise', 'code', 'read']\n['study', 'code', 'read']\n['review', 'code', 'read']\nTotal: 3"
-        },
-        {
-          "type": "code_example",
-          "title": "Sorting and Looping",
-          "language": "python",
-          "code": "scores = [88, 72, 95, 60, 81]\nscores.sort()\nprint(f\"Sorted: {scores}\")\nprint(f\"Highest: {scores[-1]}\")",
-          "expectedOutput": "Sorted: [60, 72, 81, 88, 95]\nHighest: 95"
         },
         {
           "type": "practice",

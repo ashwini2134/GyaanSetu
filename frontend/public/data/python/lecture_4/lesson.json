@@ -26,14 +26,14 @@
           "type": "analogy",
           "title": "if is Like a Traffic Light",
           "emoji": "",
-          "text": "Green light (True) \u2192 you go. Red light (False) \u2192 you stop. The if statement checks the condition and decides whether to run the code or skip it."
+          "text": "Green light (True) → you go. Red light (False) → you stop. The if statement checks the condition and decides whether to run the code or skip it."
         },
         {
           "type": "think_of",
           "analogy": {
             "title": "Traffic Light",
-            "description": "Green \u2192 GO, Red \u2192 STOP. The condition decides which path to take.",
-            "emoji": "\ud83d\udea6",
+            "description": "Green → GO, Red → STOP. The condition decides which path to take.",
+            "emoji": "🚦",
             "image": "https://images.unsplash.com/photo-1557404763-69708cd8b9ce?w=800&q=80"
           },
           "visualization": {
@@ -48,11 +48,6 @@
             "code": "light = \"green\"\nif light == \"green\":\n    print(\"Go\")\nelse:\n    print(\"Stop\")",
             "output": "Go"
           }
-        },
-        {
-          "type": "reflection",
-          "question": "Does an if/else statement always run both the if block and the else block?",
-          "answer": "No! An if/else runs exactly ONE of the two blocks \u2014 never both. If the condition is True, the if block runs and the else block is skipped. If the condition is False, the if block is skipped and the else block runs. Like a traffic light, it's either green or red \u2014 not both at the same time."
         },
         {
           "type": "code_example",
@@ -81,8 +76,8 @@
           "title": "Two Paths with if-else",
           "body": "When you need to choose between two options, use if-else. One block runs if True, another if False.",
           "bullets": [
-            "if condition: \u2014 runs when True",
-            "else: \u2014 runs when False",
+            "if condition: — runs when True",
+            "else: — runs when False",
             "Only ONE of the two blocks runs, never both"
           ]
         },
@@ -105,29 +100,15 @@
           ]
         },
         {
-          "type": "code_example",
-          "title": "elif Chain",
-          "language": "python",
-          "code": "score = 85\nif score >= 90:\n    print(\"Grade: A\")\nelif score >= 80:\n    print(\"Grade: B\")\nelif score >= 70:\n    print(\"Grade: C\")\nelse:\n    print(\"Grade: F\")",
-          "expectedOutput": "Grade: B"
-        },
-        {
           "type": "explanation",
           "accentColor": "purple",
           "title": "Truthy and Falsy Values",
           "body": "Some values are treated as True (truthy) and others as False (falsy) in conditions.",
           "bullets": [
             "Falsy: None, 0, 0.0, \"\" (empty string), [] (empty list)",
-            "Truthy: everything else \u2014 non-zero numbers, non-empty strings",
+            "Truthy: everything else — non-zero numbers, non-empty strings",
             "Lets you write concise conditions like if name:"
           ]
-        },
-        {
-          "type": "code_example",
-          "title": "Truthy and Falsy",
-          "language": "python",
-          "code": "name = \"\"\nif name:\n    print(f\"Hello, {name}\")\nelse:\n    print(\"No name entered\")",
-          "expectedOutput": "No name entered"
         },
         {
           "type": "practice",

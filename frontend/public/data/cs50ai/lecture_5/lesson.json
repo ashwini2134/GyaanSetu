@@ -18,7 +18,7 @@
           "bullets": [
             "Traditional programming: rules + data = answers",
             "Machine Learning: data + correct answers = rules (AI figures out the rules itself)",
-            "Supervised Learning: training with labeled examples \u2014 input + correct output given",
+            "Supervised Learning: training with labeled examples — input + correct output given",
             "Classification: predict a category (spam or not spam, pass or fail)",
             "Regression: predict a number (house price, student score)"
           ],
@@ -28,9 +28,9 @@
           "type": "think_of",
           "analogy": {
             "title": "Think of ML as Learning to Sort Laundry",
-            "description": "You don't write rules for every sock. You show examples: 'shirt goes here, pant goes there.' The model learns patterns \u2014 colors, shapes, sizes \u2014 to sort new items correctly without explicit instructions.",
+            "description": "Learn patterns from labeled examples",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "\ud83d\udca1"
+            "emoji": "💡"
           },
           "visualization": {
             "type": "flow",
@@ -43,14 +43,9 @@
           },
           "code": {
             "language": "python",
-            "code": "# ML: learn to classify by example\nseen = {\"t-shirt\": \"small\", \"jeans\": \"large\", \"sock\": \"small\"}\nnew = \"shirt\"\nif new in seen:\n    print(f\"{new} \u2192 {seen[new]}\")\nelse:\n    print(f\"{new} \u2192 predicting 'small' by similarity\")",
-            "output": "shirt \u2192 predicting 'small' by similarity"
+            "code": "seen = {\"t-shirt\": \"small\", \"jeans\": \"large\"}\nnew = \"shirt\"\nprint(seen.get(new, \"predicting small\"))",
+            "output": "predicting small"
           }
-        },
-        {
-          "type": "reflection",
-          "question": "In supervised learning, does AI need to be given the correct answers during training?",
-          "answer": "Yes, supervised learning requires labeled data with correct answers to learn the patterns."
         },
         {
           "type": "practice",
@@ -71,10 +66,10 @@
           "title": "What is Unsupervised & Reinforcement Learning?",
           "body": "Not all learning needs labels. Unsupervised learning finds patterns on its own. Reinforcement learning learns by trying and getting rewards.",
           "bullets": [
-            "Unsupervised Learning: finds patterns with no labels \u2014 grouping similar customers",
+            "Unsupervised Learning: finds patterns with no labels — grouping similar customers",
             "Clustering: grouping similar data points together automatically",
             "Reinforcement Learning: AI tries an action, gets a reward or penalty, learns over time",
-            "Example: chess AI learns by playing millions of games \u2014 rewarded for winning",
+            "Example: chess AI learns by playing millions of games — rewarded for winning",
             "Overfitting: model memorizes training data but fails on new data"
           ],
           "accentColor": "blue"
@@ -83,13 +78,13 @@
           "type": "think_of",
           "analogy": {
             "title": "Think of Reinforcement Learning as Training a Puppy",
-            "description": "Sit on command = treat (reward). Jump on couch = ignore (no reward). The puppy learns which actions earn treats. RL agents learn the same way \u2014 by exploring actions and maximizing cumulative reward.",
+            "description": "Learn by trial and error with rewards",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "\ud83d\udca1"
+            "emoji": "💡"
           },
           "visualization": {
             "type": "repetition",
-            "title": "RL: Actions \u2192 Rewards",
+            "title": "RL: Actions → Rewards",
             "items": [
               "Observe",
               "Act",
@@ -99,14 +94,9 @@
           },
           "code": {
             "language": "python",
-            "code": "# RL: find best action by reward\nrewards = {\"sit\": 5, \"stay\": 3, \"jump\": -1}\nbest = max(rewards, key=rewards.get)\nfor a, r in rewards.items():\n    print(f\"{a}: reward {r}\")\nprint(f\"Learned: {best} is best\")",
-            "output": "sit: reward 5\nstay: reward 3\njump: reward -1\nLearned: sit is best"
+            "code": "rewards = {\"sit\": 5, \"stay\": 3, \"jump\": -1}\nbest = max(rewards, key=rewards.get)\nprint(f\"Learned: {best} is best\")",
+            "output": "Learned: sit is best"
           }
-        },
-        {
-          "type": "reflection",
-          "question": "Does reinforcement learning need labeled training data?",
-          "answer": "No, it learns through trial and error using rewards and penalties instead of explicit labels."
         },
         {
           "type": "practice",
@@ -127,11 +117,11 @@
           "title": "What is ML Steps?",
           "body": "The Machine Learning workflow.",
           "bullets": [
-            "Step 1: Collect data \u2014 gather examples of inputs and correct outputs",
-            "Step 2: Clean data \u2014 remove errors, fill missing values",
-            "Step 3: Train model \u2014 feed data to algorithm, it learns the pattern",
-            "Step 4: Test model \u2014 give it new unseen data, check accuracy",
-            "Step 5: Predict \u2014 use trained model on real-world inputs"
+            "Step 1: Collect data — gather examples of inputs and correct outputs",
+            "Step 2: Clean data — remove errors, fill missing values",
+            "Step 3: Train model — feed data to algorithm, it learns the pattern",
+            "Step 4: Test model — give it new unseen data, check accuracy",
+            "Step 5: Predict — use trained model on real-world inputs"
           ],
           "accentColor": "blue"
         },
@@ -139,9 +129,9 @@
           "type": "think_of",
           "analogy": {
             "title": "Think of ML Pipeline as a Factory Assembly Line",
-            "description": "Raw data enters one end, passes through cleaning \u2192 feature extraction \u2192 training \u2192 evaluation \u2014 emerging as a trained model ready for predictions. Each stage transforms the data, like an assembly line.",
+            "description": "Raw data goes through stages to produce predictions",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "\ud83d\udca1"
+            "emoji": "💡"
           },
           "visualization": {
             "type": "flow",
@@ -156,19 +146,14 @@
           },
           "code": {
             "language": "python",
-            "code": "# ML pipeline: data processing\nraw = [\"  Hello  \", \"WORLD\", \"  AI  \"]\ncleaned = [s.strip().lower() for s in raw]\nlengths = [len(s) for s in cleaned]\nprint(f\"Cleaned: {cleaned}\")\nprint(f\"Features: {lengths}\")",
-            "output": "Cleaned: ['hello', 'world', 'ai']\nFeatures: [5, 5, 2]"
+            "code": "raw = [\"  Hello  \", \"WORLD\", \"  AI  \"]\nclean = [s.strip().lower() for s in raw]\nprint(f\"Cleaned: {clean}\")",
+            "output": "Cleaned: ['hello', 'world', 'ai']"
           }
-        },
-        {
-          "type": "reflection",
-          "question": "Is Getting Started always the best approach?",
-          "answer": "Not always! It depends on the specific problem and constraints."
         },
         {
           "type": "practice",
           "title": "Practice Exercise",
-          "instructions": "Classify each example \u2014 Supervised / Unsupervised / Reinforcement: spam filter, Netflix recommendations, chess AI, customer grouping",
+          "instructions": "Classify each example — Supervised / Unsupervised / Reinforcement: spam filter, Netflix recommendations, chess AI, customer grouping",
           "starterCode": "# Write your classifications\n",
           "solution": "# Example: spam filter -> Supervised",
           "hint": "Think about whether labels or rewards are present."
@@ -184,7 +169,7 @@
       },
       {
         "emoji": "",
-        "text": "Supervised learning uses labeled data \u2014 input + correct output"
+        "text": "Supervised learning uses labeled data — input + correct output"
       },
       {
         "emoji": "",

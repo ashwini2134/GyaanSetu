@@ -152,25 +152,23 @@ function AnalogyCard({ block }: { block: ThinkOfBlock }) {
   const [imgError, setImgError] = useState(false);
   const showImage = !!block.analogy.image && !imgError;
   return (
-    <div className="rounded-lg border border-slate-700/30 bg-slate-800/50 overflow-hidden h-full flex flex-col">
+    <div className="rounded-lg border border-slate-700/30 bg-slate-800/50 overflow-hidden h-full">
       {showImage ? (
-        <>
-          <div className="relative h-28 flex-shrink-0 overflow-hidden">
-            <img
-              src={block.analogy.image!}
-              alt={block.analogy.title}
-              className="absolute inset-0 w-full h-full object-cover object-center"
-              onError={() => setImgError(true)}
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-slate-900/10 via-slate-900/50 to-slate-900/80" />
+        <div className="relative w-full h-full">
+          <img
+            src={block.analogy.image!}
+            alt={block.analogy.title}
+            className="absolute inset-0 w-full h-full object-cover object-center"
+            onError={() => setImgError(true)}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-900/5 via-slate-900/30 to-slate-900/85" />
+          <div className="absolute inset-x-0 bottom-0 p-3">
+            <p className="text-sm font-bold text-white leading-tight">{block.analogy.title}</p>
+            <p className="text-xs text-slate-300 mt-0.5 font-light leading-snug">{block.analogy.description}</p>
           </div>
-          <div className="flex-1 p-4 flex flex-col justify-center">
-            <p className="text-sm font-bold text-white leading-snug">{block.analogy.title}</p>
-            <p className="text-xs text-slate-300 mt-0.5 font-light">{block.analogy.description}</p>
-          </div>
-        </>
+        </div>
       ) : (
-        <div className="p-4 flex flex-col items-center justify-center gap-2 text-center flex-1">
+        <div className="w-full h-full p-4 flex flex-col items-center justify-center gap-2 text-center">
           <span className="text-4xl">{emojiForTitle(block.analogy.title)}</span>
           <p className="text-sm font-bold text-white leading-snug">{block.analogy.title}</p>
           <p className="text-xs text-slate-300 mt-0.5 font-light">{block.analogy.description}</p>

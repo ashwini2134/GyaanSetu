@@ -14,7 +14,7 @@
         {
           "type": "explanation",
           "title": "What is What is Optimization & Hill Climbing?",
-          "body": "Optimization means finding the best solution among many possible options. Hill Climbing is the simplest approach \u2014 always move toward a better nearby option.",
+          "body": "Optimization means finding the best solution among many possible options. Hill Climbing is the simplest approach — always move toward a better nearby option.",
           "bullets": [
             "Optimization = finding the best solution (cheapest, fastest, most accurate)",
             "Real example: finding the cheapest flight with fewest stops",
@@ -28,9 +28,9 @@
           "type": "think_of",
           "analogy": {
             "title": "Think of Optimization as Packing a Suitcase",
-            "description": "Limited space but want the most valuable items. Each has weight and value. Goal: maximize value without exceeding capacity \u2014 the classic knapsack problem that optimization algorithms solve.",
+            "description": "Choose the best combination within constraints",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "\ud83d\udca1"
+            "emoji": "💡"
           },
           "visualization": {
             "type": "flow",
@@ -43,14 +43,9 @@
           },
           "code": {
             "language": "python",
-            "code": "# Knapsack: pack most value\nitems = [(\"laptop\", 3, 1000), (\"phone\", 1, 800), (\"book\", 2, 50)]\ncap = 4\nbest = []\nfor name, w, v in sorted(items, key=lambda x: -x[2]/x[1]):\n    if w <= cap:\n        best.append(name)\n        cap -= w\nprint(f\"Pack: {', '.join(best)}\")",
-            "output": "Pack: phone, laptop"
+            "code": "items = [(\"phone\",1,800), (\"laptop\",3,1000)]\ncap = 4\nfor name, w, _ in sorted(items, key=lambda x: -x[2]/x[1]):\n    if w <= cap: print(name); cap -= w",
+            "output": "phone\nlaptop"
           }
-        },
-        {
-          "type": "reflection",
-          "question": "Can Hill Climbing always find the absolute best solution?",
-          "answer": "No, it can get stuck at a local best."
         },
         {
           "type": "practice",
@@ -71,11 +66,11 @@
           "title": "What is Simulated Annealing & Constraint Satisfaction?",
           "body": "Simulated Annealing fixes Hill Climbing by occasionally accepting a worse option to escape being stuck. Constraint Satisfaction Problems have rules the solution must follow.",
           "bullets": [
-            "Simulated Annealing: sometimes accept a worse option \u2014 like shaking a puzzle to unstick pieces",
+            "Simulated Annealing: sometimes accept a worse option — like shaking a puzzle to unstick pieces",
             "As time goes on, accept worse options less often (temperature cools down)",
             "CSP: a problem where the solution must satisfy a set of constraints (rules)",
-            "CSP example: exam scheduling \u2014 no student should have two exams at the same time",
-            "Sudoku is a classic CSP \u2014 every row, column, box must have digits 1-9 with no repeats"
+            "CSP example: exam scheduling — no student should have two exams at the same time",
+            "Sudoku is a classic CSP — every row, column, box must have digits 1-9 with no repeats"
           ],
           "accentColor": "blue"
         },
@@ -83,14 +78,14 @@
           "type": "think_of",
           "analogy": {
             "title": "Think of CSP as a Classroom Seating Chart",
-            "description": "Each seat is a variable with a domain of students. Constraints: chatty pairs can't sit together. Constraint satisfaction problems assign values to variables while respecting all constraints.",
+            "description": "Assign values to variables while respecting constraints",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "\ud83d\udca1"
+            "emoji": "💡"
           },
           "visualization": {
             "type": "categories",
-            "title": "CSP: Variables \u2192 Values",
-            "centerLabel": "CSP: Variables \u2192 Values",
+            "title": "CSP: Variables → Values",
+            "centerLabel": "CSP: Variables → Values",
             "items": [
               "Seat 1",
               "Seat 2",
@@ -99,14 +94,9 @@
           },
           "code": {
             "language": "python",
-            "code": "# CSP: no enemies adjacent\nenemies = {\"Alice\": {\"Bob\"}, \"Bob\": {\"Alice\", \"Charlie\"}, \"Charlie\": {\"Bob\"}}\nseats = [\"Alice\", \"Charlie\", \"Bob\"]\nfor i in range(len(seats)-1):\n    if seats[i+1] in enemies[seats[i]]:\n        print(f\"Conflict at positions {i},{i+1}\")\n        break\nelse:\n    print(\"No seating conflicts!\")",
-            "output": "No seating conflicts!"
+            "code": "enemies = {\"Alice\": {\"Bob\"}, \"Bob\": {\"Alice\"}}\nseats = [\"Alice\", \"Bob\"]\nif seats[1] in enemies[seats[0]]:\n    print(\"Conflict: adjacent enemies\")",
+            "output": "Conflict: adjacent enemies"
           }
-        },
-        {
-          "type": "reflection",
-          "question": "Is Sudoku an example of a Constraint Satisfaction Problem?",
-          "answer": "Yes, the digits must satisfy strict row, column, and box constraints."
         },
         {
           "type": "practice",
@@ -127,9 +117,9 @@
           "title": "What is Optimization Steps?",
           "body": "How to optimize solutions.",
           "bullets": [
-            "Step 1: Define your problem \u2014 what are you trying to optimize?",
+            "Step 1: Define your problem — what are you trying to optimize?",
             "Step 2: Choose a starting solution",
-            "Step 3: Check neighboring solutions \u2014 is any better?",
+            "Step 3: Check neighboring solutions — is any better?",
             "Step 4: Move to the better solution (Hill Climbing) or sometimes move to worse (Simulated Annealing)",
             "Step 5: Repeat until no improvement found"
           ],
@@ -139,9 +129,9 @@
           "type": "think_of",
           "analogy": {
             "title": "Think of Optimization Flow as a Delivery Route",
-            "description": "A driver must visit all stops while minimizing total distance. Each decision affects the next \u2014 the optimal route visits every point in the shortest possible path, like the traveling salesman problem.",
+            "description": "Find the shortest or cheapest path through a network",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "\ud83d\udca1"
+            "emoji": "💡"
           },
           "visualization": {
             "type": "flow",
@@ -157,13 +147,8 @@
           "code": {
             "language": "python",
             "code": "# Shortest delivery route\nstops = {\"WH\": {\"A\": 5, \"B\": 10}, \"A\": {\"B\": 3, \"C\": 8}, \"B\": {\"C\": 2}, \"C\": {\"WH\": 7}}\nroute = [\"WH\", \"A\", \"B\", \"C\", \"WH\"]\ntotal = sum(stops[route[i]][route[i+1]] for i in range(len(route)-1))\nprint(f\"Total: {total} km\")",
-            "output": "Total: 22 km"
+            "output": "Total: 17 km"
           }
-        },
-        {
-          "type": "reflection",
-          "question": "Is Getting Started always the best approach?",
-          "answer": "Not always! It depends on the specific problem and constraints."
         },
         {
           "type": "practice",
@@ -188,7 +173,7 @@
       },
       {
         "emoji": "",
-        "text": "Hill Climbing can get stuck at a local best \u2014 not always the global best"
+        "text": "Hill Climbing can get stuck at a local best — not always the global best"
       },
       {
         "emoji": "",

@@ -49,14 +49,14 @@
           "type": "analogy",
           "title": "Think of a Variable as a Labeled Storage Box",
           "emoji": "",
-          "text": "Imagine a physical storage box with a label on it. The label is the variable name. What's inside the box is the value. You can open the box to look inside, replace what's stored, or use its contents in a recipe \u2014 all by referring to the label."
+          "text": "Imagine a physical storage box with a label on it. The label is the variable name. What's inside the box is the value. You can open the box to look inside, replace what's stored, or use its contents in a recipe — all by referring to the label."
         },
         {
           "type": "think_of",
           "analogy": {
             "title": "A Labeled Storage Box",
             "description": "You put something inside and give it a name so you can find it later.",
-            "emoji": "\ud83d\udca1",
+            "emoji": "💡",
             "image": "https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=800&q=80"
           },
           "visualization": {
@@ -94,20 +94,6 @@
           "expectedOutput": "Lakshanya\n20\n5.6"
         },
         {
-          "type": "code_example",
-          "title": "Updating a Variable",
-          "language": "python",
-          "code": "count = 0\nprint(count)\n\ncount = count + 1\nprint(count)\n\ncount = count + 1\nprint(count)",
-          "expectedOutput": "0\n1\n2"
-        },
-        {
-          "type": "reflection",
-          "question": "What do you think will be printed if we change the value of `name` to \"John\" before calling print()?",
-          "answer": "It will print John instead of Lakshanya. When you reassign a variable, the old value is discarded and the new value takes its place. The box is emptied and refilled.",
-          "followupCode": "name = \"Lakshanya\"\nname = \"John\"\nprint(name)",
-          "followupOutput": "John"
-        },
-        {
           "type": "practice",
           "title": "Store Your Name",
           "instructions": "Create a variable called name and assign your name to it. Then print a greeting using that variable.",
@@ -132,14 +118,14 @@
           "type": "analogy",
           "title": "Think of a Function as a Recipe",
           "emoji": "",
-          "text": "A recipe is a set of steps written once that you can follow many times to make the same dish. You don't rewrite the recipe each time \u2014 you just say 'make pasta' and follow the steps. Functions work exactly the same way."
+          "text": "A recipe is a set of steps written once that you can follow many times to make the same dish. You don't rewrite the recipe each time — you just say 'make pasta' and follow the steps. Functions work exactly the same way."
         },
         {
           "type": "think_of",
           "analogy": {
             "title": "A Recipe Book",
-            "description": "A recipe is a set of steps you write once and follow many times \u2014 just like a function.",
-            "emoji": "\ud83d\udca1",
+            "description": "A recipe is a set of steps you write once and follow many times — just like a function.",
+            "emoji": "💡",
             "image": "https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=800&q=80"
           },
           "visualization": {
@@ -163,11 +149,11 @@
           "title": "Anatomy of a Function",
           "body": "A function has three parts: a **name**, optional **parameters** (inputs), and a **body** (the code that runs).",
           "bullets": [
-            "def \u2014 the keyword that starts a function definition",
-            "name \u2014 what you call to run the function",
-            "parameters \u2014 values passed in (optional)",
-            "body \u2014 the indented code that runs when called",
-            "return \u2014 optionally sends a value back"
+            "def — the keyword that starts a function definition",
+            "name — what you call to run the function",
+            "parameters — values passed in (optional)",
+            "body — the indented code that runs when called",
+            "return — optionally sends a value back"
           ]
         },
         {
@@ -176,20 +162,6 @@
           "language": "python",
           "code": "def greet(name):\n    print(f\"Hello, {name}!\")\n\ngreet(\"Lakshanya\")\ngreet(\"David\")",
           "expectedOutput": "Hello, Lakshanya!\nHello, David!"
-        },
-        {
-          "type": "code_example",
-          "title": "A Function That Returns a Value",
-          "language": "python",
-          "code": "def add(a, b):\n    return a + b\n\nresult = add(3, 4)\nprint(result)",
-          "expectedOutput": "7"
-        },
-        {
-          "type": "reflection",
-          "question": "What happens if we call greet(\"Lakshanya\") three times in a row?",
-          "answer": "Each call runs the function body again. You get the greeting printed three times \u2014 this is exactly why functions are useful! Write the code once, run it as many times as you need.",
-          "followupCode": "def greet(name):\n    print(f\"Hello, {name}!\")\n\ngreet(\"Lakshanya\")\ngreet(\"Lakshanya\")\ngreet(\"Lakshanya\")",
-          "followupOutput": "Hello, Lakshanya!\nHello, Lakshanya!\nHello, Lakshanya!"
         },
         {
           "type": "practice",

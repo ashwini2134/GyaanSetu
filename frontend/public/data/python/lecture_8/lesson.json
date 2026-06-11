@@ -14,7 +14,7 @@
           "type": "explanation",
           "accentColor": "blue",
           "title": "What is a Tuple?",
-          "body": "A **tuple** is like a list but **immutable** \u2014 you cannot change it after creation. Use parentheses ().",
+          "body": "A **tuple** is like a list but **immutable** — you cannot change it after creation. Use parentheses ().",
           "bullets": [
             "Tuples are created with (): coordinates = (10, 20)",
             "Items cannot be added, removed, or changed",
@@ -26,14 +26,14 @@
           "type": "analogy",
           "title": "A Tuple is Like a Sealed Envelope",
           "emoji": "",
-          "text": "Once sealed with coordinates inside, you can read them but not change them. Tuples work the same \u2014 great for fixed data like RGB colors or dates."
+          "text": "Once sealed with coordinates inside, you can read them but not change them. Tuples work the same — great for fixed data like RGB colors or dates."
         },
         {
           "type": "think_of",
           "analogy": {
             "title": "Sealed Envelope",
             "description": "Once sealed, contents cannot change. Safe and tamper-proof.",
-            "emoji": "\u2709\ufe0f",
+            "emoji": "✉️",
             "image": "https://images.unsplash.com/photo-1649019489428-70f505daacd6?w=800&q=80"
           },
           "visualization": {
@@ -47,14 +47,9 @@
           },
           "code": {
             "language": "python",
-            "code": "coords = (10, 20)\nprint(coords[0])",
-            "output": "10"
+            "code": "coords = (10, 20)\nprint(\"Read:\", coords[0])\nprint(\"Sealed:\", coords)",
+            "output": "Read: 10\nSealed: (10, 20)"
           }
-        },
-        {
-          "type": "reflection",
-          "question": "Can you change the first value of coords = (10, 20) by writing coords[0] = 5?",
-          "answer": "No! Tuples are immutable \u2014 once created, their contents cannot change. Trying coords[0] = 5 would give an error. This is the whole point of a tuple: it guarantees the data stays the same, like a sealed envelope."
         },
         {
           "type": "code_example",
@@ -76,13 +71,6 @@
           ]
         },
         {
-          "type": "code_example",
-          "title": "Packing and Unpacking",
-          "language": "python",
-          "code": "point = 10, 20\nprint(point)\n\nx, y = point\nprint(f\"x = {x}, y = {y}\")\n\na = 5\nb = 10\na, b = b, a\nprint(f\"a = {a}, b = {b}\")",
-          "expectedOutput": "(10, 20)\nx = 10, y = 20\na = 10, b = 5"
-        },
-        {
           "type": "practice",
           "title": "Work with Tuples",
           "instructions": "Create a tuple with your name, age, and city. Unpack it and print each value.",
@@ -102,8 +90,8 @@
           "title": "What is a Set?",
           "body": "A **set** is an unordered collection of **unique** items. Duplicates are automatically removed.",
           "bullets": [
-            "Sets have no duplicates \u2014 each item appears once",
-            "Sets are unordered \u2014 cannot access by index",
+            "Sets have no duplicates — each item appears once",
+            "Sets are unordered — cannot access by index",
             "Great for removing duplicates and membership tests"
           ]
         },
@@ -112,7 +100,7 @@
           "analogy": {
             "title": "Bag Of Unique Items",
             "description": "Every marble appears only once. No duplicates allowed.",
-            "emoji": "\ud83c\udf92",
+            "emoji": "🎒",
             "image": "https://images.unsplash.com/photo-1544457070-4cd773b4d71e?w=800&q=80"
           },
           "visualization": {
@@ -129,16 +117,11 @@
           }
         },
         {
-          "type": "reflection",
-          "question": "If you create a set with {1, 2, 2, 3, 3, 3}, how many items will it contain?",
-          "answer": "The set will contain 3 items: {1, 2, 3}. All duplicates are automatically removed because a set only stores unique values. This is like having a bag of marbles where you toss out any duplicates \u2014 only one of each color remains."
-        },
-        {
           "type": "code_example",
           "title": "Creating Sets",
           "language": "python",
-          "code": "numbers = {1, 2, 3, 2, 1, 4, 3}\nprint(numbers)\n\nfruits = {\"apple\", \"banana\", \"apple\", \"cherry\"}\nprint(fruits)\n\nmy_list = [1, 2, 2, 3, 3, 3]\nunique = set(my_list)\nprint(unique)",
-          "expectedOutput": "{1, 2, 3, 4}\n{'banana', 'apple', 'cherry'}\n{1, 2, 3}"
+          "code": "numbers = {1, 2, 3, 2, 1, 4, 3}\nprint(numbers)",
+          "expectedOutput": "{1, 2, 3, 4}"
         },
         {
           "type": "explanation",
@@ -146,18 +129,11 @@
           "title": "Set Operations",
           "body": "Sets support mathematical operations like union, intersection, and difference.",
           "bullets": [
-            "union (|) \u2014 all items from both sets",
-            "intersection (&) \u2014 items in BOTH sets",
-            "difference (-) \u2014 items in first but NOT second",
-            "in \u2014 check membership (very fast in sets)"
+            "union (|) — all items from both sets",
+            "intersection (&) — items in BOTH sets",
+            "difference (-) — items in first but NOT second",
+            "in — check membership (very fast in sets)"
           ]
-        },
-        {
-          "type": "code_example",
-          "title": "Set Operations",
-          "language": "python",
-          "code": "a = {1, 2, 3, 4, 5}\nb = {4, 5, 6, 7, 8}\n\nprint(f\"Union: {a | b}\")\nprint(f\"Intersection: {a & b}\")\nprint(f\"A - B: {a - b}\")\nprint(f\"B - A: {b - a}\")\n\nprint(3 in a)\nprint(9 in b)",
-          "expectedOutput": "Union: {1, 2, 3, 4, 5, 6, 7, 8}\nIntersection: {4, 5}\nA - B: {1, 2, 3}\nB - A: {8, 6, 7}\nTrue\nFalse"
         },
         {
           "type": "practice",

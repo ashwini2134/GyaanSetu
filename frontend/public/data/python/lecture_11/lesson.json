@@ -14,7 +14,7 @@
           "type": "explanation",
           "accentColor": "blue",
           "title": "Strings are Sequences",
-          "body": "A string is a sequence of characters. You can access individual characters, slice portions, and measure length \u2014 just like lists.",
+          "body": "A string is a sequence of characters. You can access individual characters, slice portions, and measure length — just like lists.",
           "bullets": [
             "Indexing: text[0] gets the first character",
             "Slicing: text[1:4] gets characters at index 1-3",
@@ -27,7 +27,7 @@
           "analogy": {
             "title": "Chain of Characters",
             "description": "Each character has a position. You can access individual links.",
-            "emoji": "\u26d3\ufe0f",
+            "emoji": "⛓️",
             "image": "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=800&q=80"
           },
           "visualization": {
@@ -44,11 +44,6 @@
             "code": "word = \"Python\"\nprint(word[0])",
             "output": "P"
           }
-        },
-        {
-          "type": "reflection",
-          "question": "What does word[-1] give you for word = 'Python'?",
-          "answer": "word[-1] gives you 'n', the last character. Negative indices count from the end of the string: -1 is the last character, -2 is the second-to-last, and so on. It's like asking 'what's the last link in the chain?' without having to count all the links first."
         },
         {
           "type": "code_example",
@@ -100,11 +95,11 @@
           "title": "Powerful String Methods",
           "body": "Python strings have built-in methods for changing case, removing whitespace, finding text, and more.",
           "bullets": [
-            "upper() / lower() \u2014 change case",
-            "strip() \u2014 removes whitespace from both ends",
-            "replace(old, new) \u2014 replaces text",
-            "find(substring) \u2014 returns index or -1 if not found",
-            "startswith() / endswith() \u2014 check beginning/end"
+            "upper() / lower() — change case",
+            "strip() — removes whitespace from both ends",
+            "replace(old, new) — replaces text",
+            "find(substring) — returns index or -1 if not found",
+            "startswith() / endswith() — check beginning/end"
           ]
         },
         {
@@ -112,7 +107,7 @@
           "analogy": {
             "title": "Editing Tools",
             "description": "Each method transforms the string in a specific way",
-            "emoji": "\ud83d\udee0\ufe0f",
+            "emoji": "🛠️",
             "image": "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=800&q=80"
           },
           "visualization": {
@@ -131,11 +126,6 @@
           }
         },
         {
-          "type": "reflection",
-          "question": "Does calling msg.upper() permanently change the original msg variable?",
-          "answer": "No! String methods return a NEW string \u2014 they don't modify the original. If you want to keep the change, you must store it back: msg = msg.upper(). This is because strings in Python are immutable (cannot be changed after creation)."
-        },
-        {
           "type": "code_example",
           "title": "Case Methods and Cleanup",
           "language": "python",
@@ -143,37 +133,23 @@
           "expectedOutput": "HELLO, WORLD!  \n  hello, world!  \nHello, World!\nHello, Python!\nTrue"
         },
         {
-          "type": "code_example",
-          "title": "Searching in Strings",
-          "language": "python",
-          "code": "sentence = \"The quick brown fox jumps over the lazy dog\"\nprint(sentence.find(\"fox\"))\nprint(sentence.find(\"cat\"))\nprint(sentence.count(\"the\"))\nprint(sentence.lower().count(\"the\"))",
-          "expectedOutput": "16\n-1\n1\n2"
-        },
-        {
           "type": "explanation",
           "accentColor": "purple",
           "title": "Splitting and Joining",
           "body": "Strings can be split into lists and lists can be joined into strings.",
           "bullets": [
-            "split() \u2014 splits a string into a list (default: space)",
-            "split(\",\") \u2014 splits by comma",
-            "\" \".join(list) \u2014 joins list items into a string"
+            "split() — splits a string into a list (default: space)",
+            "split(\",\") — splits by comma",
+            "\" \".join(list) — joins list items into a string"
           ]
         },
         {
-          "type": "code_example",
-          "title": "Split and Join",
-          "language": "python",
-          "code": "csv_data = \"Alice,Bob,Charlie,Diana\"\nnames = csv_data.split(\",\")\nprint(names)\n\nsentence = \"Python is awesome\"\nwords = sentence.split()\nprint(words)\n\nrejoined = \" - \".join(words)\nprint(rejoined)",
-          "expectedOutput": "['Alice', 'Bob', 'Charlie', 'Diana']\n['Python', 'is', 'awesome']\nPython - is - awesome"
-        },
-        {
           "type": "practice",
-          "title": "Palindrome Checker",
-          "instructions": "Ask for a word. Check if it reads the same forward and backward (ignore case).",
-          "starterCode": "word = input(\"Enter a word: \")\ncleaned = word.lower().strip()\nif cleaned == cleaned[]:\n    print(\"Palindrome!\")\nelse:\n    print(\"Not a palindrome\")",
-          "solution": "word = input(\"Enter a word: \")\ncleaned = word.lower().strip()\nif cleaned == cleaned[::-1]:\n    print(\"Yes, it's a palindrome!\")\nelse:\n    print(\"No, it's not a palindrome.\")",
-          "hint": "Use [::-1] to reverse the string. Use lower() to ignore case."
+          "title": "Name Initials",
+          "instructions": "Ask for first name and last name. Print the initials in uppercase with a dot between them.",
+          "starterCode": "first = input(\"First name: \")\nlast = input(\"Last name: \")\ninitial = first[0].upper() + \".\" + last[0].upper()\nprint(initial)",
+          "solution": "first = input(\"First name: \")\nlast = input(\"Last name: \")\ninitial = first[0].upper() + \".\" + last[0].upper()\nprint(initial)",
+          "hint": "Use [0] to get the first character of each name. Use .upper() to make them uppercase."
         },
         {
           "type": "visual_aid",
@@ -202,7 +178,7 @@
     "keyTakeaways": [
       {
         "emoji": "",
-        "text": "Strings are sequences \u2014 index, slice, and measure with len()"
+        "text": "Strings are sequences — index, slice, and measure with len()"
       },
       {
         "emoji": "",

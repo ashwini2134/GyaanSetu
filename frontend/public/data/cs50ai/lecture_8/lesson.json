@@ -16,9 +16,9 @@
           "title": "What is AI Bias & Privacy?",
           "body": "AI can be unfair and invasive if not built carefully. Bias and privacy are two of the biggest ethical challenges.",
           "bullets": [
-            "AI Bias \u2014 when training data reflects unfairness, AI inherits and amplifies it",
+            "AI Bias — when training data reflects unfairness, AI inherits and amplifies it",
             "Example: a hiring AI trained on historical male-dominated data may reject female applicants unfairly",
-            "Privacy \u2014 AI systems collect and process massive amounts of personal data",
+            "Privacy — AI systems collect and process massive amounts of personal data",
             "Your data (searches, clicks, location) is used to train and improve AI systems",
             "This concept is fundamental to AI development."
           ],
@@ -28,9 +28,9 @@
           "type": "think_of",
           "analogy": {
             "title": "Think of AI Bias as a One-Sided Story",
-            "description": "If you only hear one side of a story, your view becomes biased. AI trained on only one demographic's data will be biased toward that group. The training data shapes the AI's worldview \u2014 incomplete data means biased AI.",
+            "description": "Biased training data leads to unfair outcomes",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "\ud83d\udca1"
+            "emoji": "💡"
           },
           "visualization": {
             "type": "decision",
@@ -41,14 +41,9 @@
           },
           "code": {
             "language": "python",
-            "code": "# Simulating bias in training data\napplicants = [(\"Alice\", 85), (\"Bob\", 78), (\"Eve\", 92), (\"Charlie\", 70)]\n# Only male names in training set\ntrained = [s for _, s in applicants if _[0] not in \"AE\"][:2]\navg = sum(trained) / len(trained)\nprint(f\"Model trained on male-only data: avg {avg}\")\nprint(\"Female applicants scored higher but were excluded \u2014 biased model!\")\nprint(\"Solution: ensure balanced training data\")",
-            "output": "Model trained on male-only data: avg 74.0\nFemale applicants scored higher but were excluded \u2014 biased model!\nSolution: ensure balanced training data"
+            "code": "scores = [(\"Alice\", 85), (\"Bob\", 78), (\"Eve\", 92)]\navg = sum(s for _, s in scores[:2]) / 2\nprint(f\"Trained on male-only: avg {avg}\")\nprint(\"Eve scored higher but was excluded\")",
+            "output": "Trained on male-only: avg 81.5\nEve scored higher but was excluded"
           }
-        },
-        {
-          "type": "reflection",
-          "question": "Can AI be unfair even if no one intentionally programmed it to be unfair?",
-          "answer": "Yes, because it learns biases inherently present in the training data."
         },
         {
           "type": "practice",
@@ -69,12 +64,12 @@
           "title": "What is Hallucinations, Deepfakes & Accountability?",
           "body": "AI can generate false information confidently and create fake media. Accountability asks who is responsible when AI causes harm.",
           "bullets": [
-            "AI Hallucinations \u2014 AI confidently stating things that are factually wrong",
-            "Why hallucinations happen \u2014 model predicts plausible-sounding text, not verified facts",
-            "Deepfakes \u2014 AI-generated fake videos or audio that can spread misinformation",
-            "Transparency \u2014 people should always know when they are interacting with AI",
-            "Accountability \u2014 who is responsible when AI makes a harmful decision?",
-            "Fairness \u2014 AI should perform equally well for all groups of people"
+            "AI Hallucinations — AI confidently stating things that are factually wrong",
+            "Why hallucinations happen — model predicts plausible-sounding text, not verified facts",
+            "Deepfakes — AI-generated fake videos or audio that can spread misinformation",
+            "Transparency — people should always know when they are interacting with AI",
+            "Accountability — who is responsible when AI makes a harmful decision?",
+            "Fairness — AI should perform equally well for all groups of people"
           ],
           "accentColor": "blue"
         },
@@ -82,9 +77,9 @@
           "type": "think_of",
           "analogy": {
             "title": "Think of Hallucination as an Over-Confident Friend",
-            "description": "A friend who's never wrong \u2014 even when they are. They make up details with total confidence. AI hallucination is the same: the model generates plausible-sounding but false information with complete certainty.",
+            "description": "AI confidently generates false information",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "\ud83d\udca1"
+            "emoji": "💡"
           },
           "visualization": {
             "type": "flow",
@@ -97,14 +92,9 @@
           },
           "code": {
             "language": "python",
-            "code": "# Simulating hallucination\nquestion = \"What year was the Martian city of Olympos founded?\"\nprint(f\"Q: {question}\")\nprint(\"A: Olympos was founded in 2157 by the first Mars colony.\")\nprint(\"(This is false \u2014 there is no Martian city Olympos)\")",
-            "output": "Q: What year was the Martian city of Olympos founded?\nA: Olympos was founded in 2157 by the first Mars colony.\n(This is false \u2014 there is no Martian city Olympos)"
+            "code": "# AI confidently guesses\nfacts = {\"capital\": \"Paris\"}\nprint(facts.get(\"capital\", \"Unknown\"))\nprint(facts.get(\"population\", \"Unknown (hallucinated)\"))",
+            "output": "Paris\nUnknown (hallucinated)"
           }
-        },
-        {
-          "type": "reflection",
-          "question": "Should you always verify important facts that an AI gives you?",
-          "answer": "Absolutely, because AI can confidently hallucinate incorrect information."
         },
         {
           "type": "practice",
@@ -125,11 +115,11 @@
           "title": "What is Ethical Steps?",
           "body": "How to use AI ethically.",
           "bullets": [
-            "Step 1: Always verify AI outputs before using them \u2014 especially for important decisions",
+            "Step 1: Always verify AI outputs before using them — especially for important decisions",
             "Step 2: Check if training data is diverse and representative",
-            "Step 3: Be transparent \u2014 tell users when AI is involved",
-            "Step 4: Assign accountability \u2014 define who is responsible for AI decisions",
-            "Step 5: Report harmful AI uses \u2014 do not misuse AI tools"
+            "Step 3: Be transparent — tell users when AI is involved",
+            "Step 4: Assign accountability — define who is responsible for AI decisions",
+            "Step 5: Report harmful AI uses — do not misuse AI tools"
           ],
           "accentColor": "blue"
         },
@@ -137,9 +127,9 @@
           "type": "think_of",
           "analogy": {
             "title": "Think of Responsible AI as a Safety Checklist",
-            "description": "Pilots run through a pre-flight checklist before takeoff. AI needs the same: Is it fair? Is it transparent? Does it respect privacy? A responsibility checklist ensures AI is deployed safely and ethically.",
+            "description": "Ensure AI is transparent, fair, and private",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "\ud83d\udca1"
+            "emoji": "💡"
           },
           "visualization": {
             "type": "flow",
@@ -154,19 +144,14 @@
           },
           "code": {
             "language": "python",
-            "code": "# AI ethics checklist\ndef audit(transparent, fair, private):\n    passed = sum([transparent, fair, private])\n    if passed == 3:\n        print(\"\u2705 AI passes ethics review\")\n    else:\n        print(f\"\u274c {3-passed} check(s) failed\")\n\naudit(transparent=True, fair=False, private=True)",
-            "output": "\u274c 1 check(s) failed"
+            "code": "def audit(transparent, fair, private):\n    passed = sum([transparent, fair, private])\n    print(\"Pass\" if passed == 3 else f\"{3-passed} fail(s)\")\naudit(True, False, True)",
+            "output": "1 fail(s)"
           }
-        },
-        {
-          "type": "reflection",
-          "question": "Is Getting Started always the best approach?",
-          "answer": "Not always! It depends on the specific problem and constraints."
         },
         {
           "type": "practice",
           "title": "Practice Exercise",
-          "instructions": "Find a real news story about AI causing harm \u2014 identify which ethical issue it relates to and write 3 sentences",
+          "instructions": "Find a real news story about AI causing harm — identify which ethical issue it relates to and write 3 sentences",
           "starterCode": "# Write your summary\n",
           "solution": "# Discuss bias, privacy, or hallucination",
           "hint": "Look up recent AI news."

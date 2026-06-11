@@ -17,9 +17,9 @@
           "body": "Python can do all the math you learned in school. Arithmetic operators let you add, subtract, multiply, divide, and perform advanced operations.",
           "bullets": [
             "+ addition, - subtraction, * multiplication, / division",
-            "// floor division \u2014 divides and rounds down",
-            "% modulo \u2014 returns the remainder of division",
-            "** power (exponent) \u2014 raises a number to a power"
+            "// floor division — divides and rounds down",
+            "% modulo — returns the remainder of division",
+            "** power (exponent) — raises a number to a power"
           ]
         },
         {
@@ -30,23 +30,9 @@
           "expectedOutput": "15\n5\n50\n2.0"
         },
         {
-          "type": "code_example",
-          "title": "Floor Division and Modulo",
-          "language": "python",
-          "code": "print(17 // 5)\nprint(17 % 5)\n\nprint(20 // 6)\nprint(20 % 6)",
-          "expectedOutput": "3\n2\n3\n2"
-        },
-        {
-          "type": "code_example",
-          "title": "Power Operator",
-          "language": "python",
-          "code": "print(2 ** 3)\nprint(5 ** 2)\nprint(10 ** 4)",
-          "expectedOutput": "8\n25\n10000"
-        },
-        {
           "type": "explanation",
           "accentColor": "blue",
-          "title": "PEMDAS \u2014 Order of Operations",
+          "title": "PEMDAS — Order of Operations",
           "body": "Python follows standard math rules: Parentheses, Exponents, Multiplication/Division, Addition/Subtraction.",
           "bullets": [
             "Parentheses () have the highest priority",
@@ -60,7 +46,7 @@
           "analogy": {
             "title": "The Order Rulebook",
             "description": "PEMDAS tells Python which math operation to perform first",
-            "emoji": "\ud83d\udccf",
+            "emoji": "📏",
             "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&q=80"
           },
           "visualization": {
@@ -77,18 +63,6 @@
             "code": "result = 2 + 3 * 4\nprint(result)",
             "output": "14"
           }
-        },
-        {
-          "type": "reflection",
-          "question": "Does Python always calculate left to right no matter what?",
-          "answer": "No! Python follows PEMDAS rules, not simple left-to-right. In 2 + 3 * 4, multiplication happens first (3 * 4 = 12), then addition (2 + 12 = 14). If you want addition first, use parentheses: (2 + 3) * 4 = 20."
-        },
-        {
-          "type": "code_example",
-          "title": "PEMDAS in Action",
-          "language": "python",
-          "code": "print(2 + 3 * 4)\nprint((2 + 3) * 4)\nprint(10 - 2 * 3 + 1)\nprint(10 + 2 ** 3)",
-          "expectedOutput": "14\n20\n5\n18"
         },
         {
           "type": "practice",
@@ -124,13 +98,6 @@
           "expectedOutput": "True\nFalse\nTrue\nFalse\nTrue\nFalse"
         },
         {
-          "type": "code_example",
-          "title": "Comparing Variables",
-          "language": "python",
-          "code": "age = 18\nvoting_age = 18\nprint(age >= voting_age)\nprint(age == voting_age)\n\nscore = 85\npassing = 70\nprint(score > passing)",
-          "expectedOutput": "True\nTrue\nTrue"
-        },
-        {
           "type": "reflection",
           "question": "What is the difference between = and == in Python?",
           "answer": "= is assignment (puts a value in a variable). == is comparison (checks if values are equal)."
@@ -155,9 +122,9 @@
           "title": "Combining Conditions",
           "body": "**Logical operators** let you combine multiple conditions to make complex decisions.",
           "bullets": [
-            "and \u2014 True only if BOTH sides are True",
-            "or \u2014 True if AT LEAST ONE side is True",
-            "not \u2014 reverses the result (True becomes False)"
+            "and — True only if BOTH sides are True",
+            "or — True if AT LEAST ONE side is True",
+            "not — reverses the result (True becomes False)"
           ]
         },
         {
@@ -171,7 +138,7 @@
           "analogy": {
             "title": "Gatekeepers",
             "description": "and = BOTH must pass. or = AT LEAST ONE must pass.",
-            "emoji": "\ud83d\udea7",
+            "emoji": "🚧",
             "image": "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80"
           },
           "visualization": {
@@ -183,14 +150,9 @@
           },
           "code": {
             "language": "python",
-            "code": "age = 20\nprint(age >= 18 and age < 60)",
-            "output": "True"
+            "code": "has_key = True\nhas_pass = False\nprint(\"and:\", has_key and has_pass)\nprint(\"or:\", has_key or has_pass)",
+            "output": "and: False\nor: True"
           }
-        },
-        {
-          "type": "reflection",
-          "question": "If you are 17 years old (age = 17) and have an ID (has_id = True), does age >= 18 and has_id evaluate to True?",
-          "answer": "No! The 'and' gatekeeper requires BOTH conditions to be True. age >= 18 is False (you're 17), so even though has_id is True, the whole expression is False. With 'or', only one needs to be True."
         },
         {
           "type": "code_example",
@@ -218,7 +180,7 @@
       },
       {
         "emoji": "",
-        "text": "PEMDAS rules apply \u2014 parentheses first, then exponents, etc."
+        "text": "PEMDAS rules apply — parentheses first, then exponents, etc."
       },
       {
         "emoji": "",
@@ -230,7 +192,7 @@
       },
       {
         "emoji": "",
-        "text": "= is assignment, == is comparison \u2014 don't mix them up"
+        "text": "= is assignment, == is comparison — don't mix them up"
       }
     ],
     "whatYouLearned": [

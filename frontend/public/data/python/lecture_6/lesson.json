@@ -16,7 +16,7 @@
           "title": "The while Loop",
           "body": "A `while` loop keeps running as long as its condition is True. It checks the condition BEFORE each iteration.",
           "bullets": [
-            "while condition: \u2014 checks before each run",
+            "while condition: — checks before each run",
             "If True, the body runs, then checks again",
             "If False, the loop stops"
           ]
@@ -25,14 +25,14 @@
           "type": "analogy",
           "title": "while is Like Checking Your Phone",
           "emoji": "",
-          "text": "While waiting for a friend: check for messages. No message \u2192 wait. Message arrives \u2192 stop. The while loop checks a condition and keeps going until it changes."
+          "text": "While waiting for a friend: check for messages. No message → wait. Message arrives → stop. The while loop checks a condition and keeps going until it changes."
         },
         {
           "type": "think_of",
           "analogy": {
             "title": "Checking Your Phone",
             "description": "Keep checking until there are no more notifications",
-            "emoji": "\ud83d\udcf1",
+            "emoji": "📱",
             "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=800&q=80"
           },
           "visualization": {
@@ -50,11 +50,6 @@
             "code": "count = 3\nwhile count > 0:\n    print(f\"{count} left\")\n    count -= 1",
             "output": "3 left\n2 left\n1 left"
           }
-        },
-        {
-          "type": "reflection",
-          "question": "What happens if you forget to update count inside the while loop?",
-          "answer": "The loop would run forever! If count never decreases, the condition count > 0 stays True forever. This is called an infinite loop. It's like checking your phone for notifications, but the number never goes down \u2014 you'd be stuck checking forever. Always update the variable that controls the condition."
         },
         {
           "type": "code_example",
@@ -95,25 +90,18 @@
           "title": "Controlling Loop Flow",
           "body": "Sometimes you need to exit early or skip an iteration. break and continue give you this control.",
           "bullets": [
-            "break \u2014 exits the loop immediately",
-            "continue \u2014 skips to the next iteration",
+            "break — exits the loop immediately",
+            "continue — skips to the next iteration",
             "break is useful for 'found it!' scenarios",
             "continue is useful for 'skip this one' scenarios"
           ]
         },
         {
           "type": "code_example",
-          "title": "break \u2014 Exit Early",
+          "title": "break — Exit Early",
           "language": "python",
           "code": "for num in range(1, 10):\n    if num == 5:\n        print(\"Found 5! Stopping...\")\n        break\n    print(f\"Checking: {num}\")",
           "expectedOutput": "Checking: 1\nChecking: 2\nChecking: 3\nChecking: 4\nFound 5! Stopping..."
-        },
-        {
-          "type": "code_example",
-          "title": "continue \u2014 Skip an Iteration",
-          "language": "python",
-          "code": "for num in range(1, 8):\n    if num % 2 == 0:\n        continue\n    print(f\"Odd: {num}\")",
-          "expectedOutput": "Odd: 1\nOdd: 3\nOdd: 5\nOdd: 7"
         },
         {
           "type": "explanation",
@@ -128,11 +116,11 @@
         },
         {
           "type": "practice",
-          "title": "Number Guessing Game",
-          "instructions": "Set secret = 7. Keep asking the user to guess until correct.",
-          "starterCode": "secret = 7\nwhile True:\n    guess = int(input(\"Guess (1-10): \"))\n    if guess == secret:\n        print(\"Correct!\")\n        \n    else:\n        print(\"Wrong!\")",
-          "solution": "secret = 7\nwhile True:\n    guess = int(input(\"Guess (1-10): \"))\n    if guess == secret:\n        print(\"Correct! You got it!\")\n        break\n    else:\n        print(\"Wrong, try again.\")",
-          "hint": "Use while True for infinite loop, break when guessed correctly."
+          "title": "Countdown Timer",
+          "instructions": "Ask for a number N. Use a while loop to count down from N to 1, then print 'Blast off!'",
+          "starterCode": "n = int(input(\"Enter a number: \"))\nwhile n > 0:\n    print(n)\n    n = \nprint(\"Blast off!\")",
+          "solution": "n = int(input(\"Enter a number: \"))\nwhile n > 0:\n    print(n)\n    n -= 1\nprint(\"Blast off!\")",
+          "hint": "Decrease n by 1 inside the loop using n -= 1. The loop stops when n reaches 0."
         },
         {
           "type": "reflection",
@@ -153,11 +141,11 @@
         "text": "Always update the condition variable to avoid infinite loops"
       },
       {
-        "emoji": "\u23f9",
+        "emoji": "⏹",
         "text": "break exits the loop immediately"
       },
       {
-        "emoji": "\u23ed",
+        "emoji": "⏭",
         "text": "continue skips to the next iteration"
       },
       {

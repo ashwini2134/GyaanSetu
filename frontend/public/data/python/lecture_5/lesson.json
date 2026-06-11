@@ -32,7 +32,7 @@
           "analogy": {
             "title": "Washing Machine Cycle",
             "description": "The machine runs through each step automatically for every item",
-            "emoji": "\ud83e\uddfa",
+            "emoji": "🧺",
             "image": "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=800&q=80"
           },
           "visualization": {
@@ -50,11 +50,6 @@
             "code": "for i in range(3):\n    print(f\"Cycle {i+1}\")",
             "output": "Cycle 1\nCycle 2\nCycle 3"
           }
-        },
-        {
-          "type": "reflection",
-          "question": "If you use for i in range(3), does the loop body run 3 times or 4 times?",
-          "answer": "The loop body runs exactly 3 times \u2014 for i = 0, 1, and 2. range(3) gives you the numbers 0, 1, 2 (three numbers total). The loop stops after processing the last number, just like a washing machine stops after its final spin cycle."
         },
         {
           "type": "code_example",
@@ -84,9 +79,9 @@
           "title": "Counting with range()",
           "body": "The `range()` function generates a sequence of numbers. Perfect when you want to repeat a specific number of times.",
           "bullets": [
-            "range(stop) \u2014 numbers from 0 to stop-1",
-            "range(start, stop) \u2014 numbers from start to stop-1",
-            "range(start, stop, step) \u2014 numbers with custom step"
+            "range(stop) — numbers from 0 to stop-1",
+            "range(start, stop) — numbers from start to stop-1",
+            "range(start, stop, step) — numbers with custom step"
           ]
         },
         {
@@ -97,19 +92,12 @@
           "expectedOutput": "range(5):\n0\n1\n2\n3\n4\nrange(2, 6):\n2\n3\n4\n5"
         },
         {
-          "type": "code_example",
-          "title": "range() with Step",
-          "language": "python",
-          "code": "print(\"Even numbers:\")\nfor i in range(0, 10, 2):\n    print(i)\n\nprint(\"Countdown:\")\nfor i in range(5, 0, -1):\n    print(i)\nprint(\"Blast off!\")",
-          "expectedOutput": "Even numbers:\n0\n2\n4\n6\n8\nCountdown:\n5\n4\n3\n2\n1\nBlast off!"
-        },
-        {
           "type": "practice",
           "title": "Print 1 to 10",
           "instructions": "Use a for loop with range() to print numbers 1 through 10.",
           "starterCode": "for i in range(, ):\n    print(i)",
           "solution": "for i in range(1, 11):\n    print(i)",
-          "hint": "Use range(1, 11) \u2014 range stops before the end value.",
+          "hint": "Use range(1, 11) — range stops before the end value.",
           "expectedOutput": "1\n2\n3\n4\n5\n6\n7\n8\n9\n10"
         },
         {
@@ -177,7 +165,7 @@
       },
       {
         "emoji": "",
-        "text": "range(stop) excludes stop \u2014 range(5) gives 0-4"
+        "text": "range(stop) excludes stop — range(5) gives 0-4"
       }
     ],
     "whatYouLearned": [

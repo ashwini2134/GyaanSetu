@@ -3,7 +3,7 @@
   "courseSlug": "python",
   "number": 1,
   "title": "Variables & Data Types",
-  "overview": "Every program works with data \u2014 numbers, text, true/false values. In this lecture you'll learn how to store data in variables and understand the different types of data Python can work with.",
+  "overview": "Every program works with data — numbers, text, true/false values. In this lecture you'll learn how to store data in variables and understand the different types of data Python can work with.",
   "estimatedMinutes": 50,
   "sections": [
     {
@@ -19,7 +19,7 @@
             "Variables store values like numbers, text, or true/false",
             "Use the = sign to assign a value: name = \"Lakshanya\"",
             "Once assigned, use the variable name anywhere to access the value",
-            "Variables can be updated \u2014 old value is replaced"
+            "Variables can be updated — old value is replaced"
           ]
         },
         {
@@ -33,7 +33,7 @@
           "analogy": {
             "title": "Labeled Storage Box",
             "description": "Each box has a label and holds one item",
-            "emoji": "\ud83c\udff7\ufe0f",
+            "emoji": "🏷️",
             "image": "https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=800&q=80"
           },
           "visualization": {
@@ -50,11 +50,6 @@
             "code": "name = \"Alice\"\nprint(name)",
             "output": "Alice"
           }
-        },
-        {
-          "type": "reflection",
-          "question": "After writing name = 'Lakshanya', does the variable name store the word 'name' or the value 'Lakshanya'?",
-          "answer": "The variable name stores the value 'Lakshanya'. Think of it like a box labeled 'name' that contains the item 'Lakshanya'. The label (variable name) helps you find the box, but the content is the actual value you stored."
         },
         {
           "type": "explanation",
@@ -76,13 +71,6 @@
           "expectedOutput": "Lakshanya\n20\n5.6"
         },
         {
-          "type": "code_example",
-          "title": "Updating Variables",
-          "language": "python",
-          "code": "score = 0\nprint(score)\n\nscore = score + 10\nprint(score)\n\nscore = score + 5\nprint(score)",
-          "expectedOutput": "0\n10\n15"
-        },
-        {
           "type": "practice",
           "title": "Store Information",
           "instructions": "Create three variables: your name, your age, and your college. Print each on a separate line.",
@@ -102,10 +90,10 @@
           "title": "Every Value Has a Type",
           "body": "In Python, every value belongs to a **type** that tells Python what kind of data it is and what you can do with it.",
           "bullets": [
-            "int \u2014 whole numbers like 42, 0, -7",
-            "float \u2014 decimal numbers like 3.14, 2.5, -0.001",
-            "str \u2014 text/strings like \"hello\", \"Python\"",
-            "bool \u2014 True or False values",
+            "int — whole numbers like 42, 0, -7",
+            "float — decimal numbers like 3.14, 2.5, -0.001",
+            "str — text/strings like \"hello\", \"Python\"",
+            "bool — True or False values",
             "Use type() to check the type of any value"
           ]
         },
@@ -114,7 +102,7 @@
           "analogy": {
             "title": "Different Containers",
             "description": "Each container type holds specific kinds of items",
-            "emoji": "\ud83d\udce6",
+            "emoji": "📦",
             "image": "https://images.unsplash.com/photo-1544457070-4cd773b4d71e?w=800&q=80"
           },
           "visualization": {
@@ -128,14 +116,9 @@
           },
           "code": {
             "language": "python",
-            "code": "text = \"Hello\"\nnumber = 42\nprint(text, number)",
-            "output": "Hello 42"
+            "code": "text = \"Hello\"\nnumber = 42\nflag = True\nprint(text, number, flag)",
+            "output": "Hello 42 True"
           }
-        },
-        {
-          "type": "reflection",
-          "question": "Can you put text inside an int container? For example, int_name = 'Alice'.",
-          "answer": "No! An int container only holds whole numbers. If you try age = 'Alice', Python will treat it as text (a string), not a number. The type matters because Python behaves differently with each type \u2014 you can do math with ints but not with strings."
         },
         {
           "type": "code_example",
@@ -148,27 +131,13 @@
           "type": "explanation",
           "accentColor": "purple",
           "title": "Type Conversion",
-          "body": "Sometimes you need to convert between types \u2014 turn a string into a number or a number into a string.",
+          "body": "Sometimes you need to convert between types — turn a string into a number or a number into a string.",
           "bullets": [
             "int(\"5\") converts string \"5\" to integer 5",
             "str(42) converts integer 42 to string \"42\"",
             "float(\"3.14\") converts string to float 3.14",
             "Be careful: int(\"hello\") causes an error because \"hello\" is not a number"
           ]
-        },
-        {
-          "type": "code_example",
-          "title": "Type Conversion in Action",
-          "language": "python",
-          "code": "age_str = \"20\"\nprint(age_str + \"5\")  # string concatenation\n\nage_int = int(age_str)\nprint(age_int + 5)   # integer addition\n\npi = 3.14159\nprint(\"Pi is \" + str(pi))",
-          "expectedOutput": "205\n25\nPi is 3.14159"
-        },
-        {
-          "type": "code_example",
-          "title": "Common Type Errors",
-          "language": "python",
-          "code": "# This causes an error:\n# print(\"Age: \" + 20)\n\n# This works:\nprint(\"Age: \" + str(20))\n\n# So does this:\nprint(f\"Age: {20}\")",
-          "expectedOutput": "Age: 20\nAge: 20"
         },
         {
           "type": "practice",
@@ -188,10 +157,10 @@
           "type": "explanation",
           "accentColor": "green",
           "title": "Working with Strings",
-          "body": "A **string** is a sequence of characters \u2014 letters, numbers, spaces, symbols \u2014 enclosed in quotes.",
+          "body": "A **string** is a sequence of characters — letters, numbers, spaces, symbols — enclosed in quotes.",
           "bullets": [
             "Use single quotes: 'Hello' or double quotes: \"Hello\"",
-            "Both work the same way \u2014 choose what you prefer",
+            "Both work the same way — choose what you prefer",
             "Strings can contain spaces, punctuation, and special characters",
             "Add strings together with + (concatenation)"
           ]

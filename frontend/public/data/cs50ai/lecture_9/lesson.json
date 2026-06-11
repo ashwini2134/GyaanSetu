@@ -14,15 +14,15 @@
         {
           "type": "explanation",
           "title": "What is What You Have Learned?",
-          "body": "You have completed the full AI journey \u2014 from Search to Language. This week you will apply everything to build a real project.",
+          "body": "You have completed the full AI journey — from Search to Language. This week you will apply everything to build a real project.",
           "bullets": [
-            "Week 0: Search \u2014 BFS, DFS, A \u2014 AI finding paths and solutions",
-            "Week 1: Knowledge & Logic \u2014 IF-THEN rules, inference, knowledge base",
-            "Week 2: Uncertainty \u2014 probability, Bayes Theorem, spam filters",
-            "Week 3: Optimization \u2014 Hill Climbing, Simulated Annealing, CSP",
-            "Week 4: Machine Learning \u2014 supervised, unsupervised, reinforcement",
-            "Week 5: Neural Networks \u2014 layers, weights, deep learning, CNNs",
-            "Week 6: NLP \u2014 tokenization, embeddings, LLMs, transformers"
+            "Week 0: Search — BFS, DFS, A — AI finding paths and solutions",
+            "Week 1: Knowledge & Logic — IF-THEN rules, inference, knowledge base",
+            "Week 2: Uncertainty — probability, Bayes Theorem, spam filters",
+            "Week 3: Optimization — Hill Climbing, Simulated Annealing, CSP",
+            "Week 4: Machine Learning — supervised, unsupervised, reinforcement",
+            "Week 5: Neural Networks — layers, weights, deep learning, CNNs",
+            "Week 6: NLP — tokenization, embeddings, LLMs, transformers"
           ],
           "accentColor": "blue"
         },
@@ -30,9 +30,9 @@
           "type": "think_of",
           "analogy": {
             "title": "Think of the AI Journey as Learning to Ride a Bike",
-            "description": "You start with training wheels (supervised learning), fall a few times (reinforcement learning), and eventually ride without thinking (deep learning). The journey from novice to expert mirrors AI's evolution.",
+            "description": "Start simple, practice, then handle complex tasks",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "\ud83d\udca1"
+            "emoji": "💡"
           },
           "visualization": {
             "type": "categories",
@@ -42,8 +42,7 @@
               "Symbolic (1950s)",
               "ML (1990s)",
               "Deep Learning",
-              "LLMs (2020s)",
-              "AGI (future)"
+              "LLMs (2020s)"
             ]
           },
           "code": {
@@ -51,11 +50,6 @@
             "code": "# Timeline of AI progress\neras = [(\"Symbolic\", 1956), (\"ML\", 1990), (\"Deep Learning\", 2012), (\"LLMs\", 2020)]\nfor name, year in eras:\n    print(f\"{name} ({year}): {(2026 - year) // 10} decades of progress\")",
             "output": "Symbolic (1956): 7 decades of progress\nML (1990): 3 decades of progress\nDeep Learning (2012): 1 decades of progress\nLLMs (2020): 0 decades of progress"
           }
-        },
-        {
-          "type": "reflection",
-          "question": "Is the final project a chance to apply what you have learned to a real problem?",
-          "answer": "Yes, it combines the theories into an actual application."
         },
         {
           "type": "practice",
@@ -76,10 +70,10 @@
           "title": "What is Choose Your Project?",
           "body": "Choose one of the 4 project options. Each uses a different AI concept from the course.",
           "bullets": [
-            "Option 1: AI Chatbot \u2014 uses NLP and prompt engineering to answer questions on a topic",
-            "Option 2: AI Story Generator \u2014 user gives characters and setting; AI generates a short story",
-            "Option 3: AI Resume Builder \u2014 user inputs details; AI formats and generates a professional resume",
-            "Option 4: Search Visualizer \u2014 a diagram or slide showing how BFS and DFS solve the same maze differently",
+            "Option 1: AI Chatbot — uses NLP and prompt engineering to answer questions on a topic",
+            "Option 2: AI Story Generator — user gives characters and setting; AI generates a short story",
+            "Option 3: AI Resume Builder — user inputs details; AI formats and generates a professional resume",
+            "Option 4: Search Visualizer — a diagram or slide showing how BFS and DFS solve the same maze differently",
             "This concept is fundamental to AI development."
           ],
           "accentColor": "blue"
@@ -88,9 +82,9 @@
           "type": "think_of",
           "analogy": {
             "title": "Think of Project Planning as a Blueprint",
-            "description": "Before building a house, you need a blueprint. An AI project needs the same: define the problem, gather data, choose the model, evaluate results, deploy. The blueprint guides every step of development.",
+            "description": "Define the problem, gather data, choose a model",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "\ud83d\udca1"
+            "emoji": "💡"
           },
           "visualization": {
             "type": "flow",
@@ -105,14 +99,9 @@
           },
           "code": {
             "language": "python",
-            "code": "# AI project blueprint\ndef build(problem, data, model):\n    print(f\"1. Problem: {problem}\")\n    print(f\"2. Data: {len(data)} samples\")\n    print(f\"3. Model: {model}\")\n    print(\"4. Evaluating...\")\n    print(\"5. \u2705 Ready to deploy!\")\n\nbuild(\"Spam detection\", [\"email1\", \"email2\"], \"Naive Bayes\")",
-            "output": "1. Problem: Spam detection\n2. Data: 2 samples\n3. Model: Naive Bayes\n4. Evaluating...\n5. \u2705 Ready to deploy!"
+            "code": "def build(problem, data, model):\n    print(f\"1. Problem: {problem}\")\n    print(f\"2. Data: {len(data)} samples\")\n    print(f\"3. Model: {model}\")\nbuild(\"Spam\", [\"e1\", \"e2\"], \"NB\")",
+            "output": "1. Problem: Spam\n2. Data: 2 samples\n3. Model: NB"
           }
-        },
-        {
-          "type": "reflection",
-          "question": "Should your project clearly show which AI concept from the course it uses?",
-          "answer": "Yes, clearly identifying the AI mechanism is a key requirement."
         },
         {
           "type": "practice",
@@ -135,10 +124,10 @@
           "bullets": [
             "Step 1: Choose your project from the 4 options",
             "Step 2: Identify which AI concept it uses (search, ML, NLP, etc.)",
-            "Step 3: Define input \u2014 what does the user provide?",
-            "Step 4: Define output \u2014 what does the AI produce?",
+            "Step 3: Define input — what does the user provide?",
+            "Step 4: Define output — what does the AI produce?",
             "Step 5: Identify one ethical consideration relevant to your project",
-            "Step 6: Write a short reflection \u2014 what surprised you about how AI actually works?"
+            "Step 6: Write a short reflection — what surprised you about how AI actually works?"
           ],
           "accentColor": "blue"
         },
@@ -146,29 +135,24 @@
           "type": "think_of",
           "analogy": {
             "title": "Think of Project Workflow as a Recipe",
-            "description": "A recipe has sequential instructions: prep ingredients \u2192 mix \u2192 bake \u2192 cool. An AI project workflow follows the same pattern: prepare data \u2192 train \u2192 evaluate \u2192 iterate. Follow the steps in order for best results.",
+            "description": "Follow a sequence of steps to build and deploy AI",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "\ud83d\udca1"
+            "emoji": "💡"
           },
           "visualization": {
             "type": "flow",
             "title": "Workflow = Recipe Steps",
             "items": [
               "Raw Data",
-              "Prepare \u2192 Train \u2192 Evaluate",
+              "Prepare → Train → Evaluate",
               "Trained Model"
             ]
           },
           "code": {
             "language": "python",
-            "code": "# Workflow: step by step\ndef step(name):\n    print(f\"  \u2192 {name}\")\n\nprint(\"AI Project Workflow:\")\nstep(\"Prepare data\")\nstep(\"Train model\")\nstep(\"Evaluate results\")\nstep(\"Deploy\")\nprint(\"\u2705 Complete!\")",
-            "output": "AI Project Workflow:\n  \u2192 Prepare data\n  \u2192 Train model\n  \u2192 Evaluate results\n  \u2192 Deploy\n\u2705 Complete!"
+            "code": "steps = [\"Prepare\", \"Train\", \"Deploy\"]\nfor s in steps:\n    print(f\"  → {s}\")\nprint(\"✅ Complete!\")",
+            "output": "  → Prepare\n  → Train\n  → Deploy\n✅ Complete!"
           }
-        },
-        {
-          "type": "reflection",
-          "question": "Is Getting Started always the best approach?",
-          "answer": "Not always! It depends on the specific problem and constraints."
         },
         {
           "type": "practice",
@@ -185,7 +169,7 @@
     "keyTakeaways": [
       {
         "emoji": "",
-        "text": "You have completed 8 weeks of AI concepts \u2014 Search, Logic, Probability, Optimization, ML, Neural Networks, NLP, Ethics"
+        "text": "You have completed 8 weeks of AI concepts — Search, Logic, Probability, Optimization, ML, Neural Networks, NLP, Ethics"
       },
       {
         "emoji": "",
@@ -205,7 +189,7 @@
       },
       {
         "emoji": "",
-        "text": "Reflection is as important as the code \u2014 think about what surprised you"
+        "text": "Reflection is as important as the code — think about what surprised you"
       }
     ],
     "whatYouLearned": [

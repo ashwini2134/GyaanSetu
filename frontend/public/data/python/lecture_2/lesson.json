@@ -3,7 +3,7 @@
   "courseSlug": "python",
   "number": 2,
   "title": "Input & Output",
-  "overview": "Programs are interactive \u2014 they ask for input, process it, and show output. In this lecture you'll master getting user input and formatting output like a pro.",
+  "overview": "Programs are interactive — they ask for input, process it, and show output. In this lecture you'll master getting user input and formatting output like a pro.",
   "estimatedMinutes": 45,
   "sections": [
     {
@@ -14,7 +14,7 @@
           "type": "explanation",
           "accentColor": "blue",
           "title": "Displaying Output with print()",
-          "body": "You already know print() displays text. But print() has superpowers \u2014 you can print multiple items, change separators, and control line endings.",
+          "body": "You already know print() displays text. But print() has superpowers — you can print multiple items, change separators, and control line endings.",
           "bullets": [
             "print() accepts multiple items separated by commas",
             "By default, items are separated by a space",
@@ -30,27 +30,13 @@
           "expectedOutput": "Hello World\n1 2 3 4\nPython is awesome"
         },
         {
-          "type": "code_example",
-          "title": "Custom Separator with sep",
-          "language": "python",
-          "code": "print(\"apple\", \"banana\", \"cherry\", sep=\", \")\nprint(\"one\", \"two\", \"three\", sep=\" - \")\nprint(\"A\", \"B\", \"C\", sep=\"\")",
-          "expectedOutput": "apple, banana, cherry\none - two - three\nABC"
-        },
-        {
-          "type": "code_example",
-          "title": "Custom Ending with end",
-          "language": "python",
-          "code": "print(\"Loading\", end=\"\")\nprint(\".\", end=\"\")\nprint(\".\", end=\"\")\nprint(\".\")\nprint(\"Done!\")",
-          "expectedOutput": "Loading...\nDone!"
-        },
-        {
           "type": "practice",
           "title": "Design Your Output",
-          "instructions": "Use print() with sep to display numbers 1 through 5 separated by arrows: \"1 \u2192 2 \u2192 3 \u2192 4 \u2192 5\"",
+          "instructions": "Use print() with sep to display numbers 1 through 5 separated by arrows: \"1 → 2 → 3 → 4 → 5\"",
           "starterCode": "# Print numbers with arrow separator\nprint(1, 2, 3, 4, 5, sep=\"\")",
-          "solution": "print(1, 2, 3, 4, 5, sep=\" \u2192 \")",
-          "hint": "Put your numbers as separate arguments to print(). Set sep=\" \u2192 \" with the arrow symbol.",
-          "expectedOutput": "1 \u2192 2 \u2192 3 \u2192 4 \u2192 5"
+          "solution": "print(1, 2, 3, 4, 5, sep=\" → \")",
+          "hint": "Put your numbers as separate arguments to print(). Set sep=\" → \" with the arrow symbol.",
+          "expectedOutput": "1 → 2 → 3 → 4 → 5"
         },
         {
           "type": "reflection",
@@ -67,7 +53,7 @@
           "type": "explanation",
           "accentColor": "purple",
           "title": "Getting Input with input()",
-          "body": "The `input()` function waits for the user to type something and press Enter. It **always returns a string** \u2014 even if the user types a number.",
+          "body": "The `input()` function waits for the user to type something and press Enter. It **always returns a string** — even if the user types a number.",
           "bullets": [
             "input() pauses the program and waits for the user",
             "You can show a prompt: input(\"Enter your name: \")",
@@ -86,7 +72,7 @@
           "analogy": {
             "title": "Receptionist",
             "description": "Receptionist asks a question, waits for your answer, then tells the program",
-            "emoji": "\ud83e\uddd1\u200d\ud83d\udcbc",
+            "emoji": "🧑‍💼",
             "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&q=80"
           },
           "visualization": {
@@ -105,30 +91,11 @@
           }
         },
         {
-          "type": "reflection",
-          "question": "Does input() let the program continue running while waiting for the user to type something?",
-          "answer": "No! input() pauses the program completely and waits. The program sits at that line and does nothing else until the user presses Enter. This is like a receptionist who stops everything to listen to your question before continuing their work."
-        },
-        {
           "type": "code_example",
           "title": "Getting and Using Input",
           "language": "python",
           "code": "name = input(\"Enter your name: \")\nprint(\"Hello, \" + name + \"!\")",
           "expectedOutput": "Enter your name: Lakshanya\nHello, Lakshanya!"
-        },
-        {
-          "type": "code_example",
-          "title": "Converting Input to Number",
-          "language": "python",
-          "code": "age_str = input(\"Enter your age: \")\nage = int(age_str)\nnext_year = age + 1\nprint(f\"Next year you will be {next_year}\")",
-          "expectedOutput": "Enter your age: 20\nNext year you will be 21"
-        },
-        {
-          "type": "code_example",
-          "title": "Shortcut: int(input())",
-          "language": "python",
-          "code": "age = int(input(\"Enter your age: \"))\nprint(f\"You are {age} years old\")",
-          "expectedOutput": "Enter your age: 20\nYou are 20 years old"
         },
         {
           "type": "practice",
@@ -161,13 +128,13 @@
           "analogy": {
             "title": "Fill-In-The-Blank",
             "description": "Write the sentence with blanks { }, then fill them with variable values",
-            "emoji": "\ud83d\udcdd",
+            "emoji": "📝",
             "image": "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&q=80"
           },
           "visualization": {
             "type": "categories",
-            "title": "Template \u2192 Filled",
-            "centerLabel": "Template \u2192 Filled",
+            "title": "Template → Filled",
+            "centerLabel": "Template → Filled",
             "items": [
               "name",
               "age",
@@ -181,23 +148,11 @@
           }
         },
         {
-          "type": "reflection",
-          "question": "Does f'Hello, {name}' work the same as f'Hello, {name}' with double quotes?",
-          "answer": "Yes! f-strings work with both single quotes f'...' and double quotes f\"...\". The f before the quote tells Python this is a special string where {curly braces} are replaced with variable values."
-        },
-        {
           "type": "code_example",
           "title": "f-String Examples",
           "language": "python",
           "code": "name = \"Lakshanya\"\nage = 20\n\nprint(f\"Hello, {name}!\")\nprint(f\"{name} is {age} years old\")\nprint(f\"In 5 years, {name} will be {age + 5}\")",
           "expectedOutput": "Hello, Lakshanya!\nLakshanya is 20 years old\nIn 5 years, Lakshanya will be 25"
-        },
-        {
-          "type": "code_example",
-          "title": "f-Strings vs Concatenation",
-          "language": "python",
-          "code": "# f-strings are cleaner:\nname = \"Alice\"\nscore = 95\nprint(f\"{name} scored {score}%\")\n\n# vs concatenation:\nprint(name + \" scored \" + str(score) + \"%\")",
-          "expectedOutput": "Alice scored 95%\nAlice scored 95%"
         },
         {
           "type": "practice",
@@ -217,7 +172,7 @@
         "text": "print() can take multiple items, sep changes separator, end changes line ending"
       },
       {
-        "emoji": "\u2328",
+        "emoji": "⌨",
         "text": "input() gets text from the user, always returns a string"
       },
       {
