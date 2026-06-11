@@ -499,10 +499,6 @@ export default function Dashboard() {
                   </div>
                 </button>
               </div>
-
-
-
-
             </div>
 
             {/* Right Panel: Achievements */}
