@@ -33,15 +33,12 @@
           "analogy": {
             "title": "Shopping List",
             "description": "Items in order. Add, remove, or access by position.",
-            "emoji": "🛒",
+            "emoji": "\ud83d\uded2",
             "image": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&q=80"
           },
           "visualization": {
-            "type": "sequence",
+            "type": "flow",
             "title": "Ordered List",
-            "inputLabel": "Input",
-            "processLabel": "Function",
-            "outputLabel": "Output",
             "items": [
               "Item 1",
               "Item 2",
@@ -126,10 +123,10 @@
           "title": "Working with List Methods",
           "body": "Lists have built-in **methods** that let you modify and analyze them.",
           "bullets": [
-            "append(item) — adds item to the end",
-            "remove(item) — removes the first occurrence",
-            "sort() — sorts in ascending order",
-            "len(list) — returns the number of items"
+            "append(item) \u2014 adds item to the end",
+            "remove(item) \u2014 removes the first occurrence",
+            "sort() \u2014 sorts in ascending order",
+            "len(list) \u2014 returns the number of items"
           ]
         },
         {

@@ -2,7 +2,7 @@
   "id": "cs50ai-lecture-1",
   "courseSlug": "cs50ai",
   "title": "Search Algorithms",
-  "overview": "Search is foundational in AI — finding a path from start to goal. Learn BFS, DFS, Greedy Best-First, and A search.",
+  "overview": "Search is foundational in AI \u2014 finding a path from start to goal. Learn BFS, DFS, Greedy Best-First, and A search.",
   "estimatedMinutes": 55,
   "sections": [
     {
@@ -14,10 +14,10 @@
           "title": "What is a Search Problem?",
           "body": "A search problem involves an agent moving from an initial state to a goal state by taking actions through a state space (all possible configurations).",
           "bullets": [
-            "Start state — where you begin",
-            "Goal state — where you want to arrive",
-            "Actions — valid moves from each state",
-            "Path cost — how expensive a solution is",
+            "Start state \u2014 where you begin",
+            "Goal state \u2014 where you want to arrive",
+            "Actions \u2014 valid moves from each state",
+            "Path cost \u2014 how expensive a solution is",
             "This concept is fundamental to AI development."
           ],
           "accentColor": "blue"
@@ -26,12 +26,12 @@
           "type": "think_of",
           "analogy": {
             "title": "Think of Navigating a Maze",
-            "description": "Your position is your state. Walls limit your actions. Finding a path from entrance to exit is the search problem — just like AI explores possible paths to find a solution.",
+            "description": "Your position is your state. Walls limit your actions. Finding a path from entrance to exit is the search problem \u2014 just like AI explores possible paths to find a solution.",
             "image": "https://images.unsplash.com/photo-1590278458425-6aa3912a48a5?w=800&q=80",
-            "emoji": "💡"
+            "emoji": "\ud83d\udca1"
           },
           "visualization": {
-            "type": "decision_branch",
+            "type": "decision",
             "title": "Search = Explore Choices",
             "condition": "Choose path?",
             "trueLabel": "Explore",
@@ -39,14 +39,14 @@
           },
           "code": {
             "language": "python",
-            "code": "# Maze search: explore paths\nmaze = {\"start\": [\"A\", \"B\"], \"A\": [\"C\"], \"B\": [\"C\"], \"C\": [\"exit\"]}\npath = [\"start\"]\nwhile path[-1] != \"exit\":\n    path.append(maze[path[-1]][0])\nprint(f\"Path: {' → '.join(path)}\")",
-            "output": "Path: start → A → C → exit"
+            "code": "# Maze search: explore paths\nmaze = {\"start\": [\"A\", \"B\"], \"A\": [\"C\"], \"B\": [\"C\"], \"C\": [\"exit\"]}\npath = [\"start\"]\nwhile path[-1] != \"exit\":\n    path.append(maze[path[-1]][0])\nprint(f\"Path: {' \u2192 '.join(path)}\")",
+            "output": "Path: start \u2192 A \u2192 C \u2192 exit"
           }
         },
         {
           "type": "reflection",
           "question": "In a maze, what is the goal state called?",
-          "answer": "The goal state is the destination — the configuration you want to reach."
+          "answer": "The goal state is the destination \u2014 the configuration you want to reach."
         },
         {
           "type": "practice",
@@ -65,9 +65,9 @@
         {
           "type": "explanation",
           "title": "What is Breadth-First Search (BFS)?",
-          "body": "BFS explores all neighbors at the current level before going deeper — like ripples spreading in water. It uses a queue (FIFO) and guarantees the shortest path.",
+          "body": "BFS explores all neighbors at the current level before going deeper \u2014 like ripples spreading in water. It uses a queue (FIFO) and guarantees the shortest path.",
           "bullets": [
-            "Explores level by level — all nearby options first",
+            "Explores level by level \u2014 all nearby options first",
             "Uses a queue: first discovered, first explored",
             "Guarantees shortest path in unweighted graphs",
             "Uses more memory than DFS",
@@ -79,7 +79,7 @@
           "type": "explanation",
           "accentColor": "blue",
           "title": "Depth-First Search (DFS)",
-          "body": "DFS goes deep into one path before backtracking — like following one corridor to the end. It uses a stack (LIFO) and uses less memory but may not find the shortest path.",
+          "body": "DFS goes deep into one path before backtracking \u2014 like following one corridor to the end. It uses a stack (LIFO) and uses less memory but may not find the shortest path.",
           "bullets": [
             "Explores one branch fully before trying others",
             "Uses a stack: last discovered, first explored",
@@ -93,10 +93,10 @@
             "title": "BFS = Checking Every Shelf on Floor 1 First",
             "description": "Before going to Floor 2, BFS checks every store on Floor 1. DFS is like going deep into one hallway, exploring all side rooms before backtracking. Both search, but in different orders.",
             "image": "https://images.unsplash.com/photo-1603058817990-2b9a9abbce86?w=800&q=80",
-            "emoji": "💡"
+            "emoji": "\ud83d\udca1"
           },
           "visualization": {
-            "type": "sequence",
+            "type": "flow",
             "title": "BFS Explores Level by Level",
             "items": [
               "Level 1: A B C",
@@ -106,8 +106,8 @@
           },
           "code": {
             "language": "python",
-            "code": "# BFS: explore neighbors level by level\ngraph = {\"A\": [\"B\", \"C\"], \"B\": [\"D\"], \"C\": [\"E\"], \"D\": [], \"E\": []}\nqueue, visited = [\"A\"], []\nwhile queue:\n    node = queue.pop(0)\n    visited.append(node)\n    queue.extend(graph[node])\nprint(f\"BFS: {' → '.join(visited)}\")",
-            "output": "BFS: A → B → C → D → E"
+            "code": "# BFS: explore neighbors level by level\ngraph = {\"A\": [\"B\", \"C\"], \"B\": [\"D\"], \"C\": [\"E\"], \"D\": [], \"E\": []}\nqueue, visited = [\"A\"], []\nwhile queue:\n    node = queue.pop(0)\n    visited.append(node)\n    queue.extend(graph[node])\nprint(f\"BFS: {' \u2192 '.join(visited)}\")",
+            "output": "BFS: A \u2192 B \u2192 C \u2192 D \u2192 E"
           }
         },
         {
@@ -132,11 +132,11 @@
         {
           "type": "explanation",
           "title": "What is Greedy Best-First & A Search?",
-          "body": "Greedy Best-First uses a heuristic (estimate) to pick the most promising next step. A combines actual cost so far g(n) AND estimated cost h(n) — making it both optimal and efficient.",
+          "body": "Greedy Best-First uses a heuristic (estimate) to pick the most promising next step. A combines actual cost so far g(n) AND estimated cost h(n) \u2014 making it both optimal and efficient.",
           "bullets": [
-            "Heuristic h(n) — estimated cost from current node to goal",
-            "Greedy uses only h(n) — can be fast but not optimal",
-            "A uses f(n) = g(n) + h(n) — cost so far + estimate",
+            "Heuristic h(n) \u2014 estimated cost from current node to goal",
+            "Greedy uses only h(n) \u2014 can be fast but not optimal",
+            "A uses f(n) = g(n) + h(n) \u2014 cost so far + estimate",
             "A is used in GPS navigation and game AI",
             "This concept is fundamental to AI development."
           ],
@@ -146,21 +146,23 @@
           "type": "think_of",
           "analogy": {
             "title": "A* = GPS That Considers Distance Traveled AND Estimated Distance",
-            "description": "GPS doesn't explore blindly. It considers how far you've driven AND estimates remaining distance — just like A* combines the path cost g(n) and heuristic h(n) to find efficient solutions.",
+            "description": "GPS doesn't explore blindly. It considers how far you've driven AND estimates remaining distance \u2014 just like A* combines the path cost g(n) and heuristic h(n) to find efficient solutions.",
             "image": "https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=80",
-            "emoji": "💡"
+            "emoji": "\ud83d\udca1"
           },
           "visualization": {
-            "type": "function_machine",
+            "type": "flow",
             "title": "A* Search = Smart GPS",
-            "inputLabel": "Start",
-            "processLabel": "g(n) + h(n)",
-            "outputLabel": "Goal"
+            "items": [
+              "Start",
+              "g(n) + h(n)",
+              "Goal"
+            ]
           },
           "code": {
             "language": "python",
-            "code": "graph = {\n    'A': ['B', 'C'],\n    'B': ['A', 'D'],\n    'C': ['A', 'D'],\n    'D': ['B', 'C']\n}\nheuristic = {'A': 3, 'B': 2, 'C': 2, 'D': 0}\nstart, goal = 'A', 'D'\n# A*: choose node with lowest f(n) = g(n) + h(n)\nfrontier = [(0 + heuristic[start], 0, start, [start])]\nvisited = set()\nwhile frontier:\n    frontier.sort(key=lambda x: x[0])\n    f, g, node, path = frontier.pop(0)\n    if node == goal:\n        print(f'Found: {\" → \".join(path)}')\n        break\n    if node in visited:\n        continue\n    visited.add(node)\n    for nxt in graph[node]:\n        if nxt not in visited:\n            new_g = g + 1\n            frontier.append((new_g + heuristic[nxt], new_g, nxt, path + [nxt]))",
-            "output": "Found: A → B → D\n"
+            "code": "graph = {\n    'A': ['B', 'C'],\n    'B': ['A', 'D'],\n    'C': ['A', 'D'],\n    'D': ['B', 'C']\n}\nheuristic = {'A': 3, 'B': 2, 'C': 2, 'D': 0}\nstart, goal = 'A', 'D'\n# A*: choose node with lowest f(n) = g(n) + h(n)\nfrontier = [(0 + heuristic[start], 0, start, [start])]\nvisited = set()\nwhile frontier:\n    frontier.sort(key=lambda x: x[0])\n    f, g, node, path = frontier.pop(0)\n    if node == goal:\n        print(f'Found: {\" \u2192 \".join(path)}')\n        break\n    if node in visited:\n        continue\n    visited.add(node)\n    for nxt in graph[node]:\n        if nxt not in visited:\n            new_g = g + 1\n            frontier.append((new_g + heuristic[nxt], new_g, nxt, path + [nxt]))",
+            "output": "Found: A \u2192 B \u2192 D\n"
           }
         },
         {
@@ -192,7 +194,7 @@
       },
       {
         "emoji": "",
-        "text": "DFS goes deep first — uses less memory but may not find shortest path"
+        "text": "DFS goes deep first \u2014 uses less memory but may not find shortest path"
       },
       {
         "emoji": "",

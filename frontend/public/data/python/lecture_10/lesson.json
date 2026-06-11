@@ -3,7 +3,7 @@
   "courseSlug": "python",
   "number": 10,
   "title": "Functions",
-  "overview": "Functions are the building blocks of organized code. They let you package logic into reusable units — write once, use anywhere.",
+  "overview": "Functions are the building blocks of organized code. They let you package logic into reusable units \u2014 write once, use anywhere.",
   "estimatedMinutes": 50,
   "sections": [
     {
@@ -26,22 +26,24 @@
           "type": "analogy",
           "title": "A Function is Like a Vending Machine",
           "emoji": "",
-          "text": "You press A3 (parameters), the machine runs its code (function body), and out comes a snack (return value). You don't care HOW it works inside — just press the button and get the result."
+          "text": "You press A3 (parameters), the machine runs its code (function body), and out comes a snack (return value). You don't care HOW it works inside \u2014 just press the button and get the result."
         },
         {
           "type": "think_of",
           "analogy": {
             "title": "Vending Machine",
-            "description": "Insert coins (input) → Press button (call) → Get item (output)",
-            "emoji": "🏪",
+            "description": "Insert coins (input) \u2192 Press button (call) \u2192 Get item (output)",
+            "emoji": "\ud83c\udfea",
             "image": "https://images.unsplash.com/photo-1618506557292-ec1862b3c506?w=800&q=80"
           },
           "visualization": {
-            "type": "function_machine",
+            "type": "flow",
             "title": "Function = Recipe",
-            "inputLabel": "Input",
-            "processLabel": "Function Call",
-            "outputLabel": "Return Value"
+            "items": [
+              "Input",
+              "Function Call",
+              "Return Value"
+            ]
           },
           "code": {
             "language": "python",
@@ -52,7 +54,7 @@
         {
           "type": "reflection",
           "question": "Does every function need a return statement? What happens if you don't include one?",
-          "answer": "No, a function does not need a return statement. If you don't include return, the function still runs its code but returns None (Python's way of saying 'nothing'). It's like a vending machine that takes your money and lights up but doesn't actually give you anything — the process happens, but there's no output."
+          "answer": "No, a function does not need a return statement. If you don't include return, the function still runs its code but returns None (Python's way of saying 'nothing'). It's like a vending machine that takes your money and lights up but doesn't actually give you anything \u2014 the process happens, but there's no output."
         },
         {
           "type": "code_example",
@@ -73,7 +75,7 @@
           "title": "How to Define a Function",
           "body": "Use `def` followed by the function name, parentheses for parameters, a colon, and an indented body.",
           "bullets": [
-            "def function_name(): — define a function",
+            "def function_name(): \u2014 define a function",
             "Parameters go inside parentheses: def add(a, b):",
             "Use return to send a value back",
             "If no return, the function returns None"
@@ -99,7 +101,7 @@
           "title": "Default Parameters",
           "body": "You can give parameters **default values**. If the caller doesn't provide that argument, the default is used.",
           "bullets": [
-            "def greet(name=\"Guest\"): — default value",
+            "def greet(name=\"Guest\"): \u2014 default value",
             "greet() uses \"Guest\", greet(\"Alice\") uses \"Alice\"",
             "Parameters with defaults must come LAST"
           ]

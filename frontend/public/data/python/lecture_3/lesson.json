@@ -17,9 +17,9 @@
           "body": "Python can do all the math you learned in school. Arithmetic operators let you add, subtract, multiply, divide, and perform advanced operations.",
           "bullets": [
             "+ addition, - subtraction, * multiplication, / division",
-            "// floor division — divides and rounds down",
-            "% modulo — returns the remainder of division",
-            "** power (exponent) — raises a number to a power"
+            "// floor division \u2014 divides and rounds down",
+            "% modulo \u2014 returns the remainder of division",
+            "** power (exponent) \u2014 raises a number to a power"
           ]
         },
         {
@@ -46,7 +46,7 @@
         {
           "type": "explanation",
           "accentColor": "blue",
-          "title": "PEMDAS — Order of Operations",
+          "title": "PEMDAS \u2014 Order of Operations",
           "body": "Python follows standard math rules: Parentheses, Exponents, Multiplication/Division, Addition/Subtraction.",
           "bullets": [
             "Parentheses () have the highest priority",
@@ -60,15 +60,17 @@
           "analogy": {
             "title": "The Order Rulebook",
             "description": "PEMDAS tells Python which math operation to perform first",
-            "emoji": "📏",
+            "emoji": "\ud83d\udccf",
             "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&q=80"
           },
           "visualization": {
-            "type": "function_machine",
+            "type": "flow",
             "title": "Operator Precedence",
-            "inputLabel": "Expression",
-            "processLabel": "PEMDAS Rules",
-            "outputLabel": "Result"
+            "items": [
+              "Expression",
+              "PEMDAS Rules",
+              "Result"
+            ]
           },
           "code": {
             "language": "python",
@@ -153,9 +155,9 @@
           "title": "Combining Conditions",
           "body": "**Logical operators** let you combine multiple conditions to make complex decisions.",
           "bullets": [
-            "and — True only if BOTH sides are True",
-            "or — True if AT LEAST ONE side is True",
-            "not — reverses the result (True becomes False)"
+            "and \u2014 True only if BOTH sides are True",
+            "or \u2014 True if AT LEAST ONE side is True",
+            "not \u2014 reverses the result (True becomes False)"
           ]
         },
         {
@@ -169,11 +171,11 @@
           "analogy": {
             "title": "Gatekeepers",
             "description": "and = BOTH must pass. or = AT LEAST ONE must pass.",
-            "emoji": "🚧",
+            "emoji": "\ud83d\udea7",
             "image": "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80"
           },
           "visualization": {
-            "type": "decision_branch",
+            "type": "decision",
             "title": "Logical Operators",
             "condition": "and / or",
             "trueLabel": "Pass",
@@ -216,7 +218,7 @@
       },
       {
         "emoji": "",
-        "text": "PEMDAS rules apply — parentheses first, then exponents, etc."
+        "text": "PEMDAS rules apply \u2014 parentheses first, then exponents, etc."
       },
       {
         "emoji": "",
@@ -228,7 +230,7 @@
       },
       {
         "emoji": "",
-        "text": "= is assignment, == is comparison — don't mix them up"
+        "text": "= is assignment, == is comparison \u2014 don't mix them up"
       }
     ],
     "whatYouLearned": [

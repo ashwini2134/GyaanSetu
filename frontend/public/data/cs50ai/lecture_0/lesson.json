@@ -2,7 +2,7 @@
   "id": "cs50ai-lecture-0",
   "courseSlug": "cs50ai",
   "title": "Introduction to AI",
-  "overview": "Artificial Intelligence is everywhere — from spam filters to voice assistants. Learn what AI is, how it relates to ML and Deep Learning, and where you'll encounter it daily.",
+  "overview": "Artificial Intelligence is everywhere \u2014 from spam filters to voice assistants. Learn what AI is, how it relates to ML and Deep Learning, and where you'll encounter it daily.",
   "estimatedMinutes": 50,
   "sections": [
     {
@@ -12,12 +12,12 @@
         {
           "type": "explanation",
           "title": "What is Artificial Intelligence?",
-          "body": "Artificial Intelligence (AI) is the field of computer science focused on building systems that perform tasks normally requiring human thinking — learning, reasoning, recognizing patterns, and making decisions.",
+          "body": "Artificial Intelligence (AI) is the field of computer science focused on building systems that perform tasks normally requiring human thinking \u2014 learning, reasoning, recognizing patterns, and making decisions.",
           "bullets": [
             "Computers performing tasks that need human intelligence",
             "Examples: playing chess, recognizing faces, translating languages",
             "AI powers spam filters, voice assistants, and recommendation systems",
-            "Not about robots — about intelligent problem-solving",
+            "Not about robots \u2014 about intelligent problem-solving",
             "This concept is fundamental to AI development."
           ],
           "accentColor": "blue"
@@ -26,16 +26,18 @@
           "type": "think_of",
           "analogy": {
             "title": "Think of AI as a Very Fast, Tireless Assistant",
-            "description": "Imagine an assistant who never sleeps, processes millions of examples instantly, and follows rules or learns from data. That's AI — you give it data or instructions, and it performs tasks intelligently.",
+            "description": "Imagine an assistant who never sleeps, processes millions of examples instantly, and follows rules or learns from data. That's AI \u2014 you give it data or instructions, and it performs tasks intelligently.",
             "image": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80",
-            "emoji": "💡"
+            "emoji": "\ud83d\udca1"
           },
           "visualization": {
-            "type": "function_machine",
+            "type": "flow",
             "title": "AI Processing Pipeline",
-            "inputLabel": "Data/Question",
-            "processLabel": "AI Model",
-            "outputLabel": "Answer/Action"
+            "items": [
+              "Data/Question",
+              "AI Model",
+              "Answer/Action"
+            ]
           },
           "code": {
             "language": "python",
@@ -67,9 +69,9 @@
           "title": "What is AI vs Machine Learning vs Deep Learning?",
           "body": "These three terms are related but describe different levels of the AI field.",
           "bullets": [
-            "AI — broadest umbrella: any technique making computers appear intelligent",
-            "Machine Learning (ML) — subset of AI: learns rules from data instead of being programmed",
-            "Deep Learning (DL) — subset of ML: uses brain-like neural networks with many layers",
+            "AI \u2014 broadest umbrella: any technique making computers appear intelligent",
+            "Machine Learning (ML) \u2014 subset of AI: learns rules from data instead of being programmed",
+            "Deep Learning (DL) \u2014 subset of ML: uses brain-like neural networks with many layers",
             "This concept is fundamental to AI development.",
             "It helps optimize performance and accuracy."
           ],
@@ -79,10 +81,10 @@
           "type": "explanation",
           "accentColor": "blue",
           "title": "Narrow AI vs General AI",
-          "body": "All AI today is Narrow AI — it excels at one specific task. General AI (capable of any intellectual task) remains theoretical.",
+          "body": "All AI today is Narrow AI \u2014 it excels at one specific task. General AI (capable of any intellectual task) remains theoretical.",
           "bullets": [
             "Narrow AI: chess engines, spam filters, voice assistants",
-            "General AI: would excel at any task like a human — we don't have this yet",
+            "General AI: would excel at any task like a human \u2014 we don't have this yet",
             "Every AI system you use today is Narrow AI"
           ]
         },
@@ -90,15 +92,14 @@
           "type": "think_of",
           "analogy": {
             "title": "Think of ML as Teaching a Dog Tricks",
-            "description": "You don't write every rule — you show examples and reward correct behavior. The dog learns patterns. ML works the same way: show data, let the computer find patterns.",
+            "description": "You don't write every rule \u2014 you show examples and reward correct behavior. The dog learns patterns. ML works the same way: show data, let the computer find patterns.",
             "image": "https://images.unsplash.com/photo-1504826260979-242151ee45b7?w=800&q=80",
-            "emoji": "💡"
+            "emoji": "\ud83d\udca1"
           },
           "visualization": {
-            "type": "loop_cycle",
+            "type": "repetition",
             "title": "ML Training Loop",
-            "loopLabel": "Repeat until accurate",
-            "loopSteps": [
+            "items": [
               "Show Data",
               "Predict",
               "Check",
@@ -107,8 +108,8 @@
           },
           "code": {
             "language": "python",
-            "code": "# Training loop: learn from examples\nfor epoch in range(3):\n    print(f\"Epoch {epoch+1}: show → predict → check → adjust\")\nprint(\"Model trained!\")",
-            "output": "Epoch 1: show → predict → check → adjust\nEpoch 2: show → predict → check → adjust\nEpoch 3: show → predict → check → adjust\nModel trained!"
+            "code": "# Training loop: learn from examples\nfor epoch in range(3):\n    print(f\"Epoch {epoch+1}: show \u2192 predict \u2192 check \u2192 adjust\")\nprint(\"Model trained!\")",
+            "output": "Epoch 1: show \u2192 predict \u2192 check \u2192 adjust\nEpoch 2: show \u2192 predict \u2192 check \u2192 adjust\nEpoch 3: show \u2192 predict \u2192 check \u2192 adjust\nModel trained!"
           }
         },
         {
@@ -133,12 +134,12 @@
         {
           "type": "explanation",
           "title": "What is AI in the Real World?",
-          "body": "AI isn't future technology — it's already embedded in tools you use every day.",
+          "body": "AI isn't future technology \u2014 it's already embedded in tools you use every day.",
           "bullets": [
-            "Spam filters — learn which emails are junk from millions of examples",
-            "Google Maps — uses search and optimization to find fastest routes",
-            "Netflix — recommends shows using machine learning on your history",
-            "Voice assistants — understand speech using NLP and ML",
+            "Spam filters \u2014 learn which emails are junk from millions of examples",
+            "Google Maps \u2014 uses search and optimization to find fastest routes",
+            "Netflix \u2014 recommends shows using machine learning on your history",
+            "Voice assistants \u2014 understand speech using NLP and ML",
             "This concept is fundamental to AI development."
           ],
           "accentColor": "blue"
@@ -149,29 +150,31 @@
           "title": "The AI Journey",
           "body": "This course covers 7 core AI topics you'll explore in upcoming lectures.",
           "bullets": [
-            "Search — finding paths from start to goal (GPS, puzzles)",
-            "Knowledge — representing facts and reasoning with logic",
-            "Uncertainty — handling probability when information is incomplete",
-            "Optimization — finding the best solution among many options",
-            "Learning — ML from labeled and unlabeled data",
-            "Neural Networks — brain-inspired computing for deep learning",
-            "Language — NLP and large language models like GPT"
+            "Search \u2014 finding paths from start to goal (GPS, puzzles)",
+            "Knowledge \u2014 representing facts and reasoning with logic",
+            "Uncertainty \u2014 handling probability when information is incomplete",
+            "Optimization \u2014 finding the best solution among many options",
+            "Learning \u2014 ML from labeled and unlabeled data",
+            "Neural Networks \u2014 brain-inspired computing for deep learning",
+            "Language \u2014 NLP and large language models like GPT"
           ]
         },
         {
           "type": "think_of",
           "analogy": {
             "title": "Think of AI as a GPS Navigator",
-            "description": "GPS suggests the fastest route based on live traffic. It learns from data, adapts to conditions, and helps you decide — just like AI helps computers make smart decisions with data.",
+            "description": "GPS suggests the fastest route based on live traffic. It learns from data, adapts to conditions, and helps you decide \u2014 just like AI helps computers make smart decisions with data.",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "emoji": "\ud83d\udca1"
           },
           "visualization": {
-            "type": "function_machine",
+            "type": "flow",
             "title": "GPS = AI Decision Making",
-            "inputLabel": "Start & Destination",
-            "processLabel": "AI Route Finder",
-            "outputLabel": "Fastest Route"
+            "items": [
+              "Start & Destination",
+              "AI Route Finder",
+              "Fastest Route"
+            ]
           },
           "code": {
             "language": "python",
@@ -212,7 +215,7 @@
       },
       {
         "emoji": "",
-        "text": "All AI today is Narrow AI — it does one specific task"
+        "text": "All AI today is Narrow AI \u2014 it does one specific task"
       },
       {
         "emoji": "",

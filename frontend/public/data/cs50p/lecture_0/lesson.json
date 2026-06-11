@@ -49,21 +49,24 @@
           "type": "analogy",
           "title": "Think of a Variable as a Labeled Storage Box",
           "emoji": "",
-          "text": "Imagine a physical storage box with a label on it. The label is the variable name. What's inside the box is the value. You can open the box to look inside, replace what's stored, or use its contents in a recipe — all by referring to the label."
+          "text": "Imagine a physical storage box with a label on it. The label is the variable name. What's inside the box is the value. You can open the box to look inside, replace what's stored, or use its contents in a recipe \u2014 all by referring to the label."
         },
         {
           "type": "think_of",
           "analogy": {
             "title": "A Labeled Storage Box",
             "description": "You put something inside and give it a name so you can find it later.",
-            "emoji": "💡",
+            "emoji": "\ud83d\udca1",
             "image": "https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=800&q=80"
           },
           "visualization": {
-            "type": "storage_box",
+            "type": "categories",
             "title": "Variable = Container",
-            "varName": "name",
-            "varValue": "\"Lakshanya\""
+            "centerLabel": "name",
+            "items": [
+              "Store value",
+              "Access by name"
+            ]
           },
           "code": {
             "language": "python",
@@ -129,22 +132,24 @@
           "type": "analogy",
           "title": "Think of a Function as a Recipe",
           "emoji": "",
-          "text": "A recipe is a set of steps written once that you can follow many times to make the same dish. You don't rewrite the recipe each time — you just say 'make pasta' and follow the steps. Functions work exactly the same way."
+          "text": "A recipe is a set of steps written once that you can follow many times to make the same dish. You don't rewrite the recipe each time \u2014 you just say 'make pasta' and follow the steps. Functions work exactly the same way."
         },
         {
           "type": "think_of",
           "analogy": {
             "title": "A Recipe Book",
-            "description": "A recipe is a set of steps you write once and follow many times — just like a function.",
-            "emoji": "💡",
+            "description": "A recipe is a set of steps you write once and follow many times \u2014 just like a function.",
+            "emoji": "\ud83d\udca1",
             "image": "https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=800&q=80"
           },
           "visualization": {
-            "type": "function_machine",
+            "type": "flow",
             "title": "Function = Reusable Recipe",
-            "inputLabel": "Input",
-            "processLabel": "AI Model",
-            "outputLabel": "Output"
+            "items": [
+              "Input",
+              "AI Model",
+              "Output"
+            ]
           },
           "code": {
             "language": "python",
@@ -158,11 +163,11 @@
           "title": "Anatomy of a Function",
           "body": "A function has three parts: a **name**, optional **parameters** (inputs), and a **body** (the code that runs).",
           "bullets": [
-            "def — the keyword that starts a function definition",
-            "name — what you call to run the function",
-            "parameters — values passed in (optional)",
-            "body — the indented code that runs when called",
-            "return — optionally sends a value back"
+            "def \u2014 the keyword that starts a function definition",
+            "name \u2014 what you call to run the function",
+            "parameters \u2014 values passed in (optional)",
+            "body \u2014 the indented code that runs when called",
+            "return \u2014 optionally sends a value back"
           ]
         },
         {
@@ -182,7 +187,7 @@
         {
           "type": "reflection",
           "question": "What happens if we call greet(\"Lakshanya\") three times in a row?",
-          "answer": "Each call runs the function body again. You get the greeting printed three times — this is exactly why functions are useful! Write the code once, run it as many times as you need.",
+          "answer": "Each call runs the function body again. You get the greeting printed three times \u2014 this is exactly why functions are useful! Write the code once, run it as many times as you need.",
           "followupCode": "def greet(name):\n    print(f\"Hello, {name}!\")\n\ngreet(\"Lakshanya\")\ngreet(\"Lakshanya\")\ngreet(\"Lakshanya\")",
           "followupOutput": "Hello, Lakshanya!\nHello, Lakshanya!\nHello, Lakshanya!"
         },

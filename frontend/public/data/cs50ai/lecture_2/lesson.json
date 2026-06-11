@@ -3,7 +3,7 @@
   "courseSlug": "cs50ai",
   "number": 2,
   "title": "Knowledge & Logic",
-  "overview": "Logic is how AI knows things — through rules and True/False statements, not common sense",
+  "overview": "Logic is how AI knows things \u2014 through rules and True/False statements, not common sense",
   "estimatedMinutes": 60,
   "nextUp": "Probability & Uncertainty",
   "sections": [
@@ -14,12 +14,12 @@
         {
           "type": "explanation",
           "title": "What is Propositional Logic?",
-          "body": "Logic is how AI knows things — through rules and True/False statements, not common sense",
+          "body": "Logic is how AI knows things \u2014 through rules and True/False statements, not common sense",
           "bullets": [
             "Propositional logic uses statements that are either True or False",
-            "AND — both sides must be True for result to be True",
-            "OR — at least one side must be True",
-            "NOT — reverses the value (NOT True = False)",
+            "AND \u2014 both sides must be True for result to be True",
+            "OR \u2014 at least one side must be True",
+            "NOT \u2014 reverses the value (NOT True = False)",
             "This concept is fundamental to AI development."
           ],
           "accentColor": "blue"
@@ -28,16 +28,18 @@
           "type": "think_of",
           "analogy": {
             "title": "Think of Logic as a Detective",
-            "description": "A detective gathers clues and deduces conclusions: if A is true and A implies B, then B must be true. Logic lets AI systems infer new knowledge from known facts — just like Sherlock Holmes.",
+            "description": "A detective gathers clues and deduces conclusions: if A is true and A implies B, then B must be true. Logic lets AI systems infer new knowledge from known facts \u2014 just like Sherlock Holmes.",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "emoji": "\ud83d\udca1"
           },
           "visualization": {
-            "type": "function_machine",
+            "type": "flow",
             "title": "Logical Inference",
-            "inputLabel": "Known Facts",
-            "processLabel": "Rules → Deduce",
-            "outputLabel": "New Knowledge"
+            "items": [
+              "Known Facts",
+              "Rules \u2192 Deduce",
+              "New Knowledge"
+            ]
           },
           "code": {
             "language": "python",
@@ -81,29 +83,29 @@
           "type": "think_of",
           "analogy": {
             "title": "Think of Inference as a Puzzle Solver",
-            "description": "Fill in missing pieces using what you know. If all birds have wings and Tweety is a bird, you infer Tweety has wings — even without seeing them. Inference engines chain rules to reach new conclusions.",
+            "description": "Fill in missing pieces using what you know. If all birds have wings and Tweety is a bird, you infer Tweety has wings \u2014 even without seeing them. Inference engines chain rules to reach new conclusions.",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "emoji": "\ud83d\udca1"
           },
           "visualization": {
-            "type": "sequence",
+            "type": "flow",
             "title": "Inference Chain",
             "items": [
               "All birds fly",
               "Tweety is a bird",
-              "∴ Tweety flies"
+              "\u2234 Tweety flies"
             ]
           },
           "code": {
             "language": "python",
-            "code": "# Inference chain: if-then rules\nrules = [(\"bird\", \"has_wings\"), (\"has_wings\", \"can_fly\")]\nprint(\"Fact: Tweety is a bird\")\nprint(\"Rule: All birds have wings\")\nprint(\"→ Inferred: Tweety has wings\")\nprint(\"→ Inferred: Tweety can fly\")",
-            "output": "Fact: Tweety is a bird\nRule: All birds have wings\n→ Inferred: Tweety has wings\n→ Inferred: Tweety can fly"
+            "code": "# Inference chain: if-then rules\nrules = [(\"bird\", \"has_wings\"), (\"has_wings\", \"can_fly\")]\nprint(\"Fact: Tweety is a bird\")\nprint(\"Rule: All birds have wings\")\nprint(\"\u2192 Inferred: Tweety has wings\")\nprint(\"\u2192 Inferred: Tweety can fly\")",
+            "output": "Fact: Tweety is a bird\nRule: All birds have wings\n\u2192 Inferred: Tweety has wings\n\u2192 Inferred: Tweety can fly"
           }
         },
         {
           "type": "reflection",
           "question": "Can AI figure out new facts just from existing rules without being told directly?",
-          "answer": "Yes, that's exactly what inference is—deriving new facts logically."
+          "answer": "Yes, that's exactly what inference is\u2014deriving new facts logically."
         },
         {
           "type": "practice",
@@ -124,10 +126,10 @@
           "title": "What is How AI Uses Logic?",
           "body": "Follow these steps to build a logical reasoning system.",
           "bullets": [
-            "Step 1: Define your facts — what is True and what is False in your world",
-            "Step 2: Write IF-THEN rules — connect facts to conclusions",
-            "Step 3: Build a Knowledge Base — store all facts and rules together",
-            "Step 4: Run Inference — AI combines facts and rules to reach new conclusions",
+            "Step 1: Define your facts \u2014 what is True and what is False in your world",
+            "Step 2: Write IF-THEN rules \u2014 connect facts to conclusions",
+            "Step 3: Build a Knowledge Base \u2014 store all facts and rules together",
+            "Step 4: Run Inference \u2014 AI combines facts and rules to reach new conclusions",
             "This concept is fundamental to AI development."
           ],
           "accentColor": "blue"
@@ -136,24 +138,24 @@
           "type": "think_of",
           "analogy": {
             "title": "Think of Knowledge as a Family Tree",
-            "description": "If Alice is Bob's parent and Bob is Charlie's parent, you can infer Alice is Charlie's grandparent. AI knowledge graphs connect facts to discover hidden relationships — just like discovering family connections.",
+            "description": "If Alice is Bob's parent and Bob is Charlie's parent, you can infer Alice is Charlie's grandparent. AI knowledge graphs connect facts to discover hidden relationships \u2014 just like discovering family connections.",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "emoji": "\ud83d\udca1"
           },
           "visualization": {
-            "type": "hub_spoke",
+            "type": "categories",
             "title": "Knowledge Graph",
             "centerLabel": "Facts",
-            "branches": [
-              "Alice → Bob",
-              "Bob → Charlie",
-              "Alice → Charlie"
+            "items": [
+              "Alice \u2192 Bob",
+              "Bob \u2192 Charlie",
+              "Alice \u2192 Charlie"
             ]
           },
           "code": {
             "language": "python",
-            "code": "# Knowledge graph: family relationships\nfamily = {(\"Alice\", \"parent\", \"Bob\"), (\"Bob\", \"parent\", \"Charlie\")}\nfor a, r, b in family:\n    print(f\"{a} → {b}\")\nprint(\"Inferred: Alice is grandparent of Charlie\")",
-            "output": "Alice → Bob\nBob → Charlie\nInferred: Alice is grandparent of Charlie"
+            "code": "# Knowledge graph: family relationships\nfamily = {(\"Alice\", \"parent\", \"Bob\"), (\"Bob\", \"parent\", \"Charlie\")}\nfor a, r, b in family:\n    print(f\"{a} \u2192 {b}\")\nprint(\"Inferred: Alice is grandparent of Charlie\")",
+            "output": "Alice \u2192 Bob\nBob \u2192 Charlie\nInferred: Alice is grandparent of Charlie"
           }
         },
         {
@@ -192,7 +194,7 @@
       },
       {
         "emoji": "",
-        "text": "Inference derives new facts from existing ones — like solving a puzzle"
+        "text": "Inference derives new facts from existing ones \u2014 like solving a puzzle"
       },
       {
         "emoji": "",

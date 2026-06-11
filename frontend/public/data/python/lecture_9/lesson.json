@@ -3,7 +3,7 @@
   "courseSlug": "python",
   "number": 9,
   "title": "Dictionaries",
-  "overview": "Dictionaries store data as key-value pairs — like a real dictionary where you look up a word (key) to find its definition (value).",
+  "overview": "Dictionaries store data as key-value pairs \u2014 like a real dictionary where you look up a word (key) to find its definition (value).",
   "estimatedMinutes": 50,
   "sections": [
     {
@@ -19,39 +19,31 @@
             "Keys must be unique and immutable (strings, numbers)",
             "Values can be anything: numbers, strings, lists, even other dicts",
             "Access: student[\"name\"] gets the value for key \"name\"",
-            "Dictionaries are unordered — accessed by key, not position"
+            "Dictionaries are unordered \u2014 accessed by key, not position"
           ]
         },
         {
           "type": "analogy",
           "title": "A Dictionary is Like a Phone Book",
           "emoji": "",
-          "text": "You look up a person's name (the key) to find their phone number (the value). Each name is unique. You search by name directly — that's how Python dictionaries work."
+          "text": "You look up a person's name (the key) to find their phone number (the value). Each name is unique. You search by name directly \u2014 that's how Python dictionaries work."
         },
         {
           "type": "think_of",
           "analogy": {
             "title": "Phone Book",
             "description": "Look up a name (key) to find the number (value).",
-            "emoji": "📞",
+            "emoji": "\ud83d\udcde",
             "image": "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=800&q=80"
           },
           "visualization": {
-            "type": "key_value",
-            "title": "Name → Number Mapping",
-            "pairs": [
-              {
-                "key": "Alice",
-                "value": "555-1234"
-              },
-              {
-                "key": "Bob",
-                "value": "555-5678"
-              },
-              {
-                "key": "Charlie",
-                "value": "555-9012"
-              }
+            "type": "categories",
+            "title": "Name \u2192 Number Mapping",
+            "centerLabel": "Name \u2192 Number Mapping",
+            "items": [
+              "Alice",
+              "Bob",
+              "Charlie"
             ]
           },
           "code": {
@@ -63,7 +55,7 @@
         {
           "type": "reflection",
           "question": "Can two people have the same phone number in a dictionary? Can two keys have the same value?",
-          "answer": "Yes! Values can be duplicated. Two different keys (people) could have the same value (phone number). But the keys themselves must be unique — you cannot have two 'Alice' entries. It's like a real phone book: two people can share a number, but you can't have two listings for Alice."
+          "answer": "Yes! Values can be duplicated. Two different keys (people) could have the same value (phone number). But the keys themselves must be unique \u2014 you cannot have two 'Alice' entries. It's like a real phone book: two people can share a number, but you can't have two listings for Alice."
         },
         {
           "type": "code_example",
@@ -83,7 +75,7 @@
         {
           "type": "visual_aid",
           "kind": "mapping_visual",
-          "title": "Key → Value Mapping",
+          "title": "Key \u2192 Value Mapping",
           "accentColor": "green",
           "items": [
             {
@@ -110,12 +102,12 @@
           "type": "explanation",
           "accentColor": "purple",
           "title": "Adding, Updating, and Deleting",
-          "body": "Dictionaries are mutable — you can change them after creation.",
+          "body": "Dictionaries are mutable \u2014 you can change them after creation.",
           "bullets": [
-            "Add: student[\"grade\"] = \"A\" — creates a new key-value pair",
-            "Update: student[\"age\"] = 21 — changes the existing value",
-            "Delete: del student[\"grade\"] — removes the key-value pair",
-            "Check: \"name\" in student — returns True if key exists"
+            "Add: student[\"grade\"] = \"A\" \u2014 creates a new key-value pair",
+            "Update: student[\"age\"] = 21 \u2014 changes the existing value",
+            "Delete: del student[\"grade\"] \u2014 removes the key-value pair",
+            "Check: \"name\" in student \u2014 returns True if key exists"
           ]
         },
         {
@@ -131,10 +123,10 @@
           "title": "Dictionary Methods",
           "body": "Dictionaries have useful methods for working with keys, values, and items.",
           "bullets": [
-            ".keys() — returns all keys",
-            ".values() — returns all values",
-            ".items() — returns all (key, value) pairs",
-            ".get(key) — safely gets value or returns None if missing"
+            ".keys() \u2014 returns all keys",
+            ".values() \u2014 returns all values",
+            ".items() \u2014 returns all (key, value) pairs",
+            ".get(key) \u2014 safely gets value or returns None if missing"
           ]
         },
         {
@@ -155,7 +147,7 @@
         {
           "type": "visual_aid",
           "kind": "mapping_visual",
-          "title": "Key → Value Mapping",
+          "title": "Key \u2192 Value Mapping",
           "accentColor": "green",
           "items": [
             {

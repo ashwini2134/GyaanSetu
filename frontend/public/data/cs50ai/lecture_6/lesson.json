@@ -18,7 +18,7 @@
           "bullets": [
             "Human neurons pass electrical signals; AI nodes pass numbers",
             "Each node takes inputs, multiplies by weights, adds them up, produces output",
-            "Layers: Input Layer (receives data) → Hidden Layers (processes) → Output Layer (gives result)",
+            "Layers: Input Layer (receives data) \u2192 Hidden Layers (processes) \u2192 Output Layer (gives result)",
             "Training adjusts weights over thousands of examples until outputs are correct",
             "This concept is fundamental to AI development."
           ],
@@ -28,15 +28,15 @@
           "type": "think_of",
           "analogy": {
             "title": "Think of Neural Networks as a Team of Detectives",
-            "description": "Each detective specializes in one clue — an edge, a color, a shape. Together they combine findings to solve the case. Each neuron detects one pattern; layers combine them to recognize complex objects.",
+            "description": "Each detective specializes in one clue \u2014 an edge, a color, a shape. Together they combine findings to solve the case. Each neuron detects one pattern; layers combine them to recognize complex objects.",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "emoji": "\ud83d\udca1"
           },
           "visualization": {
-            "type": "hub_spoke",
+            "type": "categories",
             "title": "Neuron = Pattern Detector",
             "centerLabel": "Input",
-            "branches": [
+            "items": [
               "Neuron 1: Edges",
               "Neuron 2: Shapes",
               "Neuron 3: Objects",
@@ -75,9 +75,9 @@
           "bullets": [
             "Deep Learning = neural networks with many hidden layers",
             "More layers = ability to learn more complex patterns",
-            "CNNs (Convolutional Neural Networks) — specialized for recognizing patterns in images",
+            "CNNs (Convolutional Neural Networks) \u2014 specialized for recognizing patterns in images",
             "Real-world uses: face unlock on phones, voice recognition (Alexa, Siri), medical image diagnosis",
-            "Why neural networks need lots of data — more examples = better and more reliable learning"
+            "Why neural networks need lots of data \u2014 more examples = better and more reliable learning"
           ],
           "accentColor": "blue"
         },
@@ -85,12 +85,12 @@
           "type": "think_of",
           "analogy": {
             "title": "Think of CNN as a Magnifying Glass Scanning a Photo",
-            "description": "A magnifying glass slides across a photo, examining small patches at a time. Each patch reveals local patterns: edges → textures → objects. CNNs convolve filters across images to detect visual features.",
+            "description": "A magnifying glass slides across a photo, examining small patches at a time. Each patch reveals local patterns: edges \u2192 textures \u2192 objects. CNNs convolve filters across images to detect visual features.",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "emoji": "\ud83d\udca1"
           },
           "visualization": {
-            "type": "sequence",
+            "type": "flow",
             "title": "CNN Processing Layers",
             "items": [
               "Input Image",
@@ -130,11 +130,11 @@
           "title": "What is NN Steps?",
           "body": "Building a neural network.",
           "bullets": [
-            "Step 1: Define input — what data goes into the network (numbers, image pixels, text)",
-            "Step 2: Set up layers — input layer, hidden layers, output layer",
-            "Step 3: Initialize weights — start with random numbers",
-            "Step 4: Train — feed examples, compare output to correct answer, adjust weights",
-            "Step 5: Test — give new unseen data, measure accuracy"
+            "Step 1: Define input \u2014 what data goes into the network (numbers, image pixels, text)",
+            "Step 2: Set up layers \u2014 input layer, hidden layers, output layer",
+            "Step 3: Initialize weights \u2014 start with random numbers",
+            "Step 4: Train \u2014 feed examples, compare output to correct answer, adjust weights",
+            "Step 5: Test \u2014 give new unseen data, measure accuracy"
           ],
           "accentColor": "blue"
         },
@@ -144,10 +144,10 @@
             "title": "Think of Neural Network Layers as a Factory Assembly Line",
             "description": "Raw materials enter. Each station transforms the product. Early stations handle simple tasks, later ones build complex assemblies. Information flows forward through network layers, each building on the last.",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "emoji": "\ud83d\udca1"
           },
           "visualization": {
-            "type": "sequence",
+            "type": "flow",
             "title": "Network Layer Flow",
             "items": [
               "Input Layer",
@@ -170,7 +170,7 @@
         {
           "type": "practice",
           "title": "Practice Exercise",
-          "instructions": "Draw a simple 3-layer neural network for predicting if a student passes — inputs: attendance and marks",
+          "instructions": "Draw a simple 3-layer neural network for predicting if a student passes \u2014 inputs: attendance and marks",
           "starterCode": "# Draw/describe your network\n",
           "solution": "# Input layer (2 nodes) -> Hidden layer -> Output layer (1 node)",
           "hint": "Ensure nodes are connected."
@@ -190,7 +190,7 @@
       },
       {
         "emoji": "",
-        "text": "Layers: Input → Hidden → Output"
+        "text": "Layers: Input \u2192 Hidden \u2192 Output"
       },
       {
         "emoji": "",
@@ -202,7 +202,7 @@
       },
       {
         "emoji": "",
-        "text": "CNNs specialize in image recognition — used in face unlock, medical scans"
+        "text": "CNNs specialize in image recognition \u2014 used in face unlock, medical scans"
       }
     ],
     "whatYouLearned": [

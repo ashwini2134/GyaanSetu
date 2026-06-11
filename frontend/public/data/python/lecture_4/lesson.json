@@ -26,18 +26,18 @@
           "type": "analogy",
           "title": "if is Like a Traffic Light",
           "emoji": "",
-          "text": "Green light (True) → you go. Red light (False) → you stop. The if statement checks the condition and decides whether to run the code or skip it."
+          "text": "Green light (True) \u2192 you go. Red light (False) \u2192 you stop. The if statement checks the condition and decides whether to run the code or skip it."
         },
         {
           "type": "think_of",
           "analogy": {
             "title": "Traffic Light",
-            "description": "Green → GO, Red → STOP. The condition decides which path to take.",
-            "emoji": "🚦",
+            "description": "Green \u2192 GO, Red \u2192 STOP. The condition decides which path to take.",
+            "emoji": "\ud83d\udea6",
             "image": "https://images.unsplash.com/photo-1557404763-69708cd8b9ce?w=800&q=80"
           },
           "visualization": {
-            "type": "decision_branch",
+            "type": "decision",
             "title": "Decision Branching",
             "condition": "Condition?",
             "trueLabel": "True Path",
@@ -52,7 +52,7 @@
         {
           "type": "reflection",
           "question": "Does an if/else statement always run both the if block and the else block?",
-          "answer": "No! An if/else runs exactly ONE of the two blocks — never both. If the condition is True, the if block runs and the else block is skipped. If the condition is False, the if block is skipped and the else block runs. Like a traffic light, it's either green or red — not both at the same time."
+          "answer": "No! An if/else runs exactly ONE of the two blocks \u2014 never both. If the condition is True, the if block runs and the else block is skipped. If the condition is False, the if block is skipped and the else block runs. Like a traffic light, it's either green or red \u2014 not both at the same time."
         },
         {
           "type": "code_example",
@@ -81,8 +81,8 @@
           "title": "Two Paths with if-else",
           "body": "When you need to choose between two options, use if-else. One block runs if True, another if False.",
           "bullets": [
-            "if condition: — runs when True",
-            "else: — runs when False",
+            "if condition: \u2014 runs when True",
+            "else: \u2014 runs when False",
             "Only ONE of the two blocks runs, never both"
           ]
         },
@@ -118,7 +118,7 @@
           "body": "Some values are treated as True (truthy) and others as False (falsy) in conditions.",
           "bullets": [
             "Falsy: None, 0, 0.0, \"\" (empty string), [] (empty list)",
-            "Truthy: everything else — non-zero numbers, non-empty strings",
+            "Truthy: everything else \u2014 non-zero numbers, non-empty strings",
             "Lets you write concise conditions like if name:"
           ]
         },

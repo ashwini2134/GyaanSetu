@@ -249,11 +249,16 @@ export function getCourseStats(courseSlug: string, totalLectures: number): Cours
   return { lecturesStarted, lecturesCompleted, quizzesPassed, handsOnTasksCompleted, totalLectures };
 }
 
+// ── Review mode flag (bypasses sequential lecture locking) ────────────────
+// Set to `false` to re-enforce sequential lecture unlocking.
+const REVIEW_MODE = true;
+
 // ── Sequential unlocking ─────────────────────────────────────────────────────
 export function isLectureUnlocked(
   lectureNumber: number,
   courseProgress: Record<number, LectureProgress>,
 ): boolean {
+  if (REVIEW_MODE) return true;
   if (lectureNumber === 0) return true;
   const prev = courseProgress[lectureNumber - 1];
   if (!prev) return false;

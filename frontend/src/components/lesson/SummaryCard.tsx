@@ -56,15 +56,21 @@ export default function SummaryCard({ summary, lectureTitle, nextLectureTitle, o
           <p className="text-lg font-bold text-white">Lecture Complete!</p>
           <p className="text-sm text-slate-400 mt-1">You've finished "{lectureTitle}"</p>
         </div>
-        {nextLectureTitle && onNext && (
+        {onNext && (
           <button
             onClick={onNext}
             className="inline-flex items-center gap-2 text-sm font-semibold text-white px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 shadow-lg shadow-blue-600/20 transition-all"
           >
-            Next: {nextLectureTitle}
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
+            {nextLectureTitle ? (
+              <>
+                Next: {nextLectureTitle}
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </>
+            ) : (
+              'Back to Course'
+            )}
           </button>
         )}
       </div>

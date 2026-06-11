@@ -564,7 +564,11 @@ export default function LecturePage() {
                     const problemsDone = progress.problemsCompleted.length >= problems.length;
                     if (allSectionsDone && quizDone && problemsDone) {
                       markLectureCompleted();
-                      if (nextLecture) navigate(`/course/${slug}/lecture/${nextLecture.number}`);
+                    }
+                    if (nextLecture) {
+                      navigate(`/course/${slug}/lecture/${nextLecture.number}`);
+                    } else {
+                      navigate(`/course/${slug}`);
                     }
                   }}
                 />

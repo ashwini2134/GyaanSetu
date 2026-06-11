@@ -65,16 +65,10 @@ export interface ConceptVisualizationBlock {
 }
 
 export type ThinkOfVisualType =
-  | 'storage_box'
-  | 'sequence'
-  | 'function_machine'
-  | 'loop_cycle'
-  | 'key_value'
-  | 'decision_branch'
-  | 'blueprint_object'
-  | 'string_beads'
-  | 'hub_spoke'
-  | 'light_switch';
+  | 'flow'
+  | 'decision'
+  | 'repetition'
+  | 'categories';
 
 export interface ThinkOfBlock {
   type: 'think_of';
@@ -87,24 +81,11 @@ export interface ThinkOfBlock {
   visualization: {
     type: ThinkOfVisualType;
     title: string;
-    varName?: string;
-    varValue?: string;
     items?: string[];
-    inputLabel?: string;
-    processLabel?: string;
-    outputLabel?: string;
-    loopLabel?: string;
-    loopSteps?: string[];
-    pairs?: Array<{ key: string; value: string }>;
     condition?: string;
     trueLabel?: string;
     falseLabel?: string;
-    className?: string;
-    properties?: Array<{ name: string; type: string }>;
-    text?: string;
-    boolValue?: boolean;
     centerLabel?: string;
-    branches?: string[];
   };
   code: {
     language: string;
