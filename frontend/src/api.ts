@@ -1,7 +1,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
-//  Static Data Layer — no backend required
-//  All data comes from /public/data/ JSON files.
-//  Auth & submissions are persisted in localStorage.
+//  Data Layer — course content from /public/data/ JSON files.
+//  Auth is handled by the backend API via authClient.ts.
+//  Progress & submissions are persisted in localStorage.
 // ─────────────────────────────────────────────────────────────────────────────
 import { getMentorHint, getFailureAnalysis, getProgressiveHints, reviewStudentCode, type FailureAnalysisResult, type ProgressiveHints, type CodeReviewResult } from './mentor';
 export type { FailureAnalysisResult, ProgressiveHints, CodeReviewCheck, CodeReviewResult } from './mentor';
@@ -26,33 +26,10 @@ export type ProblemDetail = ProblemSummary & {
 export type Lecture = { number: number; title: string; content: string };
 export type ChatMsg = { role: string; content: string; created_at: string };
 
+export { getToken, setToken, clearToken } from "./authClient";
+
 // ── localStorage helpers ──────────────────────────────────────────────────────
-const TOKEN_KEY = "fa_token";
-const USERS_KEY = "fa_users";
 const CHAT_KEY  = "fa_chat";
-
-export function getToken(): string | null { return localStorage.getItem(TOKEN_KEY); }
-export function setToken(t: string)       { localStorage.setItem(TOKEN_KEY, t); }
-export function clearToken()              { localStorage.removeItem(TOKEN_KEY); }
-
-type StoredUser = { id: number; name: string; email: string; passwordHash: string };
-
-function getUsers(): StoredUser[] {
-  try { return JSON.parse(localStorage.getItem(USERS_KEY) ?? "[]"); } catch { return []; }
-}
-function saveUsers(u: StoredUser[]) { localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
-
-// ── Simple token: base64-encoded JSON (no crypto needed for demo) ─────────────
-function makeToken(user: Omit<StoredUser, "passwordHash">): string {
-  return btoa(JSON.stringify({ id: user.id, email: user.email, name: user.name, exp: Date.now() + 86_400_000 * 30 }));
-}
-function parseToken(t: string): { id: number; email: string; name: string } | null {
-  try {
-    const p = JSON.parse(atob(t));
-    if (p.exp < Date.now()) { clearToken(); return null; }
-    return p;
-  } catch { return null; }
-}
 
 // ── Chat storage ─────────────────────────────────────────────────────────────
 function getChatHistory(problemId: number | string): ChatMsg[] {
@@ -187,32 +164,6 @@ async function loadLectures(courseSlug: string): Promise<Lecture[]> {
 
 // ── Public API (same shape as the old api object) ─────────────────────────────
 export const api = {
-  // ── Auth ──────────────────────────────────────────────────────────────────
-  register: async (email: string, password: string, name: string): Promise<{ access_token: string }> => {
-    const users = getUsers();
-    if (users.some((u) => u.email === email)) throw new Error("Email already in use");
-    const id = Date.now();
-    const newUser: StoredUser = { id, name, email, passwordHash: btoa(password) };
-    saveUsers([...users, newUser]);
-    const token = makeToken(newUser);
-    return { access_token: token };
-  },
-
-  login: async (email: string, password: string): Promise<{ access_token: string }> => {
-    const users = getUsers();
-    const user = users.find((u) => u.email === email && u.passwordHash === btoa(password));
-    if (!user) throw new Error("Invalid email or password");
-    return { access_token: makeToken(user) };
-  },
-
-  me: async (): Promise<{ id: number; email: string; name: string }> => {
-    const t = getToken();
-    if (!t) throw new Error("Not authenticated");
-    const p = parseToken(t);
-    if (!p) throw new Error("Session expired");
-    return p;
-  },
-
   // ── Courses ───────────────────────────────────────────────────────────────
   courses: async (): Promise<Course[]> => {
     const index = await loadCourseIndex();

@@ -2,6 +2,7 @@ import { type FormEvent, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../auth";
 import { AuthLayout, Button, Input } from "../components";
+import { OAuthButtons } from "../components/OAuthButtons";
 
 export default function Register() {
   const { user, register } = useAuth();
@@ -38,7 +39,6 @@ export default function Register() {
       }
     >
       <form onSubmit={onSubmit} className="space-y-4">
-        {/* Name Input */}
         <div className="space-y-1.5">
           <label htmlFor="name" className="block text-sm font-medium text-slate-200">
             Full Name
@@ -53,7 +53,6 @@ export default function Register() {
           />
         </div>
 
-        {/* Email Input */}
         <div className="space-y-1.5">
           <label htmlFor="email" className="block text-sm font-medium text-slate-200">
             Email Address
@@ -69,16 +68,15 @@ export default function Register() {
           />
         </div>
 
-        {/* Password Input */}
         <div className="space-y-1.5">
           <label htmlFor="password" className="block text-sm font-medium text-slate-200">
-            Password <span className="text-xs text-slate-400">(min 6 characters)</span>
+            Password <span className="text-xs text-slate-400">(min 8 characters)</span>
           </label>
           <Input
             id="password"
             type="password"
             required
-            minLength={6}
+            minLength={8}
             autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -86,14 +84,12 @@ export default function Register() {
           />
         </div>
 
-        {/* Error Message */}
         {err && (
           <div className="rounded-lg bg-red-900/20 border border-red-700/50 px-4 py-3 text-sm text-red-300">
             {err}
           </div>
         )}
 
-        {/* Submit Button */}
         <Button
           type="submit"
           variant="primary"
@@ -105,6 +101,10 @@ export default function Register() {
           {busy ? "Creating account…" : "Create account"}
         </Button>
       </form>
+
+      <div className="mt-6">
+        <OAuthButtons />
+      </div>
     </AuthLayout>
   );
 }

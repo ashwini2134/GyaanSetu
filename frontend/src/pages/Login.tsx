@@ -1,13 +1,16 @@
 import { type FormEvent, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth";
 import { AuthLayout, Button, Input } from "../components";
+import { OAuthButtons } from "../components/OAuthButtons";
 
 export default function Login() {
   const { user, login } = useAuth();
+  const [params] = useSearchParams();
+  const oauthError = params.get("oauth_error");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [err, setErr] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(oauthError);
   const [busy, setBusy] = useState(false);
 
   if (user) return <Navigate to="/" replace />;
@@ -37,7 +40,6 @@ export default function Login() {
       }
     >
       <form onSubmit={onSubmit} className="space-y-4">
-        {/* Email Input */}
         <div className="space-y-1.5">
           <label htmlFor="email" className="block text-sm font-medium text-slate-200">
             Email Address
@@ -53,11 +55,18 @@ export default function Login() {
           />
         </div>
 
-        {/* Password Input */}
         <div className="space-y-1.5">
-          <label htmlFor="password" className="block text-sm font-medium text-slate-200">
-            Password
-          </label>
+          <div className="flex items-center justify-between">
+            <label htmlFor="password" className="block text-sm font-medium text-slate-200">
+              Password
+            </label>
+            <Link
+              to="/forgot-password"
+              className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              Forgot password?
+            </Link>
+          </div>
           <Input
             id="password"
             type="password"
@@ -69,14 +78,12 @@ export default function Login() {
           />
         </div>
 
-        {/* Error Message */}
         {err && (
           <div className="rounded-lg bg-red-900/20 border border-red-700/50 px-4 py-3 text-sm text-red-300">
             {err}
           </div>
         )}
 
-        {/* Submit Button */}
         <Button
           type="submit"
           variant="primary"
@@ -88,6 +95,10 @@ export default function Login() {
           {busy ? "Signing in…" : "Sign in"}
         </Button>
       </form>
+
+      <div className="mt-6">
+        <OAuthButtons />
+      </div>
     </AuthLayout>
   );
 }

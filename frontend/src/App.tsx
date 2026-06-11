@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Suspense, lazy } from "react";
 
 import { useAuth } from "./auth";
+import type { UserRole } from "./authClient";
 
 // Pages
 const CoursePage = lazy(
@@ -35,6 +36,18 @@ const QuizPage = lazy(
 
 const Register = lazy(
   () => import("./pages/Register")
+);
+
+const ForgotPassword = lazy(
+  () => import("./pages/ForgotPassword")
+);
+
+const ResetPassword = lazy(
+  () => import("./pages/ResetPassword")
+);
+
+const OAuthCallback = lazy(
+  () => import("./pages/OAuthCallback")
 );
 
 const Shell = lazy(
@@ -118,6 +131,22 @@ function RequireAuth({
   return <>{children}</>;
 }
 
+function RequireRole({
+  roles,
+  children,
+}: {
+  roles: UserRole[];
+  children: ReactNode;
+}) {
+  const { user, ready, hasRole } = useAuth();
+
+  if (!ready) return <LoadingSpinner />;
+  if (!user) return <Navigate to="/login" replace />;
+  if (!hasRole(...roles)) return <Navigate to="/" replace />;
+
+  return <>{children}</>;
+}
+
 // Main App
 export default function App() {
 
@@ -137,6 +166,21 @@ export default function App() {
         <Route
           path="/register"
           element={<Register />}
+        />
+
+        <Route
+          path="/forgot-password"
+          element={<ForgotPassword />}
+        />
+
+        <Route
+          path="/reset-password"
+          element={<ResetPassword />}
+        />
+
+        <Route
+          path="/auth/oauth"
+          element={<OAuthCallback />}
         />
 
         {/* PRIVATE ROUTES */}

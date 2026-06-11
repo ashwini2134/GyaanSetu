@@ -17,6 +17,13 @@ frontend/.vite/
 .env
 .env.local
 .env.*.local
+backend/.env
+backend/data/
+
+# Backend
+backend/node_modules/
+backend/dist/
+backend/tests/test-auth.db
 
 # Editor
 .vscode/

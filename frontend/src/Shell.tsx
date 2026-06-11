@@ -121,6 +121,9 @@ export default function Shell() {
                 <span className="text-slate-300 truncate max-w-[140px] font-medium">
                   {user.name}
                 </span>
+                <span className="text-xs text-slate-500 capitalize hidden md:inline">
+                  {user.role}
+                </span>
               </div>
             )}
 

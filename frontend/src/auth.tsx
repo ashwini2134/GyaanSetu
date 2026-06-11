@@ -1,13 +1,16 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
-import { api, clearToken, getToken, setToken } from "./api";
-type User = { id: number; email: string; name: string } | null;
+import { authApi, clearToken, getToken, setToken, type AuthUser, type UserRole } from "./authClient";
+
+type User = AuthUser | null;
 
 const Ctx = createContext<{
   user: User;
   ready: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
+  completeOAuth: (code: string) => Promise<void>;
+  hasRole: (...roles: UserRole[]) => boolean;
 } | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -21,9 +24,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     try {
-      const me = await api.me();
+      const { user: me } = await authApi.me();
       setUser(me);
     } catch {
+      clearToken();
       setUser(null);
     } finally {
       setReady(true);
@@ -35,34 +39,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [loadMe]);
 
   useEffect(() => {
-    const onLogout = () => {
-      setUser(null);
-    };
+    const onLogout = () => setUser(null);
     window.addEventListener("fa:logout", onLogout);
     return () => window.removeEventListener("fa:logout", onLogout);
   }, []);
 
   const login = async (email: string, password: string) => {
-    const { access_token } = await api.login(email, password);
+    const { access_token, user: me } = await authApi.login(email, password);
     setToken(access_token);
-    const me = await api.me();
     setUser(me);
   };
 
   const register = async (email: string, password: string, name: string) => {
-    const { access_token } = await api.register(email, password, name);
+    const { access_token, user: me } = await authApi.register(email, password, name);
     setToken(access_token);
-    const me = await api.me();
     setUser(me);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await authApi.logout();
     clearToken();
     setUser(null);
   };
 
+  const completeOAuth = async (code: string) => {
+    const { access_token, user: me } = await authApi.exchangeOAuthCode(code);
+    setToken(access_token);
+    setUser(me);
+  };
+
+  const hasRole = (...roles: UserRole[]) => Boolean(user && roles.includes(user.role));
+
   return (
-    <Ctx.Provider value={{ user, ready, login, register, logout }}>{children}</Ctx.Provider>
+    <Ctx.Provider value={{ user, ready, login, register, logout, completeOAuth, hasRole }}>
+      {children}
+    </Ctx.Provider>
   );
 }
 
