@@ -33,8 +33,11 @@ export default function QuizEngine({ quizId = 'default', questions, onComplete }
       const saved = localStorage.getItem(`lms:quiz_history:${quizId}`);
       if (saved) {
         const parsed = JSON.parse(saved);
-        setHistory(parsed);
-        setViewHistoryIdx(parsed.length - 1);
+        if (parsed && parsed.length > 0) {
+          setHistory(parsed);
+          setViewHistoryIdx(parsed.length - 1);
+          setPhase('result');
+        }
       }
     } catch {}
   }, [quizId]);
@@ -131,11 +134,14 @@ export default function QuizEngine({ quizId = 'default', questions, onComplete }
   }
 
   if (phase === 'result') {
-    const pct = Math.round((score / total) * 100);
-    const passed = pct >= 70;
-    
     // Safety check for viewHistoryIdx
     const currentAtt = history[viewHistoryIdx] ?? history[history.length - 1];
+    
+    const displayScore = currentAtt ? currentAtt.score : score;
+    const displayTotal = currentAtt ? currentAtt.total : total;
+    
+    const pct = Math.round((displayScore / displayTotal) * 100);
+    const passed = pct >= 70;
 
     return (
       <div className={`rounded-2xl border p-6 text-center space-y-6 ${passed ? 'border-green-500/25 bg-gradient-to-br from-green-600/10 to-slate-800/40' : 'border-orange-500/25 bg-gradient-to-br from-orange-600/10 to-slate-800/40'}`}>
@@ -146,7 +152,7 @@ export default function QuizEngine({ quizId = 'default', questions, onComplete }
               {passed ? <PartyPopper size={28} /> : <Book size={28} />}
             </div>
             <div className="text-left">
-              <p className="text-3xl font-bold text-white">{score}/{total}</p>
+              <p className="text-3xl font-bold text-white">{displayScore}/{displayTotal}</p>
               <p className={`text-sm font-medium ${passed ? 'text-green-300' : 'text-orange-300'}`}>
                 {passed ? 'Great job!' : 'Keep studying!'}
               </p>
