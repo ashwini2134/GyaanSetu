@@ -31,7 +31,11 @@ export default function QuizEngine({ quizId = 'default', questions, onComplete }
   useEffect(() => {
     try {
       const saved = localStorage.getItem(`lms:quiz_history:${quizId}`);
-      if (saved) setHistory(JSON.parse(saved));
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setHistory(parsed);
+        setViewHistoryIdx(parsed.length - 1);
+      }
     } catch {}
   }, [quizId]);
 
@@ -170,15 +174,15 @@ export default function QuizEngine({ quizId = 'default', questions, onComplete }
             
             <div className="space-y-3">
               {currentAtt.details.map((d, j) => (
-                <div key={j} className="flex items-start gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-700/40 text-sm">
-                  <span className="font-semibold text-slate-300 w-6">Q{d.qNum}</span>
-                  <span className={`w-12 font-medium ${d.passed ? 'text-green-400' : 'text-red-400'}`}>
-                    {d.passed ? 'Pass' : 'Fail'}
+                <div key={j} className="flex items-start gap-2 p-3 rounded-xl bg-slate-900/60 border border-slate-700/40 text-sm">
+                  <span className="font-semibold text-slate-300">Q{d.qNum}</span>
+                  <span className="text-slate-400">—</span>
+                  <span className={`font-medium ${d.passed ? 'text-green-400' : 'text-red-400'}`}>
+                    {d.passed ? '✅ Pass' : '❌ Fail'}
                   </span>
                   <span className="text-slate-400">—</span>
                   <span className="text-slate-200 flex-1">
-                    <span className="text-slate-500 mr-2">Answer:</span>
-                    {d.userAns || '(skipped)'}
+                    Your Answer: {d.userAns || '(skipped)'}
                   </span>
                 </div>
               ))}
@@ -192,7 +196,7 @@ export default function QuizEngine({ quizId = 'default', questions, onComplete }
                   disabled={viewHistoryIdx === 0}
                   className="px-4 py-2 rounded-lg text-sm font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  Previous
+                  Previous Attempt
                 </button>
                 <span className="text-xs text-slate-500">
                   {new Date(currentAtt.timestamp).toLocaleString()}
@@ -202,7 +206,7 @@ export default function QuizEngine({ quizId = 'default', questions, onComplete }
                   disabled={viewHistoryIdx === history.length - 1}
                   className="px-4 py-2 rounded-lg text-sm font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  Next
+                  Next Attempt
                 </button>
               </div>
             )}
