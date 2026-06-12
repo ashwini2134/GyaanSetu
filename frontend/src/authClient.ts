@@ -12,7 +12,7 @@ const TOKEN_KEY = "fa_token";
 const API_BASE = import.meta.env.VITE_API_URL ?? "/api";
 const BACKEND_BASE = import.meta.env.VITE_BACKEND_URL ?? "http://localhost:3001";
 
-export type OAuthProvider = "github" | "linkedin";
+export type OAuthProvider = "github" | "linkedin" | "google";
 
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);

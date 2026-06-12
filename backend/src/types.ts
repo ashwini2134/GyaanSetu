@@ -12,9 +12,9 @@ export type User = {
 
 export type SafeUser = Pick<User, "id" | "email" | "name" | "role" | "emailVerified">;
 
-export type OAuthProvider = "github" | "linkedin";
+export type OAuthProvider = "github" | "linkedin" | "google";
 
-export const OAUTH_PROVIDERS: OAuthProvider[] = ["github", "linkedin"];
+export const OAUTH_PROVIDERS: OAuthProvider[] = ["github", "linkedin", "google"];
 
 export type AuthTokens = {
   accessToken: string;

@@ -4,13 +4,33 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { api, type ChatMsg, saveCompletedProject, getProjectMetadata, type FailureAnalysisResult, type CodeReviewResult } from "../api";
+import { api, type ChatMsg, getProjectMetadata, type FailureAnalysisResult, type CodeReviewResult } from "../api";
+import { getToken } from "../authClient";
 import { runPythonMock, type DebugStep } from "../interpreter";
 import {
   Check, CheckCircle, X, XCircle, AlertTriangle, Gem, Clock,
   FolderUp, Download, Monitor, Bot, Pencil, MessageSquare,
   Search, Lightbulb, Bug, Unlock, Settings, RefreshCw,
 } from "lucide-react";
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3001';
+
+async function recordProjectCompletion(courseSlug: string, lectureNumber: number, projectId: string) {
+  const token = getToken();
+  if (!token) return;
+  try {
+    await fetch(`${BACKEND_URL}/api/progress/lecture/problem`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ courseSlug, lectureNumber, problemId: projectId }),
+    });
+  } catch (err) {
+    console.warn('Failed to record project completion:', err);
+  }
+}
 
 
 export default function CodingProjectPage() {
@@ -245,7 +265,8 @@ export default function CodingProjectPage() {
       if (result.passed || result.success) {
         setStatus("success");
         if (slug && projectId) {
-          saveCompletedProject(slug, projectId, true);
+          const lectureNum = parseInt(number ?? "9", 10);
+          recordProjectCompletion(slug, lectureNum, projectId);
         }
         setOutput(result.message || "[OK] All test cases passed!");
         setFailureAnalysis(null);
@@ -288,7 +309,8 @@ export default function CodingProjectPage() {
       if (result.passed || result.success) {
         setStatus("success");
         if (slug && projectId) {
-          saveCompletedProject(slug, projectId, true);
+          const lectureNum = parseInt(number ?? "9", 10);
+          recordProjectCompletion(slug, lectureNum, projectId);
         }
         setOutput("[OK] Submission Successful!\n\nAll hidden test cases passed.");
         setFailureAnalysis(null);

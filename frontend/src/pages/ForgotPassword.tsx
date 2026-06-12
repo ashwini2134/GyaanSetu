@@ -1,5 +1,6 @@
 import { type FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
+import { AlertCircle, Mail } from "lucide-react";
 import { authApi } from "../authClient";
 import { AuthLayout, Button, Input } from "../components";
 
@@ -53,17 +54,33 @@ export default function ForgotPassword() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
+              leftIcon={<Mail className="h-4.5 w-4.5 text-slate-400" />}
             />
           </div>
 
           {err && (
-            <div className="rounded-lg bg-red-900/20 border border-red-700/50 px-4 py-3 text-sm text-red-300">
-              {err}
+            <div className="rounded-lg bg-red-950/20 border border-red-500/20 px-4 py-3 text-sm text-red-200 flex items-start gap-3 shadow-[0_0_15px_rgba(239,68,68,0.07)]">
+              <AlertCircle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
+              <div className="flex-1 leading-relaxed">{err}</div>
             </div>
           )}
 
-          <Button type="submit" variant="primary" size="md" isLoading={busy} disabled={busy} className="w-full">
-            {busy ? "Sending…" : "Send reset link"}
+          <Button
+            type="submit"
+            variant="primary"
+            size="md"
+            isLoading={busy}
+            disabled={busy}
+            className="w-full group flex items-center justify-center gap-2"
+          >
+            {busy ? (
+              "Sending…"
+            ) : (
+              <>
+                <span>Send reset link</span>
+                <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+              </>
+            )}
           </Button>
         </form>
       )}

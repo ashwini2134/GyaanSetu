@@ -258,8 +258,12 @@ export const api = {
   },
 };
 
-// ── Progress & Streaks Helpers ────────────────────────────────────────────────
+// ── DEPRECATED: Progress & Streaks Helpers (use backend APIs instead) ────────────
+// These localStorage-based helpers are deprecated. The backend now manages progress.
+// See useProgress() hook for backend-backed progress tracking.
+
 export function getCompletedProjects(): Record<string, boolean> {
+  console.warn('getCompletedProjects is deprecated. Use backend APIs via useProgress.');
   try {
     return JSON.parse(localStorage.getItem("fa_completed_projects") ?? "{}");
   } catch {
@@ -268,23 +272,21 @@ export function getCompletedProjects(): Record<string, boolean> {
 }
 
 export function saveCompletedProject(courseSlug: string, projectId: string, completed: boolean = true) {
-  const current = getCompletedProjects();
-  const key = `${courseSlug}/${projectId}`;
-  if (completed) {
-    if (!current[key]) {
-      const meta = getProjectMetadata(projectId);
-      addXp(meta.xp);
+  console.warn('saveCompletedProject is deprecated. Use backend API /progress/lecture/problem instead.');
+  try {
+    const key = `${courseSlug}/${projectId}`;
+    const all = getCompletedProjects();
+    if (completed) {
+      all[key] = true;
+    } else {
+      delete all[key];
     }
-    current[key] = true;
-    recordSubmission();
-  } else {
-    delete current[key];
-  }
-  localStorage.setItem("fa_completed_projects", JSON.stringify(current));
-  updateStreak();
+    localStorage.setItem("fa_completed_projects", JSON.stringify(all));
+  } catch { /* ignore */ }
 }
 
 export function getCompletedQuizzes(): Record<string, number> {
+  console.warn('getCompletedQuizzes is deprecated. Use backend APIs via useProgress.');
   try {
     return JSON.parse(localStorage.getItem("fa_completed_quizzes") ?? "{}");
   } catch {
@@ -293,10 +295,13 @@ export function getCompletedQuizzes(): Record<string, number> {
 }
 
 export function saveCompletedQuiz(courseSlug: string, lectureNum: number, score: number) {
-  const current = getCompletedQuizzes();
-  const key = `${courseSlug}_${lectureNum}`;
-  current[key] = score;
-  localStorage.setItem("fa_completed_quizzes", JSON.stringify(current));
+  console.warn('saveCompletedQuiz is deprecated. Use backend API /progress/lecture/quiz instead.');
+  try {
+    const key = `${courseSlug}_${lectureNum}`;
+    const all = getCompletedQuizzes();
+    all[key] = score;
+    localStorage.setItem("fa_completed_quizzes", JSON.stringify(all));
+  } catch { /* ignore */ }
 }
 
 
@@ -700,7 +705,7 @@ export function getBadgesWithProgress(completedCount: number, streak: number): B
   return badges;
 }
 
-// ── Mock Leaderboard ────────────────────────────────────────────────────────────
+// ── DEPRECATED: Mock Leaderboard (use backend API instead) ────────────────────────────────────
 export interface LeaderboardEntry {
   rank: number;
   name: string;
@@ -709,26 +714,7 @@ export interface LeaderboardEntry {
 }
 
 export function getLeaderboard(): LeaderboardEntry[] {
-  // In a real app, this would come from the backend
-  // For now, return mock data with current user included
-  const currentXp = getTotalXp();
-  const currentStreak = getStreak().count;
-  
-  const mockData: LeaderboardEntry[] = [
-    { rank: 1, name: "Priya", xp: 2500, streak: 15 },
-    { rank: 2, name: "Rahul", xp: 1800, streak: 8 },
-    { rank: 3, name: "Ashwini", xp: currentXp, streak: currentStreak },
-    { rank: 4, name: "Sneha", xp: 1200, streak: 5 },
-    { rank: 5, name: "Arjun", xp: 950, streak: 3 },
-  ];
-
-  // Sort by XP descending
-  mockData.sort((a, b) => b.xp - a.xp);
-  
-  // Update ranks
-  mockData.forEach((entry, index) => {
-    entry.rank = index + 1;
-  });
-
-  return mockData;
+  console.warn('getLeaderboard is deprecated. Use backend API /progress/leaderboard instead.');
+  // Return empty array - LeaderboardPage now uses backend API
+  return [];
 }

@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth';
-import { api, getCompletedProjects, getTotalXp, getStreak } from '../api';
-import { getAllProgress, subscribeToProgressChanges } from '../hooks/useProgress';
+import { getToken } from '../authClient';
 import { Card, LoadingCard } from '../components';
 import { Trophy, Medal, Award, Flame } from 'lucide-react';
 
@@ -12,11 +11,29 @@ interface LeaderboardEntry {
   email: string;
   lecturesCompleted: number;
   quizzesPassed: number;
-  tasksCompleted: number;
-  projectsSolved: number;
-  totalXp: number;
+  problemsSolved: number;
+  projectsCompleted: number;
   streak: number;
-  completionPercent: number;
+  score: number;
+}
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3001';
+
+async function fetchLeaderboard(): Promise<LeaderboardEntry[]> {
+  const token = getToken();
+  if (!token) return [];
+  
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/progress/leaderboard`, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    });
+    if (!res.ok) return [];
+    const data = await res.json() as { leaderboard?: LeaderboardEntry[] };
+    return data.leaderboard ?? [];
+  } catch (err) {
+    console.warn('Failed to fetch leaderboard:', err);
+    return [];
+  }
 }
 
 export default function LeaderboardPage() {
@@ -24,77 +41,14 @@ export default function LeaderboardPage() {
   const { user } = useAuth();
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  // Listen for progress changes
-  useEffect(() => {
-    const unsub = subscribeToProgressChanges(() => setRefreshKey(k => k + 1));
-    return unsub;
-  }, []);
 
   useEffect(() => {
     setLoading(true);
-
-    // Load all progress data and compute leaderboard entries
-    // In a real app, this would be a server endpoint.
-    // Here we compute from local data per-user.
-    const allProgress = getAllProgress();
-    const completedProjects = getCompletedProjects();
-    const totalXp = getTotalXp();
-    const streak = getStreak();
-
-    // Compute stats for current user (since we're in localStorage-only mode)
-    const computeEntries = async () => {
-      const courses = await api.courses();
-
-      let totalLecturesAcrossCourses = 0;
-      const courseLectureCounts: Record<string, number> = {};
-
-      for (const course of courses) {
-        try {
-          const lectures = await api.courseLectures(course.slug);
-          courseLectureCounts[course.slug] = lectures.length;
-          totalLecturesAcrossCourses += lectures.length;
-        } catch {
-          courseLectureCounts[course.slug] = 0;
-        }
-      }
-
-      const lecturesCompleted = new Set<string>();
-      const quizzesPassed = new Set<string>();
-      const tasksCompleted = new Set<string>();
-
-      for (const [key, p] of Object.entries(allProgress)) {
-        if (p.lectureCompleted) lecturesCompleted.add(key);
-        if (p.quizCompleted) quizzesPassed.add(key);
-        if (p.handsOnTaskCompleted) tasksCompleted.add(key);
-      }
-
-      const projectsCount = Object.keys(completedProjects).length;
-
-      const completionPercent = totalLecturesAcrossCourses > 0
-        ? Math.round((lecturesCompleted.size / totalLecturesAcrossCourses) * 100)
-        : 0;
-
-      const currentUserEntry: LeaderboardEntry = {
-        rank: 1,
-        name: user?.name ?? 'You',
-        email: user?.email ?? '',
-        lecturesCompleted: lecturesCompleted.size,
-        quizzesPassed: quizzesPassed.size,
-        tasksCompleted: tasksCompleted.size,
-        projectsSolved: projectsCount,
-        totalXp: totalXp,
-        streak: streak.count,
-        completionPercent,
-      };
-
-      setEntries([currentUserEntry]);
+    fetchLeaderboard().then(data => {
+      setEntries(data);
       setLoading(false);
-    };
-
-    computeEntries();
-  }, [user, refreshKey]);
+    });
+  }, []);
 
   const getRankIcon = (rank: number) => {
     if (rank === 1) return <Trophy size={20} className="text-yellow-400" />;
@@ -125,7 +79,7 @@ export default function LeaderboardPage() {
             Leaderboard
           </h1>
           <p className="text-slate-400 text-sm mt-2">
-            Rankings are computed from actual completion data — lectures, quizzes, tasks, and projects.
+            Rankings are based on lectures completed, quizzes passed, problems solved, projects submitted, and streak days.
           </p>
         </div>
       </div>
@@ -140,7 +94,7 @@ export default function LeaderboardPage() {
             <Trophy size={48} className="text-slate-600 mx-auto mb-4" />
             <h3 className="text-lg font-bold text-slate-300 mb-2">No Rankings Yet</h3>
             <p className="text-sm text-slate-400 max-w-md mx-auto">
-              Complete lectures, pass quizzes, and submit tasks to appear on the leaderboard.
+              Complete lectures, pass quizzes, and submit problems to appear on the leaderboard.
             </p>
             <button
               onClick={() => navigate('/courses')}
@@ -157,10 +111,10 @@ export default function LeaderboardPage() {
               <div className="col-span-3">Name</div>
               <div className="col-span-1 text-center">Lectures</div>
               <div className="col-span-1 text-center">Quizzes</div>
-              <div className="col-span-1 text-center">Tasks</div>
+              <div className="col-span-1 text-center">Problems</div>
               <div className="col-span-1 text-center">Projects</div>
               <div className="col-span-2 text-center">Streak</div>
-              <div className="col-span-2 text-right">Progress</div>
+              <div className="col-span-2 text-right">Score</div>
             </div>
 
             {/* Table rows */}
@@ -190,23 +144,15 @@ export default function LeaderboardPage() {
                   </div>
                   <div className="col-span-1 text-center text-sm text-slate-300">{entry.lecturesCompleted}</div>
                   <div className="col-span-1 text-center text-sm text-slate-300">{entry.quizzesPassed}</div>
-                  <div className="col-span-1 text-center text-sm text-slate-300">{entry.tasksCompleted}</div>
-                  <div className="col-span-1 text-center text-sm text-slate-300">{entry.projectsSolved}</div>
+                  <div className="col-span-1 text-center text-sm text-slate-300">{entry.problemsSolved}</div>
+                  <div className="col-span-1 text-center text-sm text-slate-300">{entry.projectsCompleted}</div>
                   <div className="col-span-2 text-center text-sm">
                     <span className="inline-flex items-center gap-1 text-amber-400">
                       <Flame size={16} className="text-amber-400" /> {entry.streak}
                     </span>
                   </div>
                   <div className="col-span-2 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <div className="w-20 h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500"
-                          style={{ width: `${entry.completionPercent}%` }}
-                        />
-                      </div>
-                      <span className="text-xs font-medium text-slate-300 w-10 text-right">{entry.completionPercent}%</span>
-                    </div>
+                    <span className="text-sm font-bold text-blue-400">{entry.score}</span>
                   </div>
                 </div>
               ))}
@@ -223,9 +169,8 @@ export default function LeaderboardPage() {
             <div>
               <p className="text-xs font-semibold text-slate-300 mb-1">How Rankings Work</p>
               <p className="text-xs text-slate-400 leading-relaxed">
-                The leaderboard is populated from actual student activity — no fake data. Rankings are based on
-                lectures completed, quizzes passed, tasks submitted, projects solved, and streak days.
-                Progress updates in real-time as you learn.
+                Rankings are computed from actual student activity. Score is based on lectures completed (50 pts), quizzes passed (30 pts), 
+                problems solved (20 pts), projects completed (100 pts), and daily streak bonuses. Progress updates in real-time as you learn.
               </p>
             </div>
           </div>

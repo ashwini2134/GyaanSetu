@@ -53,6 +53,44 @@ CREATE TABLE IF NOT EXISTS oauth_exchange_codes (
 
 CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user ON refresh_tokens(user_id);
 CREATE INDEX IF NOT EXISTS idx_oauth_accounts_user ON oauth_accounts(user_id);
+
+CREATE TABLE IF NOT EXISTS lecture_progress (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  course_slug TEXT NOT NULL COLLATE NOCASE,
+  lecture_number INTEGER NOT NULL,
+  sections_json TEXT NOT NULL DEFAULT '{}',
+  quiz_score INTEGER,
+  quiz_completed INTEGER NOT NULL DEFAULT 0,
+  problems_completed_json TEXT NOT NULL DEFAULT '[]',
+  hands_on_task_completed INTEGER NOT NULL DEFAULT 0,
+  lecture_completed INTEGER NOT NULL DEFAULT 0,
+  last_section TEXT NOT NULL DEFAULT '',
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(user_id, course_slug, lecture_number)
+);
+
+CREATE TABLE IF NOT EXISTS project_submissions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  course_slug TEXT NOT NULL COLLATE NOCASE,
+  project_id TEXT NOT NULL,
+  completed_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(user_id, course_slug, project_id)
+);
+
+CREATE TABLE IF NOT EXISTS user_activities (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  activity_type TEXT NOT NULL CHECK(activity_type IN ('lecture_complete','quiz_passed','problem_solved','project_completed','course_complete','progress_update')),
+  meta_json TEXT NOT NULL DEFAULT '{}',
+  activity_date TEXT NOT NULL DEFAULT (date('now')),
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_lecture_progress_user ON lecture_progress(user_id);
+CREATE INDEX IF NOT EXISTS idx_project_submissions_user ON project_submissions(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_activities_user_date ON user_activities(user_id, activity_date);
 `;
 
 let db: DatabaseSync | null = null;

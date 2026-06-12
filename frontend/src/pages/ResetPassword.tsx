@@ -1,5 +1,6 @@
 import { type FormEvent, useState } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
+import { AlertCircle, Lock, Eye, EyeOff } from "lucide-react";
 import { authApi } from "../authClient";
 import { AuthLayout, Button, Input } from "../components";
 
@@ -8,6 +9,8 @@ export default function ResetPassword() {
   const token = params.get("token") ?? "";
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [done, setDone] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -66,13 +69,27 @@ export default function ResetPassword() {
             </label>
             <Input
               id="password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               required
               minLength={8}
               autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
+              leftIcon={<Lock className="h-4.5 w-4.5 text-slate-400" />}
+              rightIcon={
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-slate-400 hover:text-slate-250 transition-colors focus:outline-none cursor-pointer flex items-center"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4.5 w-4.5" />
+                  ) : (
+                    <Eye className="h-4.5 w-4.5" />
+                  )}
+                </button>
+              }
             />
           </div>
 
@@ -82,24 +99,53 @@ export default function ResetPassword() {
             </label>
             <Input
               id="confirm"
-              type="password"
+              type={showConfirm ? "text" : "password"}
               required
               minLength={8}
               autoComplete="new-password"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
               placeholder="••••••••"
+              leftIcon={<Lock className="h-4.5 w-4.5 text-slate-400" />}
+              rightIcon={
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  className="text-slate-400 hover:text-slate-250 transition-colors focus:outline-none cursor-pointer flex items-center"
+                >
+                  {showConfirm ? (
+                    <EyeOff className="h-4.5 w-4.5" />
+                  ) : (
+                    <Eye className="h-4.5 w-4.5" />
+                  )}
+                </button>
+              }
             />
           </div>
 
           {err && (
-            <div className="rounded-lg bg-red-900/20 border border-red-700/50 px-4 py-3 text-sm text-red-300">
-              {err}
+            <div className="rounded-lg bg-red-950/20 border border-red-500/20 px-4 py-3 text-sm text-red-200 flex items-start gap-3 shadow-[0_0_15px_rgba(239,68,68,0.07)]">
+              <AlertCircle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
+              <div className="flex-1 leading-relaxed">{err}</div>
             </div>
           )}
 
-          <Button type="submit" variant="primary" size="md" isLoading={busy} disabled={busy} className="w-full">
-            {busy ? "Updating…" : "Update password"}
+          <Button
+            type="submit"
+            variant="primary"
+            size="md"
+            isLoading={busy}
+            disabled={busy}
+            className="w-full group flex items-center justify-center gap-2"
+          >
+            {busy ? (
+              "Updating…"
+            ) : (
+              <>
+                <span>Update password</span>
+                <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+              </>
+            )}
           </Button>
         </form>
       )}

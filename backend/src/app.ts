@@ -6,6 +6,7 @@ import { config } from "./config.js";
 import { getDb } from "./db.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import authRoutes from "./routes/auth.js";
+import progressRoutes from "./routes/progress.js";
 
 export function createApp() {
   getDb();
@@ -38,6 +39,7 @@ export function createApp() {
   });
 
   app.use("/api/auth", authRoutes);
+  app.use("/api/progress", progressRoutes);
 
   app.use(errorHandler);
   return app;
