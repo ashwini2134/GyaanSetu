@@ -51,3 +51,5 @@ CLAUDE.md
 
 # Nested repo clone (local copy)
 LMS/
+
+/generated/prisma
