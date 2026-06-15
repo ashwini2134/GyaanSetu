@@ -3,14 +3,12 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import { config } from "./config.js";
-import { getDb } from "./db.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import authRoutes from "./routes/auth.js";
 import progressRoutes from "./routes/progress.js";
+import projectRoutes from "./routes/project.js";
 
 export function createApp() {
-  getDb();
-
   const app = express();
 
   app.use(helmet());
@@ -40,6 +38,7 @@ export function createApp() {
 
   app.use("/api/auth", authRoutes);
   app.use("/api/progress", progressRoutes);
+  app.use("/api/projects", projectRoutes);
 
   app.use(errorHandler);
   return app;

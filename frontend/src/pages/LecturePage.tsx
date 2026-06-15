@@ -452,7 +452,7 @@ export default function LecturePage() {
                       onComplete={(score, total) => {
                         setRetakingQuiz(false);
                         markQuizCompleted(score, total);
-                        if (score / total >= 0.7) {
+                        if (score / total >= 0.6) {
                           markSectionVisited('quiz');
                           if (slug && lessonData) {
                             tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, problems.length, quiz.length > 0, hasProject);

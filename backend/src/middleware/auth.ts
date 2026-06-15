@@ -6,7 +6,7 @@ import { AppError } from "./errorHandler.js";
 
 export type AuthenticatedRequest = Request & { user?: SafeUser };
 
-export function requireAuth(req: AuthenticatedRequest, _res: Response, next: NextFunction): void {
+export async function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   const header = req.headers.authorization;
   if (!header?.startsWith("Bearer ")) {
     next(new AppError("Not authenticated", 401));
@@ -14,7 +14,7 @@ export function requireAuth(req: AuthenticatedRequest, _res: Response, next: Nex
   }
   try {
     const payload = verifyAccessToken(header.slice(7));
-    const user = findUserById(payload.sub);
+    const user = await findUserById(payload.sub);
     if (!user) {
       next(new AppError("User not found", 401));
       return;

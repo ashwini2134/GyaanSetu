@@ -1,60 +1,25 @@
 import { useEffect, useState, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { api, type ChatMsg, saveCompletedProject, getProjectMetadata, type FailureAnalysisResult, type CodeReviewResult } from "../api";
-import { markProjectCompletedDirect } from "../hooks/useProgress";
+import { authFetch } from "../authClient";
 import { runPythonMock, type DebugStep } from "../interpreter";
-import VisualPreview from "../components/lesson/VisualPreview";
-import { hasSimulation } from "../simulation/registry";
 import {
   Check, CheckCircle, X, XCircle, AlertTriangle, Gem, Clock,
   FolderUp, Download, Monitor, Bot, Pencil, MessageSquare,
-  Search, Lightbulb, Bug, Unlock, Settings, RefreshCw, ChevronDown,
+  Search, Lightbulb, Bug, Unlock, Settings, RefreshCw,
 } from "lucide-react";
-import {
-  runChecklist,
-  getProjectDefaultInput,
-  getProjectChecklist,
-  generateExampleOutput,
-} from "../projects/registry";
-
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3001';
-
-async function recordProjectCompletion(courseSlug: string, lectureNumber: number, projectId: string) {
-  const token = getToken();
-  if (!token) return;
-  try {
-    await fetch(`${BACKEND_URL}/api/progress/lecture/problem`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ courseSlug, lectureNumber, problemId: projectId }),
-    });
-  } catch (err) {
-    console.warn('Failed to record project completion:', err);
-  }
-}
 
 
 export default function CodingProjectPage() {
   const { slug, number, projectId } = useParams<{ slug: string; number: string; projectId: string }>();
-  const navigate = useNavigate();
   const highlighterRef = useRef<HTMLDivElement>(null);
   const gutterRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const courseTitle = slug === "cs50p" ? "CS50 Python" : slug === "cs50ai" ? "CS50 AI" : slug === "python" ? "Python Programming" : slug?.toUpperCase() ?? "";
   
-  const [lectureTitle, setLectureTitle] = useState("");
-  const [showCompletionOverlay, setShowCompletionOverlay] = useState(false);
-  const [completedConcepts, setCompletedConcepts] = useState<string[]>([]);
-  const [showToolsDropdown, setShowToolsDropdown] = useState(false);
   const [draftSaved, setDraftSaved] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
@@ -69,19 +34,17 @@ export default function CodingProjectPage() {
   const [hints, setHints] = useState("");
   const [testing, setTesting] = useState("");
 
-  // Visual Preview output
-  const [previewOutput, setPreviewOutput] = useState("");
-  const [hasRun, setHasRun] = useState(false);
-  const [executionSteps, setExecutionSteps] = useState<DebugStep[] | undefined>(undefined);
-
-  // Example output for the "What You Will Create" section
-  const [examplePreviewOutput, setExamplePreviewOutput] = useState("");
-
-  // Build checklist tracking
-  const [checklistResults, setChecklistResults] = useState<Record<string, boolean>>({});
-
   // Editor Code State
   const [code, setCode] = useState("");
+
+  // Accordion Expands State
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    description: true,
+    understanding: false,
+    specification: false,
+    hints: false,
+    testing: false,
+  });
 
   // Dynamic Console Tabbed Panels State
   const [activeTab, setActiveTab] = useState<"results" | "output" | "mentor" | "input">("results");
@@ -132,16 +95,6 @@ export default function CodingProjectPage() {
     }
   }, [projectId]);
 
-  // Load lecture title for contextual header
-  useEffect(() => {
-    if (!slug || number === undefined) return;
-    const base = import.meta.env.BASE_URL ?? '/';
-    const url = base.replace(/\/$/, '') + `/data/${slug}/lecture_${number}/lesson.json`;
-    fetch(url).then(r => r.ok ? r.json() : null).then(data => {
-      if (data?.title) setLectureTitle(data.title);
-    }).catch(() => {});
-  }, [slug, number]);
-
   // Load optional Markdown files helper
   async function loadOptionalFile(path: string) {
     try {
@@ -184,11 +137,10 @@ export default function CodingProjectPage() {
         const codeKey = `fa_code_${projectId}`;
         const savedCode = localStorage.getItem(codeKey);
 
-        const initialCode = savedCode || "# Write your Python program below\n";
-        setCode(initialCode);
-        // Run initial checklist checks on loaded code
-        if (projectId) {
-          setChecklistResults(runChecklist(initialCode, projectId));
+        if (savedCode) {
+          setCode(savedCode);
+        } else {
+          setCode("# Write your Python program below\n");
         }
       } catch (error) {
         console.error(error);
@@ -200,11 +152,13 @@ export default function CodingProjectPage() {
     loadFiles();
   }, [slug, number, projectId]);
 
-  // Generate example preview for "What You Will Create" section
-  useEffect(() => {
-    if (!projectId) return;
-    setExamplePreviewOutput(generateExampleOutput(projectId));
-  }, [projectId]);
+  // Toggle Description Accordion
+  const toggleSection = (section: string) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
 
   // Submit Mentor Chat
   async function handleChatSubmit(e: React.FormEvent) {
@@ -255,19 +209,10 @@ export default function CodingProjectPage() {
 
 
 
-  // Run per-project checklist checks against the current code
-  function runChecklistChecks() {
-    if (!projectId) return {};
-    const results = runChecklist(code, projectId);
-    setChecklistResults(results);
-    return results;
-  }
-
-  // Run Code — capture actual output for preview, run tests for terminal
+  // Run Code
   async function handleRun() {
     setStatus("");
     setSyntaxError("");
-    setHasRun(true);
 
     if (!code.trim()) {
       setStatus("error");
@@ -276,32 +221,22 @@ export default function CodingProjectPage() {
       return;
     }
 
-    // Always execute the code to capture actual output for the Visual Preview
-    const fallback = "Maya\n22\nblue\npainting";
-    const input = useCustomInput ? customInput : (projectId ? getProjectDefaultInput(projectId) : fallback);
-    const steps = runPythonMock(code, input);
-    setExecutionSteps(steps);
-    const lastStep = steps[steps.length - 1];
-    const outputText = lastStep?.outputs?.length ? lastStep.outputs.join("\n") : '';
-    const rawOutput = outputText || (lastStep ? "Your program ran but produced no visible output. Try adding print() statements." : "Program ran successfully (no output).");
-    const execError = lastStep?.error;
-    setPreviewOutput(execError ? rawOutput : rawOutput);
-
     if (useCustomInput) {
       setOutput("Running with custom input...\n");
       setActiveTab("output");
       await new Promise((r) => setTimeout(r, 450));
-      if (execError) {
-        setOutput(rawOutput + "\n\n[Error] Execution Error:\n" + execError);
+      const steps = runPythonMock(code, customInput);
+      const lastStep = steps[steps.length - 1];
+      if (lastStep?.error) {
+        setOutput(lastStep.outputs.join("\n") + "\n\n[Error] Execution Error:\n" + lastStep.error);
       } else {
-        setOutput(rawOutput);
+        setOutput(lastStep ? lastStep.outputs.join("\n") : "Program ran successfully (no output).");
       }
-      setStatus("");
+      setStatus(""); // Reset autograder success/error for custom test
       return;
     }
 
-    // Run tests for terminal output
-    setOutput("Running your code...");
+    setOutput("Running tests...");
     setActiveTab("results");
 
     try {
@@ -309,9 +244,14 @@ export default function CodingProjectPage() {
       const result = await runDynamicTests();
 
       if (result.passed || result.success) {
-        setStatus("");
+        setStatus("success");
+        if (slug && projectId) {
+          await authFetch("/projects/complete", {
+            method: "POST",
+            body: JSON.stringify({ courseSlug: slug, lectureId: number, projectId })
+          });
+        }
         setOutput(result.message || "[OK] All test cases passed!");
-        runChecklistChecks();
         setFailureAnalysis(null);
       } else {
         setStatus("error");
@@ -334,7 +274,6 @@ export default function CodingProjectPage() {
   async function handleSubmit() {
     setStatus("");
     setSyntaxError("");
-    setHasRun(true);
 
     if (!code.trim()) {
       setStatus("error");
@@ -352,23 +291,17 @@ export default function CodingProjectPage() {
 
       if (result.passed || result.success) {
         setStatus("success");
-        runChecklistChecks();
         if (slug && projectId) {
-          saveCompletedProject(slug, projectId, true);
-          const num = Number(number);
-          if (!isNaN(num)) markProjectCompletedDirect(slug, num, projectId);
+          await authFetch("/projects/complete", {
+            method: "POST",
+            body: JSON.stringify({ courseSlug: slug, lectureId: number, projectId })
+          });
         }
-        const msg = "[OK] Submission Successful!\n\nAll hidden test cases passed.";
-        setOutput(msg);
-        setPreviewOutput(msg);
+        setOutput("[OK] Submission Successful!\n\nAll hidden test cases passed.");
         setFailureAnalysis(null);
-        setCompletedConcepts(metadata.concepts ?? []);
-        setTimeout(() => setShowCompletionOverlay(true), 800);
       } else {
         setStatus("error");
-        const msg = result.message || "Please review your logic.";
-        setOutput(`[Error] Submission Failed.\n\n${msg}`);
-        setPreviewOutput(msg);
+        setOutput(`[Error] Submission Failed.\n\n${result.message || "Please review your logic."}`);
         if (projectId) {
           const fa = api.getFailureAnalysis(code, projectId);
           setFailureAnalysis(fa);
@@ -535,33 +468,39 @@ export default function CodingProjectPage() {
         
         {/* Left Panel Metadata Header */}
         <div className="flex-shrink-0 p-5 border-b border-slate-800/80 bg-[#0c1015]/60">
-          {/* Breadcrumb */}
-          <nav className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-500 mb-3">
-            <button onClick={() => navigate('/')} className="hover:text-blue-400 transition-colors">Dashboard</button>
-            <span className="text-slate-700">/</span>
-            <button onClick={() => navigate(`/course/${slug}`)} className="hover:text-blue-400 transition-colors">{courseTitle}</button>
-            <span className="text-slate-700">/</span>
-            <span className="text-slate-400">
-              Lecture {number}{lectureTitle ? ` — ${lectureTitle}` : ''}
+          <div className="flex items-center justify-between gap-4 mb-3">
+            <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">
+              {slug === "cs50p" ? "CS50 Python" : "AI"} • Lecture {number}
             </span>
-            <span className="text-slate-700">/</span>
-            <span className="text-blue-300">Project: {problemTitle}</span>
-          </nav>
+            
+            {/* Problem Navigation Links */}
+            <div className="flex items-center gap-1.5">
+              {currentProblemIndex > 0 ? (
+                <Link
+                  to={`/course/${slug}/lecture/${number}/project/${problems[currentProblemIndex - 1].slug}`}
+                  className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700/80 border border-slate-750 rounded-lg text-xs font-semibold text-slate-300 transition-colors"
+                >
+                  ← Previous
+                </Link>
+              ) : (
+                <span className="px-2.5 py-1 bg-slate-900/60 border border-slate-800 rounded-lg text-xs font-semibold text-slate-650 cursor-not-allowed select-none">
+                  ← Previous
+                </span>
+              )}
 
-          {/* Lecture Navigation */}
-          <div className="flex items-center gap-2 mb-4">
-            <button
-              onClick={() => navigate(`/course/${slug}/lecture/${number}`)}
-              className="flex items-center gap-1 text-[11px] font-medium text-slate-400 hover:text-slate-200 transition-colors px-2.5 py-1 rounded-lg bg-slate-800/40 hover:bg-slate-700/40 border border-slate-700/30"
-            >
-              ← Back to Lecture
-            </button>
-            <button
-              onClick={() => navigate(`/course/${slug}/lecture/${number}?page=summary`)}
-              className="flex items-center gap-1 text-[11px] font-medium text-blue-400 hover:text-blue-300 transition-colors px-2.5 py-1 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20"
-            >
-              Continue to Summary →
-            </button>
+              {currentProblemIndex >= 0 && currentProblemIndex < problems.length - 1 ? (
+                <Link
+                  to={`/course/${slug}/lecture/${number}/project/${problems[currentProblemIndex + 1].slug}`}
+                  className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700/80 border border-slate-750 rounded-lg text-xs font-semibold text-slate-300 transition-colors"
+                >
+                  Next →
+                </Link>
+              ) : (
+                <span className="px-2.5 py-1 bg-slate-900/60 border border-slate-800 rounded-lg text-xs font-semibold text-slate-650 cursor-not-allowed select-none">
+                  Next →
+                </span>
+              )}
+            </div>
           </div>
 
           <h1 className="text-xl md:text-2xl font-black text-white tracking-tight mb-2">
@@ -595,193 +534,105 @@ export default function CodingProjectPage() {
           </div>
         </div>
 
-        {/* Left Panel Content */}
+        {/* Accordions Container */}
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
-
-          {/* Section 1: Project Overview */}
-          <div className="border border-slate-800/85 rounded-xl overflow-hidden bg-gradient-to-br from-blue-900/5 to-slate-900/30">
-            <div className="px-5 py-2.5 bg-gradient-to-r from-blue-900/10 to-slate-900/50 text-left font-bold text-[10px] text-blue-300 uppercase tracking-widest border-b border-slate-800/80 flex items-center gap-2">
-              Project Overview
-            </div>
-            <div className="p-5">
-              <p className="text-sm text-slate-200 leading-relaxed font-medium">
-                {(() => {
-                  const firstLine = (question || '').split('\n').find(l => l.trim() && !l.startsWith('#') && !l.startsWith('**') && !l.startsWith('```'));
-                  return firstLine?.replace(/^Write a Python program that /i, '') || `Build a ${problemTitle}.`;
-                })()}
-              </p>
-              <div className="mt-4 flex items-center gap-3 text-[10px] text-slate-400">
-                <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold border ${
-                  metadata.difficulty === "Easy" ? "bg-green-500/10 text-green-400 border-green-500/20" :
-                  metadata.difficulty === "Medium" ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
-                  "bg-red-500/10 text-red-400 border-red-500/20"
-                }`}>
-                  {metadata.difficulty}
-                </span>
-                <span className="text-slate-600">·</span>
-                <span><Gem className="w-3 h-3 inline -mt-0.5" /> {metadata.xp} XP</span>
-                <span className="text-slate-600">·</span>
-                <span><Clock className="w-3 h-3 inline -mt-0.5" /> {metadata.estimatedTime}</span>
+          
+          {/* Description Section */}
+          <div className="border border-slate-800/85 rounded-xl overflow-hidden bg-[#0c1015]/40">
+            <button
+              onClick={() => toggleSection("description")}
+              className="w-full flex items-center justify-between px-5 py-3 bg-slate-900/60 text-left font-bold text-xs text-slate-200 border-b border-slate-800/80 hover:bg-slate-900 transition-colors"
+            >
+              <span>Problem Description</span>
+              <span className="text-[10px]">{expandedSections.description ? "▼" : "▶"}</span>
+            </button>
+            {expandedSections.description && (
+              <div className="p-5 prose prose-invert max-w-none text-xs leading-relaxed text-slate-300">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {question}
+                </ReactMarkdown>
               </div>
-            </div>
+            )}
           </div>
 
-          {/* Section 2: What You Will Create */}
-          <div className="border border-slate-800/85 rounded-xl overflow-hidden bg-[#0c1015]/40">
-            <div className="px-5 py-2.5 bg-gradient-to-r from-purple-900/10 to-slate-900/50 text-left font-bold text-[10px] text-purple-300 uppercase tracking-widest border-b border-slate-800/80 flex items-center gap-2">
-              What You Will Create
-            </div>
-            <div className="p-4">
-              {hasSimulation(projectId ?? '') || examplePreviewOutput ? (
-                <div className="rounded-xl border border-slate-700/20 bg-[#0b0f14] overflow-hidden pointer-events-none">
-                  <VisualPreview
-                    output={examplePreviewOutput || ''}
-                    projectId={projectId ?? ''}
-                    visible={true}
-                  />
-                </div>
-              ) : (
-                <div className="bg-slate-800/20 rounded-xl border border-slate-700/10 p-5 text-center">
-                  <div className="w-12 h-12 rounded-xl bg-slate-800/40 flex items-center justify-center mx-auto mb-3">
-                    <svg className="w-6 h-6 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                  </div>
-                  <p className="text-xs text-slate-500 font-medium">Preview not available</p>
+          {/* Understanding Section */}
+          {understanding && (
+            <div className="border border-slate-800/85 rounded-xl overflow-hidden bg-[#0c1015]/40">
+              <button
+                onClick={() => toggleSection("understanding")}
+                className="w-full flex items-center justify-between px-5 py-3 bg-slate-900/60 text-left font-bold text-xs text-slate-200 border-b border-slate-800/80 hover:bg-slate-900 transition-colors"
+              >
+                <span>Understanding & Background</span>
+                <span className="text-[10px]">{expandedSections.understanding ? "▼" : "▶"}</span>
+              </button>
+              {expandedSections.understanding && (
+                <div className="p-5 prose prose-invert max-w-none text-xs leading-relaxed text-slate-300">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {understanding}
+                  </ReactMarkdown>
                 </div>
               )}
             </div>
-          </div>
+          )}
 
-          {/* Section 3: Build Checklist */}
-          <div className="border border-slate-800/85 rounded-xl overflow-hidden bg-[#0c1015]/40">
-            <div className="px-5 py-2.5 bg-gradient-to-r from-emerald-900/10 to-slate-900/50 text-left font-bold text-[10px] text-emerald-300 uppercase tracking-widest border-b border-slate-800/80 flex items-center gap-2">
-              Build Checklist
+          {/* Specification Section */}
+          {specification && (
+            <div className="border border-slate-800/85 rounded-xl overflow-hidden bg-[#0c1015]/40">
+              <button
+                onClick={() => toggleSection("specification")}
+                className="w-full flex items-center justify-between px-5 py-3 bg-slate-900/60 text-left font-bold text-xs text-slate-200 border-b border-slate-800/80 hover:bg-slate-900 transition-colors"
+              >
+                <span>Specification & Constraints</span>
+                <span className="text-[10px]">{expandedSections.specification ? "▼" : "▶"}</span>
+              </button>
+              {expandedSections.specification && (
+                <div className="p-5 prose prose-invert max-w-none text-xs leading-relaxed text-slate-300">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {specification}
+                  </ReactMarkdown>
+                </div>
+              )}
             </div>
-            <div className="p-4">
-              {(() => {
-                const items = getProjectChecklist(projectId ?? '');
-                if (!items) return <p className="text-[10px] text-slate-500 italic">Checklist items not defined for this project.</p>;
-                const completedCount = Object.values(checklistResults).filter(Boolean).length;
-                return (
-                  <div>
-                    <div className="flex items-center justify-between mb-3 px-0.5">
-                      <p className="text-[10px] text-slate-400">{completedCount} of {items.length} complete</p>
-                      <div className="flex gap-1">
-                        {items.map((_, i) => (
-                          <div key={i} className={`w-2 h-2 rounded-full transition-all ${
-                            checklistResults[items[i].id]
-                              ? 'bg-emerald-500 shadow-sm shadow-emerald-500/30'
-                              : 'bg-slate-700'
-                          }`} />
-                        ))}
-                      </div>
-                    </div>
-                    <div className="space-y-1.5">
-                      {items.map((item) => (
-                        <div
-                          key={item.id}
-                          className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all ${
-                            checklistResults[item.id]
-                              ? 'bg-emerald-500/5 text-emerald-300'
-                              : 'bg-slate-800/20 text-slate-400'
-                          }`}
-                        >
-                          <span className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                            checklistResults[item.id]
-                              ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
-                              : 'border-slate-600/60'
-                          }`}>
-                            {checklistResults[item.id] ? (
-                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                              </svg>
-                            ) : ''}
-                          </span>
-                          <span className={checklistResults[item.id] ? 'line-through text-emerald-400/70' : ''}>
-                            {item.label}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                    {completedCount === items.length && (
-                      <div className="mt-3 pt-3 border-t border-emerald-500/20 text-center">
-                        <p className="text-[11px] font-semibold text-emerald-400">All checklist items complete!</p>
-                        <p className="text-[9px] text-slate-500 mt-0.5">Click Submit Project to finish.</p>
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
-            </div>
-          </div>
+          )}
 
-          {/* Section 4: Project Skills */}
-          <div className="border border-slate-800/85 rounded-xl overflow-hidden bg-gradient-to-br from-amber-900/5 to-slate-900/30">
-            <div className="px-5 py-2.5 bg-gradient-to-r from-amber-900/10 to-slate-900/50 text-left font-bold text-[10px] text-amber-300 uppercase tracking-widest border-b border-slate-800/80 flex items-center gap-2">
-              Project Skills
+          {/* Hints Section */}
+          {hints && (
+            <div className="border border-slate-800/85 rounded-xl overflow-hidden bg-[#0c1015]/40">
+              <button
+                onClick={() => toggleSection("hints")}
+                className="w-full flex items-center justify-between px-5 py-3 bg-slate-900/60 text-left font-bold text-xs text-slate-200 border-b border-slate-800/80 hover:bg-slate-900 transition-colors"
+              >
+                <span>Hints & Guidance</span>
+                <span className="text-[10px]">{expandedSections.hints ? "▼" : "▶"}</span>
+              </button>
+              {expandedSections.hints && (
+                <div className="p-5 prose prose-invert max-w-none text-xs leading-relaxed text-slate-300">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {hints}
+                  </ReactMarkdown>
+                </div>
+              )}
             </div>
-            <div className="p-4">
-              <div className="flex flex-wrap gap-1.5">
-                {metadata.concepts?.length ? (
-                  metadata.concepts.map((concept) => (
-                    <span
-                      key={concept}
-                      className={`text-[10px] font-medium px-2.5 py-1 rounded-full border transition-all ${
-                        checklistResults[concept.replace(/[^a-zA-Z]/g, '')] || 
-                        Object.keys(checklistResults).length === 0
-                          ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                          : 'bg-slate-800/40 text-slate-400 border-slate-700/30'
-                      }`}
-                    >
-                      {concept}
-                    </span>
-                  ))
-                ) : (
-                  metadata.tags.map((tag) => (
-                    <span key={tag} className="text-[10px] text-slate-400 bg-slate-800/40 px-2.5 py-1 rounded-full border border-slate-700/20">
-                      {tag}
-                    </span>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
+          )}
 
-          {/* Extra details collapsible */}
-          {(hints || understanding || specification || testing) && (
-            <details className="border border-slate-800/50 rounded-xl overflow-hidden bg-[#0c1015]/20">
-              <summary className="px-5 py-2.5 bg-slate-900/30 text-left text-[10px] font-medium text-slate-400 cursor-pointer hover:text-slate-300 transition-colors select-none">
-                Additional reference materials
-              </summary>
-              <div className="p-4 space-y-4 border-t border-slate-800/40">
-                {understanding && (
-                  <div className="text-xs text-slate-400">
-                    <p className="font-semibold text-slate-300 mb-1">Background</p>
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{understanding}</ReactMarkdown>
-                  </div>
-                )}
-                {specification && (
-                  <div className="text-xs text-slate-400">
-                    <p className="font-semibold text-slate-300 mb-1">Detailed Specs</p>
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{specification}</ReactMarkdown>
-                  </div>
-                )}
-                {hints && (
-                  <div className="text-xs text-slate-400">
-                    <p className="font-semibold text-slate-300 mb-1">Tips</p>
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{hints}</ReactMarkdown>
-                  </div>
-                )}
-                {testing && (
-                  <div className="text-xs text-slate-400">
-                    <p className="font-semibold text-slate-300 mb-1">Testing</p>
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{testing}</ReactMarkdown>
-                  </div>
-                )}
-              </div>
-            </details>
+          {/* Testing Section */}
+          {testing && (
+            <div className="border border-slate-800/85 rounded-xl overflow-hidden bg-[#0c1015]/40">
+              <button
+                onClick={() => toggleSection("testing")}
+                className="w-full flex items-center justify-between px-5 py-3 bg-slate-900/60 text-left font-bold text-xs text-slate-200 border-b border-slate-800/80 hover:bg-slate-900 transition-colors"
+              >
+                <span>Testing Requirements</span>
+                <span className="text-[10px]">{expandedSections.testing ? "▼" : "▶"}</span>
+              </button>
+              {expandedSections.testing && (
+                <div className="p-5 prose prose-invert max-w-none text-xs leading-relaxed text-slate-300">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {testing}
+                  </ReactMarkdown>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -808,40 +659,31 @@ export default function CodingProjectPage() {
                 <option value="javascript" disabled>JavaScript (Disabled)</option>
               </select>
             </div>
-
-            {/* Project Tools Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setShowToolsDropdown(v => !v)}
-                onBlur={() => setTimeout(() => setShowToolsDropdown(false), 200)}
-                className="flex items-center gap-1 px-2.5 py-1 bg-slate-800 hover:bg-slate-700/80 border border-slate-700 rounded-lg text-[10px] font-semibold text-slate-300 transition-colors cursor-pointer"
-              >
-                <Settings className="w-3 h-3" /> Project Tools <ChevronDown className="w-3 h-3" />
-              </button>
-              {showToolsDropdown && (
-                <div className="absolute top-full left-0 mt-1 w-44 bg-slate-900 border border-slate-700/80 rounded-xl shadow-xl overflow-hidden z-50">
-                  <button
-                    onClick={() => { fileInputRef.current?.click(); setShowToolsDropdown(false); }}
-                    className="w-full flex items-center gap-2 px-3.5 py-2.5 text-[11px] font-medium text-slate-300 hover:bg-slate-800/80 transition-colors text-left"
-                  >
-                    <FolderUp className="w-3.5 h-3.5 text-slate-400" /> Upload File
-                  </button>
-                  <button
-                    onClick={() => { handleDownloadCode(); setShowToolsDropdown(false); }}
-                    className="w-full flex items-center gap-2 px-3.5 py-2.5 text-[11px] font-medium text-slate-300 hover:bg-slate-800/80 transition-colors text-left"
-                  >
-                    <Download className="w-3.5 h-3.5 text-slate-400" /> Download Code
-                  </button>
-                </div>
-              )}
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileUpload}
-                accept=".py,.txt"
-                className="hidden"
-              />
-            </div>
+            
+            {/* Hidden Input file reader */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept=".py,.txt"
+              className="hidden"
+            />
+            
+            {/* Upload Action */}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-1 px-2.5 py-1 bg-slate-800 hover:bg-slate-750 border border-slate-700 rounded-lg text-[10px] font-bold text-slate-300 transition-colors cursor-pointer"
+            >
+              <FolderUp className="w-3 h-3" /> Upload File
+            </button>
+            
+            {/* Download Action */}
+            <button
+              onClick={handleDownloadCode}
+              className="flex items-center gap-1 px-2.5 py-1 bg-slate-800 hover:bg-slate-750 border border-slate-700 rounded-lg text-[10px] font-bold text-slate-300 transition-colors cursor-pointer"
+            >
+              <Download className="w-3 h-3" /> Download
+            </button>
           </div>
 
           <div className="flex items-center gap-3">
@@ -854,121 +696,67 @@ export default function CodingProjectPage() {
           </div>
         </div>
 
-        {hasRun ? (
-          /* After Run: simulation first (hero), editor below */
-          <>
-            <div className="flex-[3] flex flex-col overflow-hidden min-h-0 border-b border-slate-800/60">
-              <VisualPreview output={previewOutput} steps={executionSteps} projectId={projectId ?? ''} visible={true} />
-            </div>
-            <div className="flex-[2] flex overflow-hidden bg-[#090d12] min-h-0">
-              <div
-                ref={gutterRef}
-                className="w-10 flex-shrink-0 bg-[#070b0f] border-r border-slate-800/80 text-slate-600 font-mono text-right pr-2 select-none overflow-hidden py-4 text-xs"
-                style={{ height: "100%" }}
-              >
-                {Array.from({ length: Math.max(1, lineCount) }).map((_, i) => (
-                  <div key={i} style={{ height: "1.5rem", lineHeight: "1.5rem" }}>
-                    {i + 1}
-                  </div>
-                ))}
+        {/* Code Editor Area with Left Gutter Gutter */}
+        <div className="flex-1 flex overflow-hidden bg-[#090d12]">
+          
+          {/* Scroll Synced Line Number Gutter */}
+          <div
+            ref={gutterRef}
+            className="w-10 flex-shrink-0 bg-[#070b0f] border-r border-slate-800/80 text-slate-600 font-mono text-right pr-2 select-none overflow-hidden py-4 text-xs"
+            style={{ height: "100%" }}
+          >
+            {Array.from({ length: Math.max(1, lineCount) }).map((_, i) => (
+              <div key={i} style={{ height: "1.5rem", lineHeight: "1.5rem" }}>
+                {i + 1}
               </div>
-              <div className="relative flex-1 h-full overflow-hidden">
-                <textarea
-                  value={code}
-                  onChange={handleCodeChange}
-                  onKeyDown={handleKeyDown}
-                  onScroll={handleScroll}
-                  spellCheck="false"
-                  aria-label="Code Editor"
-                  className="absolute inset-0 w-full h-full resize-none bg-transparent py-4 pl-3 pr-6 font-mono text-xs leading-6 text-transparent caret-white outline-none z-10 whitespace-pre overflow-auto"
-                  style={{ WebkitTextFillColor: "transparent" }}
-                />
-                <div
-                  ref={highlighterRef}
-                  className="absolute inset-0 w-full h-full py-4 pl-3 pr-6 overflow-hidden pointer-events-none"
-                >
-                  <SyntaxHighlighter
-                    language="python"
-                    style={vscDarkPlus}
-                    customStyle={{
-                      margin: 0,
-                      padding: 0,
-                      background: "transparent",
-                      fontSize: "0.75rem",
-                      fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-                      overflow: "hidden",
-                      whiteSpace: "pre",
-                      lineHeight: "1.5rem",
-                    }}
-                  >
-                    {code}
-                  </SyntaxHighlighter>
-                </div>
-                {syntaxError && (
-                  <div className="absolute bottom-4 right-4 bg-red-900/90 text-red-200 px-3.5 py-1.5 rounded-lg shadow-xl border border-red-750/80 z-20 pointer-events-none text-[10px] font-semibold animate-pulse">
-                    <AlertTriangle className="w-3 h-3 inline" /> {syntaxError}
-                  </div>
-                )}
-              </div>
-            </div>
-          </>
-        ) : (
-          /* Before Run: editor fills available space */
-          <div className="flex-1 flex overflow-hidden bg-[#090d12]">
-            <div
-              ref={gutterRef}
-              className="w-10 flex-shrink-0 bg-[#070b0f] border-r border-slate-800/80 text-slate-600 font-mono text-right pr-2 select-none overflow-hidden py-4 text-xs"
-              style={{ height: "100%" }}
-            >
-              {Array.from({ length: Math.max(1, lineCount) }).map((_, i) => (
-                <div key={i} style={{ height: "1.5rem", lineHeight: "1.5rem" }}>
-                  {i + 1}
-                </div>
-              ))}
-            </div>
-            <div className="relative flex-1 h-full overflow-hidden">
-              <textarea
-                value={code}
-                onChange={handleCodeChange}
-                onKeyDown={handleKeyDown}
-                onScroll={handleScroll}
-                spellCheck="false"
-                aria-label="Code Editor"
-                className="absolute inset-0 w-full h-full resize-none bg-transparent py-4 pl-3 pr-6 font-mono text-xs leading-6 text-transparent caret-white outline-none z-10 whitespace-pre overflow-auto"
-                style={{ WebkitTextFillColor: "transparent" }}
-              />
-              <div
-                ref={highlighterRef}
-                className="absolute inset-0 w-full h-full py-4 pl-3 pr-6 overflow-hidden pointer-events-none"
-              >
-                <SyntaxHighlighter
-                  language="python"
-                  style={vscDarkPlus}
-                  customStyle={{
-                    margin: 0,
-                    padding: 0,
-                    background: "transparent",
-                    fontSize: "0.75rem",
-                    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-                    overflow: "hidden",
-                    whiteSpace: "pre",
-                    lineHeight: "1.5rem",
-                  }}
-                >
-                  {code}
-                </SyntaxHighlighter>
-              </div>
-              {syntaxError && (
-                <div className="absolute bottom-4 right-4 bg-red-900/90 text-red-200 px-3.5 py-1.5 rounded-lg shadow-xl border border-red-750/80 z-20 pointer-events-none text-[10px] font-semibold animate-pulse">
-                  <AlertTriangle className="w-3 h-3 inline" /> {syntaxError}
-                </div>
-              )}
-            </div>
+            ))}
           </div>
-        )}
+
+          {/* Text Area Input overlaid with Prism Syntax Highlighter */}
+          <div className="relative flex-1 h-full overflow-hidden">
+            <textarea
+              value={code}
+              onChange={handleCodeChange}
+              onKeyDown={handleKeyDown}
+              onScroll={handleScroll}
+              spellCheck="false"
+              aria-label="Code Editor"
+              className="absolute inset-0 w-full h-full resize-none bg-transparent py-4 pl-3 pr-6 font-mono text-xs leading-6 text-transparent caret-white outline-none z-10 whitespace-pre overflow-auto"
+              style={{ WebkitTextFillColor: "transparent" }}
+            />
+            <div
+              ref={highlighterRef}
+              className="absolute inset-0 w-full h-full py-4 pl-3 pr-6 overflow-hidden pointer-events-none"
+            >
+              <SyntaxHighlighter
+                language="python"
+                style={vscDarkPlus}
+                customStyle={{
+                  margin: 0,
+                  padding: 0,
+                  background: "transparent",
+                  fontSize: "0.75rem",
+                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+                  overflow: "hidden",
+                  whiteSpace: "pre",
+                  lineHeight: "1.5rem",
+                }}
+              >
+                {code}
+              </SyntaxHighlighter>
+            </div>
+            
+            {/* Inline lint warnings */}
+            {syntaxError && (
+              <div className="absolute bottom-4 right-4 bg-red-900/90 text-red-200 px-3.5 py-1.5 rounded-lg shadow-xl border border-red-750/80 z-20 pointer-events-none text-[10px] font-semibold animate-pulse">
+                <AlertTriangle className="w-3 h-3 inline" /> {syntaxError}
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* BOTTOM TABBED CONSOLE */}
-        <div className={`flex-shrink-0 flex flex-col bg-[#0b0f14] border-t border-slate-800 ${hasRun ? 'h-[140px]' : 'h-[200px] md:h-[220px]'}`}>
+        <div className="h-[250px] md:h-[280px] flex-shrink-0 flex flex-col bg-[#0b0f14] border-t border-slate-800">
           
           {/* Console Header Tabs */}
           <div className="flex-shrink-0 flex items-center justify-between px-5 bg-[#10141b] border-b border-slate-800 h-10">
@@ -1492,73 +1280,34 @@ export default function CodingProjectPage() {
             )}
           </div>
 
-        </div>
-
-        {/* ── Sticky Bottom Action Bar ── */}
-        <div className="flex-shrink-0 bg-[#10141b] border-t border-slate-800 px-6 py-3 flex items-center justify-between">
-          <div className="text-slate-500 text-[10px]">
-            Press <kbd className="bg-slate-800 px-1 py-0.5 rounded text-[9px] text-slate-400 border border-slate-750">Ctrl+Enter</kbd> to Run
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleSaveCode}
-              className="px-4 py-2 border border-slate-700 bg-slate-800 hover:bg-slate-700/80 rounded-xl text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
-            >
-              Save Draft
-            </button>
-            <button
-              onClick={handleRun}
-              className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-900/20 transition-all cursor-pointer flex items-center gap-1.5"
-            >
-              <RefreshCw className="w-3 h-3" /> Run Project
-            </button>
-            <button
-              onClick={handleSubmit}
-              className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-900/20 transition-all cursor-pointer flex items-center gap-1.5"
-            >
-              <Check className="w-3.5 h-3.5" /> Submit Project
-            </button>
-          </div>
-        </div>
-
-        {/* ── Project Completion Overlay ── */}
-        {showCompletionOverlay && (
-          <div className="fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-300">
-            <div className="max-w-md w-full mx-4 p-8 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-emerald-500/30 text-center space-y-6 animate-in zoom-in duration-500">
-              <div className="w-20 h-20 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center mx-auto">
-                <svg className="w-10 h-10 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-white">Project Completed</p>
-                <p className="text-sm text-slate-400 mt-2">Project successfully submitted.</p>
-              </div>
-              {completedConcepts.length > 0 && (
-                <div className="bg-slate-800/40 rounded-xl p-4 text-left">
-                  <p className="text-xs font-semibold text-slate-400 mb-2">Concepts Practiced:</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {completedConcepts.map((concept) => (
-                      <span key={concept} className="text-[10px] text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full border border-green-500/20">
-                        ✓ {concept}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-              <p className="text-[10px] text-blue-400 font-medium">Progress Updated</p>
+          {/* Console Action Footer */}
+          <div className="flex-shrink-0 bg-[#10141b] border-t border-slate-800 px-6 py-2.5 flex justify-between items-center h-12">
+            <div className="text-slate-500 text-[10px]">
+              Press <kbd className="bg-slate-800 px-1 py-0.5 rounded text-[9px] text-slate-400 border border-slate-750">Ctrl+Enter</kbd> to Run
+            </div>
+            <div className="flex items-center gap-2.5">
               <button
-                onClick={() => {
-                  setShowCompletionOverlay(false);
-                  navigate(`/course/${slug}/lecture/${number}?page=summary`);
-                }}
-                className="text-sm font-medium px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-all"
+                onClick={handleSaveCode}
+                className="px-3 py-1.5 border border-slate-700 bg-slate-800 hover:bg-slate-750 rounded-xl text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
               >
-                Continue to Summary →
+                Save
+              </button>
+              <button
+                onClick={handleRun}
+                className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-900/10 transition-all cursor-pointer"
+              >
+                Run Code
+              </button>
+              <button
+                onClick={handleSubmit}
+                className="px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold shadow-md shadow-green-900/10 transition-all cursor-pointer"
+              >
+                Submit Code
               </button>
             </div>
           </div>
-        )}
+        </div>
+
       </div>
     </div>
   );

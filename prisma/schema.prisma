@@ -19,6 +19,9 @@ model User {
   name           String
   passwordHash   String
   createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  role           String   @default("student")
+  emailVerified  Boolean  @default(false)
 
   // Unified Gamification & Stats
   totalXp        Int      @default(0)
@@ -33,19 +36,27 @@ model User {
   projects       Project[]
   achievements   Achievement[]
   xpHistory      XpTransaction[]
-  chatMessages   ChatMessage[]
+  chatMessages         ChatMessage[]
+  oauthAccounts        OAuthAccount[]
+  refreshTokens        RefreshToken[]
+  passwordResetTokens  PasswordResetToken[]
+  oauthExchangeCodes   OAuthExchangeCode[]
 }
 
 // ── Course Engagement ────────────────────────────────────────────────────────
 
 model Progress {
-  id           String   @id @default(uuid())
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId       String
-  courseSlug   String   // e.g. "cs50-ai"
-  lectureId    String   // Identifies the specific section/lecture
-  status       String   // e.g. "STARTED", "COMPLETED"
-  completedAt  DateTime?
+  id                String   @id @default(uuid())
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String
+  courseSlug        String   // e.g. "cs50-ai"
+  lectureId         String   // Identifies the specific section/lecture
+  status            String   // e.g. "STARTED", "COMPLETED"
+  practiceAttempted Boolean  @default(false)
+  practiceCompleted Boolean  @default(false)
+  projectCompleted  Boolean  @default(false)
+  projectId         String?
+  completedAt       DateTime?
   
   @@unique([userId, courseSlug, lectureId])
 }
@@ -121,4 +132,47 @@ model XpTransaction {
   createdAt    DateTime @default(now())
 
   @@unique([userId, actionId]) // Prisma ignores nulls in Postgres unique constraints
+}
+
+// ── Auth & Tokens ────────────────────────────────────────────────────────────
+
+model OAuthAccount {
+  id             String   @id @default(uuid())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  provider       String   // 'github' | 'linkedin'
+  providerUserId String
+  createdAt      DateTime @default(now())
+
+  @@unique([provider, providerUserId])
+}
+
+model RefreshToken {
+  id          String    @id @default(uuid())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  tokenHash   String    @unique
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+model PasswordResetToken {
+  id          String    @id @default(uuid())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  tokenHash   String    @unique
+  expiresAt   DateTime
+  usedAt      DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+model OAuthExchangeCode {
+  id          String    @id @default(uuid())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  codeHash    String    @unique
+  expiresAt   DateTime
+  usedAt      DateTime?
+  createdAt   DateTime  @default(now())
 }
