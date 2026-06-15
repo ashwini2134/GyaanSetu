@@ -3,6 +3,7 @@ import { requireAuth } from "../middleware/auth.js";
 import { prisma } from "../prisma.js";
 import type { AuthenticatedRequest } from "../middleware/auth.js";
 import { z } from "zod";
+import { awardXp } from "../services/gamificationService.js";
 
 const router = Router();
 
@@ -41,6 +42,8 @@ router.post("/complete", requireAuth, async (req: AuthenticatedRequest, res, nex
         completedAt: new Date(),
       },
     });
+
+    await awardXp(userId, 100, "Completed Project", `project_complete_${courseSlug}_${projectId}`);
 
     res.json(progress);
   } catch (error) {
