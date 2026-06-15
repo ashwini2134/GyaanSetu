@@ -211,7 +211,7 @@ export function checkAchievements() {
 
 // Single entry point for completing actions to avoid duplicates
 export function completeAction(
-  actionType: 'section' | 'lecture' | 'quiz' | 'problem' | 'course_start' | 'course_complete' | 'project',
+  actionType: 'section' | 'lecture' | 'quiz' | 'problem' | 'course_start' | 'course_complete',
   actionId: string
 ) {
   const completed = safeGet<string[]>(KEYS.completedActions, []);
@@ -239,10 +239,6 @@ export function completeAction(
     case 'problem':
       awardXp(20, 'Problem Solved');
       stats.tasksSubmitted += 1;
-      break;
-    case 'project':
-      awardXp(100, 'Capstone Project Solved');
-      stats.projectsSolved += 1;
       break;
     case 'course_start':
       stats.coursesStarted += 1;

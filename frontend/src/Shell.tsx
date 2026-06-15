@@ -53,7 +53,6 @@ export default function Shell() {
   const location = useLocation();
   const leaveTimer = useRef<number | null>(null);
 
-  const isWorkspace = location.pathname.includes("/project/") && !location.pathname.endsWith("/project");
   const onCoursePage = location.pathname.startsWith("/course/");
   const courseSlug = onCoursePage ? location.pathname.split("/")[2] : null;
 
@@ -277,8 +276,8 @@ export default function Shell() {
         )}
 
         {/* Main Content */}
-        <main className={`flex-1 ${isWorkspace ? "overflow-hidden" : "overflow-auto"}`}>
-          <div className={isWorkspace ? "w-full h-full" : "max-w-7xl mx-auto"}>
+        <main className="flex-1 overflow-auto">
+          <div className="max-w-7xl mx-auto">
             <Outlet />
           </div>
         </main>

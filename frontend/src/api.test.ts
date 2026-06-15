@@ -3,8 +3,6 @@ import {
   getToken,
   setToken,
   clearToken,
-  getCompletedProjects,
-  saveCompletedProject,
   getCompletedQuizzes,
   saveCompletedQuiz,
   getStreak,
@@ -34,12 +32,6 @@ describe("API Utils", () => {
   });
 
   describe("Progress, Streak and Badges functionality", () => {
-    it("saves and retrieves completed projects correctly", () => {
-      saveCompletedProject("cs50p", "indoor", true);
-      const completed = getCompletedProjects();
-      expect(completed["cs50p/indoor"]).toBe(true);
-    });
-
     it("saves and retrieves completed quizzes correctly", () => {
       saveCompletedQuiz("cs50p", 1, 90);
       const quizzes = getCompletedQuizzes();

@@ -57,38 +57,38 @@ function Palette({ size = 1, colors }: { size?: number; colors?: string[] }) {
 }
 
 function NameBadge({ label = '?', size = 1 }: { label?: string; size?: number }) {
-  const w = 80 * size;
+  const w = 120 * size;
   const h = 28 * size;
   return (
-    <svg width={w} height={h} viewBox="0 0 80 28">
-      <rect x="0" y="0" width="80" height="28" rx="14" fill="#1e293b" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
-      <rect x="4" y="4" width="72" height="20" rx="10" fill="rgba(255,255,255,0.05)" />
-      <text x="40" y="18" textAnchor="middle" fill="#f1f5f9" fontSize="11" fontWeight="700">{label}</text>
+    <svg width={w} height={h} viewBox="0 0 120 28">
+      <rect x="0" y="0" width="120" height="28" rx="14" fill="#1e293b" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
+      <rect x="4" y="4" width="112" height="20" rx="10" fill="rgba(255,255,255,0.05)" />
+      <text x="60" y="18" textAnchor="middle" fill="#f1f5f9" fontSize="11" fontWeight="700" textLength="96">{label}</text>
     </svg>
   );
 }
 
 function AgeBadge({ label = '?', size = 1 }: { label?: string; size?: number }) {
-  const w = 70 * size;
+  const w = 100 * size;
   const h = 24 * size;
   return (
-    <svg width={w} height={h} viewBox="0 0 70 24">
-      <rect x="0" y="0" width="70" height="24" rx="12" fill="#1e293b" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
-      <rect x="3" y="3" width="64" height="18" rx="9" fill="rgba(255,255,255,0.05)" />
-      <text x="35" y="15.5" textAnchor="middle" fill="#fbbf24" fontSize="10" fontWeight="600">{label}</text>
+    <svg width={w} height={h} viewBox="0 0 100 24">
+      <rect x="0" y="0" width="100" height="24" rx="12" fill="#1e293b" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
+      <rect x="3" y="3" width="94" height="18" rx="9" fill="rgba(255,255,255,0.05)" />
+      <text x="50" y="15.5" textAnchor="middle" fill="#fbbf24" fontSize="10" fontWeight="600" textLength="80">{label}</text>
     </svg>
   );
 }
 
 function ColorSwatch({ color = '#6366f1', label = '', size = 1 }: { color?: string; label?: string; size?: number }) {
-  const w = 60 * size;
+  const w = 80 * size;
   const h = 48 * size;
   return (
-    <svg width={w} height={h} viewBox="0 0 60 48">
-      <rect x="5" y="3" width="50" height="28" rx="5" fill={color} stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
-      <rect x="12" y="9" width="36" height="16" rx="3" fill="rgba(0,0,0,0.15)" />
-      <rect x="5" y="33" width="50" height="12" rx="3" fill="#1e293b" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
-      {label && <text x="30" y="42" textAnchor="middle" fill="#94a3b8" fontSize="8" fontWeight="600">{label}</text>}
+    <svg width={w} height={h} viewBox="0 0 80 48">
+      <rect x="5" y="3" width="70" height="28" rx="5" fill={color} stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
+      <rect x="12" y="9" width="56" height="16" rx="3" fill="rgba(0,0,0,0.15)" />
+      <rect x="5" y="33" width="70" height="12" rx="3" fill="#1e293b" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
+      {label && <text x="40" y="42" textAnchor="middle" fill="#94a3b8" fontSize="8" fontWeight="600" textLength="60">{label}</text>}
     </svg>
   );
 }
@@ -257,6 +257,128 @@ function SketchBook({ size = 1 }: { size?: number }) {
   );
 }
 
+function StoryBook({ size = 1 }: { size?: number }) {
+  const w = 100 * size;
+  const h = 80 * size;
+  return (
+    <svg width={w} height={h} viewBox="0 0 100 80">
+      <defs>
+        <linearGradient id="bookCover" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#1e293b" />
+          <stop offset="100%" stopColor="#0f172a" />
+        </linearGradient>
+        <linearGradient id="bookPage" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#f8fafc" />
+          <stop offset="100%" stopColor="#f1f5f9" />
+        </linearGradient>
+      </defs>
+      <rect x="5" y="10" width="40" height="60" rx="2" fill="url(#bookCover)" stroke="#334155" strokeWidth="0.8" />
+      <rect x="55" y="10" width="40" height="60" rx="2" fill="url(#bookCover)" stroke="#334155" strokeWidth="0.8" />
+      <rect x="8" y="13" width="34" height="54" rx="1" fill="url(#bookPage)" />
+      <rect x="58" y="13" width="34" height="54" rx="1" fill="url(#bookPage)" />
+      <line x1="50" y1="10" x2="50" y2="70" stroke="#475569" strokeWidth="1.5" />
+      <line x1="12" y1="24" x2="38" y2="24" stroke="#64748b" strokeWidth="0.6" opacity="0.4" />
+      <line x1="12" y1="30" x2="35" y2="30" stroke="#64748b" strokeWidth="0.6" opacity="0.4" />
+      <line x1="12" y1="36" x2="36" y2="36" stroke="#64748b" strokeWidth="0.6" opacity="0.4" />
+      <line x1="12" y1="42" x2="33" y2="42" stroke="#64748b" strokeWidth="0.6" opacity="0.4" />
+      <line x1="62" y1="24" x2="88" y2="24" stroke="#64748b" strokeWidth="0.6" opacity="0.4" />
+      <line x1="62" y1="30" x2="86" y2="30" stroke="#64748b" strokeWidth="0.6" opacity="0.4" />
+      <line x1="62" y1="36" x2="85" y2="36" stroke="#64748b" strokeWidth="0.6" opacity="0.4" />
+      <line x1="62" y1="42" x2="87" y2="42" stroke="#64748b" strokeWidth="0.6" opacity="0.4" />
+      <circle cx="50" cy="40" r="3" fill="#6366f1" opacity="0.5" />
+      <circle cx="48" cy="38" r="1.5" fill="#818cf8" opacity="0.4" />
+      <circle cx="52" cy="42" r="1" fill="#a5b4fc" opacity="0.3" />
+    </svg>
+  );
+}
+
+function CanvasArt({ color = '#6366f1', size = 1 }: { color?: string; size?: number }) {
+  const w = 56 * size;
+  const h = 56 * size;
+  return (
+    <svg width={w} height={h} viewBox="0 0 56 56">
+      <line x1="28" y1="4" x2="18" y2="54" stroke="#8B7355" strokeWidth="2" strokeLinecap="round" />
+      <line x1="5" y1="34" x2="28" y2="12" stroke="#8B7355" strokeWidth="2" strokeLinecap="round" />
+      <line x1="51" y1="34" x2="28" y2="12" stroke="#8B7355" strokeWidth="2" strokeLinecap="round" />
+      <line x1="8" y1="30" x2="48" y2="30" stroke="#6B5B3E" strokeWidth="1.8" strokeLinecap="round" />
+      <rect x="15" y="8" width="26" height="26" rx="1" fill="#FAF0E6" stroke="#D4C4B0" strokeWidth="0.8" />
+      <circle cx="28" cy="21" r="8" fill={color} opacity="0.6" />
+      <circle cx="26" cy="18" r="5" fill={color} opacity="0.8" />
+      <circle cx="30" cy="25" r="4" fill={color} opacity="0.5" />
+      <path d="M 18 24 Q 22 26 28 22 Q 34 18 38 20" fill="none" stroke={color} strokeWidth="1.5" opacity="0.4" />
+    </svg>
+  );
+}
+
+function Bookshelf({ size = 1 }: { size?: number }) {
+  const w = 50 * size;
+  const h = 60 * size;
+  return (
+    <svg width={w} height={h} viewBox="0 0 50 60">
+      <rect x="2" y="2" width="46" height="56" rx="2" fill="#1e293b" stroke="rgba(255,255,255,0.08)" strokeWidth="0.6" />
+      <rect x="2" y="16" width="46" height="3" fill="#334155" />
+      <rect x="2" y="34" width="46" height="3" fill="#334155" />
+      <rect x="6" y="20" width="8" height="14" rx="0.5" fill="#6366f1" opacity="0.7" />
+      <rect x="16" y="22" width="7" height="12" rx="0.5" fill="#ec4899" opacity="0.7" />
+      <rect x="25" y="18" width="9" height="16" rx="0.5" fill="#22c55e" opacity="0.7" />
+      <rect x="36" y="20" width="8" height="14" rx="0.5" fill="#f59e0b" opacity="0.7" />
+      <rect x="6" y="4" width="10" height="12" rx="0.5" fill="#a855f7" opacity="0.6" />
+      <rect x="18" y="6" width="8" height="10" rx="0.5" fill="#3b82f6" opacity="0.6" />
+      <rect x="28" y="4" width="7" height="12" rx="0.5" fill="#ef4444" opacity="0.6" />
+      <rect x="37" y="6" width="7" height="10" rx="0.5" fill="#14b8a6" opacity="0.6" />
+      <rect x="6" y="38" width="12" height="18" rx="0.5" fill="#f97316" opacity="0.5" />
+      <rect x="20" y="40" width="9" height="16" rx="0.5" fill="#06b6d4" opacity="0.5" />
+      <rect x="31" y="38" width="10" height="18" rx="0.5" fill="#d946ef" opacity="0.5" />
+    </svg>
+  );
+}
+
+function BirthdayCake({ size = 1 }: { size?: number }) {
+  const w = 60 * size;
+  const h = 60 * size;
+  return (
+    <svg width={w} height={h} viewBox="0 0 60 60">
+      <rect x="12" y="34" width="36" height="20" rx="3" fill="#f59e0b" stroke="#d97706" strokeWidth="1" />
+      <rect x="14" y="20" width="32" height="16" rx="2" fill="#fbbf24" stroke="#d97706" strokeWidth="0.8" />
+      <rect x="16" y="10" width="28" height="12" rx="2" fill="#fcd34d" stroke="#d97706" strokeWidth="0.6" />
+      <rect x="12" y="54" width="36" height="4" rx="1.5" fill="#d97706" />
+      <circle cx="22" cy="31" r="1.5" fill="#ef4444" />
+      <circle cx="30" cy="29" r="1.5" fill="#3b82f6" />
+      <circle cx="38" cy="31" r="1.5" fill="#22c55e" />
+      <circle cx="26" cy="17" r="1" fill="#ef4444" />
+      <circle cx="34" cy="17" r="1" fill="#3b82f6" />
+      <circle cx="30" cy="15" r="1" fill="#fbbf24" />
+      <line x1="24" y1="10" x2="24" y2="0" stroke="#f97316" strokeWidth="1.2" strokeLinecap="round" />
+      <line x1="30" y1="10" x2="30" y2="0" stroke="#f97316" strokeWidth="1.2" strokeLinecap="round" />
+      <line x1="36" y1="10" x2="36" y2="0" stroke="#f97316" strokeWidth="1.2" strokeLinecap="round" />
+      <circle cx="24" cy="2" r="2" fill="#fbbf24" opacity="0.9" />
+      <circle cx="30" cy="2" r="2" fill="#fbbf24" opacity="0.9" />
+      <circle cx="36" cy="2" r="2" fill="#fbbf24" opacity="0.9" />
+      <ellipse cx="24" cy="5" rx="1.5" ry="2" fill="#f97316" opacity="0.4" />
+      <ellipse cx="30" cy="5" rx="1.5" ry="2" fill="#f97316" opacity="0.4" />
+      <ellipse cx="36" cy="5" rx="1.5" ry="2" fill="#f97316" opacity="0.4" />
+    </svg>
+  );
+}
+
+function Calendar({ size = 1 }: { size?: number }) {
+  const w = 50 * size;
+  const h = 50 * size;
+  return (
+    <svg width={w} height={h} viewBox="0 0 50 50">
+      <rect x="4" y="8" width="42" height="38" rx="4" fill="#1e293b" stroke="rgba(255,255,255,0.12)" strokeWidth="0.8" />
+      <rect x="4" y="8" width="42" height="10" rx="4" fill="#6366f1" />
+      <rect x="4" y="14" width="42" height="4" fill="#6366f1" />
+      <circle cx="14" cy="14" rx="1" ry="1" fill="rgba(255,255,255,0.3)" />
+      <circle cx="25" cy="14" rx="1" ry="1" fill="rgba(255,255,255,0.3)" />
+      <circle cx="36" cy="14" rx="1" ry="1" fill="rgba(255,255,255,0.3)" />
+      <line x1="14" y1="4" x2="14" y2="8" stroke="#475569" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="36" y1="4" x2="36" y2="8" stroke="#475569" strokeWidth="1.5" strokeLinecap="round" />
+      <text x="25" y="36" textAnchor="middle" fill="#f1f5f9" fontSize="16" fontWeight="800" fontFamily="sans-serif">22</text>
+    </svg>
+  );
+}
+
 export default function SceneObject({ type, color, label, size = 1 }: SceneObjectProps) {
   switch (type) {
     case 'easel':
@@ -289,6 +411,16 @@ export default function SceneObject({ type, color, label, size = 1 }: SceneObjec
       return <Stadium size={size} />;
     case 'sketchBook':
       return <SketchBook size={size} />;
+    case 'storyBook':
+      return <StoryBook size={size} />;
+    case 'birthdayCake':
+      return <BirthdayCake size={size} />;
+    case 'calendar':
+      return <Calendar size={size} />;
+    case 'canvasArt':
+      return <CanvasArt color={color} size={size} />;
+    case 'bookshelf':
+      return <Bookshelf size={size} />;
     default:
       return null;
   }

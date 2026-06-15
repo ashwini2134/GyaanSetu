@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { LessonData, QuizQuestion, CodingProblem, ProjectSummary, TestCase } from '../types/lesson';
+import type { LessonData, QuizQuestion, CodingProblem, TestCase } from '../types/lesson';
 
 const BASE = import.meta.env.BASE_URL ?? '/';
 
@@ -70,37 +70,27 @@ export function useLessonData(
             if (quiz) lesson.quiz = quiz;
           }
 
-          // Merge problems and projects if not embedded
+          // Merge problems if not embedded
           if (!lesson.problems || lesson.problems.length === 0) {
             const rawProblems = await fetchJson<RawProblem[]>(
               `data/${courseSlug}/lecture_${num}/problems.json`
             );
             if (rawProblems) {
               const problems: CodingProblem[] = [];
-              const projects: ProjectSummary[] = [];
               for (const p of rawProblems) {
+                if (!p.starterCode) continue;
                 const difficulty = (['easy', 'medium', 'hard'].includes(p.difficulty ?? '') ? p.difficulty : 'easy') as 'easy' | 'medium' | 'hard';
-                if (p.starterCode) {
-                  problems.push({
-                    id: p.id,
-                    title: p.title,
-                    description: p.description,
-                    difficulty,
-                    starterCode: p.starterCode,
-                    solution: p.solution ?? '',
-                    testCases: p.testCases ?? [],
-                  });
-                } else {
-                  projects.push({
-                    id: p.id,
-                    title: p.title,
-                    description: p.description,
-                    difficulty,
-                  });
-                }
+                problems.push({
+                  id: p.id,
+                  title: p.title,
+                  description: p.description,
+                  difficulty,
+                  starterCode: p.starterCode,
+                  solution: p.solution ?? '',
+                  testCases: p.testCases ?? [],
+                });
               }
               lesson.problems = problems;
-              lesson.projects = projects;
             }
           }
 

@@ -1,6 +1,6 @@
 import type { DebugStep } from '../interpreter';
 
-export type EnterMotion = 'fadeIn' | 'slideInUp' | 'slideInLeft' | 'slideInRight' | 'scaleIn' | 'bounce';
+export type EnterMotion = 'fadeIn' | 'slideInUp' | 'slideInLeft' | 'slideInRight' | 'scaleIn' | 'bounce' | 'pageOpen' | 'typewriter';
 
 export type IdleMotion = 'float' | 'pulse' | 'wiggle' | 'none';
 

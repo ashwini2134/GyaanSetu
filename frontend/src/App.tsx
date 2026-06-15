@@ -26,10 +26,6 @@ const Login = lazy(
   () => import("./pages/Login")
 );
 
-const ProjectPage = lazy(
-  () => import("./pages/ProjectPage")
-);
-
 const QuizPage = lazy(
   () => import("./pages/QuizPage")
 );
@@ -54,12 +50,12 @@ const Shell = lazy(
   () => import("./Shell")
 );
 
-const InteractiveProjectPage = lazy(
-  () => import("./pages/InteractiveProjectPage")
-);
-
 const LeaderboardPage = lazy(
   () => import("./pages/LeaderboardPage")
+);
+
+const CapstonePage = lazy(
+  () => import("./pages/CapstonePage")
 );
 
 // Loading Spinner
@@ -229,25 +225,11 @@ export default function App() {
             element={<QuizPage />}
           />
 
-          {/* Project List */}
+          {/* Capstone */}
 
           <Route
-            path="course/:slug/lecture/:number/project"
-            element={<ProjectPage />}
-          />
-
-          {/* Coding Workspace */}
-
-          <Route
-            path="course/:slug/lecture/:number/project/:projectId"
-            element={<InteractiveProjectPage />}
-          />
-
-          {/* Interactive Playground (simulation projects) */}
-
-          <Route
-            path="course/:slug/lecture/:number/play/:projectId"
-            element={<InteractiveProjectPage />}
+            path="course/:slug/capstone"
+            element={<CapstonePage />}
           />
 
           {/* Leaderboard */}
