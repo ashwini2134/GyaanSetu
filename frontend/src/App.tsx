@@ -54,8 +54,8 @@ const Shell = lazy(
   () => import("./Shell")
 );
 
-const CodingProjectPage = lazy(
-  () => import("./pages/CodingProjectPage")
+const InteractiveProjectPage = lazy(
+  () => import("./pages/InteractiveProjectPage")
 );
 
 const LeaderboardPage = lazy(
@@ -240,7 +240,14 @@ export default function App() {
 
           <Route
             path="course/:slug/lecture/:number/project/:projectId"
-            element={<CodingProjectPage />}
+            element={<InteractiveProjectPage />}
+          />
+
+          {/* Interactive Playground (simulation projects) */}
+
+          <Route
+            path="course/:slug/lecture/:number/play/:projectId"
+            element={<InteractiveProjectPage />}
           />
 
           {/* Leaderboard */}

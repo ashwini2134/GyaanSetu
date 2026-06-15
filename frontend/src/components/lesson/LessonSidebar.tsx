@@ -5,6 +5,7 @@ interface LessonSidebarProps {
   sections: LessonSection[];
   hasQuiz: boolean;
   hasProblems: boolean;
+  hasProjects: boolean;
   hasSummary: boolean;
   activeSection: string;
   progress: LectureProgress;
@@ -21,6 +22,7 @@ export default function LessonSidebar({
   sections,
   hasQuiz,
   hasProblems,
+  hasProjects,
   hasSummary,
   activeSection,
   progress,
@@ -30,13 +32,15 @@ export default function LessonSidebar({
     ...sections.map((s): NavItem => ({ id: s.id, label: s.label, icon: 'section' })),
     ...(hasQuiz ? [{ id: 'quiz', label: 'Quiz', icon: 'quiz' }] : []),
     ...(hasProblems ? [{ id: 'problems', label: 'Problems', icon: 'problems' }] : []),
+    ...(hasProjects ? [{ id: 'project', label: 'Project', icon: 'project' }] : []),
     ...(hasSummary ? [{ id: 'summary', label: 'Summary', icon: 'summary' }] : []),
   ];
 
-  const allIds = new Set(['overview', 'quiz', 'problems', 'summary', ...sections.map(s => s.id)]);
+  const allIds = new Set(['overview', 'quiz', 'problems', 'project', 'summary', ...sections.map(s => s.id)]);
 
   const isVisited = (id: string) => {
     if (!allIds.has(id)) return false;
+    if (id === 'project') return progress.projectCompleted;
     return !!progress.sections[id]?.visited;
   };
 

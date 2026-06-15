@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { api } from '../api';
+import { api, getProjectMetadata } from '../api';
 import { useLessonData } from '../hooks/useLessonData';
 import { useProgress, getCourseProgress, isLectureUnlocked, tryAutoCompleteLecture } from '../hooks/useProgress';
 import {
@@ -9,7 +9,7 @@ import {
   ProblemCard,
   SummaryCard,
 } from '../components/lesson';
-import type { CodingProblem } from '../types/lesson';
+import type { CodingProblem, ProjectSummary } from '../types/lesson';
 import { ArrowLeft, ArrowRight, CheckCircle, Lock } from 'lucide-react';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -18,6 +18,7 @@ type Page =
   | { type: 'section'; index: number }
   | { type: 'quiz' }
   | { type: 'problems' }
+  | { type: 'project' }
   | { type: 'summary' };
 
 function pageId(page: Page, sections: Array<{ id: string }>): string {
@@ -29,6 +30,7 @@ function pageLabel(page: Page, sections: Array<{ label: string }>): string {
   if (page.type === 'section') return sections[page.index].label;
   if (page.type === 'quiz') return 'Quiz';
   if (page.type === 'problems') return 'Problems';
+  if (page.type === 'project') return 'Project';
   return 'Summary';
 }
 
@@ -155,11 +157,13 @@ export default function LecturePage() {
     if (!lessonData) return [];
     const quiz = lessonData.quiz ?? [];
     const problems: CodingProblem[] = lessonData.problems ?? [];
+    const projects: ProjectSummary[] = lessonData.projects ?? [];
     const summary = lessonData.summary;
 
     const result: Page[] = lessonData.sections.map((_, i) => ({ type: 'section', index: i }));
     if (quiz.length > 0) result.push({ type: 'quiz' });
     if (problems.length > 0) result.push({ type: 'problems' });
+    if (projects.length > 0) result.push({ type: 'project' });
     if (summary) result.push({ type: 'summary' });
     return result;
   }, [lessonData]);
@@ -181,15 +185,29 @@ export default function LecturePage() {
     // First run: attempt to resume
     if (!hasResumed) {
       setHasResumed(true);
-      const lastId = progress.lastSection;
-      if (lastId && lastId !== 'overview' && lastId !== 'summary') {
-        const idx = pages.findIndex(p => {
-          if (p.type === 'section') return lessonData.sections[p.index]?.id === lastId;
-          return p.type === lastId;
-        });
-        if (idx > 0) {
-          setCurrentPageIdx(idx);
-          targetIdx = idx; // Update our local ref so we mark the correct one visited
+
+      // Check for ?page=summary query param (set by CodingProjectPage completion)
+      const params = new URLSearchParams(window.location.search);
+      const targetPage = params.get('page');
+      if (targetPage === 'summary') {
+        const summaryIdx = pages.findIndex(p => p.type === 'summary');
+        if (summaryIdx >= 0) {
+          setCurrentPageIdx(summaryIdx);
+          targetIdx = summaryIdx;
+          // Clean URL
+          window.history.replaceState({}, '', window.location.pathname);
+        }
+      } else {
+        const lastId = progress.lastSection;
+        if (lastId && lastId !== 'overview' && lastId !== 'summary') {
+          const idx = pages.findIndex(p => {
+            if (p.type === 'section') return lessonData.sections[p.index]?.id === lastId;
+            return p.type === lastId;
+          });
+          if (idx > 0) {
+            setCurrentPageIdx(idx);
+            targetIdx = idx;
+          }
         }
       }
     }
@@ -204,7 +222,8 @@ export default function LecturePage() {
     if (page.type === 'summary' && slug && lessonData) {
       const totalProblems = (lessonData.problems ?? []).length;
       const hasQuiz = (lessonData.quiz ?? []).length > 0;
-      tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, totalProblems, hasQuiz);
+      const hasProject = (lessonData.projects ?? []).length > 0;
+      tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, totalProblems, hasQuiz, hasProject);
     }
 
     if (page.type === 'section') {
@@ -221,7 +240,8 @@ export default function LecturePage() {
           lectureNumber, 
           lessonData.sections.length, 
           lessonData.problems?.length ?? 0, 
-          (lessonData.quiz?.length ?? 0) > 0
+          (lessonData.quiz?.length ?? 0) > 0,
+          (lessonData.projects?.length ?? 0) > 0,
         );
       }
     }, 0);
@@ -236,6 +256,7 @@ export default function LecturePage() {
       let isVisited = false;
       if (id === 'quiz') isVisited = progress.quizCompleted;
       else if (id === 'problems') isVisited = progress.problemsCompleted.length > 0;
+      else if (id === 'project') isVisited = progress.projectCompleted;
       else if (id === 'summary') isVisited = progress.lectureCompleted;
       else isVisited = !!progress.sections[id]?.visited;
 
@@ -274,6 +295,8 @@ export default function LecturePage() {
   const courseTitle = slug === 'cs50p' ? 'CS50 Python' : slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
   const quiz = lessonData.quiz ?? [];
   const problems: CodingProblem[] = lessonData.problems ?? [];
+  const projects: ProjectSummary[] = lessonData.projects ?? [];
+  const hasProject = projects.length > 0;
   const summary = lessonData.summary;
 
   const currentPage = pages[currentPageIdx];
@@ -331,6 +354,15 @@ export default function LecturePage() {
               const id = pageId(page, lessonData.sections);
               const label = pageLabel(page, lessonData.sections);
 
+              // Check if any project has a draft saved (In Progress)
+              const projectInProgress = id === 'project' && !progress.projectCompleted &&
+                projects.some(p => {
+                  const draft = localStorage.getItem(`fa_code_${p.id}`);
+                  if (!draft) return false;
+                  const clean = draft.split('\n').map(l => l.replace(/#.*$/, '')).join('').trim();
+                  return clean.length > 0;
+                });
+
               return (
                 <button
                   key={id}
@@ -343,10 +375,14 @@ export default function LecturePage() {
                 >
                   {/* Status indicator */}
                   <span className="w-4 h-4 flex items-center justify-center flex-shrink-0">
-                    {progress.sections[id]?.visited ? (
+                    {id === 'project' && progress.projectCompleted ? (
                       <CheckCircle size={14} className="text-green-400" />
+                    ) : projectInProgress ? (
+                      <span className="w-2 h-2 rounded-full bg-blue-400 ring-1 ring-blue-400/50" />
                     ) : status === 'current' ? (
                       <span className="w-2 h-2 rounded-full bg-blue-400" />
+                    ) : progress.sections[id]?.visited ? (
+                      <CheckCircle size={14} className="text-green-400" />
                     ) : (
                       <span className="w-2 h-2 rounded-full bg-slate-600" />
                     )}
@@ -370,7 +406,7 @@ export default function LecturePage() {
                   onPracticeComplete={() => {
                     markPracticeCompleted(lessonData.sections[currentPage.index].id);
                     if (slug && lessonData) {
-                      tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, problems.length, quiz.length > 0);
+                      tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, problems.length, quiz.length > 0, hasProject);
                     }
                   }}
               />
@@ -419,7 +455,7 @@ export default function LecturePage() {
                         if (score / total >= 0.7) {
                           markSectionVisited('quiz');
                           if (slug && lessonData) {
-                            tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, problems.length, quiz.length > 0);
+                            tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, problems.length, quiz.length > 0, hasProject);
                           }
                         }
                       }}
@@ -461,7 +497,7 @@ export default function LecturePage() {
                           markSectionVisited('problems');
                           markHandsOnTaskCompleted();
                           if (slug && lessonData) {
-                            tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, problems.length, quiz.length > 0);
+                            tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, problems.length, quiz.length > 0, hasProject);
                           }
                           if (!alreadySolved) {
                             if (progress.problemsCompleted.length + 1 >= problems.length) {
@@ -517,6 +553,104 @@ export default function LecturePage() {
               </section>
             )}
 
+            {currentPage?.type === 'project' && (
+              <section id="section-project">
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-600/30 to-violet-600/20 flex items-center justify-center shadow-lg shadow-purple-600/10">
+                      <svg className="w-5 h-5 text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 01-.657.643 48.39 48.39 0 01-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 01-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 00-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 01-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 00.657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 01-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.401.604-.401.959v0c0 .333.277.599.61.58a48.1 48.1 0 005.43-.576 48.1 48.1 0 00.57-5.571.555.555 0 00-.571-.545v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.369 0 .713.128 1.003.349.283.215.604.401.959.401v0a.656.656 0 00.658-.663 48.422 48.422 0 00-.37-5.34c-1.591.976-3.25 1.028-4.796.086-.28-.208-.461-.314-.662-.346a.64.64 0 01-.23-.111z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">Milestone Project</span>
+                      <h2 className="text-lg font-bold text-white">Apply what you've learned</h2>
+                    </div>
+                  </div>
+
+                  {progress.projectCompleted && (
+                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-3 flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                        <CheckCircle size={16} className="text-emerald-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-emerald-300">Project Completed</p>
+                        <p className="text-[11px] text-emerald-400/60">Great work! This project has been submitted successfully.</p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid gap-4">
+                    {projects.map((project) => {
+                      const meta = getProjectMetadata(project.id);
+                      const projectIcon = meta.tags[0] === 'I/O' ? 'M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0' :
+                        'M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z';
+                      return (
+                        <div
+                          key={project.id}
+                          className="rounded-2xl border border-slate-700/30 bg-gradient-to-br from-slate-800/60 via-slate-900/60 to-purple-900/20 backdrop-blur-sm p-6 transition-all duration-200 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-600/5 group"
+                        >
+                          <div className="flex items-start gap-5">
+                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-600/20 to-violet-600/10 flex items-center justify-center flex-shrink-0 border border-purple-500/10 group-hover:border-purple-400/30 transition-all">
+                              <svg className="w-7 h-7 text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d={projectIcon} />
+                              </svg>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-4">
+                                <div>
+                                  <h3 className="text-base font-bold text-slate-100">{project.title}</h3>
+                                  <p className="text-xs text-slate-400 mt-1.5 leading-relaxed line-clamp-2">{project.description}</p>
+                                </div>
+                                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border whitespace-nowrap ${
+                                  project.difficulty === 'easy'
+                                    ? 'bg-green-500/10 text-green-400 border-green-500/20'
+                                    : project.difficulty === 'medium'
+                                    ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                    : 'bg-red-500/10 text-red-400 border-red-500/20'
+                                }`}>
+                                  {project.difficulty === 'easy' ? 'Beginner' : project.difficulty === 'medium' ? 'Intermediate' : 'Advanced'}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-4 mt-3 text-[10px] text-slate-500">
+                                <span>{meta.xp} XP</span>
+                                <span className="text-slate-700">·</span>
+                                <span>{meta.estimatedTime}</span>
+                                <span className="text-slate-700">·</span>
+                                <span className="flex gap-1.5">
+                                  {meta.tags.slice(0, 3).map(t => (
+                                    <span key={t} className="text-[9px] text-slate-400 bg-slate-800/60 px-1.5 py-0.5 rounded">{t}</span>
+                                  ))}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="mt-4 pt-4 border-t border-slate-700/20 flex items-center justify-between">
+                            {progress.projectCompleted && progress.projectId === project.id ? (
+                              <span className="text-[11px] text-emerald-400 flex items-center gap-1.5 font-medium">
+                                <CheckCircle size={12} /> Completed — review your workspace or continue
+                              </span>
+                            ) : (
+                              <span className="text-[10px] text-slate-500">Build a real mini-application using your new skills</span>
+                            )}
+                            <button
+                              onClick={() => navigate(`/course/${slug}/lecture/${lectureNumber}/project/${project.id}`)}
+                              className="text-xs font-semibold text-white px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 transition-all shadow-md shadow-purple-900/20 flex items-center gap-2"
+                            >
+                              {progress.projectCompleted && progress.projectId === project.id ? 'Open Workspace' : 'Start Building'}
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </section>
+            )}
+
             {showAllCompleted && (
               <div className="fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-300">
                 <div className="max-w-md w-full mx-4 p-8 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-emerald-500/30 text-center space-y-6 animate-in zoom-in duration-500">
@@ -562,7 +696,8 @@ export default function LecturePage() {
                     const allSectionsDone = sectionsVisited >= lessonData.sections.length;
                     const quizDone = !quiz.length || progress.quizCompleted;
                     const problemsDone = progress.problemsCompleted.length >= problems.length;
-                    if (allSectionsDone && quizDone && problemsDone) {
+                    const projectDone = !hasProject || progress.projectCompleted;
+                    if (allSectionsDone && quizDone && problemsDone && projectDone) {
                       markLectureCompleted();
                     }
                     if (nextLecture) {

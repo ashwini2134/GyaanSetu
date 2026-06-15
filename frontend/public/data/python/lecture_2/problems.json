@@ -28,5 +28,11 @@
         "expectedOutput": "First number: Second number: 5 + 3 = 8"
       }
     ]
+  },
+  {
+    "id": "story_generator",
+    "title": "Story Generator",
+    "description": "Create a personalized story using user input and f-strings.",
+    "difficulty": "easy"
   }
 ]

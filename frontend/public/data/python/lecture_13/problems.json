@@ -13,5 +13,11 @@
         "expectedOutput": "=== Choose Your Project ===\n1. Student Management System\n2. Expense Tracker\n3. Quiz Application\n4. To-Do List\nEnter choice (1-4): You selected: Quiz Application"
       }
     ]
+  },
+  {
+    "id": "grade_tracker",
+    "title": "Student Grade Tracker",
+    "description": "Capstone: manage student grades with file persistence, reports, and letter grades.",
+    "difficulty": "hard"
   }
 ]

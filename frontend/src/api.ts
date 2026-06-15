@@ -5,6 +5,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import { getMentorHint, getFailureAnalysis, getProgressiveHints, reviewStudentCode, type FailureAnalysisResult, type ProgressiveHints, type CodeReviewResult } from './mentor';
 export type { FailureAnalysisResult, ProgressiveHints, CodeReviewCheck, CodeReviewResult } from './mentor';
+import { getProjectDefinition } from './projects/registry';
 // ── Types (public API unchanged so pages need zero edits) ─────────────────────
 export type Course = {
   id: number;
@@ -181,6 +182,21 @@ export const api = {
   courseProblems: (slug: string) => loadProblems(slug),
 
   courseLectures: (slug: string) => loadLectures(slug),
+
+  // ── Project counts per lecture ───────────────────────────────────────────
+  lectureProjectsCounts: async (slug: string): Promise<Record<number, number>> => {
+    const manifest = await fetchJson<{ number: number }[]>(`data/${slug}/lectures.json`);
+    const counts: Record<number, number> = {};
+    for (const lm of manifest) {
+      try {
+        const raw = await fetchJson<any[]>(`data/${slug}/lecture_${lm.number}/problems.json`);
+        if (raw) counts[lm.number] = raw.filter((p: any) => !p.starterCode).length;
+      } catch {
+        counts[lm.number] = 0;
+      }
+    }
+    return counts;
+  },
 
   // ── Problem detail ────────────────────────────────────────────────────────
   problem: async (id: number): Promise<ProblemDetail> => {
@@ -397,6 +413,8 @@ export interface ProjectMetadata {
   estimatedTime: string;
   tags: string[];
   xp: number;
+  concepts?: string[];
+  learningGoal?: string;
 }
 
 export function getProjectMetadata(projectId: string, customDifficulty?: string): ProjectMetadata {
@@ -445,7 +463,18 @@ export function getProjectMetadata(projectId: string, customDifficulty?: string)
     // Lecture 8
     "seasons": { tags: ["OOP", "Datetime", "Unit Tests"], estimatedTime: "40 min" },
     "jar": { tags: ["OOP", "Classes", "Methods", "Properties"], estimatedTime: "40 min" },
-    "shirtificate": { tags: ["OOP", "FPDF", "PDF Generation"], estimatedTime: "45 min" }
+    "shirtificate": { tags: ["OOP", "FPDF", "PDF Generation"], estimatedTime: "45 min" },
+    // Python Programming Course Projects
+    "story_generator": { tags: ["I/O", "f-Strings", "Variables"], estimatedTime: "20 min", concepts: ["input()", "variables", "print()", "f-strings"], learningGoal: "Use user input and variables to generate a simple story." },
+    "rock_paper_scissors": { tags: ["Conditionals", "Random", "Loops"], estimatedTime: "30 min", concepts: ["if/elif/else", "comparison operators", "random.choice()"], learningGoal: "Build a rock-paper-scissors game using conditional logic." },
+    "multiplication_explorer": { tags: ["Loops", "Nested Loops", "Formatting"], estimatedTime: "25 min", concepts: ["for loops", "range()", "nested loops", "formatted output"], learningGoal: "Generate a multiplication table using nested loops." },
+    "guessing_game_project": { tags: ["While Loops", "Random", "Input Validation"], estimatedTime: "35 min", concepts: ["while loops", "break", "random.randint()", "input validation"], learningGoal: "Create a number guessing game with loop control." },
+    "shopping_list": { tags: ["Lists", "Dictionaries", "Menu-Driven"], estimatedTime: "30 min", concepts: ["lists", "list methods", "menu-driven programs", "loops"], learningGoal: "Build an interactive shopping list manager." },
+    "contact_book": { tags: ["Dictionaries", "CRUD", "Search"], estimatedTime: "35 min", concepts: ["dictionaries", "key-value pairs", "dict methods", "search"], learningGoal: "Create a contact book that stores and retrieves information." },
+    "unit_converter": { tags: ["Functions", "Modular Design", "Math"], estimatedTime: "30 min", concepts: ["function definitions", "parameters", "return values", "modular design"], learningGoal: "Build a unit converter using reusable functions." },
+    "text_analyzer": { tags: ["Strings", "Methods", "Frequency Analysis"], estimatedTime: "35 min", concepts: ["string methods", "character iteration", "frequency analysis", "slicing"], learningGoal: "Analyze text to count characters, words, and letter frequency." },
+    "personal_diary": { tags: ["File I/O", "Persistence", "CRUD"], estimatedTime: "45 min", concepts: ["file reading/writing", "append mode", "persistence", "CRUD operations"], learningGoal: "Build a personal diary app that saves entries to files." },
+    "grade_tracker": { tags: ["Functions", "Dictionaries", "File I/O", "Capstone"], estimatedTime: "60 min", concepts: ["functions", "dictionaries", "file I/O", "data processing", "capstone"], learningGoal: "Create a complete grade tracking system that reads, processes, and saves student grades." }
   };
 
   const rawDiff = customDifficulty || "easy";
@@ -466,15 +495,32 @@ export function getProjectMetadata(projectId: string, customDifficulty?: string)
       xp,
       estimatedTime: matched.estimatedTime,
       tags: matched.tags,
+      concepts: matched.concepts ?? [],
+      learningGoal: matched.learningGoal ?? '',
     };
   }
 
-  // Fallback metadata
+  // Fallback: check project registry (Python course projects)
+  const regDef = getProjectDefinition(projectId);
+  if (regDef) {
+    return {
+      difficulty: regDef.difficulty,
+      xp: regDef.xp,
+      estimatedTime: regDef.estimatedTime,
+      tags: regDef.tags,
+      concepts: regDef.concepts,
+      learningGoal: regDef.learningGoal,
+    };
+  }
+
+  // Generic fallback
   return {
     difficulty,
     xp,
     estimatedTime: difficulty === "Easy" ? "15 min" : difficulty === "Medium" ? "30 min" : "45 min",
     tags: ["Python", "Programming"],
+    concepts: [],
+    learningGoal: '',
   };
 }
 

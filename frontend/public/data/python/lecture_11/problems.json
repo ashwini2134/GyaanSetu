@@ -33,5 +33,11 @@
         "expectedOutput": "alice@example.com\nbob@test.com"
       }
     ]
+  },
+  {
+    "id": "text_analyzer",
+    "title": "Text Analyzer",
+    "description": "Analyze text and report word count, sentence count, unique words, and more.",
+    "difficulty": "medium"
   }
 ]

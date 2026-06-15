@@ -28,5 +28,11 @@
         "expectedOutput": "0C = 32.0F\n100C = 212.0F\n32F = 0.0C\n212F = 100.0C"
       }
     ]
+  },
+  {
+    "id": "unit_converter",
+    "title": "Unit Converter Toolkit",
+    "description": "Build a modular unit converter using functions for temperature, length, weight, and time.",
+    "difficulty": "medium"
   }
 ]

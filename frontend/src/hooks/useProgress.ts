@@ -61,6 +61,8 @@ function defaultProgress(courseSlug: string, lectureNumber: number): LectureProg
     quizScore: null,
     quizCompleted: false,
     problemsCompleted: [],
+    projectCompleted: false,
+    projectId: null,
     handsOnTaskCompleted: false,
     lectureCompleted: false,
     lastSection: 'overview',
@@ -90,6 +92,7 @@ function checkLectureCompletion(
   totalSections: number,
   totalProblems: number,
   hasQuiz: boolean,
+  hasProject: boolean = false,
 ) {
   const all = readCache();
   const key = progressKey(courseSlug, lectureNumber);
@@ -101,8 +104,10 @@ function checkLectureCompletion(
   const allSectionsVisited = sectionsVisited >= totalSections;
   const quizDone = !hasQuiz || prev.quizCompleted;
   const problemsDone = prev.problemsCompleted.length >= totalProblems;
+  const projectDone = !hasProject || prev.projectCompleted;
+  const summaryReached = prev.lastSection === 'summary';
 
-  if (allSectionsVisited && quizDone && problemsDone) {
+  if (allSectionsVisited && quizDone && problemsDone && projectDone && summaryReached) {
     all[key] = { ...prev, lectureCompleted: true, handsOnTaskCompleted: true };
     writeCache(all);
   }
@@ -241,6 +246,14 @@ export function useProgress(courseSlug: string | undefined, lectureNumber: numbe
     updateProgress(prev => ({ ...prev, handsOnTaskCompleted: true }));
   }, [updateProgress]);
 
+  const markProjectCompleted = useCallback((projectId: string) => {
+    updateProgress(prev => {
+      if (prev.projectCompleted) return prev;
+      return { ...prev, projectCompleted: true, projectId };
+    });
+    import('../progress').then(m => m.completeAction('project', `${courseSlug}:${lectureNumber}:${projectId}`));
+  }, [updateProgress, courseSlug, lectureNumber]);
+
   const markLectureCompleted = useCallback(() => {
     updateProgress(prev => {
       if (prev.lectureCompleted) return prev;
@@ -283,6 +296,7 @@ export function useProgress(courseSlug: string | undefined, lectureNumber: numbe
     markQuizCompleted,
     markProblemCompleted,
     markHandsOnTaskCompleted,
+    markProjectCompleted,
     markLectureCompleted,
   };
 }
@@ -355,6 +369,21 @@ export function subscribeToProgressChanges(cb: () => void) {
   };
 }
 
+export function markProjectCompletedDirect(courseSlug: string, lectureNumber: number, projectId: string) {
+  const all = readAll();
+  const key = progressKey(courseSlug, lectureNumber);
+  const prev = all[key];
+  if (prev?.projectCompleted) return;
+  const next = {
+    ...(prev ?? defaultProgress(courseSlug, lectureNumber)),
+    projectCompleted: true,
+    projectId,
+    lastSection: 'summary',
+  };
+  all[key] = next;
+  writeAll(all);
+}
+
 export function getAllProgress(): Record<string, LectureProgress> {
   return readCache();
 }
@@ -366,6 +395,7 @@ export function tryAutoCompleteLecture(
   totalSections: number,
   totalProblems: number,
   hasQuiz: boolean,
+  hasProject: boolean = false,
 ) {
-  checkLectureCompletion(courseSlug, lectureNumber, totalSections, totalProblems, hasQuiz);
+  checkLectureCompletion(courseSlug, lectureNumber, totalSections, totalProblems, hasQuiz, hasProject);
 }

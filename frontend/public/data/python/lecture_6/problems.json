@@ -28,5 +28,11 @@
         "expectedOutput": "Number: Digits: 5"
       }
     ]
+  },
+  {
+    "id": "guessing_game_project",
+    "title": "Number Guessing Game with Levels",
+    "description": "Create a number guessing game with multiple difficulty levels, guess limits, and replay.",
+    "difficulty": "medium"
   }
 ]

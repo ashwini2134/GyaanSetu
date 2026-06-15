@@ -28,5 +28,11 @@
         "expectedOutput": "Original: [1, 2, 3, 4, 5]\nReversed: [5, 4, 3, 2, 1]"
       }
     ]
+  },
+  {
+    "id": "shopping_list",
+    "title": "Shopping List Manager",
+    "description": "Build a menu-driven shopping list with add, remove, and purchase tracking.",
+    "difficulty": "medium"
   }
 ]

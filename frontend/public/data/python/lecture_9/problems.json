@@ -28,5 +28,11 @@
         "expectedOutput": "{'the': 3, 'cat': 1, 'and': 2, 'dog': 1, 'bird': 1}"
       }
     ]
+  },
+  {
+    "id": "contact_book",
+    "title": "Contact Book",
+    "description": "Manage contacts using a dictionary with search and update features.",
+    "difficulty": "medium"
   }
 ]

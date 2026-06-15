@@ -194,6 +194,15 @@ export interface CodingProblem {
   testCases: TestCase[];
 }
 
+// ── Projects (external coding projects with their own workspace) ────────────
+
+export interface ProjectSummary {
+  id: string;
+  title: string;
+  description: string;
+  difficulty: Difficulty;
+}
+
 // ── Summary ───────────────────────────────────────────────────────────────────
 
 export interface SummaryData {
@@ -214,6 +223,7 @@ export interface LessonData {
   sections: LessonSection[];
   quiz?: QuizQuestion[];
   problems?: CodingProblem[];
+  projects?: ProjectSummary[];
   summary?: SummaryData;
 }
 
@@ -232,6 +242,8 @@ export interface LectureProgress {
   quizScore: number | null;
   quizCompleted: boolean;
   problemsCompleted: string[];
+  projectCompleted: boolean;
+  projectId: string | null;
   handsOnTaskCompleted: boolean;
   lectureCompleted: boolean;
   lastSection: string;

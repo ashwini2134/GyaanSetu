@@ -33,5 +33,11 @@
         "expectedOutput": "Enter year: Not a leap year"
       }
     ]
+  },
+  {
+    "id": "rock_paper_scissors",
+    "title": "Rock, Paper, Scissors",
+    "description": "Build a rock-paper-scissors game against the computer with score tracking.",
+    "difficulty": "medium"
   }
 ]

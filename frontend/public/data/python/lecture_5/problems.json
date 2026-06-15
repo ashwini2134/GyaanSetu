@@ -33,5 +33,11 @@
         "expectedOutput": "Enter N: Factorial: 120"
       }
     ]
+  },
+  {
+    "id": "multiplication_explorer",
+    "title": "Multiplication Explorer",
+    "description": "Print a customizable multiplication table using nested loops.",
+    "difficulty": "easy"
   }
 ]
