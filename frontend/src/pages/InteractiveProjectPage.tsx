@@ -245,7 +245,8 @@ export default function InteractiveProjectPage() {
   }, []);
 
   const runCode = useCallback(() => {
-    if (!projectId || !code.trim()) return null;
+    if (!projectId) return null;
+    if (!code.trim()) return [];
     const fields = projectFormFields[projectId] || [];
     const input = fields.length > 0
       ? fields.map(f => formValues[f.key] || f.defaultValue).join('\n')
