@@ -172,6 +172,91 @@ function Pencil({ size = 1 }: { size?: number }) {
   );
 }
 
+function Computer({ size = 1 }: { size?: number }) {
+  const w = 64 * size;
+  const h = 56 * size;
+  return (
+    <svg width={w} height={h} viewBox="0 0 64 56">
+      <rect x="6" y="2" width="52" height="34" rx="3" fill="#1e293b" stroke="rgba(255,255,255,0.12)" strokeWidth="0.5" />
+      <rect x="10" y="6" width="44" height="24" rx="2" fill="#0f172a" />
+      <rect x="10" y="6" width="44" height="24" rx="2" fill="url(#screenGrad)" opacity="0.3" />
+      <defs>
+        <linearGradient id="screenGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#3b82f6" />
+          <stop offset="100%" stopColor="#6366f1" />
+        </linearGradient>
+      </defs>
+      <line x1="32" y1="36" x2="32" y2="42" stroke="#475569" strokeWidth="2" strokeLinecap="round" />
+      <rect x="20" y="42" width="24" height="3" rx="1.5" fill="#334155" />
+      <rect x="6" y="48" width="52" height="6" rx="2" fill="#1e293b" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
+      <line x1="12" y1="50" x2="52" y2="50" stroke="#334155" strokeWidth="0.5" />
+      <rect x="15" y="49" width="2" height="4" rx="0.5" fill="#475569" />
+      <rect x="20" y="49" width="2" height="4" rx="0.5" fill="#475569" />
+      <rect x="25" y="49" width="2" height="4" rx="0.5" fill="#475569" />
+      <rect x="30" y="49" width="2" height="4" rx="0.5" fill="#475569" />
+      <rect x="35" y="49" width="2" height="4" rx="0.5" fill="#475569" />
+      <rect x="40" y="49" width="2" height="4" rx="0.5" fill="#475569" />
+      <rect x="45" y="49" width="2" height="4" rx="0.5" fill="#475569" />
+    </svg>
+  );
+}
+
+function MusicInstrument({ size = 1 }: { size?: number }) {
+  const w = 28 * size;
+  const h = 56 * size;
+  return (
+    <svg width={w} height={h} viewBox="0 0 28 56">
+      <rect x="11" y="2" width="6" height="32" rx="1" fill="#d97706" />
+      <ellipse cx="14" cy="36" rx="12" ry="16" fill="#d97706" stroke="#b45309" strokeWidth="1" />
+      <ellipse cx="14" cy="40" rx="8" ry="8" fill="none" stroke="#b45309" strokeWidth="0.8" />
+      <ellipse cx="14" cy="40" rx="4" ry="4" fill="#1c1917" />
+      <line x1="6" y1="18" x2="6" y2="22" stroke="#fcd34d" strokeWidth="0.6" />
+      <line x1="9" y1="18" x2="9" y2="24" stroke="#fcd34d" strokeWidth="0.6" />
+      <line x1="19" y1="18" x2="19" y2="24" stroke="#fcd34d" strokeWidth="0.6" />
+      <line x1="22" y1="18" x2="22" y2="22" stroke="#fcd34d" strokeWidth="0.6" />
+      <rect x="6" y="12" width="5" height="2" rx="0.5" fill="#fcd34d" />
+      <rect x="17" y="12" width="5" height="2" rx="0.5" fill="#fcd34d" />
+    </svg>
+  );
+}
+
+function Stadium({ size = 1 }: { size?: number }) {
+  const w = 60 * size;
+  const h = 50 * size;
+  return (
+    <svg width={w} height={h} viewBox="0 0 60 50">
+      <rect x="10" y="6" width="40" height="36" rx="2" fill="none" stroke="#475569" strokeWidth="1.5" />
+      <line x1="30" y1="6" x2="30" y2="42" stroke="#475569" strokeWidth="1" strokeDasharray="4 3" />
+      <rect x="22" y="42" width="16" height="4" rx="1" fill="#334155" />
+      <circle cx="30" cy="24" r="6" fill="none" stroke="#475569" strokeWidth="1" />
+      <line x1="10" y1="16" x2="8" y2="8" stroke="#475569" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="50" y1="16" x2="52" y2="8" stroke="#475569" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="8" y1="8" x2="52" y2="8" stroke="#475569" strokeWidth="1.5" strokeLinecap="round" />
+      <rect x="3" y="3" width="3" height="5" rx="0.5" fill="#475569" />
+      <rect x="54" y="3" width="3" height="5" rx="0.5" fill="#475569" />
+    </svg>
+  );
+}
+
+function SketchBook({ size = 1 }: { size?: number }) {
+  const w = 44 * size;
+  const h = 52 * size;
+  return (
+    <svg width={w} height={h} viewBox="0 0 44 52">
+      <rect x="6" y="4" width="32" height="44" rx="2" fill="#1e293b" stroke="rgba(255,255,255,0.1)" strokeWidth="0.8" />
+      <rect x="9" y="7" width="26" height="38" rx="1" fill="#f8fafc" />
+      <circle cx="22" cy="26" r="5" fill="none" stroke="#3b82f6" strokeWidth="0.8" opacity="0.5" />
+      <path d="M 15 32 L 20 28 L 29 35" fill="none" stroke="#6366f1" strokeWidth="0.8" opacity="0.5" />
+      <line x1="6" y1="10" x2="0" y2="10" stroke="#94a3b8" strokeWidth="1.2" strokeLinecap="round" />
+      <line x1="6" y1="16" x2="0" y2="16" stroke="#94a3b8" strokeWidth="1.2" strokeLinecap="round" />
+      <line x1="6" y1="22" x2="0" y2="22" stroke="#94a3b8" strokeWidth="1.2" strokeLinecap="round" />
+      <line x1="6" y1="28" x2="0" y2="28" stroke="#94a3b8" strokeWidth="1.2" strokeLinecap="round" />
+      <line x1="6" y1="34" x2="0" y2="34" stroke="#94a3b8" strokeWidth="1.2" strokeLinecap="round" />
+      <line x1="6" y1="40" x2="0" y2="40" stroke="#94a3b8" strokeWidth="1.2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export default function SceneObject({ type, color, label, size = 1 }: SceneObjectProps) {
   switch (type) {
     case 'easel':
@@ -196,6 +281,14 @@ export default function SceneObject({ type, color, label, size = 1 }: SceneObjec
       return <MusicNote size={size} />;
     case 'pencil':
       return <Pencil size={size} />;
+    case 'computer':
+      return <Computer size={size} />;
+    case 'musicInstrument':
+      return <MusicInstrument size={size} />;
+    case 'stadium':
+      return <Stadium size={size} />;
+    case 'sketchBook':
+      return <SketchBook size={size} />;
     default:
       return null;
   }

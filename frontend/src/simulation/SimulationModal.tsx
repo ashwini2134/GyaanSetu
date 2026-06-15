@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import type { DebugStep } from '../interpreter';
 import SceneRenderer from './SceneRenderer';
 
@@ -6,19 +6,13 @@ interface SimulationModalProps {
   projectId: string;
   steps?: DebugStep[];
   onClose: () => void;
-  autoClose?: boolean;
+  mode?: 'example' | 'your-version';
 }
 
-export default function SimulationModal({ projectId, steps, onClose, autoClose = true }: SimulationModalProps) {
-  const [showCompletion, setShowCompletion] = useState(false);
-
+export default function SimulationModal({ projectId, steps, onClose, mode }: SimulationModalProps) {
   const handleFinish = useCallback(() => {
-    if (autoClose) {
-      onClose();
-    } else {
-      setShowCompletion(true);
-    }
-  }, [autoClose, onClose]);
+    onClose();
+  }, [onClose]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -28,34 +22,24 @@ export default function SimulationModal({ projectId, steps, onClose, autoClose =
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-  if (showCompletion) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-        <div className="flex flex-col items-center gap-4 p-8">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-sky-500/20 border border-emerald-500/30 flex items-center justify-center">
-            <svg className="w-10 h-10 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <p className="text-xl font-bold text-slate-100">Project Complete!</p>
-          <p className="text-sm text-slate-400">Great work on this project.</p>
-          <button
-            onClick={onClose}
-            className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition-all"
-          >
-            Continue
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div className="relative w-[90vw] h-[85vh] max-w-5xl rounded-2xl overflow-hidden border border-slate-700/30 shadow-2xl bg-[#0b0f14]">
+        <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
+          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${
+            mode === 'example'
+              ? 'bg-sky-500/10 text-sky-300 border border-sky-500/20'
+              : 'bg-violet-500/10 text-violet-300 border border-violet-500/20'
+          }`}>
+            {mode === 'example' ? 'Example Preview' : 'Your Version'}
+          </span>
+          <span className="px-2.5 py-0.5 rounded-full bg-white/5 text-slate-500 text-[10px] font-medium">
+            Click to skip
+          </span>
+        </div>
         <button
           onClick={onClose}
           className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-slate-900/60 hover:bg-slate-800/80 text-slate-400 hover:text-white flex items-center justify-center transition-colors backdrop-blur-sm"

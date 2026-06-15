@@ -344,8 +344,8 @@ export function getCourseStats(courseSlug: string, totalLectures: number): Cours
   return { lecturesStarted, lecturesCompleted, quizzesPassed, handsOnTasksCompleted, totalLectures };
 }
 
-// ── Sequential unlocking (REVIEW_MODE disabled - enforces prerequisite completion) ────────────────────────────────
-const REVIEW_MODE = false;
+// ── Sequential unlocking (REVIEW_MODE enabled - bypasses prerequisite completion) ────────────────────────────────
+const REVIEW_MODE = true;
 
 // ── Sequential unlocking ─────────────────────────────────────────────────────
 export function isLectureUnlocked(

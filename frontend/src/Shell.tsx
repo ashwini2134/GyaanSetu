@@ -115,6 +115,17 @@ export default function Shell() {
           <div className="flex-1" />
 
           <div className="flex items-center gap-3 text-sm">
+            {user?.role === 'admin' && (
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-900/40 border border-amber-600/40">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                <span className="text-amber-300 font-semibold text-xs whitespace-nowrap">
+                  Review Mode
+                </span>
+                <span className="text-amber-400/70 text-[10px] hidden md:inline">
+                  All lectures unlocked
+                </span>
+              </div>
+            )}
               {user && (
               <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700/50">
                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />

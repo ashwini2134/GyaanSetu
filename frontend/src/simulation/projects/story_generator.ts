@@ -31,18 +31,19 @@ function getHobbySceneElements(hobby: string, hex: string): SceneElement[] {
 
   if (normalized.includes('football') || normalized.includes('soccer') || normalized.includes('sport')) {
     return [
-      { id: 'football-1', type: 'object', x: 50, y: 65, motion: 'slideInLeft', delay: 200, data: { objectType: 'football', size: 1.2 } },
-      { id: 'football-2', type: 'object', x: 35, y: 52, motion: 'slideInRight', delay: 600, data: { objectType: 'football', size: 0.8 } },
-      { id: 'football-3', type: 'object', x: 65, y: 48, motion: 'bounce', delay: 1000, data: { objectType: 'football', size: 0.6 } },
+      { id: 'stadium', type: 'object', x: 60, y: 48, motion: 'slideInUp', delay: 100, data: { objectType: 'stadium', size: 0.9 } },
+      { id: 'football-1', type: 'object', x: 50, y: 68, motion: 'slideInLeft', delay: 400, data: { objectType: 'football', size: 1.2 } },
+      { id: 'football-2', type: 'object', x: 35, y: 52, motion: 'slideInRight', delay: 700, data: { objectType: 'football', size: 0.8 } },
       { ...char, x: 20, y: 55 },
     ];
   }
 
-  if (normalized.includes('read') || normalized.includes('book')) {
+  if (normalized.includes('read') || normalized.includes('book') || normalized.includes('library')) {
     return [
       { id: 'book-1', type: 'object', x: 48, y: 50, motion: 'slideInUp', delay: 200, data: { objectType: 'book', size: 1.3 } },
-      { id: 'book-2', type: 'object', x: 60, y: 45, motion: 'slideInLeft', delay: 600, data: { objectType: 'book', size: 0.9 } },
+      { id: 'book-2', type: 'object', x: 62, y: 44, motion: 'slideInLeft', delay: 600, data: { objectType: 'book', size: 0.9 } },
       { id: 'book-3', type: 'object', x: 36, y: 42, motion: 'slideInRight', delay: 800, data: { objectType: 'book', size: 0.7 } },
+      { id: 'pencil-book', type: 'object', x: 50, y: 26, motion: 'fadeIn', delay: 1100, data: { objectType: 'pencil', size: 0.6 } },
       { ...char, x: 20, y: 55 },
     ];
   }
@@ -56,10 +57,10 @@ function getHobbySceneElements(hobby: string, hex: string): SceneElement[] {
 
   if (normalized.includes('music') || normalized.includes('sing') || normalized.includes('dance')) {
     return [
-      { id: 'note-1', type: 'object', x: 35, y: 35, motion: 'slideInLeft', delay: 200, data: { objectType: 'musicNote', size: 1 } },
-      { id: 'note-2', type: 'object', x: 55, y: 28, motion: 'slideInRight', delay: 500, data: { objectType: 'musicNote', size: 0.8 } },
-      { id: 'note-3', type: 'object', x: 65, y: 38, motion: 'scaleIn', delay: 800, data: { objectType: 'musicNote', size: 0.7 } },
-      { id: 'note-4', type: 'object', x: 40, y: 48, motion: 'bounce', delay: 1100, data: { objectType: 'musicNote', size: 0.6 } },
+      { id: 'instrument', type: 'object', x: 38, y: 48, motion: 'slideInLeft', delay: 200, data: { objectType: 'musicInstrument', size: 0.9 } },
+      { id: 'note-1', type: 'object', x: 58, y: 30, motion: 'slideInRight', delay: 500, data: { objectType: 'musicNote', size: 1 } },
+      { id: 'note-2', type: 'object', x: 70, y: 42, motion: 'bounce', delay: 800, data: { objectType: 'musicNote', size: 0.8 } },
+      { id: 'note-3', type: 'object', x: 45, y: 22, motion: 'scaleIn', delay: 1100, data: { objectType: 'musicNote', size: 0.7 } },
       { ...char, x: 20, y: 55 },
     ];
   }
@@ -67,9 +68,18 @@ function getHobbySceneElements(hobby: string, hex: string): SceneElement[] {
   if (normalized.includes('draw') || normalized.includes('paint') || normalized.includes('art')) {
     return [
       { id: 'easel', type: 'object', x: 30, y: 48, motion: 'slideInLeft', delay: 200, data: { objectType: 'easel', size: 0.8 } },
-      { id: 'brush', type: 'object', x: 55, y: 40, motion: 'fadeIn', delay: 600, data: { objectType: 'paintBrush', size: 0.6, animating: true } },
-      { id: 'palette', type: 'object', x: 70, y: 60, motion: 'slideInRight', delay: 800, data: { objectType: 'palette', size: 0.6, colors: ['#ef4444', '#3b82f6', '#fbbf24', '#22c55e'] } },
-      { id: 'pencil-1', type: 'object', x: 50, y: 25, motion: 'fadeIn', delay: 1100, data: { objectType: 'pencil', size: 0.7 } },
+      { id: 'brush', type: 'object', x: 55, y: 40, motion: 'fadeIn', delay: 600, data: { objectType: 'paintBrush', size: 0.6 } },
+      { id: 'palette', type: 'object', x: 72, y: 62, motion: 'slideInRight', delay: 800, data: { objectType: 'palette', size: 0.6, colors: ['#ef4444', '#3b82f6', '#fbbf24', '#22c55e'] } },
+      { id: 'sketchbook', type: 'object', x: 50, y: 26, motion: 'fadeIn', delay: 1100, data: { objectType: 'sketchBook', size: 0.8 } },
+      { ...char, x: 20, y: 55 },
+    ];
+  }
+
+  if (normalized.includes('code') || normalized.includes('program') || normalized.includes('computer') || normalized.includes('tech')) {
+    return [
+      { id: 'computer', type: 'object', x: 48, y: 48, motion: 'slideInUp', delay: 200, data: { objectType: 'computer', size: 0.9 } },
+      { id: 'pencil-code', type: 'object', x: 65, y: 30, motion: 'fadeIn', delay: 600, data: { objectType: 'pencil', size: 0.7 } },
+      { id: 'book-code', type: 'object', x: 35, y: 30, motion: 'fadeIn', delay: 900, data: { objectType: 'book', size: 0.7 } },
       { ...char, x: 20, y: 55 },
     ];
   }

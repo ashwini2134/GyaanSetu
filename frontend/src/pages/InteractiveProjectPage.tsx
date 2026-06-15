@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -8,7 +8,6 @@ import { runPythonMock, type DebugStep } from '../interpreter';
 import { getProjectDefaultInput, getProjectChecklist, runChecklist, getProjectDefinition } from '../projects/registry';
 import SimulationModal from '../simulation/SimulationModal';
 import { hasSimulation } from '../simulation/registry';
-import SceneRenderer from '../simulation/SceneRenderer';
 
 interface FormField { label: string; key: string; defaultValue: string; }
 
@@ -21,10 +20,140 @@ const projectFormFields: Record<string, FormField[]> = {
   ],
 };
 
-function formatDefaultInput(input: string): { label: string; value: string }[] {
-  const parts = input.split('\n').filter(Boolean);
-  const labels = ['Name', 'Age', 'Color', 'Hobby'];
-  return parts.map((v, i) => ({ label: labels[i] || `Input ${i + 1}`, value: v }));
+const conceptExplanations: Record<string, string> = {
+  'input()': 'Used to collect information from the user.',
+  'variables': 'Used to store information for later use.',
+  'print()': 'Used to display information.',
+  'f-strings': 'Used to combine variables and text.',
+  'if/elif/else': 'Used to make decisions based on conditions.',
+  'comparison operators': 'Used to compare values in conditions.',
+  'random.choice()': 'Used to pick a random option from a list.',
+  'for loops': 'Used to repeat code a specific number of times.',
+  'range()': 'Used to generate a sequence of numbers.',
+  'nested loops': 'Used to create loops inside other loops.',
+  'formatted output': 'Used to control how data is displayed.',
+  'while loops': 'Used to repeat code until a condition changes.',
+  'break': 'Used to exit a loop early.',
+  'random.randint()': 'Used to generate a random integer.',
+  'input validation': 'Used to check user input is correct.',
+  'lists': 'Used to store multiple items in one variable.',
+  'list methods': 'Used to manipulate lists.',
+  'menu-driven programs': 'Used to create interactive menus.',
+  'loops': 'Used to repeat actions in your code.',
+  'dictionaries': 'Used to store key-value pairs.',
+  'key-value pairs': 'Used to associate related data.',
+  'dict methods': 'Used to work with dictionaries.',
+  'search': 'Used to find specific data.',
+  'function definitions': 'Used to create reusable blocks of code.',
+  'parameters': 'Used to pass data into functions.',
+  'return values': 'Used to send data back from functions.',
+  'modular design': 'Used to organize code into separate parts.',
+  'string methods': 'Used to manipulate text.',
+  'character iteration': 'Used to process each character in text.',
+  'frequency analysis': 'Used to count how often things appear.',
+  'slicing': 'Used to extract parts of strings or lists.',
+  'file reading/writing': 'Used to save and load data from files.',
+  'append mode': 'Used to add data to the end of a file.',
+  'persistence': 'Used to keep data between program runs.',
+  'CRUD operations': 'Used to create, read, update, and delete data.',
+  'data processing': 'Used to transform raw data into useful information.',
+  'capstone': 'Used to combine everything you have learned.',
+};
+
+function thinkingQuestions(concepts: string[]): { question: string }[] {
+  const qs: { question: string }[] = [];
+  if (concepts.some(c => c.includes('input'))) {
+    qs.push({ question: 'How will I collect information from the user?' });
+  }
+  if (concepts.some(c => c.includes('variable'))) {
+    qs.push({ question: 'Where will I store the answers for later use?' });
+  }
+  if (concepts.some(c => c.includes('f-string') || c.includes('print'))) {
+    qs.push({ question: 'How can I combine text and variables together?' });
+  }
+  if (concepts.some(c => c.includes('print'))) {
+    qs.push({ question: 'How will I display the final result?' });
+  }
+  if (concepts.some(c => c.includes('loop') || c.includes('for') || c.includes('while'))) {
+    qs.push({ question: 'Which parts of the program need to repeat?' });
+  }
+  if (concepts.some(c => c.includes('condition') || c.includes('if') || c.includes('comparison'))) {
+    qs.push({ question: 'What decisions does my program need to make?' });
+  }
+  if (concepts.some(c => c.includes('list'))) {
+    qs.push({ question: 'How should I organize the collection of items?' });
+  }
+  if (concepts.some(c => c.includes('dictionar'))) {
+    qs.push({ question: 'How should I group related pieces of data?' });
+  }
+  if (concepts.some(c => c.includes('function') || c.includes('parameter'))) {
+    qs.push({ question: 'How can I break this problem into smaller reusable pieces?' });
+  }
+  if (concepts.some(c => c.includes('file') || c.includes('persistence') || c.includes('CRUD'))) {
+    qs.push({ question: 'How should I save data so it persists between runs?' });
+  }
+  if (qs.length === 0) {
+    qs.push({ question: 'What steps does my program need to follow?' });
+    qs.push({ question: 'How can I make sure each step works correctly?' });
+  }
+  return qs;
+}
+
+function missionDetails(projectId: string): string[] {
+  const map: Record<string, string[]> = {
+    story_generator: [
+      'The user\'s name',
+      'The user\'s age',
+      'Their favorite color',
+      'Their favorite hobby',
+    ],
+    rock_paper_scissors: [
+      'The player\'s choice (rock, paper, or scissors)',
+      'The computer\'s random choice',
+      'The winner determined by the rules',
+    ],
+    multiplication_explorer: [
+      'A number from the user',
+      'Which multiplication table to generate',
+      'How far the table should go',
+    ],
+    guessing_game_project: [
+      'A random secret number',
+      'The player\'s guesses',
+      'Hints that guide the player',
+    ],
+    shopping_list: [
+      'Items the user wants to add',
+      'A way to view the current list',
+      'Options to remove or mark items',
+    ],
+    contact_book: [
+      'Contact names and details',
+      'A way to search for contacts',
+      'Options to add, edit, or remove',
+    ],
+    unit_converter: [
+      'A value to convert',
+      'The unit to convert from',
+      'The unit to convert to',
+    ],
+    text_analyzer: [
+      'A block of text from the user',
+      'Character and word counts',
+      'Letter frequency analysis',
+    ],
+    personal_diary: [
+      'New diary entries from the user',
+      'A way to view past entries',
+      'Entries saved between sessions',
+    ],
+    grade_tracker: [
+      'Student names and grades',
+      'Calculated averages and stats',
+      'Saved grade records',
+    ],
+  };
+  return map[projectId] || ['Input from the user', 'Processing logic', 'Output displayed to the user'];
 }
 
 export default function InteractiveProjectPage() {
@@ -38,7 +167,6 @@ export default function InteractiveProjectPage() {
   const [checklist, setChecklist] = useState<{ id: string; label: string }[]>([]);
   const [checklistResults, setChecklistResults] = useState<Record<string, boolean>>({});
 
-  const [showCompleted, setShowCompleted] = useState(false);
   const [runStatus, setRunStatus] = useState<'idle' | 'running' | 'passed' | 'submitted'>('idle');
   const [draftSaved, setDraftSaved] = useState(false);
 
@@ -53,7 +181,9 @@ export default function InteractiveProjectPage() {
   const checkedCount = Object.values(checklistResults).filter(Boolean).length;
   const totalCount = checklist.length;
 
-  const exampleInputs = projectDef ? formatDefaultInput(projectDef.defaultInput) : [];
+  const concepts = projectDef?.concepts ?? [];
+  const thinkingQs = thinkingQuestions(concepts);
+  const details = projectId ? missionDetails(projectId) : [];
 
   useEffect(() => {
     if (projectId) setChecklist(getProjectChecklist(projectId));
@@ -66,7 +196,6 @@ export default function InteractiveProjectPage() {
     setFormValues(initial);
   }, [projectId]);
 
-  // Auto-save draft
   useEffect(() => {
     if (!code) return;
     const t = setTimeout(() => {
@@ -77,7 +206,6 @@ export default function InteractiveProjectPage() {
     return () => clearTimeout(t);
   }, [code, projectId]);
 
-  // Load saved draft
   useEffect(() => {
     if (projectId) {
       const saved = localStorage.getItem(`draft_${projectId}`);
@@ -151,7 +279,6 @@ export default function InteractiveProjectPage() {
       setAutoClose(false);
       setShowModal(true);
     } else if (slug && projectId) {
-      setShowCompleted(true);
       saveCompletedProject(slug, projectId, true);
       const num = Number(number);
       if (!isNaN(num)) markProjectCompletedDirect(slug, num, projectId);
@@ -161,18 +288,28 @@ export default function InteractiveProjectPage() {
 
   const handleModalClose = useCallback(() => {
     setShowModal(false);
-    if (!autoClose) {
-      setShowCompleted(true);
+    if (!autoClose && slug && projectId) {
       setRunStatus('submitted');
-      if (slug && projectId) {
-        saveCompletedProject(slug, projectId, true);
-        const num = Number(number);
-        if (!isNaN(num)) markProjectCompletedDirect(slug, num, projectId);
-      }
+      saveCompletedProject(slug, projectId, true);
+      const num = Number(number);
+      if (!isNaN(num)) markProjectCompletedDirect(slug, num, projectId);
     }
   }, [autoClose, slug, projectId, number]);
 
   const fields = (projectId && projectFormFields[projectId]) || [];
+
+  const defaultFormValues = useMemo(() => {
+    const initial: Record<string, string> = {};
+    for (const f of fields) initial[f.key] = f.defaultValue;
+    return initial;
+  }, [fields]);
+
+  const mode: 'example' | 'your-version' = useMemo(() => {
+    const defaults = defaultFormValues;
+    return Object.keys(defaults).every(key => formValues[key] === defaults[key])
+      ? 'example'
+      : 'your-version';
+  }, [formValues, defaultFormValues]);
 
   return (
     <div className="h-full flex flex-col bg-[#0c1015] text-slate-200">
@@ -193,80 +330,117 @@ export default function InteractiveProjectPage() {
         <div className="w-[30%] flex-shrink-0 border-r border-slate-800/80 overflow-y-auto bg-[#0a0e13]">
           <div className="p-5 space-y-6">
 
-            {/* SECTION 1: What Are We Building? */}
+            {/* SECTION 1: Project Mission */}
             <section>
-              <h2 className="text-xs font-bold text-sky-400 uppercase tracking-wider mb-2">What Are We Building?</h2>
+              <h2 className="text-xs font-bold text-sky-400 uppercase tracking-wider mb-2">Project Mission</h2>
               <p className="text-xs text-slate-400 leading-relaxed mb-3">{projectDef?.description}</p>
-              <p className="text-[11px] text-slate-500 font-medium mb-2">By completing this project you will learn:</p>
-              <ul className="space-y-1 mb-3">
-                {projectDef?.concepts.map(c => (
-                  <li key={c} className="flex items-center gap-1.5 text-[11px]">
-                    <span className="text-emerald-400">✓</span>
-                    <span className="text-slate-300">{c}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="flex items-center gap-3">
+              {details.length > 0 && (
+                <>
+                  <p className="text-[11px] text-slate-500 font-medium mb-2">The user will provide:</p>
+                  <ul className="space-y-1 mb-3">
+                    {details.map((d, i) => (
+                      <li key={i} className="flex items-start gap-2 text-[11px]">
+                        <span className="text-sky-400 mt-0.5">•</span>
+                        <span className="text-slate-300">{d}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+              {projectDef?.learningGoal && (
+                <p className="text-[11px] text-slate-400 italic border-t border-slate-800/40 pt-3 mt-3">
+                  Goal: {projectDef.learningGoal}
+                </p>
+              )}
+              <div className="flex items-center gap-3 mt-3">
                 <span className="text-[10px] px-2 py-0.5 bg-sky-500/10 text-sky-300 rounded font-semibold">{projectDef?.difficulty}</span>
                 <span className="text-[10px] text-amber-400 font-semibold">+{projectDef?.xp} XP</span>
                 <span className="text-[10px] text-slate-500">{projectDef?.estimatedTime}</span>
               </div>
             </section>
 
-            {/* SECTION 2: What Should The Result Look Like? */}
-            {exampleInputs.length > 0 && (
+            {/* SECTION 2: Think Before You Code */}
+            {thinkingQs.length > 0 && (
               <section>
-                <h2 className="text-xs font-bold text-violet-400 uppercase tracking-wider mb-2">What Should The Result Look Like?</h2>
-                <div className="bg-[#090d12] rounded-lg border border-slate-800/60 p-3 mb-2">
-                  <p className="text-[10px] font-semibold text-slate-500 uppercase mb-2">Example Input</p>
-                  <div className="space-y-1">
-                    {exampleInputs.map(({ label, value }) => (
-                      <div key={label} className="flex items-center gap-2 text-[11px]">
-                        <span className="text-slate-500 w-12">{label}:</span>
-                        <span className="text-slate-200 font-mono">{value}</span>
+                <h2 className="text-xs font-bold text-violet-400 uppercase tracking-wider mb-2">Think Before You Code</h2>
+                <p className="text-[10px] text-slate-500 mb-2">Before writing any code, ask yourself:</p>
+                <ul className="space-y-2">
+                  {thinkingQs.map((q, i) => (
+                    <li key={i} className="flex items-start gap-2 text-[11px]">
+                      <span className="text-violet-400 font-bold mt-0.5 flex-shrink-0">?</span>
+                      <span className="text-slate-300">{q.question}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {/* SECTION 3: Concepts You Should Use */}
+            {concepts.length > 0 && (
+              <section>
+                <h2 className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">Concepts You Should Use</h2>
+                <div className="space-y-2">
+                  {concepts.map(c => {
+                    const explanation = conceptExplanations[c] || 'Used to build a working solution.';
+                    return (
+                      <div key={c} className="flex items-start gap-2 bg-[#090d12] rounded-lg border border-slate-800/40 p-2.5">
+                        <span className="text-emerald-400 text-xs font-bold font-mono flex-shrink-0 mt-0.5">{c}</span>
+                        <span className="text-[10px] text-slate-400 leading-relaxed">{explanation}</span>
                       </div>
-                    ))}
-                  </div>
-                  <p className="text-[10px] font-semibold text-slate-500 uppercase mt-3 mb-1">Expected Result</p>
-                  <p className="text-[11px] text-slate-400">A personalized story appears.</p>
+                    );
+                  })}
                 </div>
-                {isSim && (
-                  <div className="rounded-lg overflow-hidden border border-slate-800/40 pointer-events-none" style={{ height: 140 }}>
-                    <SceneRenderer projectId={projectId ?? ''} />
+              </section>
+            )}
+
+            {/* SECTION 4: Build Checklist */}
+            {totalCount > 0 && (
+              <section>
+                <h2 className="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">Build Checklist</h2>
+                <p className="text-[10px] text-slate-500 mb-2">Your project is complete when:</p>
+                <div className="space-y-1.5">
+                  {checklist.map(item => (
+                    <div
+                      key={item.id}
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-all ${
+                        checklistResults[item.id]
+                          ? 'bg-emerald-500/5 text-emerald-300'
+                          : 'bg-slate-800/20 text-slate-400'
+                      }`}
+                    >
+                      <span className={`w-4 h-4 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                        checklistResults[item.id]
+                          ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
+                          : 'border-slate-600/60'
+                      }`}>
+                        {checklistResults[item.id] ? (
+                          <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        ) : ''}
+                      </span>
+                      <span className={checklistResults[item.id] ? 'line-through text-emerald-400/70' : ''}>
+                        {item.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                {checkedCount === totalCount && (
+                  <div className="mt-3 pt-3 border-t border-emerald-500/20 text-center">
+                    <p className="text-[11px] font-semibold text-emerald-400">All criteria met!</p>
+                    <p className="text-[9px] text-slate-500 mt-0.5">Click Submit Project to finish.</p>
                   </div>
                 )}
               </section>
             )}
 
-            {/* SECTION 3: Checklist */}
-            <section>
-              <h2 className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">Checklist</h2>
-              {totalCount > 0 && (
-                <p className="text-[11px] text-slate-500 mb-2">{checkedCount} / {totalCount} Complete</p>
-              )}
-              <ul className="space-y-1.5">
-                {checklist.map(item => (
-                  <li key={item.id} className="flex items-center gap-2 text-xs">
-                    <span className={`w-3.5 h-3.5 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${
-                      checklistResults[item.id] ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400' : 'border-slate-600/50 text-transparent'
-                    }`}>
-                      {checklistResults[item.id] && (
-                        <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                      )}
-                    </span>
-                    <span className={checklistResults[item.id] ? 'text-slate-300' : 'text-slate-500'}>{item.label}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-
-            {/* SECTION 4: Try Your Story */}
+            {/* SECTION 5: Test Data */}
             {fields.length > 0 && (
               <section>
-                <h2 className="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">Try Your Story</h2>
-                <p className="text-[10px] text-slate-500 mb-2">Change values to experiment without editing code.</p>
+                <h2 className="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-2">Test Data</h2>
+                <p className="text-[10px] text-slate-500 mb-2">
+                  Change these values and run your project to see how your program behaves with different inputs.
+                </p>
                 <div className="space-y-2">
                   {fields.map(field => (
                     <div key={field.key} className="flex items-center gap-2">
@@ -283,6 +457,25 @@ export default function InteractiveProjectPage() {
               </section>
             )}
 
+            {/* SECTION 6: Project Experience */}
+            <section>
+              <h2 className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">Project Experience</h2>
+              {showModal ? (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-500/5 border border-blue-500/10">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+                  <span className="text-[11px] text-blue-300">Playing your project</span>
+                </div>
+              ) : isSim ? (
+                <p className="text-[10px] text-slate-500 leading-relaxed">
+                  Run your project to see your story come to life. Use different test data to explore unique outcomes.
+                </p>
+              ) : (
+                <p className="text-[10px] text-slate-500 leading-relaxed">
+                  Run your project to see the output.
+                </p>
+              )}
+            </section>
+
           </div>
         </div>
 
@@ -292,7 +485,7 @@ export default function InteractiveProjectPage() {
           {/* File Explorer */}
           <div className="border-b border-slate-800/40 bg-[#0a0e13]">
             <div className="flex items-center gap-4 px-5 py-1.5">
-              <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">📁 Project Files</span>
+              <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Project Files</span>
             </div>
             <div className="px-5 pb-1.5 flex items-center gap-2 text-xs text-slate-400">
               <svg className="w-3.5 h-3.5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -409,30 +602,8 @@ export default function InteractiveProjectPage() {
           projectId={projectId ?? ''}
           steps={isSim ? modalSteps : undefined}
           onClose={handleModalClose}
-          autoClose={autoClose}
+          mode={mode}
         />
-      )}
-
-      {/* Completion Overlay */}
-      {showCompleted && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="flex flex-col items-center gap-4 p-8">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-sky-500/20 border border-emerald-500/30 flex items-center justify-center">
-              <svg className="w-10 h-10 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <p className="text-xl font-bold text-slate-100">Project Complete!</p>
-            <p className="text-sm text-slate-400">Great work on this project.</p>
-            {projectDef && <p className="text-sm text-amber-400 font-semibold">+{projectDef.xp} XP</p>}
-            <a
-              href={`/course/${slug}/lecture/${number}/project`}
-              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition-all"
-            >
-              Back to Projects
-            </a>
-          </div>
-        </div>
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Scene } from './types';
 import Character from './elements/Character';
 import SceneObject from './elements/SceneObject';
@@ -6,16 +6,14 @@ import ParticleEffect from './elements/ParticleEffect';
 
 interface ScenePlayerProps {
   scenes: Scene[];
-  onComplete?: () => void;
   onFinish?: () => void;
   className?: string;
 }
 
-export default function ScenePlayer({ scenes, onComplete, onFinish, className = '' }: ScenePlayerProps) {
+export default function ScenePlayer({ scenes, onFinish, className = '' }: ScenePlayerProps) {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [visibleElements, setVisibleElements] = useState<Set<string>>(new Set());
   const [showNarration, setShowNarration] = useState(false);
-  const [completed, setCompleted] = useState(false);
   const timersRef = useRef<number[]>([]);
   const scene = scenes[currentIdx];
 
@@ -29,13 +27,12 @@ export default function ScenePlayer({ scenes, onComplete, onFinish, className = 
     if (currentIdx < scenes.length - 1) {
       setCurrentIdx(prev => prev + 1);
     } else {
-      setCompleted(true);
-      onComplete?.();
+      onFinish?.();
     }
-  }, [currentIdx, scenes.length, clearTimers, onComplete]);
+  }, [currentIdx, scenes.length, clearTimers, onFinish]);
 
   useEffect(() => {
-    if (completed || !scene) return;
+    if (!scene) return;
 
     setVisibleElements(new Set());
     setShowNarration(false);
@@ -55,48 +52,7 @@ export default function ScenePlayer({ scenes, onComplete, onFinish, className = 
     timersRef.current.push(at);
 
     return clearTimers;
-  }, [scene, completed]);
-
-  useEffect(() => {
-    if (!completed || !onFinish) return;
-    const t = window.setTimeout(onFinish, 1500);
-    return () => clearTimeout(t);
-  }, [completed, onFinish]);
-
-  const handleReplay = useCallback(() => {
-    setCompleted(false);
-    setCurrentIdx(0);
-    setVisibleElements(new Set());
-    setShowNarration(false);
-    clearTimers();
-  }, [clearTimers]);
-
-  if (completed) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full gap-4">
-        <ParticleEffect count={20} color="#fbbf24" />
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500/15 to-rose-500/15 border border-amber-500/20 flex items-center justify-center">
-          <svg className="w-8 h-8 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-        {!onFinish && (
-          <>
-            <p className="text-base font-bold text-slate-200">Story Complete</p>
-            <button
-              onClick={handleReplay}
-              className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-slate-200 transition-colors px-4 py-2 rounded-lg hover:bg-slate-800/40 border border-slate-700/30"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Watch again
-            </button>
-          </>
-        )}
-      </div>
-    );
-  }
+  }, [scene]);
 
   if (!scenes.length) {
     return null;
