@@ -3,14 +3,19 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import { config } from "./config.js";
-import { getDb } from "./db.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import authRoutes from "./routes/auth.js";
 import progressRoutes from "./routes/progress.js";
+import projectRoutes from "./routes/project.js";
+import xpRoutes from "./routes/xp.js";
+import achievementsRoutes from "./routes/achievements.js";
+import streaksRoutes from "./routes/streaks.js";
+import quizAttemptsRoutes from "./routes/quizAttempts.js";
+import codeDraftsRoutes from "./routes/codeDrafts.js";
+import chatRoutes from "./routes/chat.js";
+import dailyMissionsRoutes from "./routes/dailyMissions.js";
 
 export function createApp() {
-  getDb();
-
   const app = express();
 
   app.use(helmet());
@@ -40,6 +45,14 @@ export function createApp() {
 
   app.use("/api/auth", authRoutes);
   app.use("/api/progress", progressRoutes);
+  app.use("/api/projects", projectRoutes);
+  app.use("/api/xp", xpRoutes);
+  app.use("/api/achievements", achievementsRoutes);
+  app.use("/api/streaks", streaksRoutes);
+  app.use("/api/quiz-attempts", quizAttemptsRoutes);
+  app.use("/api/drafts", codeDraftsRoutes);
+  app.use("/api/chat", chatRoutes);
+  app.use("/api/daily-missions", dailyMissionsRoutes);
 
   app.use(errorHandler);
   return app;

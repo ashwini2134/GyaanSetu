@@ -5,6 +5,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import { getMentorHint, getFailureAnalysis, getProgressiveHints, reviewStudentCode, type FailureAnalysisResult, type ProgressiveHints, type CodeReviewResult } from './mentor';
 export type { FailureAnalysisResult, ProgressiveHints, CodeReviewCheck, CodeReviewResult } from './mentor';
+import { getProjectDefinition } from './projects/registry';
+import { authFetch } from './authClient';
 // ── Types (public API unchanged so pages need zero edits) ─────────────────────
 export type Course = {
   id: number;
@@ -28,21 +30,31 @@ export type ChatMsg = { role: string; content: string; created_at: string };
 
 export { getToken, setToken, clearToken } from "./authClient";
 
-// ── localStorage helpers ──────────────────────────────────────────────────────
+import { authFetch } from "./authClient";
+
 const CHAT_KEY  = "fa_chat";
 
 // ── Chat storage ─────────────────────────────────────────────────────────────
-function getChatHistory(problemId: number | string): ChatMsg[] {
+async function getChatHistory(problemId: number | string): Promise<ChatMsg[]> {
   try {
-    const all: Record<string, ChatMsg[]> = JSON.parse(localStorage.getItem(CHAT_KEY) ?? "{}");
-    return all[String(problemId)] ?? [];
-  } catch { return []; }
+    const res = await authFetch(`/api/chat/${problemId}`);
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch { /* ignore */ }
+  return [];
 }
-function saveChatHistory(problemId: number | string, msgs: ChatMsg[]) {
+
+async function saveChatMessage(problemId: number | string, msg: ChatMsg) {
   try {
-    const all: Record<string, ChatMsg[]> = JSON.parse(localStorage.getItem(CHAT_KEY) ?? "{}");
-    all[String(problemId)] = msgs;
-    localStorage.setItem(CHAT_KEY, JSON.stringify(all));
+    await authFetch('/api/chat', {
+      method: 'POST',
+      body: JSON.stringify({
+        problemId: String(problemId),
+        role: msg.role,
+        content: msg.content
+      })
+    });
   } catch { /* ignore */ }
 }
 
@@ -229,7 +241,7 @@ export const api = {
       lectureNum = Math.floor(problemIndex / 5); // Rough estimate: 5 problems per lecture
     }
 
-    const existing = getChatHistory(problemId);
+    const existing = await getChatHistory(problemId);
 
     // Get mentor hint
     const hintResponse = getMentorHint({
@@ -251,7 +263,12 @@ export const api = {
 
     const userMsg: ChatMsg  = { role: "user",   content: message, created_at: new Date().toISOString() };
     const asstMsg: ChatMsg  = { role: "assistant", content: reply, created_at: new Date().toISOString() };
-    saveChatHistory(problemId, [...existing, userMsg, asstMsg]);
+    
+    await saveChatMessage(problemId, userMsg);
+    await saveChatMessage(problemId, asstMsg);
+    
+    // Clean up old localStorage keys only after backend calls are confirmed working
+    try { localStorage.removeItem(CHAT_KEY); } catch {}
 
     return { reply };
   },
@@ -275,59 +292,7 @@ export const api = {
 
 // ── DEPRECATED: Progress & Streaks Helpers (use backend APIs instead) ────────────
 // These localStorage-based helpers are deprecated. The backend now manages progress.
-// See useProgress() hook for backend-backed progress tracking.
-
-export function getCompletedQuizzes(): Record<string, number> {
-  console.warn('getCompletedQuizzes is deprecated. Use backend APIs via useProgress.');
-  try {
-    return JSON.parse(localStorage.getItem("fa_completed_quizzes") ?? "{}");
-  } catch {
-    return {};
-  }
-}
-
-export function saveCompletedQuiz(courseSlug: string, lectureNum: number, score: number) {
-  console.warn('saveCompletedQuiz is deprecated. Use backend API /progress/lecture/quiz instead.');
-  try {
-    const key = `${courseSlug}_${lectureNum}`;
-    const all = getCompletedQuizzes();
-    all[key] = score;
-    localStorage.setItem("fa_completed_quizzes", JSON.stringify(all));
-  } catch { /* ignore */ }
-}
-
-
-
-export function getStreak(): { count: number; lastDate: string | null } {
-  try {
-    const count = Number(localStorage.getItem("fa_streak_count") ?? "0");
-    const lastDate = localStorage.getItem("fa_last_submission_date");
-    return { count, lastDate };
-  } catch {
-    return { count: 0, lastDate: null };
-  }
-}
-
-export function updateStreak() {
-  const todayStr = new Date().toISOString().split("T")[0];
-  const { count, lastDate } = getStreak();
-  if (lastDate === todayStr) {
-    return;
-  }
-  
-  let newCount = 1;
-  if (lastDate) {
-    const last = new Date(lastDate);
-    const today = new Date(todayStr);
-    const diffTime = today.getTime() - last.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    if (diffDays === 1) {
-      newCount = count + 1;
-    }
-  }
-  localStorage.setItem("fa_streak_count", String(newCount));
-  localStorage.setItem("fa_last_submission_date", todayStr);
-}
+// Streak functionality is now handled by the backend /api/streaks
 
 export interface Badge {
   id: string;
@@ -371,17 +336,145 @@ export function getBadges(completedCount: number, streak: number): Badge[] {
 }
 
 // ── XP & Gamification Helpers ──────────────────────────────────────────────────
-export function getTotalXp(): number {
+export async function getTotalXp(): Promise<number> {
   try {
-    return Number(localStorage.getItem("fa_total_xp") ?? "0");
+    const res = await authFetch('/api/xp');
+    if (res.ok) {
+      const json = await res.json();
+      return json.totalXp || 0;
+    }
   } catch {
-    return 0;
+    console.error("Failed to fetch XP");
+  }
+  return 0;
+}
+
+export async function addXp(amount: number) {
+  try {
+    await authFetch('/api/xp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount, reason: "Manual XP addition" })
+    });
+  } catch {
+    console.error("Failed to add XP");
   }
 }
 
-export function addXp(amount: number) {
-  const current = getTotalXp();
-  localStorage.setItem("fa_total_xp", String(current + amount));
+export interface ProjectMetadata {
+  difficulty: "Easy" | "Medium" | "Hard";
+  estimatedTime: string;
+  tags: string[];
+  xp: number;
+  concepts?: string[];
+  learningGoal?: string;
+}
+
+export function getProjectMetadata(projectId: string, customDifficulty?: string): ProjectMetadata {
+  const defaultMeta: Record<string, Omit<ProjectMetadata, "difficulty" | "xp">> = {
+    // Lecture 0
+    "indoor_voice": { tags: ["Strings", "User Input", "Methods"], estimatedTime: "10 min" },
+    "playback_speed": { tags: ["Strings", "Replace", "Formatting"], estimatedTime: "10 min" },
+    "making_faces": { tags: ["Functions", "Strings", "Emojis"], estimatedTime: "15 min" },
+    "einstein": { tags: ["Math", "Variables", "Constants"], estimatedTime: "20 min" },
+    "tip_calculator": { tags: ["Functions", "Floats", "Types"], estimatedTime: "25 min" },
+    // Lecture 1
+    "deep_thought": { tags: ["Conditionals", "Logic", "Strings"], estimatedTime: "15 min" },
+    "home_federal": { tags: ["Conditionals", "Strings", "Methods"], estimatedTime: "20 min" },
+    "file_extensions": { tags: ["Conditionals", "Strings", "MIME Types"], estimatedTime: "25 min" },
+    "math_interpreter": { tags: ["Conditionals", "Math", "Parsing"], estimatedTime: "30 min" },
+    "meal_time": { tags: ["Conditionals", "Functions", "Floats"], estimatedTime: "35 min" },
+    // Lecture 2
+    "camel_case": { tags: ["Loops", "Strings", "Case Conversion"], estimatedTime: "25 min" },
+    "coke_machine": { tags: ["Loops", "State", "Math"], estimatedTime: "30 min" },
+    "just_setting_up": { tags: ["Loops", "Strings", "Vowels"], estimatedTime: "20 min" },
+    "nutrition_facts": { tags: ["Dictionaries", "Loops", "Lookups"], estimatedTime: "25 min" },
+    "vanity_plates": { tags: ["Loops", "Functions", "Validation"], estimatedTime: "40 min" },
+    // Lecture 3
+    "fuel": { tags: ["Exceptions", "Try-Except", "Fractions"], estimatedTime: "30 min" },
+    "taqueria": { tags: ["Exceptions", "Dictionaries", "EOF Handling"], estimatedTime: "25 min" },
+    "grocery": { tags: ["Exceptions", "Lists", "Sorting"], estimatedTime: "35 min" },
+    "outdated": { tags: ["Exceptions", "Strings", "Date Parsing"], estimatedTime: "40 min" },
+    // Lecture 4
+    "emojize": { tags: ["Libraries", "Third-party", "Emojis"], estimatedTime: "15 min" },
+    "figlet": { tags: ["Libraries", "CLI Arguments", "ASCII Art"], estimatedTime: "30 min" },
+    "adieu": { tags: ["Libraries", "Lists", "Formatting"], estimatedTime: "20 min" },
+    "game": { tags: ["Libraries", "Random", "Loops"], estimatedTime: "25 min" },
+    "professor": { tags: ["Libraries", "Math", "State Machine"], estimatedTime: "45 min" },
+    "bitcoin": { tags: ["Libraries", "API", "JSON", "HTTP Requests"], estimatedTime: "40 min" },
+    // Lecture 6
+    "lines": { tags: ["File I/O", "File Reading", "Parsing"], estimatedTime: "30 min" },
+    "pizza": { tags: ["File I/O", "CSV", "Formatting Tables"], estimatedTime: "30 min" },
+    "scourgify": { tags: ["File I/O", "CSV", "DictReader/DictWriter"], estimatedTime: "40 min" },
+    "shirt": { tags: ["File I/O", "Pillow", "Image Processing"], estimatedTime: "45 min" },
+    // Lecture 7
+    "numb3rs": { tags: ["Regex", "Validation", "IP Addresses"], estimatedTime: "35 min" },
+    "watch": { tags: ["Regex", "HTML Parsing", "URLs"], estimatedTime: "30 min" },
+    "working": { tags: ["Regex", "Time Parsing", "Validation"], estimatedTime: "45 min" },
+    "um": { tags: ["Regex", "Word Boundaries", "Substrings"], estimatedTime: "25 min" },
+    "response": { tags: ["Regex", "Libraries", "Email Validation"], estimatedTime: "20 min" },
+    // Lecture 8
+    "seasons": { tags: ["OOP", "Datetime", "Unit Tests"], estimatedTime: "40 min" },
+    "jar": { tags: ["OOP", "Classes", "Methods", "Properties"], estimatedTime: "40 min" },
+    "shirtificate": { tags: ["OOP", "FPDF", "PDF Generation"], estimatedTime: "45 min" },
+    // Python Programming Course Projects
+    "story_generator": { tags: ["I/O", "f-Strings", "Variables"], estimatedTime: "20 min", concepts: ["input()", "variables", "print()", "f-strings"], learningGoal: "Use user input and variables to generate a simple story." },
+    "rock_paper_scissors": { tags: ["Conditionals", "Random", "Loops"], estimatedTime: "30 min", concepts: ["if/elif/else", "comparison operators", "random.choice()"], learningGoal: "Build a rock-paper-scissors game using conditional logic." },
+    "multiplication_explorer": { tags: ["Loops", "Nested Loops", "Formatting"], estimatedTime: "25 min", concepts: ["for loops", "range()", "nested loops", "formatted output"], learningGoal: "Generate a multiplication table using nested loops." },
+    "guessing_game_project": { tags: ["While Loops", "Random", "Input Validation"], estimatedTime: "35 min", concepts: ["while loops", "break", "random.randint()", "input validation"], learningGoal: "Create a number guessing game with loop control." },
+    "shopping_list": { tags: ["Lists", "Dictionaries", "Menu-Driven"], estimatedTime: "30 min", concepts: ["lists", "list methods", "menu-driven programs", "loops"], learningGoal: "Build an interactive shopping list manager." },
+    "contact_book": { tags: ["Dictionaries", "CRUD", "Search"], estimatedTime: "35 min", concepts: ["dictionaries", "key-value pairs", "dict methods", "search"], learningGoal: "Create a contact book that stores and retrieves information." },
+    "unit_converter": { tags: ["Functions", "Modular Design", "Math"], estimatedTime: "30 min", concepts: ["function definitions", "parameters", "return values", "modular design"], learningGoal: "Build a unit converter using reusable functions." },
+    "text_analyzer": { tags: ["Strings", "Methods", "Frequency Analysis"], estimatedTime: "35 min", concepts: ["string methods", "character iteration", "frequency analysis", "slicing"], learningGoal: "Analyze text to count characters, words, and letter frequency." },
+    "personal_diary": { tags: ["File I/O", "Persistence", "CRUD"], estimatedTime: "45 min", concepts: ["file reading/writing", "append mode", "persistence", "CRUD operations"], learningGoal: "Build a personal diary app that saves entries to files." },
+    "grade_tracker": { tags: ["Functions", "Dictionaries", "File I/O", "Capstone"], estimatedTime: "60 min", concepts: ["functions", "dictionaries", "file I/O", "data processing", "capstone"], learningGoal: "Create a complete grade tracking system that reads, processes, and saves student grades." }
+  };
+
+  const rawDiff = customDifficulty || "easy";
+  let difficulty: "Easy" | "Medium" | "Hard" = "Easy";
+  if (rawDiff.toLowerCase() === "medium" || rawDiff.toLowerCase() === "moderate") {
+    difficulty = "Medium";
+  } else if (rawDiff.toLowerCase() === "hard" || rawDiff.toLowerCase() === "difficult") {
+    difficulty = "Hard";
+  }
+
+  const xpValues = { Easy: 50, Medium: 100, Hard: 150 };
+  const xp = xpValues[difficulty];
+
+  const matched = defaultMeta[projectId];
+  if (matched) {
+    return {
+      difficulty,
+      xp,
+      estimatedTime: matched.estimatedTime,
+      tags: matched.tags,
+      concepts: matched.concepts ?? [],
+      learningGoal: matched.learningGoal ?? '',
+    };
+  }
+
+  // Fallback: check project registry (Python course projects)
+  const regDef = getProjectDefinition(projectId);
+  if (regDef) {
+    return {
+      difficulty: regDef.difficulty,
+      xp: regDef.xp,
+      estimatedTime: regDef.estimatedTime,
+      tags: regDef.tags,
+      concepts: regDef.concepts,
+      learningGoal: regDef.learningGoal,
+    };
+  }
+
+  // Generic fallback
+  return {
+    difficulty,
+    xp,
+    estimatedTime: difficulty === "Easy" ? "15 min" : difficulty === "Medium" ? "30 min" : "45 min",
+    tags: ["Python", "Programming"],
+    concepts: [],
+    learningGoal: '',
+  };
 }
 
 // ── XP Level System ─────────────────────────────────────────────────────────────
@@ -418,27 +511,6 @@ export function getXpLevel(totalXp: number): { level: number; currentXp: number;
   return { level: currentLevel, currentXp, xpToNext, progress };
 }
 
-// ── Submission History for Heatmap ─────────────────────────────────────────────
-export interface SubmissionRecord {
-  date: string;
-  count: number;
-}
-
-export function getSubmissionHistory(): Record<string, number> {
-  try {
-    return JSON.parse(localStorage.getItem("fa_submission_history") ?? "{}");
-  } catch {
-    return {};
-  }
-}
-
-export function recordSubmission() {
-  const todayStr = new Date().toISOString().split("T")[0];
-  const history = getSubmissionHistory();
-  history[todayStr] = (history[todayStr] || 0) + 1;
-  localStorage.setItem("fa_submission_history", JSON.stringify(history));
-}
-
 // ── Daily Missions ─────────────────────────────────────────────────────────────
 export interface DailyMission {
   id: string;
@@ -450,93 +522,28 @@ export interface DailyMission {
   completed: boolean;
 }
 
-export function getDailyMissions(): DailyMission[] {
-  const todayStr = new Date().toISOString().split("T")[0];
-  const missionsKey = `fa_daily_missions_${todayStr}`;
-  
+export async function getDailyMissions(): Promise<DailyMission[]> {
   try {
-    const stored = localStorage.getItem(missionsKey);
-    if (stored) {
-      return JSON.parse(stored);
+    const res = await authFetch('/api/daily-missions');
+    if (res.ok) {
+      const data = await res.json();
+      return data.missions || [];
     }
-  } catch {
-    // Fall through to create new missions
+  } catch (err) {
+    console.error("Failed to fetch daily missions", err);
   }
-
-  // Create new daily missions
-  const streak = getStreak();
-  const totalXp = getTotalXp();
-
-  const missions: DailyMission[] = [
-    {
-      id: "solve_one",
-      title: "Solve 1 coding problem",
-      description: "Complete at least one problem today",
-      target: 1,
-      current: 0,
-      xpReward: 25,
-      completed: false,
-    },
-    {
-      id: "earn_xp",
-      title: "Earn 25 XP",
-      description: "Gain 25 XP from solving problems",
-      target: 25,
-      current: totalXp,
-      xpReward: 50,
-      completed: false,
-    },
-    {
-      id: "maintain_streak",
-      title: "Maintain streak",
-      description: "Keep your daily streak alive",
-      target: 1,
-      current: streak.count >= 1 ? 1 : 0,
-      xpReward: 30,
-      completed: streak.count >= 1,
-    },
-  ];
-
-  localStorage.setItem(missionsKey, JSON.stringify(missions));
-  return missions;
+  return [];
 }
 
-export function updateDailyMissions() {
-  const missions = getDailyMissions();
-  const streak = getStreak();
-  const totalXp = getTotalXp();
-  const todayStr = new Date().toISOString().split("T")[0];
-
-  let updated = false;
-
-  missions.forEach((mission) => {
-    if (mission.completed) return;
-
-    if (mission.id === "solve_one") {
-      const todaySubmissions = getSubmissionHistory()[todayStr] || 0;
-      if (todaySubmissions >= mission.target) {
-        mission.current = todaySubmissions;
-        mission.completed = true;
-        updated = true;
-      }
-    } else if (mission.id === "earn_xp") {
-      if (totalXp >= mission.target) {
-        mission.current = totalXp;
-        mission.completed = true;
-        updated = true;
-      }
-    } else if (mission.id === "maintain_streak") {
-      if (streak.count >= mission.target) {
-        mission.current = streak.count;
-        mission.completed = true;
-        updated = true;
-      }
-    }
-  });
-
-  if (updated) {
-    const missionsKey = `fa_daily_missions_${todayStr}`;
-    localStorage.setItem(missionsKey, JSON.stringify(missions));
+export async function updateDailyMissions(missions: DailyMission[]) {
+  try {
+    await authFetch('/api/daily-missions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ missions })
+    });
+  } catch (err) {
+    console.error("Failed to update daily missions", err);
   }
 }
 

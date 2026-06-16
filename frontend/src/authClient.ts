@@ -1,7 +1,7 @@
 export type UserRole = "student" | "instructor" | "admin";
 
 export type AuthUser = {
-  id: number;
+  id: string;
   email: string;
   name: string;
   role: UserRole;
@@ -42,7 +42,7 @@ async function parseResponse<T>(res: Response): Promise<T> {
   return data;
 }
 
-async function authFetch<T>(path: string, init: RequestInit = {}, retry = true): Promise<T> {
+export async function authFetch<T>(path: string, init: RequestInit = {}, retry = true): Promise<T> {
   const headers = new Headers(init.headers);
   if (init.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");

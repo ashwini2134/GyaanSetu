@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { api, type Course, getSubmissionHistory } from "../api";
+import { api, type Course } from "../api";
 import { useAuth } from "../auth";
 import { Card, LoadingCard, CourseSearchFilters, NoResultsState } from "../components";
 import { getCourseStats, subscribeToProgressChanges } from "../hooks/useProgress";
@@ -123,7 +123,7 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    setSubmissionHistory(getSubmissionHistory());
+    setSubmissionHistory({});
   }, []);
 
   const [courseStatsMap, setCourseStatsMap] = useState<Record<string, { completed: number; total: number; lecturesCompleted: number }>>({});

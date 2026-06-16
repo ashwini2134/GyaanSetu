@@ -1,7 +1,7 @@
 export type UserRole = "student" | "instructor" | "admin";
 
 export type User = {
-  id: number;
+  id: string;
   email: string;
   name: string;
   role: UserRole;
@@ -22,14 +22,14 @@ export type AuthTokens = {
 };
 
 export type JwtAccessPayload = {
-  sub: number;
+  sub: string;
   email: string;
   role: UserRole;
   type: "access";
 };
 
 export type JwtRefreshPayload = {
-  sub: number;
+  sub: string;
   type: "refresh";
   jti: string;
 };

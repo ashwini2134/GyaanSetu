@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { config } from "../config.js";
 import type { AuthTokens, JwtAccessPayload, JwtRefreshPayload, SafeUser } from "../types.js";
 import { generateSecureToken, hashToken } from "./tokens.js";
-import { getDb } from "../db.js";
+import { prisma } from "../prisma.js";
 
 function parseDurationMs(duration: string): number {
   const match = duration.match(/^(\d+)([smhd])$/);
@@ -25,7 +25,7 @@ export function signAccessToken(user: SafeUser): string {
   } as jwt.SignOptions);
 }
 
-export function signRefreshToken(userId: number): { token: string; jti: string } {
+export function signRefreshToken(userId: string): { token: string; jti: string } {
   const jti = generateSecureToken();
   const payload: JwtRefreshPayload = { sub: userId, type: "refresh", jti };
   const token = jwt.sign(payload, config.jwt.refreshSecret, {
@@ -46,44 +46,59 @@ export function verifyRefreshToken(token: string): JwtRefreshPayload {
   return payload;
 }
 
-export function storeRefreshToken(userId: number, jti: string): void {
-  const db = getDb();
-  const expiresAt = new Date(Date.now() + parseDurationMs(config.jwt.refreshExpiresIn)).toISOString();
-  db.prepare(
-    `INSERT INTO refresh_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)`
-  ).run(userId, hashToken(jti), expiresAt);
+export async function storeRefreshToken(userId: string, jti: string): Promise<void> {
+  const expiresAt = new Date(Date.now() + parseDurationMs(config.jwt.refreshExpiresIn));
+  await prisma.refreshToken.create({
+    data: {
+      userId,
+      tokenHash: hashToken(jti),
+      expiresAt,
+    },
+  });
 }
 
-export function isRefreshTokenValid(userId: number, jti: string): boolean {
-  const db = getDb();
-  const row = db
-    .prepare(
-      `SELECT id FROM refresh_tokens
-       WHERE user_id = ? AND token_hash = ? AND revoked_at IS NULL AND expires_at > datetime('now')`
-    )
-    .get(userId, hashToken(jti)) as { id: number } | undefined;
-  return Boolean(row);
+export async function isRefreshTokenValid(userId: string, jti: string): Promise<boolean> {
+  const record = await prisma.refreshToken.findFirst({
+    where: {
+      userId,
+      tokenHash: hashToken(jti),
+      revokedAt: null,
+      expiresAt: {
+        gt: new Date(),
+      },
+    },
+  });
+  return Boolean(record);
 }
 
-export function revokeRefreshToken(userId: number, jti: string): void {
-  const db = getDb();
-  db.prepare(
-    `UPDATE refresh_tokens SET revoked_at = datetime('now')
-     WHERE user_id = ? AND token_hash = ? AND revoked_at IS NULL`
-  ).run(userId, hashToken(jti));
+export async function revokeRefreshToken(userId: string, jti: string): Promise<void> {
+  await prisma.refreshToken.updateMany({
+    where: {
+      userId,
+      tokenHash: hashToken(jti),
+      revokedAt: null,
+    },
+    data: {
+      revokedAt: new Date(),
+    },
+  });
 }
 
-export function revokeAllRefreshTokens(userId: number): void {
-  const db = getDb();
-  db.prepare(
-    `UPDATE refresh_tokens SET revoked_at = datetime('now')
-     WHERE user_id = ? AND revoked_at IS NULL`
-  ).run(userId);
+export async function revokeAllRefreshTokens(userId: string): Promise<void> {
+  await prisma.refreshToken.updateMany({
+    where: {
+      userId,
+      revokedAt: null,
+    },
+    data: {
+      revokedAt: new Date(),
+    },
+  });
 }
 
-export function issueAuthTokens(user: SafeUser): AuthTokens {
+export async function issueAuthTokens(user: SafeUser): Promise<AuthTokens> {
   const accessToken = signAccessToken(user);
   const { token: refreshToken, jti } = signRefreshToken(user.id);
-  storeRefreshToken(user.id, jti);
+  await storeRefreshToken(user.id, jti);
   return { accessToken, refreshToken };
 }
