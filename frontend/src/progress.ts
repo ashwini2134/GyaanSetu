@@ -4,9 +4,6 @@ import { authFetch } from './authClient';
 
 // ── Constants & Keys ─────────────────────────────────────────────────────────
 const EVENT_NAME = 'fraylon:progress:update';
-const KEYS = {
-  completedActions: 'fraylon_completed_actions',
-};
 
 // ── Types ────────────────────────────────────────────────────────────────────
 export type AchievementDef = {
@@ -44,19 +41,6 @@ export type StatsData = {
 // ── Core Helpers ─────────────────────────────────────────────────────────────
 function emit() {
   window.dispatchEvent(new CustomEvent(EVENT_NAME));
-}
-
-function safeGet<T>(key: string, fallback: T): T {
-  try {
-    const val = localStorage.getItem(key);
-    return val ? JSON.parse(val) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function safeSet(key: string, val: any) {
-  localStorage.setItem(key, JSON.stringify(val));
 }
 
 // ── Toast Queue System ───────────────────────────────────────────────────────
@@ -168,13 +152,6 @@ export async function completeAction(
   actionType: 'section' | 'lecture' | 'quiz' | 'problem' | 'course_start' | 'course_complete' | 'project',
   actionId: string
 ) {
-  const completed = safeGet<string[]>(KEYS.completedActions, []);
-  const fullId = `${actionType}:${actionId}`;
-  
-  if (completed.includes(fullId)) return; // Already awarded
-
-  completed.push(fullId);
-  safeSet(KEYS.completedActions, completed);
 
   try {
     await authFetch('/api/progress/action', {

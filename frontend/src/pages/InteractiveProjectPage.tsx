@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
+import { authFetch } from '../authClient';
 import { markProjectCompletedDirect } from '../hooks/useProgress';
 import { runPythonMock, type DebugStep } from '../interpreter';
 import { getProjectDefaultInput, getProjectChecklist, runChecklist, getProjectDefinition } from '../projects/registry';
@@ -197,9 +198,14 @@ export default function InteractiveProjectPage() {
   }, [projectId]);
 
   useEffect(() => {
-    if (!code) return;
+    if (!code || !projectId) return;
     const t = setTimeout(() => {
-      localStorage.setItem(`draft_${projectId}`, code);
+      authFetch('/api/drafts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'project', targetId: projectId, code })
+      }).catch(console.error);
+      
       setDraftSaved(true);
       setTimeout(() => setDraftSaved(false), 2000);
     }, 1500);
@@ -208,8 +214,15 @@ export default function InteractiveProjectPage() {
 
   useEffect(() => {
     if (projectId) {
-      const saved = localStorage.getItem(`draft_${projectId}`);
-      if (saved) setCode(saved);
+      authFetch(`/api/drafts?type=project&targetId=${projectId}`)
+        .then(res => {
+          if (res.ok) return res.json();
+          return null;
+        })
+        .then(data => {
+          if (data?.code) setCode(data.code);
+        })
+        .catch(console.error);
     }
   }, [projectId]);
 
