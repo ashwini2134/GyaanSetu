@@ -58,6 +58,10 @@ const CapstonePage = lazy(
   () => import("./pages/CapstonePage")
 );
 
+const ProfilePage = lazy(
+  () => import("./pages/ProfilePage")
+);
+
 // Loading Spinner
 function LoadingSpinner() {
 
@@ -127,11 +131,7 @@ function RequireAuth({
   return <>{children}</>;
 }
 
-<<<<<<< HEAD
-function RequireRole({
-=======
 export function RequireRole({
->>>>>>> 8245f18 (Initial commit)
   roles,
   children,
 }: {
@@ -241,6 +241,13 @@ export default function App() {
           <Route
             path="leaderboard"
             element={<LeaderboardPage />}
+          />
+
+          {/* Profile */}
+
+          <Route
+            path="profile"
+            element={<ProfilePage />}
           />
 
         </Route>

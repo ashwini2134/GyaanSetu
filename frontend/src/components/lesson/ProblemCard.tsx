@@ -1,15 +1,8 @@
-<<<<<<< HEAD
-import { useState, useEffect, useRef } from 'react';
-import type { CodingProblem } from '../../types/lesson';
-import CodeEditor from './CodeEditor';
-import { runPython } from '../../utils/pythonRunner';
-import { authFetch } from '../../authClient';
-=======
 import { useState, useEffect } from 'react';
 import type { CodingProblem } from '../../types/lesson';
 import CodeEditor from './CodeEditor';
 import { runPython } from '../../utils/pythonRunner';
->>>>>>> 8245f18 (Initial commit)
+import { authFetch } from '../../authClient';
 
 const DIFF_COLOR: Record<string, string> = {
   easy:   'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
@@ -99,10 +92,6 @@ export default function ProblemCard({ problem, index, completed, onComplete, isO
   const [tab, setTab] = useState<'description' | 'hints'>('description');
   const [testResults, setTestResults] = useState<TestResult[] | null>(null);
   const [allPassed, setAllPassed] = useState(completed ?? false);
-<<<<<<< HEAD
-  const [submitting, setSubmitting] = useState(false);
-=======
->>>>>>> 8245f18 (Initial commit)
   const [showCompletion, setShowCompletion] = useState(false);
 
   // Run-only state (separate from submission)
@@ -113,33 +102,22 @@ export default function ProblemCard({ problem, index, completed, onComplete, isO
   const saveKey = `lms:problem:${problem.id}`;
 
   useEffect(() => {
-<<<<<<< HEAD
     async function loadDraft() {
       try {
-        const res = await authFetch(`/api/drafts/${problem.id}?type=problem`);
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data.code) setSavedCode(data.code);
+        const data = await authFetch<{ code?: string }>(`/api/drafts/${problem.id}?type=problem`);
+        if (data && data.code) setSavedCode(data.code);
       } catch (err) {
         console.error('Failed to load problem draft', err);
       }
     }
     loadDraft();
   }, [problem.id]);
-=======
-    try {
-      const saved = localStorage.getItem(saveKey);
-      if (saved) setSavedCode(saved);
-    } catch {}
-  }, [saveKey]);
->>>>>>> 8245f18 (Initial commit)
 
   useEffect(() => {
     if (completed) setAllPassed(true);
   }, [completed]);
 
   const handleSave = (code: string) => {
-<<<<<<< HEAD
     setSavedCode(code);
     authFetch('/api/drafts', {
       method: 'POST',
@@ -156,17 +134,7 @@ export default function ProblemCard({ problem, index, completed, onComplete, isO
   };
 
   // Run — just execute, show output, no test cases
-  const handleRun = (code: string, output: string, error: string | null) => {
-=======
-    try {
-      localStorage.setItem(saveKey, code);
-      setSavedCode(code);
-    } catch {}
-  };
-
-  // Run — just execute, show output, no test cases
   const handleRun = (_code: string, output: string, error: string | null) => {
->>>>>>> 8245f18 (Initial commit)
     setRunOutput(output);
     setRunError(error);
     // Clear any previous submission results when running new code
@@ -180,10 +148,6 @@ export default function ProblemCard({ problem, index, completed, onComplete, isO
       completeProblem();
       return;
     }
-<<<<<<< HEAD
-    setSubmitting(true);
-=======
->>>>>>> 8245f18 (Initial commit)
     setTestResults(null);
     setRunOutput(null);
     setRunError(null);
@@ -209,10 +173,6 @@ export default function ProblemCard({ problem, index, completed, onComplete, isO
       if (results.every(r => r.passed)) {
         completeProblem();
       }
-<<<<<<< HEAD
-      setSubmitting(false);
-=======
->>>>>>> 8245f18 (Initial commit)
     }, 100);
   };
 

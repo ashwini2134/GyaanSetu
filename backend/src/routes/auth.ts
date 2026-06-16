@@ -21,6 +21,7 @@ import {
   findUserByEmail,
   findUserById,
   updatePassword,
+  updateProfile,
 } from "../services/userService.js";
 import type { OAuthProvider } from "../types.js";
 import { OAUTH_PROVIDERS } from "../types.js";
@@ -88,11 +89,7 @@ router.post("/register", authLimiter, async (req, res, next) => {
   try {
     const body = registerSchema.parse(req.body);
     const user = await createUser(body);
-<<<<<<< HEAD
     const tokens = await issueAuthTokens(user);
-=======
-    const tokens = issueAuthTokens(user);
->>>>>>> 8245f18 (Initial commit)
     res.status(201).json({ ...tokenResponse(res, tokens), user });
   } catch (err) {
     if (err instanceof Error && err.message === "Email already in use") {
@@ -107,11 +104,7 @@ router.post("/login", authLimiter, async (req, res, next) => {
   try {
     const body = loginSchema.parse(req.body);
     const user = await authenticateUser(body.email, body.password);
-<<<<<<< HEAD
     const tokens = await issueAuthTokens(user);
-=======
-    const tokens = issueAuthTokens(user);
->>>>>>> 8245f18 (Initial commit)
     res.json({ ...tokenResponse(res, tokens), user });
   } catch (err) {
     if (err instanceof Error && err.message === "Invalid email or password") {
@@ -122,17 +115,11 @@ router.post("/login", authLimiter, async (req, res, next) => {
   }
 });
 
-<<<<<<< HEAD
 router.post("/logout", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
     if (req.user) {
       await revokeAllRefreshTokens(req.user.id);
     }
-=======
-router.post("/logout", requireAuth, (req: AuthenticatedRequest, res, next) => {
-  try {
-    if (req.user) revokeAllRefreshTokens(req.user.id);
->>>>>>> 8245f18 (Initial commit)
     clearRefreshCookie(res);
     res.json({ ok: true });
   } catch (err) {
@@ -140,17 +127,12 @@ router.post("/logout", requireAuth, (req: AuthenticatedRequest, res, next) => {
   }
 });
 
-<<<<<<< HEAD
 router.post("/refresh", authLimiter, async (req, res, next) => {
-=======
-router.post("/refresh", authLimiter, (req, res, next) => {
->>>>>>> 8245f18 (Initial commit)
   try {
     const refreshToken = (req.cookies?.[REFRESH_COOKIE] as string | undefined) ?? req.body?.refresh_token;
     if (!refreshToken) throw new AppError("Refresh token required", 401);
 
     const payload = verifyRefreshToken(refreshToken);
-<<<<<<< HEAD
     const isValid = await isRefreshTokenValid(payload.sub, payload.jti);
     if (!isValid) {
       throw new AppError("Invalid refresh token", 401);
@@ -161,17 +143,6 @@ router.post("/refresh", authLimiter, (req, res, next) => {
 
     await revokeRefreshToken(payload.sub, payload.jti);
     const tokens = await issueAuthTokens(user);
-=======
-    if (!isRefreshTokenValid(payload.sub, payload.jti)) {
-      throw new AppError("Invalid refresh token", 401);
-    }
-
-    const user = findUserById(payload.sub);
-    if (!user) throw new AppError("User not found", 401);
-
-    revokeRefreshToken(payload.sub, payload.jti);
-    const tokens = issueAuthTokens(user);
->>>>>>> 8245f18 (Initial commit)
     res.json(tokenResponse(res, tokens));
   } catch (err) {
     next(err instanceof Error && !(err instanceof AppError) ? new AppError("Invalid refresh token", 401) : err);
@@ -182,18 +153,41 @@ router.get("/me", requireAuth, (req: AuthenticatedRequest, res) => {
   res.json({ user: req.user });
 });
 
+const profileSchema = z.object({
+  name: z.string().min(1).max(100).trim().optional(),
+  bio: z.string().max(500).trim().optional(),
+  password: z.string().min(8).max(128).optional(),
+});
+
+router.patch("/profile", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    if (!req.user) {
+      throw new AppError("Unauthorized", 401);
+    }
+    const body = profileSchema.parse(req.body);
+    
+    const user = await updateProfile(req.user.id, {
+      name: body.name,
+      bio: body.bio,
+    });
+    
+    if (body.password) {
+      await updatePassword(req.user.id, body.password);
+      await revokeAllRefreshTokens(req.user.id);
+    }
+    
+    res.json({ user });
+  } catch (err) {
+    next(err instanceof z.ZodError ? new AppError(err.errors[0]?.message ?? "Invalid input") : err);
+  }
+});
+
 router.post("/forgot-password", authLimiter, async (req, res, next) => {
   try {
     const { email } = forgotSchema.parse(req.body);
-<<<<<<< HEAD
     const user = await findUserByEmail(email);
     if (user?.passwordHash) {
       const token = await createPasswordResetToken(user.id);
-=======
-    const user = findUserByEmail(email);
-    if (user?.passwordHash) {
-      const token = createPasswordResetToken(user.id);
->>>>>>> 8245f18 (Initial commit)
       const resetUrl = `${config.frontendUrl}/#/reset-password?token=${token}`;
       await sendPasswordResetEmail(email, resetUrl);
     }
@@ -206,17 +200,10 @@ router.post("/forgot-password", authLimiter, async (req, res, next) => {
 router.post("/reset-password", authLimiter, async (req, res, next) => {
   try {
     const { token, password } = resetSchema.parse(req.body);
-<<<<<<< HEAD
     const userId = await consumePasswordResetToken(token);
     if (!userId) throw new AppError("Invalid or expired reset token", 400);
     await updatePassword(userId, password);
     await revokeAllRefreshTokens(userId);
-=======
-    const userId = consumePasswordResetToken(token);
-    if (!userId) throw new AppError("Invalid or expired reset token", 400);
-    await updatePassword(userId, password);
-    revokeAllRefreshTokens(userId);
->>>>>>> 8245f18 (Initial commit)
     res.json({ message: "Password updated successfully" });
   } catch (err) {
     next(err instanceof z.ZodError ? new AppError("Invalid input") : err);
@@ -274,11 +261,7 @@ router.get("/oauth/:provider/callback", async (req, res) => {
       name: profile.name,
     });
 
-<<<<<<< HEAD
     const exchangeCode = await createOAuthExchangeCode(user.id);
-=======
-    const exchangeCode = createOAuthExchangeCode(user.id);
->>>>>>> 8245f18 (Initial commit)
     res.redirect(`${config.frontendUrl}/#/auth/oauth?code=${exchangeCode}`);
   } catch (err) {
     const message =
@@ -287,7 +270,6 @@ router.get("/oauth/:provider/callback", async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
 router.post("/oauth/exchange", authLimiter, async (req, res, next) => {
   try {
     const code = z.string().min(1).parse(req.body?.code);
@@ -298,14 +280,6 @@ router.post("/oauth/exchange", authLimiter, async (req, res, next) => {
     if (!user) throw new AppError("User not found", 400);
 
     const tokens = await issueAuthTokens(user);
-=======
-router.post("/oauth/exchange", authLimiter, (req, res, next) => {
-  try {
-    const code = z.string().min(1).parse(req.body?.code);
-    const user = consumeOAuthExchangeCode(code);
-    if (!user) throw new AppError("Invalid or expired OAuth code", 400);
-    const tokens = issueAuthTokens(user);
->>>>>>> 8245f18 (Initial commit)
     res.json({ ...tokenResponse(res, tokens), user });
   } catch (err) {
     next(err instanceof z.ZodError ? new AppError("Invalid code") : err);

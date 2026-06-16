@@ -1,20 +1,17 @@
 export type UserRole = "student" | "instructor" | "admin";
 
 export type User = {
-<<<<<<< HEAD
   id: string;
-=======
-  id: number;
->>>>>>> 8245f18 (Initial commit)
   email: string;
   name: string;
   role: UserRole;
   emailVerified: boolean;
+  bio: string;
   createdAt: string;
   updatedAt: string;
 };
 
-export type SafeUser = Pick<User, "id" | "email" | "name" | "role" | "emailVerified">;
+export type SafeUser = Pick<User, "id" | "email" | "name" | "role" | "emailVerified" | "bio" | "createdAt">;
 
 export type OAuthProvider = "github" | "linkedin" | "google";
 
@@ -26,22 +23,14 @@ export type AuthTokens = {
 };
 
 export type JwtAccessPayload = {
-<<<<<<< HEAD
   sub: string;
-=======
-  sub: number;
->>>>>>> 8245f18 (Initial commit)
   email: string;
   role: UserRole;
   type: "access";
 };
 
 export type JwtRefreshPayload = {
-<<<<<<< HEAD
   sub: string;
-=======
-  sub: number;
->>>>>>> 8245f18 (Initial commit)
   type: "refresh";
   jti: string;
 };

@@ -1,10 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-<<<<<<< HEAD
 import { api, getProjectMetadata } from '../api';
-=======
-import { api } from '../api';
->>>>>>> 8245f18 (Initial commit)
 import { useLessonData } from '../hooks/useLessonData';
 import { useProgress, getCourseProgress, isLectureUnlocked, tryAutoCompleteLecture } from '../hooks/useProgress';
 import {
@@ -13,11 +9,7 @@ import {
   ProblemCard,
   SummaryCard,
 } from '../components/lesson';
-<<<<<<< HEAD
 import type { CodingProblem, ProjectSummary } from '../types/lesson';
-=======
-import type { CodingProblem } from '../types/lesson';
->>>>>>> 8245f18 (Initial commit)
 import { ArrowLeft, ArrowRight, CheckCircle, Lock } from 'lucide-react';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -26,10 +18,7 @@ type Page =
   | { type: 'section'; index: number }
   | { type: 'quiz' }
   | { type: 'problems' }
-<<<<<<< HEAD
   | { type: 'project' }
-=======
->>>>>>> 8245f18 (Initial commit)
   | { type: 'summary' };
 
 function pageId(page: Page, sections: Array<{ id: string }>): string {
@@ -41,20 +30,13 @@ function pageLabel(page: Page, sections: Array<{ label: string }>): string {
   if (page.type === 'section') return sections[page.index].label;
   if (page.type === 'quiz') return 'Quiz';
   if (page.type === 'problems') return 'Problems';
-<<<<<<< HEAD
   if (page.type === 'project') return 'Project';
-=======
->>>>>>> 8245f18 (Initial commit)
   return 'Summary';
 }
 
 type PageStatus = 'completed' | 'current' | 'upcoming';
 
-<<<<<<< HEAD
-function LockedLectureView({ slug, lectureNumber, courseTitle }: { slug: string; lectureNumber: number; courseTitle: string }) {
-=======
-function LockedLectureView({ slug, lectureNumber }: { slug: string; lectureNumber: number }) {
->>>>>>> 8245f18 (Initial commit)
+function LockedLectureView({ slug, lectureNumber, courseTitle: _courseTitle }: { slug: string; lectureNumber: number; courseTitle: string }) {
   const navigate = useNavigate();
   const prevLecture = lectureNumber > 0 ? lectureNumber - 1 : null;
 
@@ -97,10 +79,6 @@ function LegacyLecturePage({ slug, lectureNumber }: { slug: string; lectureNumbe
   const navigate = useNavigate();
   const [content, setContent] = useState('');
   const courseTitle = slug === 'cs50p' ? 'CS50 Python' : slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
-<<<<<<< HEAD
-  const [retakingQuiz, setRetakingQuiz] = useState(false);
-=======
->>>>>>> 8245f18 (Initial commit)
 
   useEffect(() => {
     const base = import.meta.env.BASE_URL ?? '/';
@@ -162,10 +140,6 @@ export default function LecturePage() {
     if (!slug) return;
     api.courseLectures(slug).then(lectures => {
       setAllLectures(lectures.map(l => ({ number: l.number, title: l.title })));
-<<<<<<< HEAD
-    }).catch(() => {});
-  }, [slug]);
-=======
       // Redirect to capstone page for the last lecture
       const last = lectures[lectures.length - 1];
       if (last && lectureNumber >= last.number) {
@@ -173,7 +147,6 @@ export default function LecturePage() {
       }
     }).catch(() => {});
   }, [slug, lectureNumber, navigate]);
->>>>>>> 8245f18 (Initial commit)
 
   // Derive unlock status from stored progress (no state needed — avoids loops)
   const unlocked = useMemo(() => {
@@ -188,19 +161,13 @@ export default function LecturePage() {
     if (!lessonData) return [];
     const quiz = lessonData.quiz ?? [];
     const problems: CodingProblem[] = lessonData.problems ?? [];
-<<<<<<< HEAD
     const projects: ProjectSummary[] = lessonData.projects ?? [];
-=======
->>>>>>> 8245f18 (Initial commit)
     const summary = lessonData.summary;
 
     const result: Page[] = lessonData.sections.map((_, i) => ({ type: 'section', index: i }));
     if (quiz.length > 0) result.push({ type: 'quiz' });
     if (problems.length > 0) result.push({ type: 'problems' });
-<<<<<<< HEAD
     if (projects.length > 0) result.push({ type: 'project' });
-=======
->>>>>>> 8245f18 (Initial commit)
     if (summary) result.push({ type: 'summary' });
     return result;
   }, [lessonData]);
@@ -259,12 +226,8 @@ export default function LecturePage() {
     if (page.type === 'summary' && slug && lessonData) {
       const totalProblems = (lessonData.problems ?? []).length;
       const hasQuiz = (lessonData.quiz ?? []).length > 0;
-<<<<<<< HEAD
       const hasProject = (lessonData.projects ?? []).length > 0;
       tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, totalProblems, hasQuiz, hasProject);
-=======
-      tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, totalProblems, hasQuiz);
->>>>>>> 8245f18 (Initial commit)
     }
 
     if (page.type === 'section') {
@@ -282,10 +245,7 @@ export default function LecturePage() {
           lessonData.sections.length, 
           lessonData.problems?.length ?? 0, 
           (lessonData.quiz?.length ?? 0) > 0,
-<<<<<<< HEAD
           (lessonData.projects?.length ?? 0) > 0,
-=======
->>>>>>> 8245f18 (Initial commit)
         );
       }
     }, 0);
@@ -300,10 +260,7 @@ export default function LecturePage() {
       let isVisited = false;
       if (id === 'quiz') isVisited = progress.quizCompleted;
       else if (id === 'problems') isVisited = progress.problemsCompleted.length > 0;
-<<<<<<< HEAD
-      else if (id === 'project') isVisited = progress.projectCompleted;
-=======
->>>>>>> 8245f18 (Initial commit)
+      else if (id === 'project') isVisited = !!progress.projectCompleted;
       else if (id === 'summary') isVisited = progress.lectureCompleted;
       else isVisited = !!progress.sections[id]?.visited;
 
@@ -313,15 +270,10 @@ export default function LecturePage() {
 
   if (!slug) return null;
 
-<<<<<<< HEAD
   // Show locked view
   if (unlocked === false) {
     const courseTitle = slug === 'cs50p' ? 'CS50 Python' : slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
     return <LockedLectureView slug={slug} lectureNumber={lectureNumber} courseTitle={courseTitle} />;
-=======
-  if (unlocked === false) {
-    return <LockedLectureView slug={slug} lectureNumber={lectureNumber} />;
->>>>>>> 8245f18 (Initial commit)
   }
 
   // Fallback to legacy renderer if no lesson.json
@@ -342,19 +294,12 @@ export default function LecturePage() {
 
   if (!lessonData) return null;
 
-<<<<<<< HEAD
-  const prevLecture = allLectures.find(l => l.number === lectureNumber - 1);
-=======
->>>>>>> 8245f18 (Initial commit)
   const nextLecture = allLectures.find(l => l.number === lectureNumber + 1);
   const courseTitle = slug === 'cs50p' ? 'CS50 Python' : slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
   const quiz = lessonData.quiz ?? [];
   const problems: CodingProblem[] = lessonData.problems ?? [];
-<<<<<<< HEAD
   const projects: ProjectSummary[] = lessonData.projects ?? [];
   const hasProject = projects.length > 0;
-=======
->>>>>>> 8245f18 (Initial commit)
   const summary = lessonData.summary;
 
   const currentPage = pages[currentPageIdx];
@@ -412,11 +357,7 @@ export default function LecturePage() {
               const id = pageId(page, lessonData.sections);
               const label = pageLabel(page, lessonData.sections);
 
-<<<<<<< HEAD
               const projectInProgress = id === 'project' && !progress.projectCompleted;
-
-=======
->>>>>>> 8245f18 (Initial commit)
               return (
                 <button
                   key={id}
@@ -429,19 +370,13 @@ export default function LecturePage() {
                 >
                   {/* Status indicator */}
                   <span className="w-4 h-4 flex items-center justify-center flex-shrink-0">
-<<<<<<< HEAD
                     {id === 'project' && progress.projectCompleted ? (
                       <CheckCircle size={14} className="text-green-400" />
                     ) : projectInProgress ? (
                       <span className="w-2 h-2 rounded-full bg-blue-400 ring-1 ring-blue-400/50" />
                     ) : status === 'current' ? (
                       <span className="w-2 h-2 rounded-full bg-blue-400" />
-                    ) : progress.sections[id]?.visited ? (
-=======
-                    {status === 'current' ? (
-                      <span className="w-2 h-2 rounded-full bg-blue-400" />
                     ) : progress.sections[id]?.visited || status === 'completed' ? (
->>>>>>> 8245f18 (Initial commit)
                       <CheckCircle size={14} className="text-green-400" />
                     ) : (
                       <span className="w-2 h-2 rounded-full bg-slate-600" />
@@ -466,11 +401,7 @@ export default function LecturePage() {
                   onPracticeComplete={() => {
                     markPracticeCompleted(lessonData.sections[currentPage.index].id);
                     if (slug && lessonData) {
-<<<<<<< HEAD
                       tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, problems.length, quiz.length > 0, hasProject);
-=======
-                      tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, problems.length, quiz.length > 0);
->>>>>>> 8245f18 (Initial commit)
                     }
                   }}
               />
@@ -516,17 +447,10 @@ export default function LecturePage() {
                       onComplete={(score, total) => {
                         setRetakingQuiz(false);
                         markQuizCompleted(score, total);
-<<<<<<< HEAD
                         if (score / total >= 0.6) {
                           markSectionVisited('quiz');
                           if (slug && lessonData) {
                             tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, problems.length, quiz.length > 0, hasProject);
-=======
-                        if (score / total >= 0.7) {
-                          markSectionVisited('quiz');
-                          if (slug && lessonData) {
-                            tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, problems.length, quiz.length > 0);
->>>>>>> 8245f18 (Initial commit)
                           }
                         }
                       }}
@@ -568,11 +492,7 @@ export default function LecturePage() {
                           markSectionVisited('problems');
                           markHandsOnTaskCompleted();
                           if (slug && lessonData) {
-<<<<<<< HEAD
                             tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, problems.length, quiz.length > 0, hasProject);
-=======
-                            tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, problems.length, quiz.length > 0);
->>>>>>> 8245f18 (Initial commit)
                           }
                           if (!alreadySolved) {
                             if (progress.problemsCompleted.length + 1 >= problems.length) {
@@ -612,8 +532,7 @@ export default function LecturePage() {
                               isOpen={openSimilarIndex === i}
                               onOpenChange={(isOpen) => setOpenSimilarIndex(isOpen ? i : -1)}
                               completed={progress.problemsCompleted.includes(problem.id)}
-                              onComplete={(id) => {
-                                markProblemCompleted(id);
+                              onComplete={() => {
                                 if (i + 1 < similarProblems.length) {
                                   setTimeout(() => setOpenSimilarIndex(i + 1), 1500);
                                 }
@@ -628,7 +547,6 @@ export default function LecturePage() {
               </section>
             )}
 
-<<<<<<< HEAD
             {currentPage?.type === 'project' && (
               <section id="section-project">
                 <div className="space-y-6">
@@ -726,9 +644,6 @@ export default function LecturePage() {
                 </div>
               </section>
             )}
-
-=======
->>>>>>> 8245f18 (Initial commit)
             {showAllCompleted && (
               <div className="fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-300">
                 <div className="max-w-md w-full mx-4 p-8 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-emerald-500/30 text-center space-y-6 animate-in zoom-in duration-500">
@@ -774,12 +689,8 @@ export default function LecturePage() {
                     const allSectionsDone = sectionsVisited >= lessonData.sections.length;
                     const quizDone = !quiz.length || progress.quizCompleted;
                     const problemsDone = progress.problemsCompleted.length >= problems.length;
-<<<<<<< HEAD
                     const projectDone = !hasProject || progress.projectCompleted;
                     if (allSectionsDone && quizDone && problemsDone && projectDone) {
-=======
-                    if (allSectionsDone && quizDone && problemsDone) {
->>>>>>> 8245f18 (Initial commit)
                       markLectureCompleted();
                     }
                     if (nextLecture) {

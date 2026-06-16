@@ -3,7 +3,6 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import { config } from "./config.js";
-<<<<<<< HEAD
 import { errorHandler } from "./middleware/errorHandler.js";
 import authRoutes from "./routes/auth.js";
 import progressRoutes from "./routes/progress.js";
@@ -17,16 +16,6 @@ import chatRoutes from "./routes/chat.js";
 import dailyMissionsRoutes from "./routes/dailyMissions.js";
 
 export function createApp() {
-=======
-import { getDb } from "./db.js";
-import { errorHandler } from "./middleware/errorHandler.js";
-import authRoutes from "./routes/auth.js";
-import progressRoutes from "./routes/progress.js";
-
-export function createApp() {
-  getDb();
-
->>>>>>> 8245f18 (Initial commit)
   const app = express();
 
   app.use(helmet());
@@ -56,7 +45,6 @@ export function createApp() {
 
   app.use("/api/auth", authRoutes);
   app.use("/api/progress", progressRoutes);
-<<<<<<< HEAD
   app.use("/api/projects", projectRoutes);
   app.use("/api/xp", xpRoutes);
   app.use("/api/achievements", achievementsRoutes);
@@ -65,8 +53,6 @@ export function createApp() {
   app.use("/api/drafts", codeDraftsRoutes);
   app.use("/api/chat", chatRoutes);
   app.use("/api/daily-missions", dailyMissionsRoutes);
-=======
->>>>>>> 8245f18 (Initial commit)
 
   app.use(errorHandler);
   return app;

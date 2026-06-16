@@ -6,6 +6,19 @@ import { z } from "zod";
 
 const router = Router();
 
+router.get("/", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const attempts = await prisma.quizAttempt.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" }
+    });
+    res.json(attempts);
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get("/:quizId", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
     const userId = req.user!.id;

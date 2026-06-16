@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-=======
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
->>>>>>> 8245f18 (Initial commit)
 generator client {
   provider   = "prisma-client-js"
   output     = "../generated/prisma"
@@ -14,7 +8,6 @@ datasource db {
   provider = "postgresql"
 }
 
-<<<<<<< HEAD
 model User {
   id                  String               @id @default(uuid())
   email               String               @unique
@@ -27,6 +20,7 @@ model User {
   lastActiveAt        DateTime             @default(now())
   emailVerified       Boolean              @default(false)
   role                String               @default("student")
+  bio                 String               @default("")
   statsData           Json?
   overallProgress     Int                  @default(0)
   updatedAt           DateTime             @updatedAt
@@ -58,49 +52,10 @@ model Progress {
   projectId         String?
   user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-=======
-// ── Core Identity ────────────────────────────────────────────────────────────
-
-model User {
-  id             String   @id @default(uuid())
-  email          String   @unique
-  name           String
-  passwordHash   String
-  createdAt      DateTime @default(now())
-
-  // Unified Gamification & Stats
-  totalXp        Int      @default(0)
-  currentStreak  Int      @default(0)
-  longestStreak  Int      @default(0)
-  lastActiveAt   DateTime @default(now())
-
-  // Relational Links
-  progress       Progress[]
-  quizAttempts   QuizAttempt[]
-  submissions    Submission[]
-  projects       Project[]
-  achievements   Achievement[]
-  xpHistory      XpTransaction[]
-  chatMessages   ChatMessage[]
-}
-
-// ── Course Engagement ────────────────────────────────────────────────────────
-
-model Progress {
-  id           String   @id @default(uuid())
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId       String
-  courseSlug   String   // e.g. "cs50-ai"
-  lectureId    String   // Identifies the specific section/lecture
-  status       String   // e.g. "STARTED", "COMPLETED"
-  completedAt  DateTime?
-  
->>>>>>> 8245f18 (Initial commit)
   @@unique([userId, courseSlug, lectureId])
 }
 
 model QuizAttempt {
-<<<<<<< HEAD
   id        String   @id @default(uuid())
   userId    String
   quizId    String
@@ -121,35 +76,10 @@ model Submission {
   updatedAt DateTime @updatedAt
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-=======
-  id           String   @id @default(uuid())
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId       String
-  quizId       String   // Identifies which quiz
-  score        Int
-  total        Int
-  passed       Boolean
-  answers      Json     // Stores the specific answers chosen by the student
-  createdAt    DateTime @default(now())
-}
-
-// ── Practice & Code Submissions ──────────────────────────────────────────────
-
-model Submission {
-  id           String   @id @default(uuid())
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId       String
-  problemId    String   // Identifies the practice problem
-  code         String   @db.Text
-  status       String   // e.g. "DRAFT", "SUBMITTED", "PASSED"
-  updatedAt    DateTime @updatedAt
-  
->>>>>>> 8245f18 (Initial commit)
   @@unique([userId, problemId])
 }
 
 model ChatMessage {
-<<<<<<< HEAD
   id        String   @id @default(uuid())
   userId    String
   problemId String
@@ -179,44 +109,10 @@ model Achievement {
   unlockedAt    DateTime @default(now())
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-=======
-  id           String   @id @default(uuid())
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId       String
-  problemId    String
-  role         String   // "user" or "assistant"
-  content      String   @db.Text
-  createdAt    DateTime @default(now())
-}
-
-model Project {
-  id           String   @id @default(uuid())
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId       String
-  projectId    String
-  code         String   @db.Text
-  status       String   // e.g. "DRAFT", "COMPLETED"
-  completedAt  DateTime?
-  updatedAt    DateTime @updatedAt
-  
-  @@unique([userId, projectId])
-}
-
-// ── Gamification Engine ──────────────────────────────────────────────────────
-
-model Achievement {
-  id             String   @id @default(uuid())
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId         String
-  achievementId  String   // Identifies the unlocked badge
-  unlockedAt     DateTime @default(now())
-  
->>>>>>> 8245f18 (Initial commit)
   @@unique([userId, achievementId])
 }
 
 model XpTransaction {
-<<<<<<< HEAD
   id        String   @id @default(uuid())
   userId    String
   amount    Int
@@ -291,15 +187,4 @@ model DailyMission {
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, date])
-=======
-  id           String   @id @default(uuid())
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId       String
-  amount       Int
-  reason       String
-  actionId     String?  // Optional: Used to uniquely identify an action so XP isn't awarded twice
-  createdAt    DateTime @default(now())
-
-  @@unique([userId, actionId]) // Prisma ignores nulls in Postgres unique constraints
->>>>>>> 8245f18 (Initial commit)
 }

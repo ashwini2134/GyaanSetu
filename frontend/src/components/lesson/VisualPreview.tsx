@@ -577,8 +577,6 @@ function DiaryCard({ text }: { text: string }) {
   );
 }
 
-<<<<<<< HEAD
-=======
 // ── Student Management Visualizer ──
 function StudentManagementCard() {
   const fileContent = localStorage.getItem('fa_file_students.txt') || '';
@@ -748,7 +746,6 @@ function QuizAppCard({ text }: { text: string }) {
   );
 }
 
->>>>>>> 8245f18 (Initial commit)
 const projectRenderers: Record<string, (text: string) => React.ReactNode> = {
   rock_paper_scissors: (text) => <GameCard text={text} />,
   multiplication_explorer: (text) => <MultiplicationTableCard text={text} />,
@@ -759,13 +756,10 @@ const projectRenderers: Record<string, (text: string) => React.ReactNode> = {
   text_analyzer: (text) => <TextAnalyzerCard text={text} />,
   personal_diary: (text) => <DiaryCard text={text} />,
   grade_tracker: (text) => <GradeTrackerCard text={text} />,
-<<<<<<< HEAD
-=======
   student_management: (_text) => <StudentManagementCard />,
   expense_tracker: (_text) => <ExpenseTrackerCard />,
   todo_list: (_text) => <TodoListCard />,
   quiz_app: (text) => <QuizAppCard text={text} />,
->>>>>>> 8245f18 (Initial commit)
 };
 
 function DefaultPreview({ text }: { text: string }) {

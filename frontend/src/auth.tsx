@@ -11,6 +11,7 @@ const Ctx = createContext<{
   logout: () => Promise<void>;
   completeOAuth: (code: string) => Promise<void>;
   hasRole: (...roles: UserRole[]) => boolean;
+  checkAuth: () => Promise<void>;
 } | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -71,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const hasRole = (...roles: UserRole[]) => Boolean(user && roles.includes(user.role));
 
   return (
-    <Ctx.Provider value={{ user, ready, login, register, logout, completeOAuth, hasRole }}>
+    <Ctx.Provider value={{ user, ready, login, register, logout, completeOAuth, hasRole, checkAuth: loadMe }}>
       {children}
     </Ctx.Provider>
   );

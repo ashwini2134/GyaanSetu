@@ -1,15 +1,13 @@
 export type UserRole = "student" | "instructor" | "admin";
 
 export type AuthUser = {
-<<<<<<< HEAD
   id: string;
-=======
-  id: number;
->>>>>>> 8245f18 (Initial commit)
   email: string;
   name: string;
   role: UserRole;
   emailVerified: boolean;
+  bio?: string;
+  createdAt?: string;
 };
 
 const TOKEN_KEY = "fa_token";
@@ -46,11 +44,7 @@ async function parseResponse<T>(res: Response): Promise<T> {
   return data;
 }
 
-<<<<<<< HEAD
 export async function authFetch<T>(path: string, init: RequestInit = {}, retry = true): Promise<T> {
-=======
-async function authFetch<T>(path: string, init: RequestInit = {}, retry = true): Promise<T> {
->>>>>>> 8245f18 (Initial commit)
   const headers = new Headers(init.headers);
   if (init.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");

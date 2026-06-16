@@ -5,11 +5,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import { getMentorHint, getFailureAnalysis, getProgressiveHints, reviewStudentCode, type FailureAnalysisResult, type ProgressiveHints, type CodeReviewResult } from './mentor';
 export type { FailureAnalysisResult, ProgressiveHints, CodeReviewCheck, CodeReviewResult } from './mentor';
-<<<<<<< HEAD
-import { getProjectDefinition } from './projects/registry';
 import { authFetch } from './authClient';
-=======
->>>>>>> 8245f18 (Initial commit)
 // ── Types (public API unchanged so pages need zero edits) ─────────────────────
 export type Course = {
   id: number;
@@ -33,18 +29,13 @@ export type ChatMsg = { role: string; content: string; created_at: string };
 
 export { getToken, setToken, clearToken } from "./authClient";
 
-<<<<<<< HEAD
-import { authFetch } from "./authClient";
-
 const CHAT_KEY  = "fa_chat";
 
 // ── Chat storage ─────────────────────────────────────────────────────────────
 async function getChatHistory(problemId: number | string): Promise<ChatMsg[]> {
   try {
-    const res = await authFetch(`/api/chat/${problemId}`);
-    if (res.ok) {
-      return await res.json();
-    }
+    const res = await authFetch<ChatMsg[]>(`/api/chat/${problemId}`);
+    return res;
   } catch { /* ignore */ }
   return [];
 }
@@ -59,23 +50,6 @@ async function saveChatMessage(problemId: number | string, msg: ChatMsg) {
         content: msg.content
       })
     });
-=======
-// ── localStorage helpers ──────────────────────────────────────────────────────
-const CHAT_KEY  = "fa_chat";
-
-// ── Chat storage ─────────────────────────────────────────────────────────────
-function getChatHistory(problemId: number | string): ChatMsg[] {
-  try {
-    const all: Record<string, ChatMsg[]> = JSON.parse(localStorage.getItem(CHAT_KEY) ?? "{}");
-    return all[String(problemId)] ?? [];
-  } catch { return []; }
-}
-function saveChatHistory(problemId: number | string, msgs: ChatMsg[]) {
-  try {
-    const all: Record<string, ChatMsg[]> = JSON.parse(localStorage.getItem(CHAT_KEY) ?? "{}");
-    all[String(problemId)] = msgs;
-    localStorage.setItem(CHAT_KEY, JSON.stringify(all));
->>>>>>> 8245f18 (Initial commit)
   } catch { /* ignore */ }
 }
 
@@ -262,11 +236,7 @@ export const api = {
       lectureNum = Math.floor(problemIndex / 5); // Rough estimate: 5 problems per lecture
     }
 
-<<<<<<< HEAD
     const existing = await getChatHistory(problemId);
-=======
-    const existing = getChatHistory(problemId);
->>>>>>> 8245f18 (Initial commit)
 
     // Get mentor hint
     const hintResponse = getMentorHint({
@@ -288,16 +258,11 @@ export const api = {
 
     const userMsg: ChatMsg  = { role: "user",   content: message, created_at: new Date().toISOString() };
     const asstMsg: ChatMsg  = { role: "assistant", content: reply, created_at: new Date().toISOString() };
-<<<<<<< HEAD
-    
     await saveChatMessage(problemId, userMsg);
     await saveChatMessage(problemId, asstMsg);
     
     // Clean up old localStorage keys only after backend calls are confirmed working
     try { localStorage.removeItem(CHAT_KEY); } catch {}
-=======
-    saveChatHistory(problemId, [...existing, userMsg, asstMsg]);
->>>>>>> 8245f18 (Initial commit)
 
     return { reply };
   },
@@ -321,63 +286,7 @@ export const api = {
 
 // ── DEPRECATED: Progress & Streaks Helpers (use backend APIs instead) ────────────
 // These localStorage-based helpers are deprecated. The backend now manages progress.
-<<<<<<< HEAD
 // Streak functionality is now handled by the backend /api/streaks
-=======
-// See useProgress() hook for backend-backed progress tracking.
-
-export function getCompletedQuizzes(): Record<string, number> {
-  console.warn('getCompletedQuizzes is deprecated. Use backend APIs via useProgress.');
-  try {
-    return JSON.parse(localStorage.getItem("fa_completed_quizzes") ?? "{}");
-  } catch {
-    return {};
-  }
-}
-
-export function saveCompletedQuiz(courseSlug: string, lectureNum: number, score: number) {
-  console.warn('saveCompletedQuiz is deprecated. Use backend API /progress/lecture/quiz instead.');
-  try {
-    const key = `${courseSlug}_${lectureNum}`;
-    const all = getCompletedQuizzes();
-    all[key] = score;
-    localStorage.setItem("fa_completed_quizzes", JSON.stringify(all));
-  } catch { /* ignore */ }
-}
-
-
-
-export function getStreak(): { count: number; lastDate: string | null } {
-  try {
-    const count = Number(localStorage.getItem("fa_streak_count") ?? "0");
-    const lastDate = localStorage.getItem("fa_last_submission_date");
-    return { count, lastDate };
-  } catch {
-    return { count: 0, lastDate: null };
-  }
-}
-
-export function updateStreak() {
-  const todayStr = new Date().toISOString().split("T")[0];
-  const { count, lastDate } = getStreak();
-  if (lastDate === todayStr) {
-    return;
-  }
-  
-  let newCount = 1;
-  if (lastDate) {
-    const last = new Date(lastDate);
-    const today = new Date(todayStr);
-    const diffTime = today.getTime() - last.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    if (diffDays === 1) {
-      newCount = count + 1;
-    }
-  }
-  localStorage.setItem("fa_streak_count", String(newCount));
-  localStorage.setItem("fa_last_submission_date", todayStr);
-}
->>>>>>> 8245f18 (Initial commit)
 
 export interface Badge {
   id: string;
@@ -421,14 +330,10 @@ export function getBadges(completedCount: number, streak: number): Badge[] {
 }
 
 // ── XP & Gamification Helpers ──────────────────────────────────────────────────
-<<<<<<< HEAD
 export async function getTotalXp(): Promise<number> {
   try {
-    const res = await authFetch('/api/xp');
-    if (res.ok) {
-      const json = await res.json();
-      return json.totalXp || 0;
-    }
+    const res = await authFetch<{ totalXp?: number }>('/api/xp');
+    return res.totalXp || 0;
   } catch {
     console.error("Failed to fetch XP");
   }
@@ -539,18 +444,7 @@ export function getProjectMetadata(projectId: string, customDifficulty?: string)
     };
   }
 
-  // Fallback: check project registry (Python course projects)
-  const regDef = getProjectDefinition(projectId);
-  if (regDef) {
-    return {
-      difficulty: regDef.difficulty,
-      xp: regDef.xp,
-      estimatedTime: regDef.estimatedTime,
-      tags: regDef.tags,
-      concepts: regDef.concepts,
-      learningGoal: regDef.learningGoal,
-    };
-  }
+
 
   // Generic fallback
   return {
@@ -561,19 +455,6 @@ export function getProjectMetadata(projectId: string, customDifficulty?: string)
     concepts: [],
     learningGoal: '',
   };
-=======
-export function getTotalXp(): number {
-  try {
-    return Number(localStorage.getItem("fa_total_xp") ?? "0");
-  } catch {
-    return 0;
-  }
-}
-
-export function addXp(amount: number) {
-  const current = getTotalXp();
-  localStorage.setItem("fa_total_xp", String(current + amount));
->>>>>>> 8245f18 (Initial commit)
 }
 
 // ── XP Level System ─────────────────────────────────────────────────────────────
@@ -610,8 +491,6 @@ export function getXpLevel(totalXp: number): { level: number; currentXp: number;
   return { level: currentLevel, currentXp, xpToNext, progress };
 }
 
-<<<<<<< HEAD
-=======
 // ── Submission History for Heatmap ─────────────────────────────────────────────
 export interface SubmissionRecord {
   date: string;
@@ -632,8 +511,6 @@ export function recordSubmission() {
   history[todayStr] = (history[todayStr] || 0) + 1;
   localStorage.setItem("fa_submission_history", JSON.stringify(history));
 }
-
->>>>>>> 8245f18 (Initial commit)
 // ── Daily Missions ─────────────────────────────────────────────────────────────
 export interface DailyMission {
   id: string;
@@ -645,14 +522,10 @@ export interface DailyMission {
   completed: boolean;
 }
 
-<<<<<<< HEAD
 export async function getDailyMissions(): Promise<DailyMission[]> {
   try {
-    const res = await authFetch('/api/daily-missions');
-    if (res.ok) {
-      const data = await res.json();
-      return data.missions || [];
-    }
+    const data = await authFetch<{ missions?: DailyMission[] }>('/api/daily-missions');
+    return data.missions || [];
   } catch (err) {
     console.error("Failed to fetch daily missions", err);
   }
@@ -668,95 +541,6 @@ export async function updateDailyMissions(missions: DailyMission[]) {
     });
   } catch (err) {
     console.error("Failed to update daily missions", err);
-=======
-export function getDailyMissions(): DailyMission[] {
-  const todayStr = new Date().toISOString().split("T")[0];
-  const missionsKey = `fa_daily_missions_${todayStr}`;
-  
-  try {
-    const stored = localStorage.getItem(missionsKey);
-    if (stored) {
-      return JSON.parse(stored);
-    }
-  } catch {
-    // Fall through to create new missions
-  }
-
-  // Create new daily missions
-  const streak = getStreak();
-  const totalXp = getTotalXp();
-
-  const missions: DailyMission[] = [
-    {
-      id: "solve_one",
-      title: "Solve 1 coding problem",
-      description: "Complete at least one problem today",
-      target: 1,
-      current: 0,
-      xpReward: 25,
-      completed: false,
-    },
-    {
-      id: "earn_xp",
-      title: "Earn 25 XP",
-      description: "Gain 25 XP from solving problems",
-      target: 25,
-      current: totalXp,
-      xpReward: 50,
-      completed: false,
-    },
-    {
-      id: "maintain_streak",
-      title: "Maintain streak",
-      description: "Keep your daily streak alive",
-      target: 1,
-      current: streak.count >= 1 ? 1 : 0,
-      xpReward: 30,
-      completed: streak.count >= 1,
-    },
-  ];
-
-  localStorage.setItem(missionsKey, JSON.stringify(missions));
-  return missions;
-}
-
-export function updateDailyMissions() {
-  const missions = getDailyMissions();
-  const streak = getStreak();
-  const totalXp = getTotalXp();
-  const todayStr = new Date().toISOString().split("T")[0];
-
-  let updated = false;
-
-  missions.forEach((mission) => {
-    if (mission.completed) return;
-
-    if (mission.id === "solve_one") {
-      const todaySubmissions = getSubmissionHistory()[todayStr] || 0;
-      if (todaySubmissions >= mission.target) {
-        mission.current = todaySubmissions;
-        mission.completed = true;
-        updated = true;
-      }
-    } else if (mission.id === "earn_xp") {
-      if (totalXp >= mission.target) {
-        mission.current = totalXp;
-        mission.completed = true;
-        updated = true;
-      }
-    } else if (mission.id === "maintain_streak") {
-      if (streak.count >= mission.target) {
-        mission.current = streak.count;
-        mission.completed = true;
-        updated = true;
-      }
-    }
-  });
-
-  if (updated) {
-    const missionsKey = `fa_daily_missions_${todayStr}`;
-    localStorage.setItem(missionsKey, JSON.stringify(missions));
->>>>>>> 8245f18 (Initial commit)
   }
 }
 

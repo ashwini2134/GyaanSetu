@@ -23,10 +23,7 @@ export interface AnalogyBlock {
   title: string;
   text: string;
   emoji?: string;
-<<<<<<< HEAD
-=======
   icon?: string;
->>>>>>> 8245f18 (Initial commit)
   accentColor?: 'blue' | 'purple' | 'green' | 'orange' | 'amber';
 }
 
@@ -208,6 +205,13 @@ export interface SummaryData {
 
 // ── Root lesson data ──────────────────────────────────────────────────────────
 
+export interface ProjectSummary {
+  id: string;
+  title: string;
+  description: string;
+  difficulty: Difficulty;
+}
+
 export interface LessonData {
   id: string;
   courseSlug: string;
@@ -218,6 +222,7 @@ export interface LessonData {
   sections: LessonSection[];
   quiz?: QuizQuestion[];
   problems?: CodingProblem[];
+  projects?: ProjectSummary[];
   summary?: SummaryData;
 }
 
@@ -239,4 +244,6 @@ export interface LectureProgress {
   handsOnTaskCompleted: boolean;
   lectureCompleted: boolean;
   lastSection: string;
+  projectCompleted?: boolean;
+  projectId?: string | null;
 }

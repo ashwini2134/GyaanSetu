@@ -9,6 +9,7 @@ import {
   Trophy,
   Menu,
   X,
+  User as UserIcon,
 } from "lucide-react";
 
 function Logo({ expanded }: { expanded: boolean }) {
@@ -261,6 +262,23 @@ export default function Shell() {
               </span>
               <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>
                 Leaderboard
+              </span>
+            </NavLink>
+
+            {/* Profile */}
+            <NavLink
+              to="/profile"
+              onClick={() => setSidebarOpen(false)}
+              className={({ isActive }) =>
+                `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`
+              }
+              title="Profile"
+            >
+              <span className="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                <UserIcon size={18} />
+              </span>
+              <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>
+                Profile
               </span>
             </NavLink>
           </nav>

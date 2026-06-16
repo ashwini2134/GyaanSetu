@@ -2,10 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import type { PracticeBlock } from '../../types/lesson';
 import CodeEditor from './CodeEditor';
 import { renderMarkdown } from '../../utils/renderContent';
-<<<<<<< HEAD
 import { authFetch } from '../../authClient';
-=======
->>>>>>> 8245f18 (Initial commit)
 
 interface PracticeCardProps {
   block: PracticeBlock;
@@ -25,13 +22,10 @@ export default function PracticeCard({ block, onAttempt, onComplete }: PracticeC
 
   const [savedCode, setSavedCode] = useState<string | null>(null);
   useEffect(() => {
-<<<<<<< HEAD
     async function loadDraft() {
       try {
-        const res = await authFetch(`/api/drafts/${encodeURIComponent(block.title)}?type=practice`);
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data.code) setSavedCode(data.code);
+        const data = await authFetch<{ code?: string }>(`/api/drafts/${encodeURIComponent(block.title)}?type=practice`);
+        if (data && data.code) setSavedCode(data.code);
       } catch (err) {
         console.error('Failed to load practice draft', err);
       }
@@ -53,17 +47,6 @@ export default function PracticeCard({ block, onAttempt, onComplete }: PracticeC
     })
     .catch(err => console.error('Failed to save practice draft', err));
   }, [block.title, saveKey]);
-=======
-    try {
-      const saved = localStorage.getItem(saveKey);
-      if (saved) setSavedCode(saved);
-    } catch {}
-  }, [saveKey]);
-
-  const saveCode = useCallback((code: string) => {
-    try { localStorage.setItem(saveKey, code); } catch {}
-  }, [saveKey]);
->>>>>>> 8245f18 (Initial commit)
 
   const handleRun = () => {
     onAttempt?.();
@@ -91,10 +74,7 @@ export default function PracticeCard({ block, onAttempt, onComplete }: PracticeC
 
   const handleReset = () => {
     setSavedCode(null);
-<<<<<<< HEAD
     saveCode('');
-=======
->>>>>>> 8245f18 (Initial commit)
     try { localStorage.removeItem(saveKey); } catch {}
     setAttempts(0);
     setPassed(false);
