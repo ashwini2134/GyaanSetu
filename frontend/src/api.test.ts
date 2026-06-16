@@ -7,7 +7,6 @@ import {
   saveCompletedProject,
   getCompletedQuizzes,
   saveCompletedQuiz,
-  getStreak,
   getBadges,
 } from "./api";
 
@@ -44,16 +43,6 @@ describe("API Utils", () => {
       saveCompletedQuiz("cs50p", 1, 90);
       const quizzes = getCompletedQuizzes();
       expect(quizzes["cs50p_1"]).toBe(90);
-    });
-
-    it("calculates streaks correctly", () => {
-      const todayStr = new Date().toISOString().split("T")[0];
-      localStorage.setItem("fa_last_submission_date", todayStr);
-      localStorage.setItem("fa_streak_count", "3");
-
-      const streak = getStreak();
-      expect(streak.count).toBe(3);
-      expect(streak.lastDate).toBe(todayStr);
     });
 
     it("unlocks badges correctly based on progress", () => {

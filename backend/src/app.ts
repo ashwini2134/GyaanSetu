@@ -7,6 +7,9 @@ import { errorHandler } from "./middleware/errorHandler.js";
 import authRoutes from "./routes/auth.js";
 import progressRoutes from "./routes/progress.js";
 import projectRoutes from "./routes/project.js";
+import xpRoutes from "./routes/xp.js";
+import achievementsRoutes from "./routes/achievements.js";
+import streaksRoutes from "./routes/streaks.js";
 
 export function createApp() {
   const app = express();
@@ -39,6 +42,9 @@ export function createApp() {
   app.use("/api/auth", authRoutes);
   app.use("/api/progress", progressRoutes);
   app.use("/api/projects", projectRoutes);
+  app.use("/api/xp", xpRoutes);
+  app.use("/api/achievements", achievementsRoutes);
+  app.use("/api/streaks", streaksRoutes);
 
   app.use(errorHandler);
   return app;

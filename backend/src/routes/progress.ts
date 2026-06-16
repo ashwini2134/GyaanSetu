@@ -9,6 +9,64 @@ const router = Router();
 import { getUserSummary, getLeaderboard, awardXp } from "../services/gamificationService.js";
 import { recordQuizAttempt } from "../services/progressTrackingService.js";
 
+router.get("/", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    const statsData = (user?.statsData as any) || {
+      coursesStarted: 0,
+      coursesCompleted: 0,
+      lecturesCompleted: 0,
+      quizzesPassed: 0,
+      tasksSubmitted: 0,
+      projectsSolved: 0,
+    };
+    
+    // Satisfy specific legacy requirements plus frontend StatsData
+    res.json({
+      moduleProgress: statsData.coursesStarted || 0,
+      lectureProgress: statsData.lecturesCompleted || 0,
+      completedModules: statsData.coursesCompleted || 0,
+      stats: statsData
+    });
+  } catch (error) { next(error); }
+});
+
+router.post("/", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const payload = req.body;
+    await prisma.user.update({
+      where: { id: userId },
+      data: { statsData: payload }
+    });
+    res.json({ ok: true });
+  } catch (error) { next(error); }
+});
+
+router.get("/overall", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    res.json({
+      courseProgress: user?.overallProgress || 0,
+      overallProgress: user?.overallProgress || 0
+    });
+  } catch (error) { next(error); }
+});
+
+router.post("/overall", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const { overallProgress } = req.body;
+    await prisma.user.update({
+      where: { id: userId },
+      data: { overallProgress: Number(overallProgress) || 0 }
+    });
+    res.json({ ok: true });
+  } catch (error) { next(error); }
+});
+
 router.get("/me", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
     const courseSlug = typeof req.query.courseSlug === "string" ? req.query.courseSlug : undefined;

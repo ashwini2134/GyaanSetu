@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider   = "prisma-client-js"
   output     = "../generated/prisma"
@@ -11,168 +8,156 @@ datasource db {
   provider = "postgresql"
 }
 
-// ── Core Identity ────────────────────────────────────────────────────────────
-
 model User {
-  id             String   @id @default(uuid())
-  email          String   @unique
-  name           String
-  passwordHash   String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  role           String   @default("student")
-  emailVerified  Boolean  @default(false)
-
-  // Unified Gamification & Stats
-  totalXp        Int      @default(0)
-  currentStreak  Int      @default(0)
-  longestStreak  Int      @default(0)
-  lastActiveAt   DateTime @default(now())
-
-  // Relational Links
-  progress       Progress[]
-  quizAttempts   QuizAttempt[]
-  submissions    Submission[]
-  projects       Project[]
-  achievements   Achievement[]
-  xpHistory      XpTransaction[]
-  chatMessages         ChatMessage[]
-  oauthAccounts        OAuthAccount[]
-  refreshTokens        RefreshToken[]
-  passwordResetTokens  PasswordResetToken[]
-  oauthExchangeCodes   OAuthExchangeCode[]
+  id                  String               @id @default(uuid())
+  email               String               @unique
+  name                String
+  passwordHash        String
+  createdAt           DateTime             @default(now())
+  totalXp             Int                  @default(0)
+  currentStreak       Int                  @default(0)
+  longestStreak       Int                  @default(0)
+  lastActiveAt        DateTime             @default(now())
+  emailVerified       Boolean              @default(false)
+  role                String               @default("student")
+  statsData           Json?
+  overallProgress     Int                  @default(0)
+  updatedAt           DateTime             @updatedAt
+  achievements        Achievement[]
+  chatMessages        ChatMessage[]
+  oauthAccounts       OAuthAccount[]
+  oauthExchangeCodes  OAuthExchangeCode[]
+  passwordResetTokens PasswordResetToken[]
+  progress            Progress[]
+  projects            Project[]
+  quizAttempts        QuizAttempt[]
+  refreshTokens       RefreshToken[]
+  submissions         Submission[]
+  xpHistory           XpTransaction[]
 }
 
-// ── Course Engagement ────────────────────────────────────────────────────────
-
 model Progress {
-  id                String   @id @default(uuid())
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String    @id @default(uuid())
   userId            String
-  courseSlug        String   // e.g. "cs50-ai"
-  lectureId         String   // Identifies the specific section/lecture
-  status            String   // e.g. "STARTED", "COMPLETED"
-  practiceAttempted Boolean  @default(false)
-  practiceCompleted Boolean  @default(false)
-  projectCompleted  Boolean  @default(false)
-  projectId         String?
+  courseSlug        String
+  lectureId         String
+  status            String
   completedAt       DateTime?
-  
+  practiceAttempted Boolean   @default(false)
+  practiceCompleted Boolean   @default(false)
+  projectCompleted  Boolean   @default(false)
+  projectId         String?
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([userId, courseSlug, lectureId])
 }
 
 model QuizAttempt {
-  id           String   @id @default(uuid())
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId       String
-  quizId       String   // Identifies which quiz
-  score        Int
-  total        Int
-  passed       Boolean
-  answers      Json     // Stores the specific answers chosen by the student
-  createdAt    DateTime @default(now())
+  id        String   @id @default(uuid())
+  userId    String
+  quizId    String
+  score     Int
+  total     Int
+  passed    Boolean
+  answers   Json
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// ── Practice & Code Submissions ──────────────────────────────────────────────
-
 model Submission {
-  id           String   @id @default(uuid())
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId       String
-  problemId    String   // Identifies the practice problem
-  code         String   @db.Text
-  status       String   // e.g. "DRAFT", "SUBMITTED", "PASSED"
-  updatedAt    DateTime @updatedAt
-  
+  id        String   @id @default(uuid())
+  userId    String
+  problemId String
+  code      String
+  status    String
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([userId, problemId])
 }
 
 model ChatMessage {
-  id           String   @id @default(uuid())
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId       String
-  problemId    String
-  role         String   // "user" or "assistant"
-  content      String   @db.Text
-  createdAt    DateTime @default(now())
+  id        String   @id @default(uuid())
+  userId    String
+  problemId String
+  role      String
+  content   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Project {
-  id           String   @id @default(uuid())
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId       String
-  projectId    String
-  code         String   @db.Text
-  status       String   // e.g. "DRAFT", "COMPLETED"
-  completedAt  DateTime?
-  updatedAt    DateTime @updatedAt
-  
+  id          String    @id @default(uuid())
+  userId      String
+  projectId   String
+  code        String
+  status      String
+  completedAt DateTime?
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([userId, projectId])
 }
 
-// ── Gamification Engine ──────────────────────────────────────────────────────
-
 model Achievement {
-  id             String   @id @default(uuid())
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId         String
-  achievementId  String   // Identifies the unlocked badge
-  unlockedAt     DateTime @default(now())
-  
+  id            String   @id @default(uuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([userId, achievementId])
 }
 
 model XpTransaction {
-  id           String   @id @default(uuid())
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId       String
-  amount       Int
-  reason       String
-  actionId     String?  // Optional: Used to uniquely identify an action so XP isn't awarded twice
-  createdAt    DateTime @default(now())
+  id        String   @id @default(uuid())
+  userId    String
+  amount    Int
+  reason    String
+  actionId  String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, actionId]) // Prisma ignores nulls in Postgres unique constraints
+  @@unique([userId, actionId])
 }
-
-// ── Auth & Tokens ────────────────────────────────────────────────────────────
 
 model OAuthAccount {
   id             String   @id @default(uuid())
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         String
-  provider       String   // 'github' | 'linkedin'
+  provider       String
   providerUserId String
   createdAt      DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerUserId])
 }
 
 model RefreshToken {
-  id          String    @id @default(uuid())
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      String
-  tokenHash   String    @unique
-  expiresAt   DateTime
-  revokedAt   DateTime?
-  createdAt   DateTime  @default(now())
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model PasswordResetToken {
-  id          String    @id @default(uuid())
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      String
-  tokenHash   String    @unique
-  expiresAt   DateTime
-  usedAt      DateTime?
-  createdAt   DateTime  @default(now())
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model OAuthExchangeCode {
-  id          String    @id @default(uuid())
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      String
-  codeHash    String    @unique
-  expiresAt   DateTime
-  usedAt      DateTime?
-  createdAt   DateTime  @default(now())
+  id        String    @id @default(uuid())
+  userId    String
+  codeHash  String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

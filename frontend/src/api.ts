@@ -6,6 +6,7 @@
 import { getMentorHint, getFailureAnalysis, getProgressiveHints, reviewStudentCode, type FailureAnalysisResult, type ProgressiveHints, type CodeReviewResult } from './mentor';
 export type { FailureAnalysisResult, ProgressiveHints, CodeReviewCheck, CodeReviewResult } from './mentor';
 import { getProjectDefinition } from './projects/registry';
+import { authFetch } from './authClient';
 // ── Types (public API unchanged so pages need zero edits) ─────────────────────
 export type Course = {
   id: number;
@@ -322,36 +323,7 @@ export function saveCompletedQuiz(courseSlug: string, lectureNum: number, score:
 
 
 
-export function getStreak(): { count: number; lastDate: string | null } {
-  try {
-    const count = Number(localStorage.getItem("fa_streak_count") ?? "0");
-    const lastDate = localStorage.getItem("fa_last_submission_date");
-    return { count, lastDate };
-  } catch {
-    return { count: 0, lastDate: null };
-  }
-}
-
-export function updateStreak() {
-  const todayStr = new Date().toISOString().split("T")[0];
-  const { count, lastDate } = getStreak();
-  if (lastDate === todayStr) {
-    return;
-  }
-  
-  let newCount = 1;
-  if (lastDate) {
-    const last = new Date(lastDate);
-    const today = new Date(todayStr);
-    const diffTime = today.getTime() - last.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    if (diffDays === 1) {
-      newCount = count + 1;
-    }
-  }
-  localStorage.setItem("fa_streak_count", String(newCount));
-  localStorage.setItem("fa_last_submission_date", todayStr);
-}
+// Streak functionality is now handled by the backend /api/streaks
 
 export interface Badge {
   id: string;
@@ -395,17 +367,29 @@ export function getBadges(completedCount: number, streak: number): Badge[] {
 }
 
 // ── XP & Gamification Helpers ──────────────────────────────────────────────────
-export function getTotalXp(): number {
+export async function getTotalXp(): Promise<number> {
   try {
-    return Number(localStorage.getItem("fa_total_xp") ?? "0");
+    const res = await authFetch('/api/xp');
+    if (res.ok) {
+      const json = await res.json();
+      return json.totalXp || 0;
+    }
   } catch {
-    return 0;
+    console.error("Failed to fetch XP");
   }
+  return 0;
 }
 
-export function addXp(amount: number) {
-  const current = getTotalXp();
-  localStorage.setItem("fa_total_xp", String(current + amount));
+export async function addXp(amount: number) {
+  try {
+    await authFetch('/api/xp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount, reason: "Manual XP addition" })
+    });
+  } catch {
+    console.error("Failed to add XP");
+  }
 }
 
 export interface ProjectMetadata {
@@ -590,7 +574,7 @@ export interface DailyMission {
   completed: boolean;
 }
 
-export function getDailyMissions(): DailyMission[] {
+export async function getDailyMissions(): Promise<DailyMission[]> {
   const todayStr = new Date().toISOString().split("T")[0];
   const missionsKey = `fa_daily_missions_${todayStr}`;
   
@@ -606,7 +590,7 @@ export function getDailyMissions(): DailyMission[] {
   // Create new daily missions
   const completedProjects = getCompletedProjects();
   const streak = getStreak();
-  const totalXp = getTotalXp();
+  const totalXp = await getTotalXp();
 
   const missions: DailyMission[] = [
     {
@@ -642,10 +626,10 @@ export function getDailyMissions(): DailyMission[] {
   return missions;
 }
 
-export function updateDailyMissions() {
-  const missions = getDailyMissions();
+export async function updateDailyMissions() {
+  const missions = await getDailyMissions();
   const streak = getStreak();
-  const totalXp = getTotalXp();
+  const totalXp = await getTotalXp();
   const todayStr = new Date().toISOString().split("T")[0];
 
   let updated = false;
