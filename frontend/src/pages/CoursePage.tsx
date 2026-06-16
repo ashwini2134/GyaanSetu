@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Star, Crown } from 'lucide-react';
-import { api, type Lecture, getCompletedProjects } from "../api";
+import { api, type Lecture } from "../api";
 import { getCourseProgress, isLectureUnlocked, subscribeToProgressChanges } from "../hooks/useProgress";
 import { useAuth } from "../auth";
 
@@ -43,7 +43,6 @@ export default function CoursePage() {
 
   // ── All progress computed fresh every render via refreshKey ──
   const courseProgress = useMemo(() => getCourseProgress(slug ?? ""), [slug, refreshKey]);
-  const completedProjects = useMemo(() => getCompletedProjects(), [refreshKey]);
 
   const getLectureStatus = (lecture: Lecture): LectureStatus => {
     const p = courseProgress[lecture.number];
@@ -58,7 +57,7 @@ export default function CoursePage() {
     ? Math.round((completedCount / lectureCount) * 100)
     : 0;
   const quizzesPassed = lectures?.filter((l) => courseProgress[l.number]?.quizCompleted).length ?? 0;
-  const projectsSubmitted = Object.keys(completedProjects).filter((k) => k.startsWith(`${slug}/`)).length;
+  const projectsSubmitted = Object.values(courseProgress).reduce((acc, p) => acc + (p.problemsCompleted?.length || 0) + (p.projectCompleted ? 1 : 0), 0);
 
   useEffect(() => {
     if (progressPercent === 100 && lectureCount > 0 && user?.name && slug) {

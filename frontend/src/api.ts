@@ -30,21 +30,31 @@ export type ChatMsg = { role: string; content: string; created_at: string };
 
 export { getToken, setToken, clearToken } from "./authClient";
 
-// ── localStorage helpers ──────────────────────────────────────────────────────
+import { authFetch } from "./authClient";
+
 const CHAT_KEY  = "fa_chat";
 
 // ── Chat storage ─────────────────────────────────────────────────────────────
-function getChatHistory(problemId: number | string): ChatMsg[] {
+async function getChatHistory(problemId: number | string): Promise<ChatMsg[]> {
   try {
-    const all: Record<string, ChatMsg[]> = JSON.parse(localStorage.getItem(CHAT_KEY) ?? "{}");
-    return all[String(problemId)] ?? [];
-  } catch { return []; }
+    const res = await authFetch(`/api/chat/${problemId}`);
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch { /* ignore */ }
+  return [];
 }
-function saveChatHistory(problemId: number | string, msgs: ChatMsg[]) {
+
+async function saveChatMessage(problemId: number | string, msg: ChatMsg) {
   try {
-    const all: Record<string, ChatMsg[]> = JSON.parse(localStorage.getItem(CHAT_KEY) ?? "{}");
-    all[String(problemId)] = msgs;
-    localStorage.setItem(CHAT_KEY, JSON.stringify(all));
+    await authFetch('/api/chat', {
+      method: 'POST',
+      body: JSON.stringify({
+        problemId: String(problemId),
+        role: msg.role,
+        content: msg.content
+      })
+    });
   } catch { /* ignore */ }
 }
 
@@ -231,7 +241,7 @@ export const api = {
       lectureNum = Math.floor(problemIndex / 5); // Rough estimate: 5 problems per lecture
     }
 
-    const existing = getChatHistory(problemId);
+    const existing = await getChatHistory(problemId);
 
     // Get mentor hint
     const hintResponse = getMentorHint({
@@ -253,7 +263,12 @@ export const api = {
 
     const userMsg: ChatMsg  = { role: "user",   content: message, created_at: new Date().toISOString() };
     const asstMsg: ChatMsg  = { role: "assistant", content: reply, created_at: new Date().toISOString() };
-    saveChatHistory(problemId, [...existing, userMsg, asstMsg]);
+    
+    await saveChatMessage(problemId, userMsg);
+    await saveChatMessage(problemId, asstMsg);
+    
+    // Clean up old localStorage keys only after backend calls are confirmed working
+    try { localStorage.removeItem(CHAT_KEY); } catch {}
 
     return { reply };
   },
@@ -277,52 +292,6 @@ export const api = {
 
 // ── DEPRECATED: Progress & Streaks Helpers (use backend APIs instead) ────────────
 // These localStorage-based helpers are deprecated. The backend now manages progress.
-// See useProgress() hook for backend-backed progress tracking.
-
-export function getCompletedProjects(): Record<string, boolean> {
-  console.warn('getCompletedProjects is deprecated. Use backend APIs via useProgress.');
-  try {
-    return JSON.parse(localStorage.getItem("fa_completed_projects") ?? "{}");
-  } catch {
-    return {};
-  }
-}
-
-export function saveCompletedProject(courseSlug: string, projectId: string, completed: boolean = true) {
-  console.warn('saveCompletedProject is deprecated. Use backend API /progress/lecture/problem instead.');
-  try {
-    const key = `${courseSlug}/${projectId}`;
-    const all = getCompletedProjects();
-    if (completed) {
-      all[key] = true;
-    } else {
-      delete all[key];
-    }
-    localStorage.setItem("fa_completed_projects", JSON.stringify(all));
-  } catch { /* ignore */ }
-}
-
-export function getCompletedQuizzes(): Record<string, number> {
-  console.warn('getCompletedQuizzes is deprecated. Use backend APIs via useProgress.');
-  try {
-    return JSON.parse(localStorage.getItem("fa_completed_quizzes") ?? "{}");
-  } catch {
-    return {};
-  }
-}
-
-export function saveCompletedQuiz(courseSlug: string, lectureNum: number, score: number) {
-  console.warn('saveCompletedQuiz is deprecated. Use backend API /progress/lecture/quiz instead.');
-  try {
-    const key = `${courseSlug}_${lectureNum}`;
-    const all = getCompletedQuizzes();
-    all[key] = score;
-    localStorage.setItem("fa_completed_quizzes", JSON.stringify(all));
-  } catch { /* ignore */ }
-}
-
-
-
 // Streak functionality is now handled by the backend /api/streaks
 
 export interface Badge {
@@ -542,27 +511,6 @@ export function getXpLevel(totalXp: number): { level: number; currentXp: number;
   return { level: currentLevel, currentXp, xpToNext, progress };
 }
 
-// ── Submission History for Heatmap ─────────────────────────────────────────────
-export interface SubmissionRecord {
-  date: string;
-  count: number;
-}
-
-export function getSubmissionHistory(): Record<string, number> {
-  try {
-    return JSON.parse(localStorage.getItem("fa_submission_history") ?? "{}");
-  } catch {
-    return {};
-  }
-}
-
-export function recordSubmission() {
-  const todayStr = new Date().toISOString().split("T")[0];
-  const history = getSubmissionHistory();
-  history[todayStr] = (history[todayStr] || 0) + 1;
-  localStorage.setItem("fa_submission_history", JSON.stringify(history));
-}
-
 // ── Daily Missions ─────────────────────────────────────────────────────────────
 export interface DailyMission {
   id: string;
@@ -575,93 +523,27 @@ export interface DailyMission {
 }
 
 export async function getDailyMissions(): Promise<DailyMission[]> {
-  const todayStr = new Date().toISOString().split("T")[0];
-  const missionsKey = `fa_daily_missions_${todayStr}`;
-  
   try {
-    const stored = localStorage.getItem(missionsKey);
-    if (stored) {
-      return JSON.parse(stored);
+    const res = await authFetch('/api/daily-missions');
+    if (res.ok) {
+      const data = await res.json();
+      return data.missions || [];
     }
-  } catch {
-    // Fall through to create new missions
+  } catch (err) {
+    console.error("Failed to fetch daily missions", err);
   }
-
-  // Create new daily missions
-  const completedProjects = getCompletedProjects();
-  const streak = getStreak();
-  const totalXp = await getTotalXp();
-
-  const missions: DailyMission[] = [
-    {
-      id: "solve_one",
-      title: "Solve 1 coding problem",
-      description: "Complete at least one problem today",
-      target: 1,
-      current: Object.values(completedProjects).filter(Boolean).length,
-      xpReward: 25,
-      completed: false,
-    },
-    {
-      id: "earn_xp",
-      title: "Earn 25 XP",
-      description: "Gain 25 XP from solving problems",
-      target: 25,
-      current: totalXp,
-      xpReward: 50,
-      completed: false,
-    },
-    {
-      id: "maintain_streak",
-      title: "Maintain streak",
-      description: "Keep your daily streak alive",
-      target: 1,
-      current: streak.count >= 1 ? 1 : 0,
-      xpReward: 30,
-      completed: streak.count >= 1,
-    },
-  ];
-
-  localStorage.setItem(missionsKey, JSON.stringify(missions));
-  return missions;
+  return [];
 }
 
-export async function updateDailyMissions() {
-  const missions = await getDailyMissions();
-  const streak = getStreak();
-  const totalXp = await getTotalXp();
-  const todayStr = new Date().toISOString().split("T")[0];
-
-  let updated = false;
-
-  missions.forEach((mission) => {
-    if (mission.completed) return;
-
-    if (mission.id === "solve_one") {
-      const todaySubmissions = getSubmissionHistory()[todayStr] || 0;
-      if (todaySubmissions >= mission.target) {
-        mission.current = todaySubmissions;
-        mission.completed = true;
-        updated = true;
-      }
-    } else if (mission.id === "earn_xp") {
-      if (totalXp >= mission.target) {
-        mission.current = totalXp;
-        mission.completed = true;
-        updated = true;
-      }
-    } else if (mission.id === "maintain_streak") {
-      if (streak.count >= mission.target) {
-        mission.current = streak.count;
-        mission.completed = true;
-        updated = true;
-      }
-    }
-  });
-
-  if (updated) {
-    const missionsKey = `fa_daily_missions_${todayStr}`;
-    localStorage.setItem(missionsKey, JSON.stringify(missions));
+export async function updateDailyMissions(missions: DailyMission[]) {
+  try {
+    await authFetch('/api/daily-missions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ missions })
+    });
+  } catch (err) {
+    console.error("Failed to update daily missions", err);
   }
 }
 

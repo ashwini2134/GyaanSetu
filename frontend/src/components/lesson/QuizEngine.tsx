@@ -1,5 +1,6 @@
 import { PartyPopper, Book } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { authFetch } from '../../authClient';
 import type { QuizQuestion } from '../../types/lesson';
 
 interface QuizEngineProps {
@@ -29,17 +30,21 @@ export default function QuizEngine({ quizId = 'default', questions, onComplete }
   const [viewHistoryIdx, setViewHistoryIdx] = useState<number>(0);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(`lms:quiz_history:${quizId}`);
-      if (saved) {
-        const parsed = JSON.parse(saved);
+    async function loadHistory() {
+      try {
+        const res = await authFetch(`/api/quiz-attempts/${quizId}`);
+        if (!res.ok) return;
+        const parsed = await res.json();
         if (parsed && parsed.length > 0) {
           setHistory(parsed);
           setViewHistoryIdx(parsed.length - 1);
           setPhase('result');
         }
+      } catch (err) {
+        console.error('Failed to load quiz history', err);
       }
-    } catch {}
+    }
+    loadHistory();
   }, [quizId]);
 
   if (!questions.length) {
@@ -78,20 +83,24 @@ export default function QuizEngine({ quizId = 'default', questions, onComplete }
         return { qNum: i + 1, passed: userAns === q.answer, userAns };
       });
       
-      const newAttempt: AttemptRecord = {
-        id: Math.random().toString(36).substring(7),
-        timestamp: Date.now(),
-        score: finalScore,
-        total,
-        details
-      };
-      
-      const updatedHistory = [...history, newAttempt];
-      setHistory(updatedHistory);
-      setViewHistoryIdx(updatedHistory.length - 1);
-      try {
-        localStorage.setItem(`lms:quiz_history:${quizId}`, JSON.stringify(updatedHistory));
-      } catch {}
+      authFetch('/api/quiz-attempts', {
+        method: 'POST',
+        body: JSON.stringify({
+          quizId,
+          score: finalScore,
+          total,
+          passed: finalScore === total, // or whatever pass criteria
+          answers: details
+        })
+      })
+      .then(res => res.json())
+      .then((newAttempt) => {
+        const updatedHistory = [...history, newAttempt];
+        setHistory(updatedHistory);
+        setViewHistoryIdx(updatedHistory.length - 1);
+        localStorage.removeItem(`lms:quiz_history:${quizId}`);
+      })
+      .catch(err => console.error('Failed to save quiz attempt', err));
 
       onComplete?.(finalScore, total);
       setPhase('result');

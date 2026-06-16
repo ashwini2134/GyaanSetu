@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Zap, Search } from 'lucide-react';
-import { getCompletedProjects, getProjectMetadata } from "../api";
+import { getProjectMetadata } from "../api";
 import { ProjectCard } from "../components";
+import { useProgress } from "../hooks/useProgress";
 
 interface Project {
   id: string;
@@ -14,14 +15,13 @@ interface Project {
 export default function ProjectPage() {
   const { slug, number } = useParams();
   const [projects, setProjects] = useState<Project[]>([]);
-  const [completedProjects, setCompletedProjects] = useState<Record<string, boolean>>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
 
-  useEffect(() => {
-    setCompletedProjects(getCompletedProjects());
+  const { progress } = useProgress(slug, parseInt(number || "0"));
 
+  useEffect(() => {
     async function loadProjects() {
       try {
         const base = import.meta.env.BASE_URL;
@@ -42,14 +42,8 @@ export default function ProjectPage() {
 
   // Helper to determine project status
   const getProjectStatus = (projectId: string) => {
-    const isCompleted = completedProjects[`${slug}/${projectId}`];
-    if (isCompleted) return "completed";
-    
-    const draft = localStorage.getItem(`fa_code_${projectId}`);
-    const cleanDraft = draft ? draft.split("\n").map(l => l.replace(/#.*$/, "")).join("").trim() : "";
-    const isInProgress = cleanDraft.length > 0 && cleanDraft !== "def main():" && cleanDraft !== "pass";
-    
-    return isInProgress ? "in_progress" : "not_started";
+    const isCompleted = progress?.problemsCompleted?.includes(projectId) || progress?.projectId === projectId;
+    return isCompleted ? "completed" : "not_started";
   };
 
   // Filter projects

@@ -5,6 +5,8 @@ import type { AuthenticatedRequest } from "../middleware/auth.js";
 
 const router = Router();
 
+import { awardXp } from "../services/gamificationService.js";
+
 router.get("/", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
     const userId = req.user!.id;
@@ -28,16 +30,11 @@ router.get("/", requireAuth, async (req: AuthenticatedRequest, res, next) => {
 router.post("/", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
     const userId = req.user!.id;
-    const { currentStreak, longestStreak, lastLoginDate } = req.body;
+    const now = new Date();
+    const todayStr = now.toISOString().split("T")[0];
 
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        currentStreak,
-        longestStreak,
-        lastActiveAt: lastLoginDate ? new Date(lastLoginDate) : new Date()
-      }
-    });
+    // Trigger Gamification Service to evaluate streak and award Daily Login XP
+    await awardXp(userId, 5, "Daily Login", `daily_login_${todayStr}`);
 
     res.json({ ok: true });
   } catch (error) {

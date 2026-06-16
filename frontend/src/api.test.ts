@@ -3,10 +3,6 @@ import {
   getToken,
   setToken,
   clearToken,
-  getCompletedProjects,
-  saveCompletedProject,
-  getCompletedQuizzes,
-  saveCompletedQuiz,
   getBadges,
 } from "./api";
 
@@ -33,18 +29,6 @@ describe("API Utils", () => {
   });
 
   describe("Progress, Streak and Badges functionality", () => {
-    it("saves and retrieves completed projects correctly", () => {
-      saveCompletedProject("cs50p", "indoor", true);
-      const completed = getCompletedProjects();
-      expect(completed["cs50p/indoor"]).toBe(true);
-    });
-
-    it("saves and retrieves completed quizzes correctly", () => {
-      saveCompletedQuiz("cs50p", 1, 90);
-      const quizzes = getCompletedQuizzes();
-      expect(quizzes["cs50p_1"]).toBe(90);
-    });
-
     it("unlocks badges correctly based on progress", () => {
       const badgesLevel0 = getBadges(0, 0);
       expect(badgesLevel0.find((b) => b.id === "first_step")?.unlocked).toBe(false);

@@ -10,6 +10,10 @@ import projectRoutes from "./routes/project.js";
 import xpRoutes from "./routes/xp.js";
 import achievementsRoutes from "./routes/achievements.js";
 import streaksRoutes from "./routes/streaks.js";
+import quizAttemptsRoutes from "./routes/quizAttempts.js";
+import codeDraftsRoutes from "./routes/codeDrafts.js";
+import chatRoutes from "./routes/chat.js";
+import dailyMissionsRoutes from "./routes/dailyMissions.js";
 
 export function createApp() {
   const app = express();
@@ -45,6 +49,10 @@ export function createApp() {
   app.use("/api/xp", xpRoutes);
   app.use("/api/achievements", achievementsRoutes);
   app.use("/api/streaks", streaksRoutes);
+  app.use("/api/quiz-attempts", quizAttemptsRoutes);
+  app.use("/api/drafts", codeDraftsRoutes);
+  app.use("/api/chat", chatRoutes);
+  app.use("/api/daily-missions", dailyMissionsRoutes);
 
   app.use(errorHandler);
   return app;

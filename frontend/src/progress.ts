@@ -114,53 +114,12 @@ function queueToast(text: string, type: 'xp' | 'achievement' | 'streak', duratio
 
 // ── Gamification Actions ─────────────────────────────────────────────────────
 
-async function awardXp(amount: number, reason: string) {
-  try {
-    await authFetch('/api/xp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount, reason })
-    });
-    queueToast(`+${amount} XP — ${reason}`, 'xp', 2000);
-    emit();
-  } catch (err) {
-    console.error("Failed to save XP", err);
-  }
-}
-
 export async function handleDailyLogin() {
   try {
-    const res = await authFetch('/api/streaks');
-    if (!res.ok) return;
-    const data = await res.json();
-    
-    const today = new Date().toISOString().split('T')[0];
-    const lastLoginStr = data.lastLoginDate ? new Date(data.lastLoginDate).toISOString().split('T')[0] : null;
-    
-    if (lastLoginStr === today) return; // already logged in today
-
-    let newStreak = 1;
-    if (lastLoginStr) {
-      const last = new Date(lastLoginStr);
-      const curr = new Date(today);
-      const diffDays = Math.round((curr.getTime() - last.getTime()) / (1000 * 60 * 60 * 24));
-      
-      if (diffDays === 1) {
-        newStreak = data.currentStreak + 1;
-      }
+    const res = await authFetch('/api/streaks', { method: 'POST' });
+    if (res.ok) {
+      emit();
     }
-
-    const longest = Math.max(newStreak, data.longestStreak);
-    
-    await authFetch('/api/streaks', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ currentStreak: newStreak, longestStreak: longest, lastLoginDate: new Date().toISOString() })
-    });
-
-    awardXp(5, 'Daily Login');
-    if (newStreak === 7) queueToast(`7 Day Streak! Keep going!`, 'streak', 4000);
-    emit();
   } catch (err) {
     console.error("Failed to handle daily login", err);
   }
@@ -218,43 +177,10 @@ export async function completeAction(
   safeSet(KEYS.completedActions, completed);
 
   try {
-    const res = await authFetch('/api/progress');
-    if (!res.ok) return;
-    const { stats } = await res.json();
-
-    switch (actionType) {
-      case 'section':
-        awardXp(10, 'Section Completed');
-        break;
-      case 'lecture':
-        awardXp(50, 'Full Lecture Completed');
-        stats.lecturesCompleted += 1;
-        break;
-      case 'quiz':
-        awardXp(30, 'Quiz Passed');
-        stats.quizzesPassed += 1;
-        break;
-      case 'problem':
-        awardXp(20, 'Problem Solved');
-        stats.tasksSubmitted += 1;
-        break;
-      case 'project':
-        awardXp(100, 'Capstone Project Solved');
-        stats.projectsSolved += 1;
-        break;
-      case 'course_start':
-        stats.coursesStarted += 1;
-        break;
-      case 'course_complete':
-        awardXp(200, 'Course Completed');
-        stats.coursesCompleted += 1;
-        break;
-    }
-
-    await authFetch('/api/progress', {
+    await authFetch('/api/progress/action', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(stats)
+      body: JSON.stringify({ actionType, actionId })
     });
 
     checkAchievements();

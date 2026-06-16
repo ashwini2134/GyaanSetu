@@ -27,6 +27,8 @@ model User {
   chatMessages        ChatMessage[]
   oauthAccounts       OAuthAccount[]
   oauthExchangeCodes  OAuthExchangeCode[]
+  codeDrafts          CodeDraft[]
+  dailyMissions       DailyMission[]
   passwordResetTokens PasswordResetToken[]
   progress            Progress[]
   projects            Project[]
@@ -160,4 +162,28 @@ model OAuthExchangeCode {
   usedAt    DateTime?
   createdAt DateTime  @default(now())
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CodeDraft {
+  id        String   @id @default(uuid())
+  userId    String
+  lectureId String
+  type      String
+  code      String
+  language  String   @default("python")
+  savedAt   DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lectureId, type])
+}
+
+model DailyMission {
+  id          String    @id @default(uuid())
+  userId      String
+  date        String
+  missions    Json
+  completedAt DateTime?
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
 }

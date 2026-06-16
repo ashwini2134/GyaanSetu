@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import type { PracticeBlock } from '../../types/lesson';
 import CodeEditor from './CodeEditor';
 import { renderMarkdown } from '../../utils/renderContent';
+import { authFetch } from '../../authClient';
 
 interface PracticeCardProps {
   block: PracticeBlock;
@@ -21,15 +22,33 @@ export default function PracticeCard({ block, onAttempt, onComplete }: PracticeC
 
   const [savedCode, setSavedCode] = useState<string | null>(null);
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(saveKey);
-      if (saved) setSavedCode(saved);
-    } catch {}
-  }, [saveKey]);
+    async function loadDraft() {
+      try {
+        const res = await authFetch(`/api/drafts/${encodeURIComponent(block.title)}?type=practice`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.code) setSavedCode(data.code);
+      } catch (err) {
+        console.error('Failed to load practice draft', err);
+      }
+    }
+    loadDraft();
+  }, [block.title]);
 
   const saveCode = useCallback((code: string) => {
-    try { localStorage.setItem(saveKey, code); } catch {}
-  }, [saveKey]);
+    authFetch('/api/drafts', {
+      method: 'POST',
+      body: JSON.stringify({
+        lectureId: block.title,
+        type: 'practice',
+        code
+      })
+    })
+    .then(() => {
+      localStorage.removeItem(saveKey);
+    })
+    .catch(err => console.error('Failed to save practice draft', err));
+  }, [block.title, saveKey]);
 
   const handleRun = () => {
     onAttempt?.();
@@ -57,6 +76,7 @@ export default function PracticeCard({ block, onAttempt, onComplete }: PracticeC
 
   const handleReset = () => {
     setSavedCode(null);
+    saveCode('');
     try { localStorage.removeItem(saveKey); } catch {}
     setAttempts(0);
     setPassed(false);

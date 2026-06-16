@@ -354,14 +354,7 @@ export default function LecturePage() {
               const id = pageId(page, lessonData.sections);
               const label = pageLabel(page, lessonData.sections);
 
-              // Check if any project has a draft saved (In Progress)
-              const projectInProgress = id === 'project' && !progress.projectCompleted &&
-                projects.some(p => {
-                  const draft = localStorage.getItem(`fa_code_${p.id}`);
-                  if (!draft) return false;
-                  const clean = draft.split('\n').map(l => l.replace(/#.*$/, '')).join('').trim();
-                  return clean.length > 0;
-                });
+              const projectInProgress = id === 'project' && !progress.projectCompleted;
 
               return (
                 <button

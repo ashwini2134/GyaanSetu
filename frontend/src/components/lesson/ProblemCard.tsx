@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import type { CodingProblem } from '../../types/lesson';
 import CodeEditor from './CodeEditor';
 import { runPython } from '../../utils/pythonRunner';
+import { authFetch } from '../../authClient';
 
 const DIFF_COLOR: Record<string, string> = {
   easy:   'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
@@ -102,21 +103,37 @@ export default function ProblemCard({ problem, index, completed, onComplete, isO
   const saveKey = `lms:problem:${problem.id}`;
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(saveKey);
-      if (saved) setSavedCode(saved);
-    } catch {}
-  }, [saveKey]);
+    async function loadDraft() {
+      try {
+        const res = await authFetch(`/api/drafts/${problem.id}?type=problem`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.code) setSavedCode(data.code);
+      } catch (err) {
+        console.error('Failed to load problem draft', err);
+      }
+    }
+    loadDraft();
+  }, [problem.id]);
 
   useEffect(() => {
     if (completed) setAllPassed(true);
   }, [completed]);
 
   const handleSave = (code: string) => {
-    try {
-      localStorage.setItem(saveKey, code);
-      setSavedCode(code);
-    } catch {}
+    setSavedCode(code);
+    authFetch('/api/drafts', {
+      method: 'POST',
+      body: JSON.stringify({
+        lectureId: problem.id,
+        type: 'problem',
+        code
+      })
+    })
+    .then(() => {
+      localStorage.removeItem(saveKey);
+    })
+    .catch(err => console.error('Failed to save problem draft', err));
   };
 
   // Run — just execute, show output, no test cases

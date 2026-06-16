@@ -133,12 +133,15 @@ export default function CodingProjectPage() {
         setHints(await loadOptionalFile(`${base}data/${slug}/lecture_${number}/${projectId}/hints.md`));
         setTesting(await loadOptionalFile(`${base}data/${slug}/lecture_${number}/${projectId}/testing.md`));
 
-        // Load draft code if saved or load fallback starter comments
-        const codeKey = `fa_code_${projectId}`;
-        const savedCode = localStorage.getItem(codeKey);
-
-        if (savedCode) {
-          setCode(savedCode);
+        // Load draft code from backend or fallback
+        const res = await authFetch(`/api/drafts/${projectId}?type=project`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.code) {
+            setCode(data.code);
+          } else {
+            setCode("# Write your Python program below\n");
+          }
         } else {
           setCode("# Write your Python program below\n");
         }
@@ -319,7 +322,11 @@ export default function CodingProjectPage() {
   // Save Code to local Storage
   function handleSaveCode() {
     if (projectId) {
-      localStorage.setItem(`fa_code_${projectId}`, code);
+      authFetch('/api/drafts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lectureId: projectId, type: 'project', code })
+      }).catch(console.error);
       setDraftSaved(false);
       setStatus("success");
       setOutput("[OK] Code saved to local storage!");
@@ -333,7 +340,11 @@ export default function CodingProjectPage() {
     setCode(val);
 
     if (projectId) {
-      localStorage.setItem(`fa_code_${projectId}`, val);
+      authFetch('/api/drafts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lectureId: projectId, type: 'project', code: val })
+      }).catch(console.error);
       setDraftSaved(true);
     }
     
@@ -361,7 +372,11 @@ export default function CodingProjectPage() {
       setCode(newVal);
       
       if (projectId) {
-        localStorage.setItem(`fa_code_${projectId}`, newVal);
+        authFetch('/api/drafts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lectureId: projectId, type: 'project', code: newVal })
+        }).catch(console.error);
         setDraftSaved(true);
       }
 
@@ -420,7 +435,11 @@ export default function CodingProjectPage() {
       const text = event.target?.result as string;
       setCode(text);
       if (projectId) {
-        localStorage.setItem(`fa_code_${projectId}`, text);
+        authFetch('/api/drafts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lectureId: projectId, type: 'project', code: text })
+        }).catch(console.error);
         setDraftSaved(true);
       }
       setToast({ message: "[OK] File uploaded successfully!", type: "success" });

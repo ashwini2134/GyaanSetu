@@ -215,4 +215,82 @@ router.post("/lecture", requireAuth, async (req: AuthenticatedRequest, res, next
   }
 });
 
+const actionSchema = z.object({
+  actionType: z.enum(["section", "lecture", "quiz", "problem", "project", "course_start", "course_complete"]),
+  actionId: z.string(),
+});
+
+router.post("/action", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const { actionType, actionId } = actionSchema.parse(req.body);
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    let stats = user.statsData as any;
+    if (!stats) {
+      stats = {
+        coursesStarted: 0,
+        coursesCompleted: 0,
+        lecturesCompleted: 0,
+        quizzesPassed: 0,
+        tasksSubmitted: 0,
+        projectsSolved: 0,
+      };
+    }
+
+    let xpAmount = 0;
+    let reason = "";
+
+    switch (actionType) {
+      case "section":
+        xpAmount = 10;
+        reason = "Section Completed";
+        break;
+      case "lecture":
+        xpAmount = 50;
+        reason = "Full Lecture Completed";
+        stats.lecturesCompleted += 1;
+        break;
+      case "quiz":
+        xpAmount = 30;
+        reason = "Quiz Passed";
+        stats.quizzesPassed += 1;
+        break;
+      case "problem":
+        xpAmount = 20;
+        reason = "Problem Solved";
+        stats.tasksSubmitted += 1;
+        break;
+      case "project":
+        xpAmount = 100;
+        reason = "Capstone Project Solved";
+        stats.projectsSolved += 1;
+        break;
+      case "course_start":
+        stats.coursesStarted += 1;
+        break;
+      case "course_complete":
+        xpAmount = 200;
+        reason = "Course Completed";
+        stats.coursesCompleted += 1;
+        break;
+    }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { statsData: stats }
+    });
+
+    if (xpAmount > 0) {
+      await awardXp(userId, xpAmount, reason, `${actionType}_${actionId}`);
+    }
+
+    res.json({ ok: true, stats });
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default router;
