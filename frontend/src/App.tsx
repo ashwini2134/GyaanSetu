@@ -127,7 +127,11 @@ function RequireAuth({
   return <>{children}</>;
 }
 
+<<<<<<< HEAD
 function RequireRole({
+=======
+export function RequireRole({
+>>>>>>> 8245f18 (Initial commit)
   roles,
   children,
 }: {

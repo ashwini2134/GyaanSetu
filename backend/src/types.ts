@@ -1,7 +1,11 @@
 export type UserRole = "student" | "instructor" | "admin";
 
 export type User = {
+<<<<<<< HEAD
   id: string;
+=======
+  id: number;
+>>>>>>> 8245f18 (Initial commit)
   email: string;
   name: string;
   role: UserRole;
@@ -22,14 +26,22 @@ export type AuthTokens = {
 };
 
 export type JwtAccessPayload = {
+<<<<<<< HEAD
   sub: string;
+=======
+  sub: number;
+>>>>>>> 8245f18 (Initial commit)
   email: string;
   role: UserRole;
   type: "access";
 };
 
 export type JwtRefreshPayload = {
+<<<<<<< HEAD
   sub: string;
+=======
+  sub: number;
+>>>>>>> 8245f18 (Initial commit)
   type: "refresh";
   jti: string;
 };

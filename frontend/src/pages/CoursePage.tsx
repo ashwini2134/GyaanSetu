@@ -31,7 +31,10 @@ export default function CoursePage() {
   const [lectures, setLectures] = useState<Lecture[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+<<<<<<< HEAD
   const [lectureProjectCounts, setLectureProjectCounts] = useState<Record<number, number>>({});
+=======
+>>>>>>> 8245f18 (Initial commit)
   const courseTitle = slug === "cs50p" ? "CS50 Python" : slug === "cs50ai" ? "CS50 AI" : slug?.toUpperCase() ?? "";
   const lectureCount = lectures?.length ?? 0;
 
@@ -57,7 +60,10 @@ export default function CoursePage() {
     ? Math.round((completedCount / lectureCount) * 100)
     : 0;
   const quizzesPassed = lectures?.filter((l) => courseProgress[l.number]?.quizCompleted).length ?? 0;
+<<<<<<< HEAD
   const projectsSubmitted = Object.values(courseProgress).reduce((acc, p) => acc + (p.problemsCompleted?.length || 0) + (p.projectCompleted ? 1 : 0), 0);
+=======
+>>>>>>> 8245f18 (Initial commit)
 
   useEffect(() => {
     if (progressPercent === 100 && lectureCount > 0 && user?.name && slug) {
@@ -72,11 +78,14 @@ export default function CoursePage() {
     api.courseLectures(slug).then(setLectures).catch((e: Error) => setErr(e.message));
   }, [slug]);
 
+<<<<<<< HEAD
   useEffect(() => {
     if (!slug) return;
     api.lectureProjectsCounts(slug).then(setLectureProjectCounts).catch(() => {});
   }, [slug]);
 
+=======
+>>>>>>> 8245f18 (Initial commit)
   if (!slug) return null;
 
   const getStatusIcon = (status: LectureStatus) => {
@@ -182,7 +191,10 @@ export default function CoursePage() {
                   {[
                     { label: "Lectures Completed", value: `${completedCount} / ${lectureCount}` },
                     { label: "Quizzes Passed", value: `${quizzesPassed} / ${lectureCount}` },
+<<<<<<< HEAD
                     { label: "Projects Submitted", value: `${projectsSubmitted}` },
+=======
+>>>>>>> 8245f18 (Initial commit)
                   ].map((stat) => (
                     <div key={stat.label} className="flex items-center gap-2.5 text-xs">
                       <svg className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -260,9 +272,12 @@ export default function CoursePage() {
                           </div>
                           <p className={`text-xs mt-0.5 ${isLocked ? "text-slate-600" : "text-slate-400"}`}>
                             Lecture {lecture.number + 1}
+<<<<<<< HEAD
                             {(lectureProjectCounts[lecture.number] ?? 0) > 0 && (
                               <span className="ml-2 text-slate-500">· Project</span>
                             )}
+=======
+>>>>>>> 8245f18 (Initial commit)
                             {isLocked && lecture.number > 0 && (
                               <span className="ml-2 text-slate-500">— Complete Lecture {lecture.number} to unlock</span>
                             )}
@@ -299,7 +314,10 @@ export default function CoursePage() {
               {[
                 { icon: <Star size={20} className="text-white" />, title: "First Steps", desc: "Complete your first lecture", done: completedCount >= 1, gradient: "from-yellow-400 to-orange-500" },
                 { icon: <Crown size={20} className="text-white" />, title: "Quiz Master", desc: quizzesPassed >= 1 ? `Passed ${quizzesPassed} quiz${quizzesPassed > 1 ? 'zes' : ''}` : "Pass your first quiz", done: quizzesPassed >= 1, gradient: "from-purple-400 to-pink-500" },
+<<<<<<< HEAD
                 { icon: "◆", title: "Project Solver", desc: projectsSubmitted >= 1 ? `Solved ${projectsSubmitted} project${projectsSubmitted > 1 ? 's' : ''}` : "Solve your first project", done: projectsSubmitted >= 1, gradient: "from-red-400 to-orange-500" },
+=======
+>>>>>>> 8245f18 (Initial commit)
                 { icon: "●", title: "Halfway There", desc: completedCount >= Math.ceil(lectureCount / 2) ? `${completedCount}/${lectureCount} complete` : `Complete ${Math.ceil(lectureCount / 2)} lectures`, done: completedCount >= Math.ceil(lectureCount / 2), gradient: "from-blue-400 to-cyan-500" },
               ].map((a) => (
                 <div key={a.title} className={`flex gap-3 p-3 rounded-xl border transition-all duration-200 ${a.done ? 'bg-slate-800/30 border-slate-700/20' : 'bg-slate-800/10 border-slate-700/10 opacity-50'}`}>

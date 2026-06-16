@@ -577,6 +577,178 @@ function DiaryCard({ text }: { text: string }) {
   );
 }
 
+<<<<<<< HEAD
+=======
+// ── Student Management Visualizer ──
+function StudentManagementCard() {
+  const fileContent = localStorage.getItem('fa_file_students.txt') || '';
+  const records = fileContent.split('\n').filter(Boolean).map(line => {
+    const [name, grade] = line.split(',');
+    return { name: name?.trim() || 'Unknown', grade: grade?.trim() || 'N/A' };
+  });
+  
+  return (
+    <div className="max-h-72 overflow-y-auto space-y-2">
+      {records.length > 0 ? (
+        <div className="grid gap-2 sm:grid-cols-2">
+          {records.map((r, i) => (
+            <AnimatedCard key={i} delay={0.05 * i}>
+              <div className="p-3 bg-slate-800/40 border border-slate-700/20 rounded-xl flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-blue-600/20 flex items-center justify-center text-xs font-bold text-blue-400">
+                    {(r.name || '?').charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-slate-100">{r.name}</p>
+                    <p className="text-[10px] text-slate-500">Record #{i+1}</p>
+                  </div>
+                </div>
+                <span className="text-xs font-black px-2.5 py-1 rounded bg-slate-900 text-emerald-400">
+                  {r.grade}
+                </span>
+              </div>
+            </AnimatedCard>
+          ))}
+        </div>
+      ) : (
+        <p className="text-xs text-slate-500 italic text-center py-6">No students saved yet. Add a student and save records to students.txt!</p>
+      )}
+    </div>
+  );
+}
+
+// ── Expense Tracker Visualizer ──
+function ExpenseTrackerCard() {
+  const fileContent = localStorage.getItem('fa_file_expenses.txt') || '';
+  const records = fileContent.split('\n').filter(Boolean).map(line => {
+    const [date, category, description, amount] = line.split(',');
+    return {
+      date: date?.trim() || 'N/A',
+      category: category?.trim() || 'General',
+      description: description?.trim() || 'Expense',
+      amount: parseFloat(amount?.trim() || '0')
+    };
+  });
+  const total = records.reduce((sum, r) => sum + r.amount, 0);
+  
+  return (
+    <div className="max-h-80 overflow-y-auto space-y-4">
+      {records.length > 0 ? (
+        <>
+          <div className="flex gap-3">
+            <div className="flex-1 bg-slate-800/40 border border-slate-700/20 rounded-xl p-3 text-center">
+              <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold">Total Expenses</p>
+              <p className="text-xl font-bold text-emerald-400 mt-0.5">${total.toFixed(2)}</p>
+            </div>
+            <div className="flex-1 bg-slate-800/40 border border-slate-700/20 rounded-xl p-3 text-center">
+              <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold">Transactions</p>
+              <p className="text-xl font-bold text-white mt-0.5">{records.length}</p>
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            {records.map((r, i) => (
+              <AnimatedItem key={i} delay={0.04 * i}>
+                <div className="flex items-center justify-between px-3 py-2 bg-slate-800/20 rounded-lg text-xs border border-slate-700/10">
+                  <div>
+                    <p className="font-semibold text-slate-200">{r.description}</p>
+                    <p className="text-[10px] text-slate-500">{r.date} · <span className="text-blue-400">{r.category}</span></p>
+                  </div>
+                  <span className="font-bold text-slate-100">${r.amount.toFixed(2)}</span>
+                </div>
+              </AnimatedItem>
+            ))}
+          </div>
+        </>
+      ) : (
+        <p className="text-xs text-slate-500 italic text-center py-6">No expenses saved yet. Add an expense and save data to expenses.txt!</p>
+      )}
+    </div>
+  );
+}
+
+// ── To-Do List Visualizer ──
+function TodoListCard() {
+  const fileContent = localStorage.getItem('fa_file_todo.txt') || '';
+  const records = fileContent.split('\n').filter(Boolean).map(line => {
+    const [title, completed] = line.split(',');
+    return { title: title?.trim() || 'Task', completed: completed?.trim() === '1' };
+  });
+  const doneCount = records.filter(r => r.completed).length;
+  
+  return (
+    <div className="max-h-72 overflow-y-auto space-y-3">
+      {records.length > 0 ? (
+        <>
+          <div className="flex justify-between items-center px-1">
+            <span className="text-[10px] text-slate-400">{records.length} task{records.length !== 1 ? 's' : ''}</span>
+            <span className="text-[10px] text-emerald-400">{doneCount} completed</span>
+          </div>
+          <div className="space-y-1.5">
+            {records.map((r, i) => (
+              <AnimatedItem key={i} delay={0.04 * i}>
+                <div className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs border border-slate-700/10 transition-all ${
+                  r.completed ? 'bg-emerald-500/5 text-slate-400' : 'bg-slate-800/30 text-slate-200'
+                }`}>
+                  <span className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 ${
+                    r.completed ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400' : 'border-slate-600/60'
+                  }`}>
+                    {r.completed ? '✓' : ''}
+                  </span>
+                  <span className={r.completed ? 'line-through' : ''}>{r.title}</span>
+                </div>
+              </AnimatedItem>
+            ))}
+          </div>
+        </>
+      ) : (
+        <p className="text-xs text-slate-500 italic text-center py-6">No tasks saved yet. Add a task and save data to todo.txt!</p>
+      )}
+    </div>
+  );
+}
+
+// ── Quiz Application Visualizer ──
+function QuizAppCard({ text }: { text: string }) {
+  const lines = text.split('\n').filter(Boolean);
+  let score = '';
+  let questionsRun = 0;
+  let corrects = 0;
+  
+  for (const line of lines) {
+    const lower = line.toLowerCase();
+    if (lower.includes('score:') || lower.includes('final score:')) {
+      const m = line.match(/(\d+)\/(\d+)/);
+      if (m) {
+        corrects = parseInt(m[1]);
+        questionsRun = parseInt(m[2]);
+        score = m[0];
+      }
+    }
+  }
+  
+  return (
+    <div className="max-h-72 overflow-y-auto flex flex-col items-center justify-center py-6">
+      {score ? (
+        <div className="bg-slate-800/40 border border-slate-700/20 rounded-2xl p-6 text-center w-full max-w-sm pvscale">
+          <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-3">
+            <span className="text-emerald-400 font-bold">✓</span>
+          </div>
+          <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold">Quiz Completed</p>
+          <p className="text-2xl font-black text-white mt-1">{score}</p>
+          <p className="text-xs text-slate-400 mt-2">
+            Success rate: {((corrects / (questionsRun || 3)) * 100).toFixed(0)}%
+          </p>
+        </div>
+      ) : (
+        <div className="text-center">
+          <p className="text-xs text-slate-500 italic">Run your code and complete the quiz questions in the Console!</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+>>>>>>> 8245f18 (Initial commit)
 const projectRenderers: Record<string, (text: string) => React.ReactNode> = {
   rock_paper_scissors: (text) => <GameCard text={text} />,
   multiplication_explorer: (text) => <MultiplicationTableCard text={text} />,
@@ -587,6 +759,13 @@ const projectRenderers: Record<string, (text: string) => React.ReactNode> = {
   text_analyzer: (text) => <TextAnalyzerCard text={text} />,
   personal_diary: (text) => <DiaryCard text={text} />,
   grade_tracker: (text) => <GradeTrackerCard text={text} />,
+<<<<<<< HEAD
+=======
+  student_management: (_text) => <StudentManagementCard />,
+  expense_tracker: (_text) => <ExpenseTrackerCard />,
+  todo_list: (_text) => <TodoListCard />,
+  quiz_app: (text) => <QuizAppCard text={text} />,
+>>>>>>> 8245f18 (Initial commit)
 };
 
 function DefaultPreview({ text }: { text: string }) {

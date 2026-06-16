@@ -1,0 +1,880 @@
+{
+  "id": "cs50p-lecture-2",
+  "courseSlug": "cs50p",
+  "number": 2,
+  "title": "Loops",
+  "overview": "Learn about the core concepts of this week's lecture.",
+  "estimatedMinutes": 45,
+  "sections": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Introduction to Loops",
+          "body": "Learn about the core concepts of this week's lecture.",
+          "bullets": [
+            "Understand the main principles of Loops",
+            "Learn through real-world visual analogies",
+            "Practice code examples interactively",
+            "Reinforce your knowledge with reflection checks"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "loops",
+      "label": "Loops",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Loops",
+          "body": "",
+          "bullets": [
+            "Essentially, loops are a way to do something over and over again.",
+            "In developing as a programmer, you want to consider how one could improve areas of one's code where one types the same thing over and over again. Imagine where one might want to \"meow\" 500 times. Would it be logical to type that same expression of `print(\"meow\")` over and over again?",
+            "Loops enable you to create a block of code that executes over and over again."
+          ]
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Loops as A Washing Machine Cycle",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Washing Machine Cycle",
+            "description": "It repeats the washing, rinsing, and spinning cycles over and over again until the timer hits zero.",
+            "image": "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "repetition",
+            "flowSteps": [
+              "Initialize",
+              "Check condition",
+              "Run loop body",
+              "Update value"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "for i in range(3):\n    print('Meow')",
+            "language": "python",
+            "output": "Meow\nMeow\nMeow"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "What happens if a while loop condition never becomes False?",
+          "answer": "The loop will run forever, creating an 'infinite loop'. You can break out of it in the terminal using Ctrl+C."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Loops",
+          "instructions": "Write a simple Python script implementing or demonstrating Loops.",
+          "starterCode": "# Practice Loops\n# Write your code below\n",
+          "solution": "for i in range(3):\n    print('Meow')",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "while-loops",
+      "label": "While Loops",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "While Loops",
+          "body": "",
+          "bullets": [
+            "The `while` loop is nearly universal throughout all coding languages.",
+            "In the text editor window, edit your code as follows:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "While Loops Example",
+          "language": "python",
+          "code": "i = 3\nwhile i != 0:\n    print(\"meow\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "While Loops",
+          "body": "  Even though this code will execute `print(\"meow\")` multiple times, it will never stop! It will loop forever. When you get stuck in a loop that executes forever, you can press `control-c` on your keyboard to break out of the loop.",
+          "bullets": [
+            "To fix this loop, we can edit our code as follows:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "While Loops Example",
+          "language": "python",
+          "code": "i = 3\nwhile i != 0:\n    print(\"meow\")\n    i = i - 1",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "While Loops",
+          "body": "  Now our code executes properly, reducing `i` by `1` for each \"iteration\" through the loop.",
+          "bullets": [
+            "It's best practice in programming to begin counting with zero:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "While Loops Example",
+          "language": "python",
+          "code": "i = 0\nwhile i < 3:\n    print(\"meow\")\n    i += 1",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "While Loops",
+          "body": "  Notice how `i += 1` is the same as saying `i = i + 1`."
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of While Loops as A Washing Machine Cycle",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Washing Machine Cycle",
+            "description": "It repeats the washing, rinsing, and spinning cycles over and over again until the timer hits zero.",
+            "image": "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "repetition",
+            "flowSteps": [
+              "Initialize",
+              "Check condition",
+              "Run loop body",
+              "Update value"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "for i in range(3):\n    print('Meow')",
+            "language": "python",
+            "output": "Meow\nMeow\nMeow"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "What happens if a while loop condition never becomes False?",
+          "answer": "The loop will run forever, creating an 'infinite loop'. You can break out of it in the terminal using Ctrl+C."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with While Loops",
+          "instructions": "Write a simple Python script implementing or demonstrating While Loops.",
+          "starterCode": "# Practice While Loops\n# Write your code below\n",
+          "solution": "for i in range(3):\n    print('Meow')",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "for-loops",
+      "label": "For Loops",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "For Loops",
+          "body": "",
+          "bullets": [
+            "A `for` loop is a different type of loop. To best understand a `for` loop, it's best to begin by talking about a new variable type called a `list` in Python.",
+            "A `for` loop iterates through a `list` of items:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "For Loops Example",
+          "language": "python",
+          "code": "for i in [0, 1, 2]:\n    print(\"meow\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "For Loops",
+          "body": "",
+          "bullets": [
+            "What if you wanted to iterate up to a million? It's best to create code that can work with such extreme cases:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "For Loops Example",
+          "language": "python",
+          "code": "for i in range(3):\n    print(\"meow\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "For Loops",
+          "body": "  `range(3)` provides back three values (`0`, `1`, and `2`) automatically.",
+          "bullets": [
+            "Notice how we never use `i` explicitly in our code. In Python, if such a variable does not have any other significance, we can simply represent this variable as a single underscore `_`:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "For Loops Example",
+          "language": "python",
+          "code": "for _ in range(3):\n    print(\"meow\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "For Loops",
+          "body": "",
+          "bullets": [
+            "Consider the following code:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "For Loops Example",
+          "language": "python",
+          "code": "print(\"meow\\n\" * 3, end=\"\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "For Loops",
+          "body": "  This code produces three meows, each on a separate line. By adding `end=\"\"` and the `\\n` we tell the compiler to add a line break at the end of each meow."
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of For Loops as A Washing Machine Cycle",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Washing Machine Cycle",
+            "description": "It repeats the washing, rinsing, and spinning cycles over and over again until the timer hits zero.",
+            "image": "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "repetition",
+            "flowSteps": [
+              "Initialize",
+              "Check condition",
+              "Run loop body",
+              "Update value"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "for i in range(3):\n    print('Meow')",
+            "language": "python",
+            "output": "Meow\nMeow\nMeow"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "What happens if a while loop condition never becomes False?",
+          "answer": "The loop will run forever, creating an 'infinite loop'. You can break out of it in the terminal using Ctrl+C."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with For Loops",
+          "instructions": "Write a simple Python script implementing or demonstrating For Loops.",
+          "starterCode": "# Practice For Loops\n# Write your code below\n",
+          "solution": "for i in range(3):\n    print('Meow')",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "improving-with-user-input",
+      "label": "Improving with User Input",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Improving with User Input",
+          "body": "",
+          "bullets": [
+            "A common paradigm within Python is to use a `while` loop to validate the input of the user:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Improving with User Input Example",
+          "language": "python",
+          "code": "while True:\n    n = int(input(\"What's n? \"))\n    if n < 0:\n        continue\n    else:\n        break",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Improving with User Input",
+          "body": "  We've introduced two new keywords, `continue` and `break`. `continue` explicitly tells Python to go to the next iteration of a loop. `break` tells Python to \"break out\" of a loop early.",
+          "bullets": [
+            "It turns out that the `continue` keyword is redundant in this case:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Improving with User Input Example",
+          "language": "python",
+          "code": "while True:\n    n = int(input(\"What's n? \"))\n    if n > 0:\n        break\n\nfor _ in range(n):\n    print(\"meow\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Improving with User Input",
+          "body": "",
+          "bullets": [
+            "Bringing in our prior learning, we can use functions to further improve our code:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Improving with User Input Example",
+          "language": "python",
+          "code": "def main():\n    meow(get_number())\n\n\ndef get_number():\n    while True:\n        n = int(input(\"What's n? \"))\n        if n > 0:\n            return n\n\n\ndef meow(n):\n    for _ in range(n):\n        print(\"meow\")\n\n\nmain()",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Improving with User Input as A Washing Machine Cycle",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Washing Machine Cycle",
+            "description": "It repeats the washing, rinsing, and spinning cycles over and over again until the timer hits zero.",
+            "image": "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "repetition",
+            "flowSteps": [
+              "Initialize",
+              "Check condition",
+              "Run loop body",
+              "Update value"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "for i in range(3):\n    print('Meow')",
+            "language": "python",
+            "output": "Meow\nMeow\nMeow"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "What happens if a while loop condition never becomes False?",
+          "answer": "The loop will run forever, creating an 'infinite loop'. You can break out of it in the terminal using Ctrl+C."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Improving with User Input",
+          "instructions": "Write a simple Python script implementing or demonstrating Improving with User Input.",
+          "starterCode": "# Practice Improving with User Input\n# Write your code below\n",
+          "solution": "for i in range(3):\n    print('Meow')",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "more-about-lists",
+      "label": "More About Lists",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "More About Lists",
+          "body": "",
+          "bullets": [
+            "In the text editor, code as follows:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "More About Lists Example",
+          "language": "python",
+          "code": "students = [\"Hermione\", \"Harry\", \"Ron\"]\n\nprint(students[0])\nprint(students[1])\nprint(students[2])",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "More About Lists",
+          "body": "  We then print the student who is at the 0th location, \"Hermione\". Each of the other students is printed as well.",
+          "bullets": [
+            "Just as we illustrated previously, we can use a loop to iterate over the list:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "More About Lists Example",
+          "language": "python",
+          "code": "students = [\"Hermione\", \"Harry\", \"Ron\"]\n\nfor student in students:\n    print(student)",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "More About Lists",
+          "body": "",
+          "bullets": [
+            "You can learn more in Python's documentation of [lists](https://docs.python.org/3/tutorial/datastructures.html#more-on-lists)."
+          ]
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of More About Lists as A Washing Machine Cycle",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Washing Machine Cycle",
+            "description": "It repeats the washing, rinsing, and spinning cycles over and over again until the timer hits zero.",
+            "image": "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "repetition",
+            "flowSteps": [
+              "Initialize",
+              "Check condition",
+              "Run loop body",
+              "Update value"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "for i in range(3):\n    print('Meow')",
+            "language": "python",
+            "output": "Meow\nMeow\nMeow"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "What happens if a while loop condition never becomes False?",
+          "answer": "The loop will run forever, creating an 'infinite loop'. You can break out of it in the terminal using Ctrl+C."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with More About Lists",
+          "instructions": "Write a simple Python script implementing or demonstrating More About Lists.",
+          "starterCode": "# Practice More About Lists\n# Write your code below\n",
+          "solution": "for i in range(3):\n    print('Meow')",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "length",
+      "label": "Length",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Length",
+          "body": "",
+          "bullets": [
+            "We can utilize `len` as a way of checking the length of the `list` called `students`:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Length Example",
+          "language": "python",
+          "code": "students = [\"Hermione\", \"Harry\", \"Ron\"]\n\nfor i in range(len(students)):\n    print(i + 1, students[i])",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Length",
+          "body": "  `len` allows you to dynamically see how long the list of students is regardless of how much it grows."
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Length as A Washing Machine Cycle",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Washing Machine Cycle",
+            "description": "It repeats the washing, rinsing, and spinning cycles over and over again until the timer hits zero.",
+            "image": "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "repetition",
+            "flowSteps": [
+              "Initialize",
+              "Check condition",
+              "Run loop body",
+              "Update value"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "for i in range(3):\n    print('Meow')",
+            "language": "python",
+            "output": "Meow\nMeow\nMeow"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "What happens if a while loop condition never becomes False?",
+          "answer": "The loop will run forever, creating an 'infinite loop'. You can break out of it in the terminal using Ctrl+C."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Length",
+          "instructions": "Write a simple Python script implementing or demonstrating Length.",
+          "starterCode": "# Practice Length\n# Write your code below\n",
+          "solution": "for i in range(3):\n    print('Meow')",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "dictionaries",
+      "label": "Dictionaries",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Dictionaries",
+          "body": "",
+          "bullets": [
+            "`dict`s or dictionaries is a data structure that allows you to associate keys with values.",
+            "Where a `list` is a list of multiple values, a `dict` associates a key with a value:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Dictionaries Example",
+          "language": "python",
+          "code": "students = {\n    \"Hermione\": \"Gryffindor\",\n    \"Harry\": \"Gryffindor\",\n    \"Ron\": \"Gryffindor\",\n    \"Draco\": \"Slytherin\",\n}\nprint(students[\"Hermione\"])\nprint(students[\"Harry\"])\nprint(students[\"Ron\"])\nprint(students[\"Draco\"])",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Dictionaries",
+          "body": "  We use `{}` curly braces to create a dictionary. Where `list`s use numbers to iterate, `dict`s allow us to use words.",
+          "bullets": [
+            "How could we print out both values and keys?"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Dictionaries Example",
+          "language": "python",
+          "code": "students = {\n    \"Hermione\": \"Gryffindor\",\n    \"Harry\": \"Gryffindor\",\n    \"Ron\": \"Gryffindor\",\n    \"Draco\": \"Slytherin\",\n}\nfor student in students:\n    print(student, students[student], sep=\", \")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Dictionaries",
+          "body": "",
+          "bullets": [
+            "What if we have more information about our students? You can imagine wanting to have lots of data associated with multiple keys:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Dictionaries Example",
+          "language": "python",
+          "code": "students = [\n    {\"name\": \"Hermione\", \"house\": \"Gryffindor\", \"patronus\": \"Otter\"},\n    {\"name\": \"Harry\", \"house\": \"Gryffindor\", \"patronus\": \"Stag\"},\n    {\"name\": \"Ron\", \"house\": \"Gryffindor\", \"patronus\": \"Jack Russell terrier\"},\n    {\"name\": \"Draco\", \"house\": \"Slytherin\", \"patronus\": None},\n]\n\nfor student in students:\n    print(student[\"name\"], student[\"house\"], student[\"patronus\"], sep=\", \")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Dictionaries",
+          "body": "  This code creates a `list` of `dict`s. Python has a special `None` designation where there is no value associated with a key."
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Dictionaries as A Washing Machine Cycle",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Washing Machine Cycle",
+            "description": "It repeats the washing, rinsing, and spinning cycles over and over again until the timer hits zero.",
+            "image": "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "repetition",
+            "flowSteps": [
+              "Initialize",
+              "Check condition",
+              "Run loop body",
+              "Update value"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "for i in range(3):\n    print('Meow')",
+            "language": "python",
+            "output": "Meow\nMeow\nMeow"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "What happens if a while loop condition never becomes False?",
+          "answer": "The loop will run forever, creating an 'infinite loop'. You can break out of it in the terminal using Ctrl+C."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Dictionaries",
+          "instructions": "Write a simple Python script implementing or demonstrating Dictionaries.",
+          "starterCode": "# Practice Dictionaries\n# Write your code below\n",
+          "solution": "for i in range(3):\n    print('Meow')",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "mario",
+      "label": "Mario",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Mario",
+          "body": "",
+          "bullets": [
+            "Remember that the classic game Mario has a hero jumping over bricks. Let's create a textual representation of this game.",
+            "Consider how we could print a column:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Mario Example",
+          "language": "python",
+          "code": "def main():\n    print_column(3)\n\n\ndef print_column(height):\n    for _ in range(height):\n        print(\"#\")\n\n\nmain()",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Mario",
+          "body": "",
+          "bullets": [
+            "Now, let's try to print a row horizontally:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Mario Example",
+          "language": "python",
+          "code": "def main():\n    print_row(4)\n\n\ndef print_row(width):\n    print(\"?\" * width)\n\n\nmain()",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Mario",
+          "body": "",
+          "bullets": [
+            "How could we implement both rows and columns within our code?"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Mario Example",
+          "language": "python",
+          "code": "def main():\n    print_square(3)\n\n\ndef print_square(size):\n\n    # For each row in square\n    for i in range(size):\n\n        # For each brick in row\n        for j in range(size):\n\n            #  Print brick\n            print(\"#\", end=\"\")\n\n        # Print blank line\n        print()\n\n\nmain()",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Mario",
+          "body": "  We have an outer loop that addresses each row in the square. Then, we have an inner loop that prints a brick in each row. Finally, we have a `print` statement that prints a blank line.",
+          "bullets": [
+            "We can further abstract away our code:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Mario Example",
+          "language": "python",
+          "code": "def main():\n    print_square(3)\n\n\ndef print_square(size):\n    for i in range(size):\n        print_row(size)\n\n\ndef print_row(width):\n    print(\"#\" * width)\n\n\nmain()",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Mario as A Washing Machine Cycle",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Washing Machine Cycle",
+            "description": "It repeats the washing, rinsing, and spinning cycles over and over again until the timer hits zero.",
+            "image": "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "repetition",
+            "flowSteps": [
+              "Initialize",
+              "Check condition",
+              "Run loop body",
+              "Update value"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "for i in range(3):\n    print('Meow')",
+            "language": "python",
+            "output": "Meow\nMeow\nMeow"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "What happens if a while loop condition never becomes False?",
+          "answer": "The loop will run forever, creating an 'infinite loop'. You can break out of it in the terminal using Ctrl+C."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Mario",
+          "instructions": "Write a simple Python script implementing or demonstrating Mario.",
+          "starterCode": "# Practice Mario\n# Write your code below\n",
+          "solution": "for i in range(3):\n    print('Meow')",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "summing-up",
+      "label": "Summing Up",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Summing Up",
+          "body": "You now have another power in your growing list of Python abilities. In this lecture, we addressed…",
+          "bullets": [
+            "Loops",
+            "`while`",
+            "`for`",
+            "`len`",
+            "`list`",
+            "`dict`"
+          ]
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Summing Up as A Washing Machine Cycle",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Washing Machine Cycle",
+            "description": "It repeats the washing, rinsing, and spinning cycles over and over again until the timer hits zero.",
+            "image": "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "repetition",
+            "flowSteps": [
+              "Initialize",
+              "Check condition",
+              "Run loop body",
+              "Update value"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "for i in range(3):\n    print('Meow')",
+            "language": "python",
+            "output": "Meow\nMeow\nMeow"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "What happens if a while loop condition never becomes False?",
+          "answer": "The loop will run forever, creating an 'infinite loop'. You can break out of it in the terminal using Ctrl+C."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Summing Up",
+          "instructions": "Write a simple Python script implementing or demonstrating Summing Up.",
+          "starterCode": "# Practice Summing Up\n# Write your code below\n",
+          "solution": "for i in range(3):\n    print('Meow')",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "label": "Summary",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "green",
+          "title": "Lecture Summary",
+          "body": "Congratulations! You've finished Lecture 2 on Loops.",
+          "bullets": [
+            "You explored the core syntax and commands",
+            "You viewed real-world analogies connecting physical objects to python code",
+            "You ran exercises to test validation and error correction"
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "keyTakeaways": [
+      {
+        "emoji": "📝",
+        "text": "Understand the core elements of Loops"
+      },
+      {
+        "emoji": "💡",
+        "text": "Apply physical analogies to visualize how Python processes statements"
+      },
+      {
+        "emoji": "🎯",
+        "text": "Run unit tests and exercises to ensure correctness"
+      }
+    ],
+    "whatYouLearned": [
+      "Core syntaxes of Loops",
+      "Applying functional concepts to resolve coding problems"
+    ],
+    "nextUp": "Next Lecture"
+  }
+}

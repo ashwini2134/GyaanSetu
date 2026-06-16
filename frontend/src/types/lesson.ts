@@ -23,6 +23,10 @@ export interface AnalogyBlock {
   title: string;
   text: string;
   emoji?: string;
+<<<<<<< HEAD
+=======
+  icon?: string;
+>>>>>>> 8245f18 (Initial commit)
   accentColor?: 'blue' | 'purple' | 'green' | 'orange' | 'amber';
 }
 

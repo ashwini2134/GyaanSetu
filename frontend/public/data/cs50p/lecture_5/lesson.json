@@ -1,0 +1,576 @@
+{
+  "id": "cs50p-lecture-5",
+  "courseSlug": "cs50p",
+  "number": 5,
+  "title": "Unit Tests",
+  "overview": "Learn about the core concepts of this week's lecture.",
+  "estimatedMinutes": 45,
+  "sections": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Introduction to Unit Tests",
+          "body": "Learn about the core concepts of this week's lecture.",
+          "bullets": [
+            "Understand the main principles of Unit Tests",
+            "Learn through real-world visual analogies",
+            "Practice code examples interactively",
+            "Reinforce your knowledge with reflection checks"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "unit-tests",
+      "label": "Unit Tests",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Unit Tests",
+          "body": "",
+          "bullets": [
+            "Up until now, you have likely been testing your own code using `print` statements, or relying upon CS50 to test your code for you.",
+            "It's most common in industry to write code to test your own programs.",
+            "In your console window, type `code calculator.py`:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Unit Tests Example",
+          "language": "python",
+          "code": "def main():\n    x = int(input(\"What's x? \"))\n    print(\"x squared is\", square(x))\n\n\ndef square(n):\n    return n * n\n\n\nif __name__ == \"__main__\":\n    main()",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Unit Tests",
+          "body": "",
+          "bullets": [
+            "Following convention, let's create a new test program by typing `code test_calculator.py`:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Unit Tests Example",
+          "language": "python",
+          "code": "from calculator import square\n\n\ndef main():\n    test_square()\n\n\ndef test_square():\n    if square(2) != 4:\n        print(\"2 squared was not 4\")\n    if square(3) != 9:\n        print(\"3 squared was not 9\")\n\n\nif __name__ == \"__main__\":\n    main()",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Unit Tests",
+          "body": "  We are importing the `square` function on the first line. By convention, we create a function called `test_square`."
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Unit Tests as A Manufacturing Inspector",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Manufacturing Inspector",
+            "description": "Inspects each item coming off the assembly line against a checklist to make sure there are no defects.",
+            "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "flow",
+            "flowSteps": [
+              "Write function",
+              "Run pytest",
+              "Verify assertions"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "def test_square():\n    assert square(2) == 4\n    assert square(-2) == 4",
+            "language": "python",
+            "output": "====== 1 passed in 0.01s ======"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Should unit tests cover both normal cases and boundary/edge cases?",
+          "answer": "Yes! Good unit tests check standard inputs (like 2) as well as boundary or negative inputs (like -2 or 0) to ensure robustness."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Unit Tests",
+          "instructions": "Write a simple Python script implementing or demonstrating Unit Tests.",
+          "starterCode": "# Practice Unit Tests\n# Write your code below\n",
+          "solution": "def test_square():\n    assert square(2) == 4\n    assert square(-2) == 4",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "assert",
+      "label": "assert",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "assert",
+          "body": "",
+          "bullets": [
+            "Python's `assert` command allows us to tell the interpreter that some assertion is true:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "assert Example",
+          "language": "python",
+          "code": "from calculator import square\n\n\ndef main():\n    test_square()\n\n\ndef test_square():\n    assert square(2) == 4\n    assert square(3) == 9\n\n\nif __name__ == \"__main__\":\n    main()",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "assert",
+          "body": "",
+          "bullets": [
+            "If an assertion is not met, the interpreter raises an `AssertionError`.",
+            "One challenge: our code could become burdensome if we wanted to provide more descriptive error output:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "assert Example",
+          "language": "python",
+          "code": "from calculator import square\n\n\ndef main():\n    test_square()\n\n\ndef test_square():\n    try:\n        assert square(2) == 4\n    except AssertionError:\n        print(\"2 squared is not 4\")\n    try:\n        assert square(3) == 9\n    except AssertionError:\n        print(\"3 squared is not 9\")\n\n\nif __name__ == \"__main__\":\n    main()",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "assert",
+          "body": "",
+          "bullets": [
+            "You can learn more in Python's documentation of [`assert`](https://docs.python.org/3/reference/simple_stmts.html#assert)."
+          ]
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of assert as A Manufacturing Inspector",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Manufacturing Inspector",
+            "description": "Inspects each item coming off the assembly line against a checklist to make sure there are no defects.",
+            "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "flow",
+            "flowSteps": [
+              "Write function",
+              "Run pytest",
+              "Verify assertions"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "def test_square():\n    assert square(2) == 4\n    assert square(-2) == 4",
+            "language": "python",
+            "output": "====== 1 passed in 0.01s ======"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Should unit tests cover both normal cases and boundary/edge cases?",
+          "answer": "Yes! Good unit tests check standard inputs (like 2) as well as boundary or negative inputs (like -2 or 0) to ensure robustness."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with assert",
+          "instructions": "Write a simple Python script implementing or demonstrating assert.",
+          "starterCode": "# Practice assert\n# Write your code below\n",
+          "solution": "def test_square():\n    assert square(2) == 4\n    assert square(-2) == 4",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "pytest",
+      "label": "pytest",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "pytest",
+          "body": "",
+          "bullets": [
+            "`pytest` is a third-party library that allows you to unit test your program. To utilize `pytest`, type `pip install pytest`.",
+            "Modify your `test_calculator` function as follows:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "pytest Example",
+          "language": "python",
+          "code": "from calculator import square\n\n\ndef test_assert():\n    assert square(2) == 4\n    assert square(3) == 9\n    assert square(-2) == 4\n    assert square(-3) == 9\n    assert square(0) == 0",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "pytest",
+          "body": "",
+          "bullets": [
+            "In the terminal window, type `pytest test_calculator.py`. Output will be provided, with a red `F` near the top indicating that something failed.",
+            "It is not ideal that `pytest` will stop running after the first failed test. Let's divide the code into different groups of tests:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "pytest Example",
+          "language": "python",
+          "code": "from calculator import square\n\n\ndef test_positive():\n    assert square(2) == 4\n    assert square(3) == 9\n\n\ndef test_negative():\n    assert square(-2) == 4\n    assert square(-3) == 9\n\n\ndef test_zero():\n    assert square(0) == 0",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "pytest",
+          "body": "  Testing frameworks like `pytest` will run each function, even if there was a failure in one of them.",
+          "bullets": [
+            "Finally, we can test that our program handles exceptions:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "pytest Example",
+          "language": "python",
+          "code": "import pytest\n\nfrom calculator import square\n\n\ndef test_positive():\n    assert square(2) == 4\n    assert square(3) == 9\n\n\ndef test_negative():\n    assert square(-2) == 4\n    assert square(-3) == 9\n\n\ndef test_zero():\n    assert square(0) == 0\n\n\ndef test_str():\n    with pytest.raises(TypeError):\n        square(\"cat\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "pytest",
+          "body": "  Instead of using `assert`, we take advantage of `pytest.raises`, which allows you to express that you expect an error to be raised.",
+          "bullets": [
+            "You can learn more in Pytest's documentation of [`pytest`](https://docs.pytest.org/en/7.1.x/getting-started.html)."
+          ]
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of pytest as A Manufacturing Inspector",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Manufacturing Inspector",
+            "description": "Inspects each item coming off the assembly line against a checklist to make sure there are no defects.",
+            "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "flow",
+            "flowSteps": [
+              "Write function",
+              "Run pytest",
+              "Verify assertions"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "def test_square():\n    assert square(2) == 4\n    assert square(-2) == 4",
+            "language": "python",
+            "output": "====== 1 passed in 0.01s ======"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Should unit tests cover both normal cases and boundary/edge cases?",
+          "answer": "Yes! Good unit tests check standard inputs (like 2) as well as boundary or negative inputs (like -2 or 0) to ensure robustness."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with pytest",
+          "instructions": "Write a simple Python script implementing or demonstrating pytest.",
+          "starterCode": "# Practice pytest\n# Write your code below\n",
+          "solution": "def test_square():\n    assert square(2) == 4\n    assert square(-2) == 4",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "testing-strings",
+      "label": "Testing Strings",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Testing Strings",
+          "body": "",
+          "bullets": [
+            "Consider the following code for `hello.py`:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Testing Strings Example",
+          "language": "python",
+          "code": "def main():\n    name = input(\"What's your name? \")\n    hello(name)\n\n\ndef hello(to=\"world\"):\n    print(\"hello,\", to)\n\n\nif __name__ == \"__main__\":\n    main()",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Testing Strings",
+          "body": "",
+          "bullets": [
+            "Why might a test not work well here? Notice that the `hello` function *prints* something: it does not *return* a value! We can change our `hello` function to return a string:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Testing Strings Example",
+          "language": "python",
+          "code": "def main():\n    name = input(\"What's your name? \")\n    print(hello(name))\n\n\ndef hello(to=\"world\"):\n    return f\"hello, {to}\"\n\n\nif __name__ == \"__main__\":\n    main()",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Testing Strings",
+          "body": "",
+          "bullets": [
+            "Now we can use `pytest` to test the `hello` function:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Testing Strings Example",
+          "language": "python",
+          "code": "from hello import hello\n\n\ndef test_default():\n    assert hello() == \"hello, world\"\n\n\ndef test_argument():\n    assert hello(\"David\") == \"hello, David\"",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Testing Strings as A Manufacturing Inspector",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Manufacturing Inspector",
+            "description": "Inspects each item coming off the assembly line against a checklist to make sure there are no defects.",
+            "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "flow",
+            "flowSteps": [
+              "Write function",
+              "Run pytest",
+              "Verify assertions"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "def test_square():\n    assert square(2) == 4\n    assert square(-2) == 4",
+            "language": "python",
+            "output": "====== 1 passed in 0.01s ======"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Should unit tests cover both normal cases and boundary/edge cases?",
+          "answer": "Yes! Good unit tests check standard inputs (like 2) as well as boundary or negative inputs (like -2 or 0) to ensure robustness."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Testing Strings",
+          "instructions": "Write a simple Python script implementing or demonstrating Testing Strings.",
+          "starterCode": "# Practice Testing Strings\n# Write your code below\n",
+          "solution": "def test_square():\n    assert square(2) == 4\n    assert square(-2) == 4",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "organizing-tests-into-folders",
+      "label": "Organizing Tests into Folders",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Organizing Tests into Folders",
+          "body": "",
+          "bullets": [
+            "Unit testing code using multiple tests is so common that you can run a whole folder of tests with a single command.",
+            "First, in the terminal window, execute `mkdir test` to create a folder called `test`.",
+            "Then create a test within that folder: `code test/test_hello.py`:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Organizing Tests into Folders Example",
+          "language": "python",
+          "code": "from hello import hello\n\n\ndef test_default():\n    assert hello() == \"hello, world\"\n\n\ndef test_argument():\n    assert hello(\"David\") == \"hello, David\"",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Organizing Tests into Folders",
+          "body": "",
+          "bullets": [
+            "`pytest` will not allow us to run tests as a folder without a special `__init__` file. Create this file by typing `code test/__init__.py`. Even leaving this `__init__.py` file empty, `pytest` is informed that the whole folder containing `__init__.py` has tests that can be run.",
+            "Now, typing `pytest test` in the terminal, you can run the entire `test` folder of code."
+          ]
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Organizing Tests into Folders as A Manufacturing Inspector",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Manufacturing Inspector",
+            "description": "Inspects each item coming off the assembly line against a checklist to make sure there are no defects.",
+            "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "flow",
+            "flowSteps": [
+              "Write function",
+              "Run pytest",
+              "Verify assertions"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "def test_square():\n    assert square(2) == 4\n    assert square(-2) == 4",
+            "language": "python",
+            "output": "====== 1 passed in 0.01s ======"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Should unit tests cover both normal cases and boundary/edge cases?",
+          "answer": "Yes! Good unit tests check standard inputs (like 2) as well as boundary or negative inputs (like -2 or 0) to ensure robustness."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Organizing Tests into Folders",
+          "instructions": "Write a simple Python script implementing or demonstrating Organizing Tests into Folders.",
+          "starterCode": "# Practice Organizing Tests into Folders\n# Write your code below\n",
+          "solution": "def test_square():\n    assert square(2) == 4\n    assert square(-2) == 4",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "summing-up",
+      "label": "Summing Up",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Summing Up",
+          "body": "Testing your code is a natural part of the programming process. Unit tests allow you to test specific aspects of your code. In this lecture, you learned about…",
+          "bullets": [
+            "Unit tests",
+            "`assert`",
+            "`pytest`"
+          ]
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Summing Up as A Manufacturing Inspector",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Manufacturing Inspector",
+            "description": "Inspects each item coming off the assembly line against a checklist to make sure there are no defects.",
+            "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "flow",
+            "flowSteps": [
+              "Write function",
+              "Run pytest",
+              "Verify assertions"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "def test_square():\n    assert square(2) == 4\n    assert square(-2) == 4",
+            "language": "python",
+            "output": "====== 1 passed in 0.01s ======"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Should unit tests cover both normal cases and boundary/edge cases?",
+          "answer": "Yes! Good unit tests check standard inputs (like 2) as well as boundary or negative inputs (like -2 or 0) to ensure robustness."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Summing Up",
+          "instructions": "Write a simple Python script implementing or demonstrating Summing Up.",
+          "starterCode": "# Practice Summing Up\n# Write your code below\n",
+          "solution": "def test_square():\n    assert square(2) == 4\n    assert square(-2) == 4",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "label": "Summary",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "green",
+          "title": "Lecture Summary",
+          "body": "Congratulations! You've finished Lecture 5 on Unit Tests.",
+          "bullets": [
+            "You explored the core syntax and commands",
+            "You viewed real-world analogies connecting physical objects to python code",
+            "You ran exercises to test validation and error correction"
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "keyTakeaways": [
+      {
+        "emoji": "📝",
+        "text": "Understand the core elements of Unit Tests"
+      },
+      {
+        "emoji": "💡",
+        "text": "Apply physical analogies to visualize how Python processes statements"
+      },
+      {
+        "emoji": "🎯",
+        "text": "Run unit tests and exercises to ensure correctness"
+      }
+    ],
+    "whatYouLearned": [
+      "Core syntaxes of Unit Tests",
+      "Applying functional concepts to resolve coding problems"
+    ],
+    "nextUp": "Next Lecture"
+  }
+}

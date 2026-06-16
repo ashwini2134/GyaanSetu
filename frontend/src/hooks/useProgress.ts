@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+=======
+import { useCallback, useEffect, useMemo, useState } from 'react';
+>>>>>>> 8245f18 (Initial commit)
 import type { LectureProgress, SectionProgress } from '../types/lesson';
 import { getToken } from '../authClient';
 
@@ -79,9 +83,13 @@ function readSnapshot(key: string | null): LectureProgress | null {
   return value;
 }
 
+<<<<<<< HEAD
 function invalidateSnapshotCache() {
   _snapCache.clear();
 }
+=======
+
+>>>>>>> 8245f18 (Initial commit)
 
 // ── Check if lecture should be auto-completed ────────────────────────────
 function checkLectureCompletion(
@@ -256,9 +264,12 @@ export function useProgress(courseSlug: string | undefined, lectureNumber: numbe
   }, [updateProgress, courseSlug, lectureNumber]);
 
   // Auto-check lecture completion
+<<<<<<< HEAD
   const totalSections = 0; // will be passed externally
   const totalProblems = 0;
   const hasQuiz = false;
+=======
+>>>>>>> 8245f18 (Initial commit)
 
   const visitedSections = useMemo(
     () => Object.values(progress.sections).filter(s => s.visited).length,

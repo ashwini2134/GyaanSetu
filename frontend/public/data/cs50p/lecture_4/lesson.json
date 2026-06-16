@@ -1,0 +1,835 @@
+{
+  "id": "cs50p-lecture-4",
+  "courseSlug": "cs50p",
+  "number": 4,
+  "title": "Libraries",
+  "overview": "Learn about the core concepts of this week's lecture.",
+  "estimatedMinutes": 45,
+  "sections": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Introduction to Libraries",
+          "body": "Learn about the core concepts of this week's lecture.",
+          "bullets": [
+            "Understand the main principles of Libraries",
+            "Learn through real-world visual analogies",
+            "Practice code examples interactively",
+            "Reinforce your knowledge with reflection checks"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "libraries",
+      "label": "Libraries",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Libraries",
+          "body": "",
+          "bullets": [
+            "Generally, libraries are bits of code written by you or others that you can use in your program.",
+            "Python allows you to share functions or features with others as \"modules\".",
+            "If you copy and paste code from an old project, chances are you can create such a module or library that you could bring into your new project."
+          ]
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Libraries as A Swiss Army Knife",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Swiss Army Knife",
+            "description": "Instead of manufacturing a knife, scissors, and file from scratch, you import a tool with everything pre-built.",
+            "image": "https://images.unsplash.com/photo-1615127717889-8945dba1f05a?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "categories",
+            "flowSteps": [
+              "choice()",
+              "randint()",
+              "shuffle()"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "import random\ncards = ['jack', 'queen', 'king']\nprint(random.choice(cards))",
+            "language": "python",
+            "output": "queen"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Why do we import libraries instead of writing all code ourselves?",
+          "answer": "Libraries contain pre-written, tested code by other developers, saving us time and making our programs more reliable."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Libraries",
+          "instructions": "Write a simple Python script implementing or demonstrating Libraries.",
+          "starterCode": "# Practice Libraries\n# Write your code below\n",
+          "solution": "import random\ncards = ['jack', 'queen', 'king']\nprint(random.choice(cards))",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "random",
+      "label": "Random",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Random",
+          "body": "",
+          "bullets": [
+            "`random` is a library that comes with Python that you could import into your own project.",
+            "So, how do you load a module into your own program? You can use the word `import`."
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Random Example",
+          "language": "python",
+          "code": "import random\n\ncoin = random.choice([\"heads\", \"tails\"])\nprint(coin)",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Random",
+          "body": "",
+          "bullets": [
+            "`from` allows us to be very specific about what we'd like to import:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Random Example",
+          "language": "python",
+          "code": "from random import choice\n\ncoin = choice([\"heads\", \"tails\"])\nprint(coin)",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Random",
+          "body": "",
+          "bullets": [
+            "Consider the function `random.randint(a, b)`. This function will generate a random number between `a` and `b`:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Random Example",
+          "language": "python",
+          "code": "import random\n\nnumber = random.randint(1, 10)\nprint(number)",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Random",
+          "body": "",
+          "bullets": [
+            "We can introduce `random.shuffle(x)` where it will shuffle a list into a random order:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Random Example",
+          "language": "python",
+          "code": "import random\n\ncards = [\"jack\", \"queen\", \"king\"]\nrandom.shuffle(cards)\nfor card in cards:\n    print(card)",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Random",
+          "body": "",
+          "bullets": [
+            "You can learn more in Python's documentation of [`random`](https://docs.python.org/3/library/random.html)."
+          ]
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Random as A Swiss Army Knife",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Swiss Army Knife",
+            "description": "Instead of manufacturing a knife, scissors, and file from scratch, you import a tool with everything pre-built.",
+            "image": "https://images.unsplash.com/photo-1615127717889-8945dba1f05a?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "categories",
+            "flowSteps": [
+              "choice()",
+              "randint()",
+              "shuffle()"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "import random\ncards = ['jack', 'queen', 'king']\nprint(random.choice(cards))",
+            "language": "python",
+            "output": "queen"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Why do we import libraries instead of writing all code ourselves?",
+          "answer": "Libraries contain pre-written, tested code by other developers, saving us time and making our programs more reliable."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Random",
+          "instructions": "Write a simple Python script implementing or demonstrating Random.",
+          "starterCode": "# Practice Random\n# Write your code below\n",
+          "solution": "import random\ncards = ['jack', 'queen', 'king']\nprint(random.choice(cards))",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "statistics",
+      "label": "Statistics",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Statistics",
+          "body": "",
+          "bullets": [
+            "Python comes with a built-in `statistics` library. `mean` is a function of this library that is quite useful:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Statistics Example",
+          "language": "python",
+          "code": "import statistics\n\nprint(statistics.mean([100, 90]))",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Statistics",
+          "body": "",
+          "bullets": [
+            "You can learn more in Python's documentation of [`statistics`](https://docs.python.org/3/library/statistics.html)."
+          ]
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Statistics as A Swiss Army Knife",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Swiss Army Knife",
+            "description": "Instead of manufacturing a knife, scissors, and file from scratch, you import a tool with everything pre-built.",
+            "image": "https://images.unsplash.com/photo-1615127717889-8945dba1f05a?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "categories",
+            "flowSteps": [
+              "choice()",
+              "randint()",
+              "shuffle()"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "import random\ncards = ['jack', 'queen', 'king']\nprint(random.choice(cards))",
+            "language": "python",
+            "output": "queen"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Why do we import libraries instead of writing all code ourselves?",
+          "answer": "Libraries contain pre-written, tested code by other developers, saving us time and making our programs more reliable."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Statistics",
+          "instructions": "Write a simple Python script implementing or demonstrating Statistics.",
+          "starterCode": "# Practice Statistics\n# Write your code below\n",
+          "solution": "import random\ncards = ['jack', 'queen', 'king']\nprint(random.choice(cards))",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "command-line-arguments",
+      "label": "Command-Line Arguments",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Command-Line Arguments",
+          "body": "",
+          "bullets": [
+            "What if we wanted to be able to take input from the command-line? For example, rather than typing `python average.py`, what if we wanted to type `python average.py 100 90`?",
+            "`sys` is a module that allows us to take arguments at the command line. `argv` is within the `sys` module:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Command-Line Arguments Example",
+          "language": "python",
+          "code": "import sys\n\nprint(\"hello, my name is\", sys.argv[1])",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Command-Line Arguments",
+          "body": "  If you type `python name.py David`, you will see `hello, my name is David`. `sys.argv[1]` is where `David` is being stored. What is held in `sys.argv[0]`? If you guessed `name.py`, you would be correct!",
+          "bullets": [
+            "What if the user does not type in the name at the command line? An error `list index out of range` will be presented. Here's how we can protect our program:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Command-Line Arguments Example",
+          "language": "python",
+          "code": "import sys\n\ntry:\n    print(\"hello, my name is\", sys.argv[1])\nexcept IndexError:\n    print(\"Too few arguments\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Command-Line Arguments",
+          "body": "",
+          "bullets": [
+            "Our program can be improved:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Command-Line Arguments Example",
+          "language": "python",
+          "code": "import sys\n\nif len(sys.argv) < 2:\n    print(\"Too few arguments\")\nelif len(sys.argv) > 2:\n    print(\"Too many arguments\")\nelse:\n    print(\"hello, my name is\", sys.argv[1])",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Command-Line Arguments",
+          "body": "",
+          "bullets": [
+            "There is something very nice about keeping our error checking separate from the remainder of our code:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Command-Line Arguments Example",
+          "language": "python",
+          "code": "import sys\n\nif len(sys.argv) < 2:\n    sys.exit(\"Too few arguments\")\nelif len(sys.argv) > 2:\n    sys.exit(\"Too many arguments\")\n\nprint(\"hello, my name is\", sys.argv[1])",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Command-Line Arguments",
+          "body": "  `sys.exit` provides a means by which the program can exit if an error arises.",
+          "bullets": [
+            "You can learn more in Python's documentation of [`sys`](https://docs.python.org/3/library/sys.html)."
+          ]
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Command-Line Arguments as A Swiss Army Knife",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Swiss Army Knife",
+            "description": "Instead of manufacturing a knife, scissors, and file from scratch, you import a tool with everything pre-built.",
+            "image": "https://images.unsplash.com/photo-1615127717889-8945dba1f05a?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "categories",
+            "flowSteps": [
+              "choice()",
+              "randint()",
+              "shuffle()"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "import random\ncards = ['jack', 'queen', 'king']\nprint(random.choice(cards))",
+            "language": "python",
+            "output": "queen"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Why do we import libraries instead of writing all code ourselves?",
+          "answer": "Libraries contain pre-written, tested code by other developers, saving us time and making our programs more reliable."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Command-Line Arguments",
+          "instructions": "Write a simple Python script implementing or demonstrating Command-Line Arguments.",
+          "starterCode": "# Practice Command-Line Arguments\n# Write your code below\n",
+          "solution": "import random\ncards = ['jack', 'queen', 'king']\nprint(random.choice(cards))",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "slice",
+      "label": "slice",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "slice",
+          "body": "",
+          "bullets": [
+            "`slice` allows us to take a `list` and tell the interpreter where we want the start of the `list` and the end of the `list`:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "slice Example",
+          "language": "python",
+          "code": "import sys\n\nif len(sys.argv) < 2:\n    sys.exit(\"Too few arguments\")\n\nfor arg in sys.argv[1:]:\n    print(\"hello, my name is\", arg)",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "slice",
+          "body": "  Rather than starting the list at `0`, we use square brackets to tell the interpreter to start at `1` and go to the end using the `1:` argument."
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of slice as A Swiss Army Knife",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Swiss Army Knife",
+            "description": "Instead of manufacturing a knife, scissors, and file from scratch, you import a tool with everything pre-built.",
+            "image": "https://images.unsplash.com/photo-1615127717889-8945dba1f05a?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "categories",
+            "flowSteps": [
+              "choice()",
+              "randint()",
+              "shuffle()"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "import random\ncards = ['jack', 'queen', 'king']\nprint(random.choice(cards))",
+            "language": "python",
+            "output": "queen"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Why do we import libraries instead of writing all code ourselves?",
+          "answer": "Libraries contain pre-written, tested code by other developers, saving us time and making our programs more reliable."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with slice",
+          "instructions": "Write a simple Python script implementing or demonstrating slice.",
+          "starterCode": "# Practice slice\n# Write your code below\n",
+          "solution": "import random\ncards = ['jack', 'queen', 'king']\nprint(random.choice(cards))",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "packages",
+      "label": "Packages",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Packages",
+          "body": "",
+          "bullets": [
+            "One of the reasons Python is so popular is that there are numerous powerful third-party libraries. We call these third-party libraries, implemented as a folder, \"packages\".",
+            "PyPI is a repository or directory of all available third-party packages.",
+            "Python has a package manager called `pip` that allows you to install packages quickly. For example: `pip install cowsay`."
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Packages Example",
+          "language": "python",
+          "code": "import cowsay\nimport sys\n\nif len(sys.argv) == 2:\n    cowsay.cow(\"hello, \" + sys.argv[1])",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Packages",
+          "body": "",
+          "bullets": [
+            "You can find other third-party packages at [PyPI](https://pypi.org/)."
+          ]
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Packages as A Swiss Army Knife",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Swiss Army Knife",
+            "description": "Instead of manufacturing a knife, scissors, and file from scratch, you import a tool with everything pre-built.",
+            "image": "https://images.unsplash.com/photo-1615127717889-8945dba1f05a?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "categories",
+            "flowSteps": [
+              "choice()",
+              "randint()",
+              "shuffle()"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "import random\ncards = ['jack', 'queen', 'king']\nprint(random.choice(cards))",
+            "language": "python",
+            "output": "queen"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Why do we import libraries instead of writing all code ourselves?",
+          "answer": "Libraries contain pre-written, tested code by other developers, saving us time and making our programs more reliable."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Packages",
+          "instructions": "Write a simple Python script implementing or demonstrating Packages.",
+          "starterCode": "# Practice Packages\n# Write your code below\n",
+          "solution": "import random\ncards = ['jack', 'queen', 'king']\nprint(random.choice(cards))",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "apis",
+      "label": "APIs",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "APIs",
+          "body": "",
+          "bullets": [
+            "APIs or \"application program interfaces\" allow you to connect to the code of others.",
+            "`requests` is a package that allows your program to behave as a web browser would. In your terminal, type `pip install requests`.",
+            "It turns out that Apple iTunes has its own API. The format returned is called JSON, a text-based format used to exchange data between applications."
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "APIs Example",
+          "language": "python",
+          "code": "import requests\nimport sys\n\nif len(sys.argv) != 2:\n    sys.exit()\n\nresponse = requests.get(\"https://itunes.apple.com/search?entity=song&limit=1&term=\" + sys.argv[1])\nprint(response.json())",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "APIs",
+          "body": "",
+          "bullets": [
+            "Python has a built-in JSON library that can help us interpret the data received:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "APIs Example",
+          "language": "python",
+          "code": "import json\nimport requests\nimport sys\n\nif len(sys.argv) != 2:\n    sys.exit()\n\nresponse = requests.get(\"https://itunes.apple.com/search?entity=song&limit=1&term=\" + sys.argv[1])\nprint(json.dumps(response.json(), indent=2))",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "APIs",
+          "body": "",
+          "bullets": [
+            "How could we output just the track name?"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "APIs Example",
+          "language": "python",
+          "code": "import json\nimport requests\nimport sys\n\nif len(sys.argv) != 2:\n    sys.exit()\n\nresponse = requests.get(\"https://itunes.apple.com/search?entity=song&limit=50&term=\" + sys.argv[1])\n\no = response.json()\nfor result in o[\"results\"]:\n    print(result[\"trackName\"])",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "APIs",
+          "body": "",
+          "bullets": [
+            "You can learn more about `requests` through the [library's documentation](https://docs.python-requests.org/), and about JSON in Python's documentation of [JSON](https://docs.python.org/3/library/json.html)."
+          ]
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of APIs as A Swiss Army Knife",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Swiss Army Knife",
+            "description": "Instead of manufacturing a knife, scissors, and file from scratch, you import a tool with everything pre-built.",
+            "image": "https://images.unsplash.com/photo-1615127717889-8945dba1f05a?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "categories",
+            "flowSteps": [
+              "choice()",
+              "randint()",
+              "shuffle()"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "import random\ncards = ['jack', 'queen', 'king']\nprint(random.choice(cards))",
+            "language": "python",
+            "output": "queen"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Why do we import libraries instead of writing all code ourselves?",
+          "answer": "Libraries contain pre-written, tested code by other developers, saving us time and making our programs more reliable."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with APIs",
+          "instructions": "Write a simple Python script implementing or demonstrating APIs.",
+          "starterCode": "# Practice APIs\n# Write your code below\n",
+          "solution": "import random\ncards = ['jack', 'queen', 'king']\nprint(random.choice(cards))",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "making-your-own-libraries",
+      "label": "Making Your Own Libraries",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Making Your Own Libraries",
+          "body": "",
+          "bullets": [
+            "You have the ability as a Python programmer to create your own library! In your terminal window, type `code sayings.py`:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Making Your Own Libraries Example",
+          "language": "python",
+          "code": "def hello(name):\n    print(f\"hello, {name}\")\n\n\ndef goodbye(name):\n    print(f\"goodbye, {name}\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Making Your Own Libraries",
+          "body": "",
+          "bullets": [
+            "Let's see how we could implement code utilizing this package. In the terminal window, type `code say.py`:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Making Your Own Libraries Example",
+          "language": "python",
+          "code": "import sys\n\nfrom sayings import goodbye\n\nif len(sys.argv) == 2:\n    goodbye(sys.argv[1])",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Making Your Own Libraries",
+          "body": "  This code imports the abilities of `goodbye` from the `sayings` package."
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Making Your Own Libraries as A Swiss Army Knife",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Swiss Army Knife",
+            "description": "Instead of manufacturing a knife, scissors, and file from scratch, you import a tool with everything pre-built.",
+            "image": "https://images.unsplash.com/photo-1615127717889-8945dba1f05a?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "categories",
+            "flowSteps": [
+              "choice()",
+              "randint()",
+              "shuffle()"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "import random\ncards = ['jack', 'queen', 'king']\nprint(random.choice(cards))",
+            "language": "python",
+            "output": "queen"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Why do we import libraries instead of writing all code ourselves?",
+          "answer": "Libraries contain pre-written, tested code by other developers, saving us time and making our programs more reliable."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Making Your Own Libraries",
+          "instructions": "Write a simple Python script implementing or demonstrating Making Your Own Libraries.",
+          "starterCode": "# Practice Making Your Own Libraries\n# Write your code below\n",
+          "solution": "import random\ncards = ['jack', 'queen', 'king']\nprint(random.choice(cards))",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "summing-up",
+      "label": "Summing Up",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Summing Up",
+          "body": "Libraries extend the abilities of Python. Some libraries are included by default with Python and simply need to be imported. Others are third-party packages that need to be installed using `pip`. You can make your own packages for use by yourself or others! In this lecture, you learned about…",
+          "bullets": [
+            "Libraries",
+            "Random",
+            "Statistics",
+            "Command-Line Arguments",
+            "Slice",
+            "Packages",
+            "APIs",
+            "Making Your Own Libraries"
+          ]
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Summing Up as A Swiss Army Knife",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Swiss Army Knife",
+            "description": "Instead of manufacturing a knife, scissors, and file from scratch, you import a tool with everything pre-built.",
+            "image": "https://images.unsplash.com/photo-1615127717889-8945dba1f05a?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "categories",
+            "flowSteps": [
+              "choice()",
+              "randint()",
+              "shuffle()"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "import random\ncards = ['jack', 'queen', 'king']\nprint(random.choice(cards))",
+            "language": "python",
+            "output": "queen"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Why do we import libraries instead of writing all code ourselves?",
+          "answer": "Libraries contain pre-written, tested code by other developers, saving us time and making our programs more reliable."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Summing Up",
+          "instructions": "Write a simple Python script implementing or demonstrating Summing Up.",
+          "starterCode": "# Practice Summing Up\n# Write your code below\n",
+          "solution": "import random\ncards = ['jack', 'queen', 'king']\nprint(random.choice(cards))",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "label": "Summary",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "green",
+          "title": "Lecture Summary",
+          "body": "Congratulations! You've finished Lecture 4 on Libraries.",
+          "bullets": [
+            "You explored the core syntax and commands",
+            "You viewed real-world analogies connecting physical objects to python code",
+            "You ran exercises to test validation and error correction"
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "keyTakeaways": [
+      {
+        "emoji": "📝",
+        "text": "Understand the core elements of Libraries"
+      },
+      {
+        "emoji": "💡",
+        "text": "Apply physical analogies to visualize how Python processes statements"
+      },
+      {
+        "emoji": "🎯",
+        "text": "Run unit tests and exercises to ensure correctness"
+      }
+    ],
+    "whatYouLearned": [
+      "Core syntaxes of Libraries",
+      "Applying functional concepts to resolve coding problems"
+    ],
+    "nextUp": "Next Lecture"
+  }
+}
