@@ -10,3 +10,4 @@ export { LoadingCard } from './LoadingCard';
 export { AuthLayout } from './AuthLayout';
 export { ErrorBoundary } from './ErrorBoundary';
 export { CourseSearchFilters, NoResultsState } from './CourseSearchFilters';
+export { DynamicCourseIcon } from './DynamicCourseIcon';

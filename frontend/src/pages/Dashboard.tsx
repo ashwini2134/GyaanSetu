@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { api, type Course, getSubmissionHistory } from "../api";
 import { useAuth } from "../auth";
-import { Card, CourseSearchFilters, NoResultsState } from "../components";
+import { Card, CourseSearchFilters, NoResultsState, DynamicCourseIcon } from "../components";
 import { getCourseStats } from "../hooks/useProgress";
 import { useGamification, ACHIEVEMENTS, updateOverallProgress } from "../progress";
 
@@ -71,11 +71,6 @@ const IconTrophy = () => (
   </svg>
 );
 
-const IconCourseCard = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 6h8M8 10h8M8 14h8M8 18h5" />
-  </svg>
-);
 
 
 
@@ -456,16 +451,10 @@ export default function Dashboard() {
                             >
                               <div className="flex flex-col gap-4">
                                 <div className="flex flex-col items-center justify-center gap-3">
-                                  <div className="relative w-12 h-12 rounded-[12px] bg-[#1F2937] border border-[#2D3748] flex items-center justify-center flex-shrink-0">
-                                    {c.slug === 'cs50p' ? (
-                                      <span className="font-bold text-sm text-[#3B82F6]">Py</span>
-                                    ) : (
-                                      <span className="text-slate-400">
-                                        <IconCourseCard />
-                                      </span>
-                                    )}
+                                  <div className="relative">
+                                    <DynamicCourseIcon courseName={c.title} category={c.category} />
                                     {isCourseActive && (
-                                      <span className="absolute inset-0 rounded-[12px] bg-cyan-400/20 animate-ping pointer-events-none" />
+                                      <span className="absolute top-0 left-1/2 -translate-x-1/2 w-[64px] h-[64px] rounded-[16px] bg-cyan-400/20 animate-ping pointer-events-none" />
                                     )}
                                   </div>
                                   {/* Metadata Badges */}

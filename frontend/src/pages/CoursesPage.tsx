@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api, type Course } from "../api";
-import { CourseSearchFilters, NoResultsState } from "../components";
+import { CourseSearchFilters, NoResultsState, DynamicCourseIcon } from "../components";
 
 export default function CoursesPage() {
   const [courses, setCourses] = useState<Course[] | null>(null);
@@ -52,11 +52,7 @@ export default function CoursesPage() {
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-blue-600/15 flex items-center justify-center group-hover:bg-blue-600/25 transition-colors">
-                      <svg className="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C6.228 6.228 2 10.692 2 16s4.228 9.772 10 9.772 10-4.692 10-9.772c0-5.308-4.228-9.747-10-9.747z" />
-                      </svg>
-                    </div>
+                    <DynamicCourseIcon courseName={course.title} category={course.category} />
 
                     {/* Metadata Badges */}
                     <div className="flex gap-1.5">
