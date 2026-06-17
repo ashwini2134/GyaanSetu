@@ -54,13 +54,8 @@ const LeaderboardPage = lazy(
   () => import("./pages/LeaderboardPage")
 );
 
-<<<<<<< Updated upstream
 const CapstonePage = lazy(
   () => import("./pages/CapstonePage")
-=======
-const ProfilePage = lazy(
-  () => import("./pages/ProfilePage")
->>>>>>> Stashed changes
 );
 
 const ProfilePage = lazy(
