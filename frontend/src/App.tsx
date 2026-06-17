@@ -54,8 +54,13 @@ const LeaderboardPage = lazy(
   () => import("./pages/LeaderboardPage")
 );
 
+<<<<<<< Updated upstream
 const CapstonePage = lazy(
   () => import("./pages/CapstonePage")
+=======
+const ProfilePage = lazy(
+  () => import("./pages/ProfilePage")
+>>>>>>> Stashed changes
 );
 
 // Loading Spinner
@@ -237,6 +242,13 @@ export default function App() {
           <Route
             path="leaderboard"
             element={<LeaderboardPage />}
+          />
+
+          {/* Profile */}
+
+          <Route
+            path="profile"
+            element={<ProfilePage />}
           />
 
         </Route>
