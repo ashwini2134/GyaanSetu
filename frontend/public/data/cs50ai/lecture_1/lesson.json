@@ -2,7 +2,7 @@
   "id": "cs50ai-lecture-1",
   "courseSlug": "cs50ai",
   "title": "Search Algorithms",
-  "overview": "Search is foundational in AI — finding a path from start to goal. Learn BFS, DFS, Greedy Best-First, and A search.",
+  "overview": "Search is foundational in AI \u2014 finding a path from start to goal. Learn BFS, DFS, Greedy Best-First, and A search.",
   "estimatedMinutes": 55,
   "sections": [
     {
@@ -14,10 +14,10 @@
           "title": "What is a Search Problem?",
           "body": "A search problem involves an agent moving from an initial state to a goal state by taking actions through a state space (all possible configurations).",
           "bullets": [
-            "Start state — where you begin",
-            "Goal state — where you want to arrive",
-            "Actions — valid moves from each state",
-            "Path cost — how expensive a solution is",
+            "Start state \u2014 where you begin",
+            "Goal state \u2014 where you want to arrive",
+            "Actions \u2014 valid moves from each state",
+            "Path cost \u2014 how expensive a solution is",
             "This concept is fundamental to AI development."
           ],
           "accentColor": "blue"
@@ -28,7 +28,7 @@
             "title": "Think of Navigating a Maze",
             "description": "Explore paths until you find the exit",
             "image": "https://images.unsplash.com/photo-1590278458425-6aa3912a48a5?w=800&q=80",
-            "emoji": "💡"
+            "emoji": "\ud83d\udca1"
           },
           "visualization": {
             "type": "decision",
@@ -40,16 +40,17 @@
           "code": {
             "language": "python",
             "code": "maze = {\"start\": [\"A\", \"B\"], \"A\": [\"exit\"]}\npath = [\"start\"]\nwhile path[-1] != \"exit\":\n    path.append(maze[path[-1]][0])\nprint(\" \\u2192 \".join(path))",
-            "output": "start → A → exit"
+            "output": "start \u2192 A \u2192 exit"
           }
         },
         {
           "type": "practice",
           "title": "Modeling a Search Problem",
           "instructions": "Model a search problem by defining a graph and identifying the start state, goal state, and valid paths.",
-          "starterCode": "# Define a graph as a dictionary\ngraph = {\n    'A': ['B', 'C'],\n    'B': ['D'],\n    'C': ['D'],\n    'D': []\n}\nstart = 'A'\ngoal = 'D'\n# Print the search problem definition\nprint(f\"Start state: {start}\")\nprint(f\"Goal state: {goal}\")\nprint(f\"Neighbors of A: {graph[start]}\")\nprint(f\"Possible paths: A → B → D or A → C → D\")",
+          "starterCode": "# Define a graph as a dictionary\ngraph = {\n    'A': ['B', 'C'],\n    'B': ['D'],\n    'C': ['D'],\n    'D': []\n}\nstart = 'A'\ngoal = 'D'\n# Print the search problem definition\nprint(f\"Start state: {start}\")\nprint(f\"Goal state: {goal}\")\nprint(f\"Neighbors of A: {graph[start]}\")\nprint(f\"Possible paths: A \u2192 B \u2192 D or A \u2192 C \u2192 D\")",
           "solution": "graph = {'A': ['B', 'C'], 'B': ['D'], 'C': ['D'], 'D': []}\nstart = 'A'\ngoal = 'D'\nprint(f\"Start state: {start}\")\nprint(f\"Goal state: {goal}\")\nprint(f\"Neighbors of A: {graph[start]}\")",
-          "hint": "Every search problem needs: a start state, actions (edges to neighbors), and a goal state."
+          "hint": "Every search problem needs: a start state, actions (edges to neighbors), and a goal state.",
+          "expectedOutput": "Start state: A\nGoal state: D\nNeighbors of A: ['B', 'C']"
         }
       ]
     },
@@ -60,9 +61,9 @@
         {
           "type": "explanation",
           "title": "What is Breadth-First Search (BFS)?",
-          "body": "BFS explores all neighbors at the current level before going deeper — like ripples spreading in water. It uses a queue (FIFO) and guarantees the shortest path.",
+          "body": "BFS explores all neighbors at the current level before going deeper \u2014 like ripples spreading in water. It uses a queue (FIFO) and guarantees the shortest path.",
           "bullets": [
-            "Explores level by level — all nearby options first",
+            "Explores level by level \u2014 all nearby options first",
             "Uses a queue: first discovered, first explored",
             "Guarantees shortest path in unweighted graphs",
             "Uses more memory than DFS",
@@ -74,7 +75,7 @@
           "type": "explanation",
           "accentColor": "blue",
           "title": "Depth-First Search (DFS)",
-          "body": "DFS goes deep into one path before backtracking — like following one corridor to the end. It uses a stack (LIFO) and uses less memory but may not find the shortest path.",
+          "body": "DFS goes deep into one path before backtracking \u2014 like following one corridor to the end. It uses a stack (LIFO) and uses less memory but may not find the shortest path.",
           "bullets": [
             "Explores one branch fully before trying others",
             "Uses a stack: last discovered, first explored",
@@ -88,7 +89,7 @@
             "title": "BFS = Checking Every Shelf on Floor 1 First",
             "description": "Explore all paths level by level",
             "image": "https://images.unsplash.com/photo-1603058817990-2b9a9abbce86?w=800&q=80",
-            "emoji": "💡"
+            "emoji": "\ud83d\udca1"
           },
           "visualization": {
             "type": "flow",
@@ -101,17 +102,18 @@
           },
           "code": {
             "language": "python",
-            "code": "queue, seen = [\"A\"], []\nwhile queue:\n    n = queue.pop(0)\n    seen.append(n)\n    queue += {\"A\":[\"B\",\"C\"],\"B\":[\"D\"],\"C\":[\"E\"]}.get(n,[])\nprint(\" → \".join(seen))",
-            "output": "A → B → C → D → E"
+            "code": "queue, seen = [\"A\"], []\nwhile queue:\n    n = queue.pop(0)\n    seen.append(n)\n    queue += {\"A\":[\"B\",\"C\"],\"B\":[\"D\"],\"C\":[\"E\"]}.get(n,[])\nprint(\" \u2192 \".join(seen))",
+            "output": "A \u2192 B \u2192 C \u2192 D \u2192 E"
           }
         },
         {
           "type": "practice",
           "title": "Implementing BFS Traversal",
           "instructions": "Complete the BFS traversal code to visit all nodes level by level.",
-          "starterCode": "# BFS traversal\ngraph = {'A': ['B', 'C'], 'B': ['D'], 'C': ['E'], 'D': [], 'E': []}\nvisited = []\nqueue = ['A']\nwhile queue:\n    node = queue.pop(0)\n    visited.append(node)\n    for neighbor in graph[node]:\n        queue.append(neighbor)\nprint(' → '.join(visited))",
-          "solution": "graph = {'A': ['B', 'C'], 'B': ['D'], 'C': ['E'], 'D': [], 'E': []}\nvisited = []\nqueue = ['A']\nwhile queue:\n    node = queue.pop(0)\n    visited.append(node)\n    for neighbor in graph[node]:\n        queue.append(neighbor)\nprint(' → '.join(visited))",
-          "hint": "BFS uses a queue (FIFO): pop the first item, add all its neighbors to the end."
+          "starterCode": "# BFS traversal\ngraph = {'A': ['B', 'C'], 'B': ['D'], 'C': ['E'], 'D': [], 'E': []}\nvisited = []\nqueue = ['A']\nwhile queue:\n    node = queue.pop(0)\n    visited.append(node)\n    for neighbor in graph[node]:\n        queue.append(neighbor)\nprint(' \u2192 '.join(visited))",
+          "solution": "graph = {'A': ['B', 'C'], 'B': ['D'], 'C': ['E'], 'D': [], 'E': []}\nvisited = []\nqueue = ['A']\nwhile queue:\n    node = queue.pop(0)\n    visited.append(node)\n    for neighbor in graph[node]:\n        queue.append(neighbor)\nprint(' \u2192 '.join(visited))",
+          "hint": "BFS uses a queue (FIFO): pop the first item, add all its neighbors to the end.",
+          "expectedOutput": "A \u2192 B \u2192 C \u2192 D \u2192 E"
         }
       ]
     },
@@ -122,11 +124,11 @@
         {
           "type": "explanation",
           "title": "What is Greedy Best-First & A Search?",
-          "body": "Greedy Best-First uses a heuristic (estimate) to pick the most promising next step. A combines actual cost so far g(n) AND estimated cost h(n) — making it both optimal and efficient.",
+          "body": "Greedy Best-First uses a heuristic (estimate) to pick the most promising next step. A combines actual cost so far g(n) AND estimated cost h(n) \u2014 making it both optimal and efficient.",
           "bullets": [
-            "Heuristic h(n) — estimated cost from current node to goal",
-            "Greedy uses only h(n) — can be fast but not optimal",
-            "A uses f(n) = g(n) + h(n) — cost so far + estimate",
+            "Heuristic h(n) \u2014 estimated cost from current node to goal",
+            "Greedy uses only h(n) \u2014 can be fast but not optimal",
+            "A uses f(n) = g(n) + h(n) \u2014 cost so far + estimate",
             "A is used in GPS navigation and game AI",
             "This concept is fundamental to AI development."
           ],
@@ -138,7 +140,7 @@
             "title": "A* = GPS That Considers Distance Traveled AND Estimated Distance",
             "description": "Chooses the most promising path using heuristics",
             "image": "https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=80",
-            "emoji": "💡"
+            "emoji": "\ud83d\udca1"
           },
           "visualization": {
             "type": "flow",
@@ -151,9 +153,16 @@
           },
           "code": {
             "language": "python",
-            "code": "graph = {\"A\": [\"B\"], \"B\": [\"D\"]}\nnode, path = \"A\", [\"A\"]\nwhile node != \"D\":\n    node = graph[node][0]; path += [node]\nprint(\" → \".join(path))",
-            "output": "A → B → D"
+            "code": "graph = {\"A\": [\"B\"], \"B\": [\"D\"]}\nnode, path = \"A\", [\"A\"]\nwhile node != \"D\":\n    node = graph[node][0]; path += [node]\nprint(\" \u2192 \".join(path))",
+            "output": "A \u2192 B \u2192 D"
           }
+        },
+        {
+          "type": "code_example",
+          "title": "BFS Algorithm Implementation",
+          "language": "python",
+          "code": "from collections import deque\n\ndef bfs(graph, start):\n    visited = set()\n    queue = deque([start])\n    visited.add(start)\n    while queue:\n        node = queue.popleft()\n        print(f\"Visited: {node}\")\n        for neighbor in graph[node]:\n            if neighbor not in visited:\n                visited.add(neighbor)\n                queue.append(neighbor)\n\ngraph = {\n    'A': ['B', 'C'],\n    'B': ['D', 'E'],\n    'C': ['F'],\n    'D': [], 'E': [], 'F': []\n}\nbfs(graph, 'A')",
+          "expectedOutput": "Visited: A\nVisited: B\nVisited: C\nVisited: D\nVisited: E\nVisited: F"
         },
         {
           "type": "practice",
@@ -179,7 +188,7 @@
       },
       {
         "emoji": "",
-        "text": "DFS goes deep first — uses less memory but may not find shortest path"
+        "text": "DFS goes deep first \u2014 uses less memory but may not find shortest path"
       },
       {
         "emoji": "",

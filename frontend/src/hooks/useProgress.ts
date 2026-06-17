@@ -157,7 +157,7 @@ export function useProgress(courseSlug: string | undefined, lectureNumber: numbe
       apiCall(`/progress/section`, {
         method: 'POST',
         body: JSON.stringify({ courseSlug, lectureId: String(lectureNumber), practiceAttempted: true }),
-      }).catch(() => {});
+      }).catch(err => console.error('[progress] save section visit failed', err));
       if (sectionId !== 'quiz' && sectionId !== 'problems') {
         import('../progress').then(m => m.completeAction('section', `${courseSlug}:${lectureNumber}:${sectionId}`));
       }
@@ -190,7 +190,7 @@ export function useProgress(courseSlug: string | undefined, lectureNumber: numbe
       apiCall(`/progress/section`, {
         method: 'POST',
         body: JSON.stringify({ courseSlug, lectureId: String(lectureNumber), practiceCompleted: true }),
-      }).catch(() => {});
+      }).catch(err => console.error('[progress] save practice completion failed', err));
     }
   }, [updateProgress, courseSlug, lectureNumber]);
 
@@ -203,7 +203,7 @@ export function useProgress(courseSlug: string | undefined, lectureNumber: numbe
           courseSlug, lectureId: String(lectureNumber), quizId: `${courseSlug}-${lectureNumber}`,
           score, total,
         }),
-      }).catch(() => {});
+      }).catch(err => console.error('[progress] save quiz failed', err));
       if (score / total >= 0.6) {
         import('../progress').then(m => m.completeAction('quiz', `${courseSlug}:${lectureNumber}`));
       }
@@ -233,7 +233,7 @@ export function useProgress(courseSlug: string | undefined, lectureNumber: numbe
       apiCall(`/progress/lecture`, {
         method: 'POST',
         body: JSON.stringify({ courseSlug, lectureId: String(lectureNumber), hasProject: false }),
-      }).catch(() => {});
+      }).catch(err => console.error('[progress] save lecture completion failed', err));
       import('../progress').then(m => m.completeAction('lecture', `${courseSlug}:${lectureNumber}`));
     }
   }, [updateProgress, courseSlug, lectureNumber]);
@@ -303,7 +303,7 @@ export function getCourseStats(courseSlug: string, totalLectures: number): Cours
   return { lecturesStarted, lecturesCompleted, quizzesPassed, handsOnTasksCompleted, totalLectures };
 }
 
-const REVIEW_MODE = true;
+const REVIEW_MODE = false;
 
 export function isLectureUnlocked(
   lectureNumber: number,

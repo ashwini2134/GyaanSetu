@@ -3,7 +3,7 @@
   "courseSlug": "python",
   "number": 12,
   "title": "File Handling",
-  "overview": "Programs that only work with in-memory data are limited. File handling lets you save data permanently — read from files, write to files, and build applications that persist information.",
+  "overview": "Programs that only work with in-memory data are limited. File handling lets you save data permanently \u2014 read from files, write to files, and build applications that persist information.",
   "estimatedMinutes": 45,
   "sections": [
     {
@@ -16,7 +16,7 @@
           "title": "Why Do We Need File Handling?",
           "body": "Without files, all data disappears when your program ends. Files let you save data permanently.",
           "bullets": [
-            "Variables disappear when the program closes — files persist",
+            "Variables disappear when the program closes \u2014 files persist",
             "Files let you share data between different programs",
             "Real applications save user data, settings, and logs to files",
             "Python handles text files (.txt) and structured files (.csv, .json)"
@@ -33,7 +33,7 @@
           "analogy": {
             "title": "Notebook",
             "description": "Open it, read/write pages, close it when done.",
-            "emoji": "📓",
+            "emoji": "\ud83d\udcd3",
             "image": "https://images.unsplash.com/photo-1517842645767-c639042777db?w=800&q=80"
           },
           "visualization": {
@@ -63,9 +63,9 @@
           "title": "Opening and Reading Files",
           "body": "Use the open() function to work with files. The default mode is 'read' (r).",
           "bullets": [
-            "file = open(\"filename.txt\", \"r\") — opens for reading",
-            "file.read() — reads the entire file as one string",
-            "file.readlines() — reads all lines into a list",
+            "file = open(\"filename.txt\", \"r\") \u2014 opens for reading",
+            "file.read() \u2014 reads the entire file as one string",
+            "file.readlines() \u2014 reads all lines into a list",
             "Always close the file: file.close()"
           ]
         },
@@ -82,7 +82,7 @@
           "title": "The with Statement",
           "body": "The `with` statement automatically closes the file even if an error occurs.",
           "bullets": [
-            "with open(\"file.txt\", \"r\") as f: — auto-closes when done",
+            "with open(\"file.txt\", \"r\") as f: \u2014 auto-closes when done",
             "No need to call .close() manually",
             "Safer and cleaner than manual open/close"
           ]
@@ -93,7 +93,8 @@
           "instructions": "Write 3 names to students.txt. Read them back and greet each: 'Hello, [name]!'",
           "starterCode": "with open(\"students.txt\", \"w\") as f:\n    f.write(\"Alice\\nBob\\nCharlie\\n\")\n\nwith open(\"students.txt\", \"r\") as f:\n    for name in f:\n        print(f\"Hello, {name.strip()}!\")",
           "solution": "with open(\"students.txt\", \"w\") as f:\n    f.write(\"Alice\\nBob\\nCharlie\\n\")\n\nwith open(\"students.txt\", \"r\") as f:\n    for name in f:\n        print(f\"Hello, {name.strip()}!\")",
-          "hint": "Use strip() on each line to remove the newline character."
+          "hint": "Use strip() on each line to remove the newline character.",
+          "expectedOutput": "Hello, Alice!\nHello, Bob!\nHello, Charlie!"
         },
         {
           "type": "reflection",
@@ -112,10 +113,10 @@
           "title": "Writing and Appending",
           "body": "Python has three main file modes: read (r), write (w), and append (a).",
           "bullets": [
-            "\"w\" mode — WRITE: creates or overwrites",
-            "\"a\" mode — APPEND: adds to end of existing file",
-            "\"r\" mode — READ: reads from existing file",
-            "Use \"w\" carefully — it deletes existing content!"
+            "\"w\" mode \u2014 WRITE: creates or overwrites",
+            "\"a\" mode \u2014 APPEND: adds to end of existing file",
+            "\"r\" mode \u2014 READ: reads from existing file",
+            "Use \"w\" carefully \u2014 it deletes existing content!"
           ]
         },
         {
@@ -131,7 +132,8 @@
           "instructions": "Ask for today's date and a diary entry. Append the entry to 'diary.txt'. Then read and display the full diary.",
           "starterCode": "date = input(\"Date: \")\nentry = input(\"Diary entry: \")\n\nwith open(\"diary.txt\", \"a\") as f:\n    f.write(date + \"\\n\")\n    f.write(entry + \"\\n\\n\")\n\nwith open(\"diary.txt\", \"r\") as f:\n    print(f.read())",
           "solution": "date = input(\"Date: \")\nentry = input(\"Diary entry: \")\nwith open(\"diary.txt\", \"a\") as f:\n    f.write(date + \"\\n\")\n    f.write(entry + \"\\n\\n\")\nwith open(\"diary.txt\", \"r\") as f:\n    print(f.read())",
-          "hint": "Use \"a\" mode to append without deleting previous entries. Write date on one line, entry on the next."
+          "hint": "Use \"a\" mode to append without deleting previous entries. Write date on one line, entry on the next.",
+          "expectedOutput": "2024-01-15\nTest diary entry"
         },
         {
           "type": "reflection",
@@ -153,11 +155,11 @@
       },
       {
         "emoji": "",
-        "text": "Always close files — use with open() for automatic closing"
+        "text": "Always close files \u2014 use with open() for automatic closing"
       },
       {
         "emoji": "",
-        "text": "\"w\" mode overwrites existing files — use carefully!"
+        "text": "\"w\" mode overwrites existing files \u2014 use carefully!"
       },
       {
         "emoji": "",

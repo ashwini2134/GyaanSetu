@@ -84,7 +84,7 @@ function LegacyLecturePage({ slug, lectureNumber }: { slug: string; lectureNumbe
   useEffect(() => {
     const base = import.meta.env.BASE_URL ?? '/';
     const url = base.replace(/\/$/, '') + `/data/${slug}/lecture_${lectureNumber}/notes.md`;
-    fetch(url).then(r => r.ok ? r.text() : '').then(setContent).catch(() => {});
+    fetch(url).then(r => r.ok ? r.text() : '').then(setContent).catch(err => console.error('[lecture] load notes failed', err));
   }, [slug, lectureNumber]);
 
   return (
@@ -162,7 +162,7 @@ export default function LecturePage() {
       if (last && lectureNumber >= last.number) {
         navigate(`/course/${slug}/capstone`, { replace: true });
       }
-    }).catch(() => {});
+    }).catch(err => console.error('[lecture] load lectures failed', err));
   }, [slug, lectureNumber, navigate]);
 
   // Derive unlock status from stored progress

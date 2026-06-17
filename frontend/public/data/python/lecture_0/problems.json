@@ -17,10 +17,16 @@
   {
     "id": "personal_info",
     "title": "Personal Info",
-    "description": "Write a program that prints your name, age, and the city you live in — each on a separate line using three print() statements.",
+    "description": "Write a program that prints your name, age, and the city you live in \u2014 each on a separate line using three print() statements.",
     "difficulty": "easy",
     "starterCode": "",
     "solution": "print(\"Your Name\")\nprint(\"Your Age\")\nprint(\"Your City\")",
-    "testCases": []
+    "testCases": [
+      {
+        "label": "Verify expected output",
+        "input": "",
+        "expectedOutput": "Your Name\nYour Age\nYour City"
+      }
+    ]
   }
 ]

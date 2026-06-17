@@ -3,7 +3,7 @@
   "courseSlug": "python",
   "number": 1,
   "title": "Variables & Data Types",
-  "overview": "Every program works with data — numbers, text, true/false values. In this lecture you'll learn how to store data in variables and understand the different types of data Python can work with.",
+  "overview": "Every program works with data \u2014 numbers, text, true/false values. In this lecture you'll learn how to store data in variables and understand the different types of data Python can work with.",
   "estimatedMinutes": 50,
   "sections": [
     {
@@ -19,7 +19,7 @@
             "Variables store values like numbers, text, or true/false",
             "Use the = sign to assign a value: name = \"Lakshanya\"",
             "Once assigned, use the variable name anywhere to access the value",
-            "Variables can be updated — old value is replaced"
+            "Variables can be updated \u2014 old value is replaced"
           ]
         },
         {
@@ -33,7 +33,7 @@
           "analogy": {
             "title": "Labeled Storage Box",
             "description": "Each box has a label and holds one item",
-            "emoji": "🏷️",
+            "emoji": "\ud83c\udff7\ufe0f",
             "image": "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=80"
           },
           "visualization": {
@@ -76,7 +76,8 @@
           "instructions": "Create three variables: your name, your age, and your college. Print each on a separate line.",
           "starterCode": "# Store your information\nname = \"\"\nage = \ncollege = \"\"\n\n# Print each variable",
           "solution": "name = \"Lakshanya\"\nage = 20\ncollege = \"SRM University\"\n\nprint(name)\nprint(age)\nprint(college)",
-          "hint": "Text values need quotes (\" \"), numbers don't. Use = to assign."
+          "hint": "Text values need quotes (\" \"), numbers don't. Use = to assign.",
+          "expectedOutput": "Lakshanya\n20\nSRM University"
         }
       ]
     },
@@ -90,10 +91,10 @@
           "title": "Every Value Has a Type",
           "body": "In Python, every value belongs to a **type** that tells Python what kind of data it is and what you can do with it.",
           "bullets": [
-            "int — whole numbers like 42, 0, -7",
-            "float — decimal numbers like 3.14, 2.5, -0.001",
-            "str — text/strings like \"hello\", \"Python\"",
-            "bool — True or False values",
+            "int \u2014 whole numbers like 42, 0, -7",
+            "float \u2014 decimal numbers like 3.14, 2.5, -0.001",
+            "str \u2014 text/strings like \"hello\", \"Python\"",
+            "bool \u2014 True or False values",
             "Use type() to check the type of any value"
           ]
         },
@@ -102,7 +103,7 @@
           "analogy": {
             "title": "Different Containers",
             "description": "Each container type holds specific kinds of items",
-            "emoji": "📦",
+            "emoji": "\ud83d\udce6",
             "image": "https://images.unsplash.com/photo-1544457070-4cd773b4d71e?w=800&q=80"
           },
           "visualization": {
@@ -131,7 +132,7 @@
           "type": "explanation",
           "accentColor": "purple",
           "title": "Type Conversion",
-          "body": "Sometimes you need to convert between types — turn a string into a number or a number into a string.",
+          "body": "Sometimes you need to convert between types \u2014 turn a string into a number or a number into a string.",
           "bullets": [
             "int(\"5\") converts string \"5\" to integer 5",
             "str(42) converts integer 42 to string \"42\"",
@@ -145,7 +146,8 @@
           "instructions": "Store your current age in a variable. Add 5 to it. Print the result using an f-string.",
           "starterCode": "# Store current age\nage = \n\n# Calculate age after 5 years\nfuture_age = \n\n# Print the result",
           "solution": "age = 20\nfuture_age = age + 5\nprint(f\"After 5 years, I will be {future_age} years old.\")",
-          "hint": "Use + to add numbers. Use f-strings with {} to insert variables into text."
+          "hint": "Use + to add numbers. Use f-strings with {} to insert variables into text.",
+          "expectedOutput": "After 5 years, I will be 25 years old."
         }
       ]
     },
@@ -157,10 +159,10 @@
           "type": "explanation",
           "accentColor": "green",
           "title": "Working with Strings",
-          "body": "A **string** is a sequence of characters — letters, numbers, spaces, symbols — enclosed in quotes.",
+          "body": "A **string** is a sequence of characters \u2014 letters, numbers, spaces, symbols \u2014 enclosed in quotes.",
           "bullets": [
             "Use single quotes: 'Hello' or double quotes: \"Hello\"",
-            "Both work the same way — choose what you prefer",
+            "Both work the same way \u2014 choose what you prefer",
             "Strings can contain spaces, punctuation, and special characters",
             "Add strings together with + (concatenation)"
           ]
@@ -178,7 +180,8 @@
           "instructions": "Create variables for name, age, and college. Print them in this format: \"Name: [name], Age: [age], College: [college]\"",
           "starterCode": "name = \"\"\nage = \ncollege = \"\"\n\n# Print profile card",
           "solution": "name = \"Lakshanya\"\nage = 20\ncollege = \"SRM University\"\n\nprint(\"Name: \" + name + \", Age: \" + str(age) + \", College: \" + college)",
-          "hint": "Use + to join strings. Convert numbers to strings with str() before concatenating."
+          "hint": "Use + to join strings. Convert numbers to strings with str() before concatenating.",
+          "expectedOutput": "Name: Lakshanya, Age: 20, College: SRM University"
         },
         {
           "type": "reflection",

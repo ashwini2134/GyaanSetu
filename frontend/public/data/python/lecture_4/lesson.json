@@ -26,14 +26,14 @@
           "type": "analogy",
           "title": "if is Like a Traffic Light",
           "emoji": "",
-          "text": "Green light (True) → you go. Red light (False) → you stop. The if statement checks the condition and decides whether to run the code or skip it."
+          "text": "Green light (True) \u2192 you go. Red light (False) \u2192 you stop. The if statement checks the condition and decides whether to run the code or skip it."
         },
         {
           "type": "think_of",
           "analogy": {
             "title": "Traffic Light",
-            "description": "Green → GO, Red → STOP. The condition decides which path to take.",
-            "emoji": "🚦",
+            "description": "Green \u2192 GO, Red \u2192 STOP. The condition decides which path to take.",
+            "emoji": "\ud83d\udea6",
             "image": "https://images.unsplash.com/photo-1557404763-69708cd8b9ce?w=800&q=80"
           },
           "visualization": {
@@ -62,7 +62,8 @@
           "instructions": "Ask for age. If 18+, print \"You are eligible to vote!\"",
           "starterCode": "age = int(input(\"Enter your age: \"))\nif age >= 18:",
           "solution": "age = int(input(\"Enter your age: \"))\nif age >= 18:\n    print(\"You are eligible to vote!\")",
-          "hint": "Use if age >= 18: followed by an indented print() statement."
+          "hint": "Use if age >= 18: followed by an indented print() statement.",
+          "expectedOutput": "You are eligible to vote!"
         }
       ]
     },
@@ -76,8 +77,8 @@
           "title": "Two Paths with if-else",
           "body": "When you need to choose between two options, use if-else. One block runs if True, another if False.",
           "bullets": [
-            "if condition: — runs when True",
-            "else: — runs when False",
+            "if condition: \u2014 runs when True",
+            "else: \u2014 runs when False",
             "Only ONE of the two blocks runs, never both"
           ]
         },
@@ -106,7 +107,7 @@
           "body": "Some values are treated as True (truthy) and others as False (falsy) in conditions.",
           "bullets": [
             "Falsy: None, 0, 0.0, \"\" (empty string), [] (empty list)",
-            "Truthy: everything else — non-zero numbers, non-empty strings",
+            "Truthy: everything else \u2014 non-zero numbers, non-empty strings",
             "Lets you write concise conditions like if name:"
           ]
         },
@@ -116,7 +117,8 @@
           "instructions": "Ask for marks. Print grade: 90+ = A, 80-89 = B, 70-79 = C, 60-69 = D, below 60 = F.",
           "starterCode": "marks = int(input(\"Enter marks: \"))\nif marks >= 90:\n    \nelif \nelif \nelif \nelse:",
           "solution": "marks = int(input(\"Enter marks: \"))\nif marks >= 90:\n    print(\"Grade: A\")\nelif marks >= 80:\n    print(\"Grade: B\")\nelif marks >= 70:\n    print(\"Grade: C\")\nelif marks >= 60:\n    print(\"Grade: D\")\nelse:\n    print(\"Grade: F\")",
-          "hint": "Check the highest grade first (>= 90), then work down."
+          "hint": "Check the highest grade first (>= 90), then work down.",
+          "expectedOutput": "Grade: B"
         },
         {
           "type": "reflection",

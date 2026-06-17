@@ -14,7 +14,7 @@
           "type": "explanation",
           "accentColor": "blue",
           "title": "What is a Tuple?",
-          "body": "A **tuple** is like a list but **immutable** — you cannot change it after creation. Use parentheses ().",
+          "body": "A **tuple** is like a list but **immutable** \u2014 you cannot change it after creation. Use parentheses ().",
           "bullets": [
             "Tuples are created with (): coordinates = (10, 20)",
             "Items cannot be added, removed, or changed",
@@ -26,14 +26,14 @@
           "type": "analogy",
           "title": "A Tuple is Like a Sealed Envelope",
           "emoji": "",
-          "text": "Once sealed with coordinates inside, you can read them but not change them. Tuples work the same — great for fixed data like RGB colors or dates."
+          "text": "Once sealed with coordinates inside, you can read them but not change them. Tuples work the same \u2014 great for fixed data like RGB colors or dates."
         },
         {
           "type": "think_of",
           "analogy": {
             "title": "Sealed Envelope",
             "description": "Once sealed, contents cannot change. Safe and tamper-proof.",
-            "emoji": "✉️",
+            "emoji": "\u2709\ufe0f",
             "image": "https://images.unsplash.com/photo-1649019489428-70f505daacd6?w=800&q=80"
           },
           "visualization": {
@@ -76,7 +76,8 @@
           "instructions": "Create a tuple with your name, age, and city. Unpack it and print each value.",
           "starterCode": "my_info = (\"\", , \"\")\nname, age, city = my_info",
           "solution": "my_info = (\"Lakshanya\", 20, \"Chennai\")\nname, age, city = my_info\nprint(f\"Name: {name}\")\nprint(f\"Age: {age}\")\nprint(f\"City: {city}\")",
-          "hint": "Unpack by putting variable names separated by commas on the left."
+          "hint": "Unpack by putting variable names separated by commas on the left.",
+          "expectedOutput": "Name: Lakshanya\nAge: 20\nCity: Chennai"
         }
       ]
     },
@@ -90,8 +91,8 @@
           "title": "What is a Set?",
           "body": "A **set** is an unordered collection of **unique** items. Duplicates are automatically removed.",
           "bullets": [
-            "Sets have no duplicates — each item appears once",
-            "Sets are unordered — cannot access by index",
+            "Sets have no duplicates \u2014 each item appears once",
+            "Sets are unordered \u2014 cannot access by index",
             "Great for removing duplicates and membership tests"
           ]
         },
@@ -100,7 +101,7 @@
           "analogy": {
             "title": "Bag Of Unique Items",
             "description": "Every marble appears only once. No duplicates allowed.",
-            "emoji": "🎒",
+            "emoji": "\ud83c\udf92",
             "image": "https://images.unsplash.com/photo-1544457070-4cd773b4d71e?w=800&q=80"
           },
           "visualization": {
@@ -129,10 +130,10 @@
           "title": "Set Operations",
           "body": "Sets support mathematical operations like union, intersection, and difference.",
           "bullets": [
-            "union (|) — all items from both sets",
-            "intersection (&) — items in BOTH sets",
-            "difference (-) — items in first but NOT second",
-            "in — check membership (very fast in sets)"
+            "union (|) \u2014 all items from both sets",
+            "intersection (&) \u2014 items in BOTH sets",
+            "difference (-) \u2014 items in first but NOT second",
+            "in \u2014 check membership (very fast in sets)"
           ]
         },
         {

@@ -33,7 +33,7 @@
           "analogy": {
             "title": "Shopping List",
             "description": "Items in order. Add, remove, or access by position.",
-            "emoji": "🛒",
+            "emoji": "\ud83d\uded2",
             "image": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&q=80"
           },
           "visualization": {
@@ -118,10 +118,10 @@
           "title": "Working with List Methods",
           "body": "Lists have built-in **methods** that let you modify and analyze them.",
           "bullets": [
-            "append(item) — adds item to the end",
-            "remove(item) — removes the first occurrence",
-            "sort() — sorts in ascending order",
-            "len(list) — returns the number of items"
+            "append(item) \u2014 adds item to the end",
+            "remove(item) \u2014 removes the first occurrence",
+            "sort() \u2014 sorts in ascending order",
+            "len(list) \u2014 returns the number of items"
           ]
         },
         {
@@ -137,7 +137,8 @@
           "instructions": "Start with [78, 92, 85, 63, 88]. Add 95, remove the lowest, sort, and print the average.",
           "starterCode": "marks = [78, 92, 85, 63, 88]\nmarks.append()\nmarks.remove()\nmarks.sort()\nprint(f\"Marks: {marks}\")\nprint(f\"Average: {sum(marks)//len(marks)}\")",
           "solution": "marks = [78, 92, 85, 63, 88]\nmarks.append(95)\nmarks.remove(min(marks))\nmarks.sort()\nprint(f\"Marks: {marks}\")\nprint(f\"Average: {sum(marks)//len(marks)}\")",
-          "hint": "Use append() to add, min(marks) with remove() for lowest, sort() to sort."
+          "hint": "Use append() to add, min(marks) with remove() for lowest, sort() to sort.",
+          "expectedOutput": "Marks: [78, 85, 88, 92, 95]\nAverage: 87"
         },
         {
           "type": "reflection",

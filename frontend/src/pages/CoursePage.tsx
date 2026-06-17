@@ -73,7 +73,7 @@ export default function CoursePage() {
 
   useEffect(() => {
     if (!slug) return;
-    api.lectureProjectsCounts(slug).then(setLectureProjectCounts).catch(() => {});
+    api.lectureProjectsCounts(slug).then(setLectureProjectCounts).catch(err => console.error('[course] load project counts failed', err));
   }, [slug]);
   if (!slug) return null;
 

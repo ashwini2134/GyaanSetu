@@ -16,9 +16,9 @@
           "title": "What is AI Bias & Privacy?",
           "body": "AI can be unfair and invasive if not built carefully. Bias and privacy are two of the biggest ethical challenges.",
           "bullets": [
-            "AI Bias — when training data reflects unfairness, AI inherits and amplifies it",
+            "AI Bias \u2014 when training data reflects unfairness, AI inherits and amplifies it",
             "Example: a hiring AI trained on historical male-dominated data may reject female applicants unfairly",
-            "Privacy — AI systems collect and process massive amounts of personal data",
+            "Privacy \u2014 AI systems collect and process massive amounts of personal data",
             "Your data (searches, clicks, location) is used to train and improve AI systems",
             "This concept is fundamental to AI development."
           ],
@@ -30,7 +30,7 @@
             "title": "Think of AI Bias as a One-Sided Story",
             "description": "Biased training data leads to unfair outcomes",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "emoji": "\ud83d\udca1"
           },
           "visualization": {
             "type": "decision",
@@ -51,7 +51,8 @@
           "instructions": "Analyze training data to detect gender bias when data excludes certain groups.",
           "starterCode": "# Detect bias in training data\napplicants = [\n    {\"name\": \"Alice\", \"gender\": \"F\", \"score\": 92},\n    {\"name\": \"Bob\", \"gender\": \"M\", \"score\": 78},\n    {\"name\": \"Eve\", \"gender\": \"F\", \"score\": 95},\n    {\"name\": \"Dave\", \"gender\": \"M\", \"score\": 85},\n]\nmale_scores = [a[\"score\"] for a in applicants if a[\"gender\"] == \"M\"]\navg = sum(male_scores) / len(male_scores)\nprint(f\"Model trained on {len(male_scores)} male applicants\")\nprint(f\"Average male score: {avg}\")\nprint(f\"Alice ({applicants[0]['score']}) would be compared to male average: {avg}\")\nprint(\"Issue: Female applicants excluded from training data!\")",
           "solution": "applicants = [{\"name\": \"Alice\", \"gender\": \"F\", \"score\": 92}, {\"name\": \"Bob\", \"gender\": \"M\", \"score\": 78}, {\"name\": \"Eve\", \"gender\": \"F\", \"score\": 95}, {\"name\": \"Dave\", \"gender\": \"M\", \"score\": 85}]\nmale_scores = [a[\"score\"] for a in applicants if a[\"gender\"] == \"M\"]\navg = sum(male_scores) / len(male_scores)\nprint(f\"Model trained on {len(male_scores)} male applicants\")\nprint(f\"Average male score: {avg}\")\nprint(f\"Alice ({applicants[0]['score']}) would be compared to male average: {avg}\")",
-          "hint": "Bias occurs when training data doesn't represent all groups fairly."
+          "hint": "Bias occurs when training data doesn't represent all groups fairly.",
+          "expectedOutput": "Model trained on 2 male applicants\nAverage male score: 81.5\nAlice (92) would be compared to male average: 81.5"
         }
       ]
     },
@@ -64,12 +65,12 @@
           "title": "What is Hallucinations, Deepfakes & Accountability?",
           "body": "AI can generate false information confidently and create fake media. Accountability asks who is responsible when AI causes harm.",
           "bullets": [
-            "AI Hallucinations — AI confidently stating things that are factually wrong",
-            "Why hallucinations happen — model predicts plausible-sounding text, not verified facts",
-            "Deepfakes — AI-generated fake videos or audio that can spread misinformation",
-            "Transparency — people should always know when they are interacting with AI",
-            "Accountability — who is responsible when AI makes a harmful decision?",
-            "Fairness — AI should perform equally well for all groups of people"
+            "AI Hallucinations \u2014 AI confidently stating things that are factually wrong",
+            "Why hallucinations happen \u2014 model predicts plausible-sounding text, not verified facts",
+            "Deepfakes \u2014 AI-generated fake videos or audio that can spread misinformation",
+            "Transparency \u2014 people should always know when they are interacting with AI",
+            "Accountability \u2014 who is responsible when AI makes a harmful decision?",
+            "Fairness \u2014 AI should perform equally well for all groups of people"
           ],
           "accentColor": "blue"
         },
@@ -79,7 +80,7 @@
             "title": "Think of Hallucination as an Over-Confident Friend",
             "description": "AI confidently generates false information",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "emoji": "\ud83d\udca1"
           },
           "visualization": {
             "type": "flow",
@@ -99,10 +100,11 @@
         {
           "type": "practice",
           "title": "Simulating AI Hallucination",
-          "instructions": "Simulate how an AI responds to known vs unknown questions — and see when hallucination can occur.",
-          "starterCode": "# Simulating AI responses\nknowledge_base = {\n    \"capital of France\": \"Paris\",\n    \"largest ocean\": \"Pacific\",\n}\nquestions = [\"capital of France\", \"population of Mars\", \"largest ocean\"]\nprint(\"AI Responses:\")\nfor q in questions:\n    if q in knowledge_base:\n        print(f\"  Q: {q}\\n  A: {knowledge_base[q]} ✅\")\n    else:\n        print(f\"  Q: {q}\\n  A: (AI might hallucinate a plausible answer) ❌\")\nprint(\"\\nAlways verify AI outputs!\")",
-          "solution": "knowledge_base = {\"capital of France\": \"Paris\", \"largest ocean\": \"Pacific\"}\nquestions = [\"capital of France\", \"population of Mars\", \"largest ocean\"]\nfor q in questions:\n    if q in knowledge_base:\n        print(f\"  Q: {q}\\n  A: {knowledge_base[q]} ✅\")\n    else:\n        print(f\"  Q: {q}\\n  A: (AI might hallucinate) ❌\")\nprint(\"Always verify AI outputs!\")",
-          "hint": "Hallucinations happen when AI confidently generates false information because it doesn't know the answer."
+          "instructions": "Simulate how an AI responds to known vs unknown questions \u2014 and see when hallucination can occur.",
+          "starterCode": "# Simulating AI responses\nknowledge_base = {\n    \"capital of France\": \"Paris\",\n    \"largest ocean\": \"Pacific\",\n}\nquestions = [\"capital of France\", \"population of Mars\", \"largest ocean\"]\nprint(\"AI Responses:\")\nfor q in questions:\n    if q in knowledge_base:\n        print(f\"  Q: {q}\\n  A: {knowledge_base[q]} \u2705\")\n    else:\n        print(f\"  Q: {q}\\n  A: (AI might hallucinate a plausible answer) \u274c\")\nprint(\"\\nAlways verify AI outputs!\")",
+          "solution": "knowledge_base = {\"capital of France\": \"Paris\", \"largest ocean\": \"Pacific\"}\nquestions = [\"capital of France\", \"population of Mars\", \"largest ocean\"]\nfor q in questions:\n    if q in knowledge_base:\n        print(f\"  Q: {q}\\n  A: {knowledge_base[q]} \u2705\")\n    else:\n        print(f\"  Q: {q}\\n  A: (AI might hallucinate) \u274c\")\nprint(\"Always verify AI outputs!\")",
+          "hint": "Hallucinations happen when AI confidently generates false information because it doesn't know the answer.",
+          "expectedOutput": "  Q: capital of France\n  A: Paris \u2705\n  Q: population of Mars\n  A: (AI might hallucinate) \u274c\n  Q: largest ocean\n  A: Pacific \u2705\nAlways verify AI outputs!"
         }
       ]
     },
@@ -115,11 +117,11 @@
           "title": "What is Ethical Steps?",
           "body": "How to use AI ethically.",
           "bullets": [
-            "Step 1: Always verify AI outputs before using them — especially for important decisions",
+            "Step 1: Always verify AI outputs before using them \u2014 especially for important decisions",
             "Step 2: Check if training data is diverse and representative",
-            "Step 3: Be transparent — tell users when AI is involved",
-            "Step 4: Assign accountability — define who is responsible for AI decisions",
-            "Step 5: Report harmful AI uses — do not misuse AI tools"
+            "Step 3: Be transparent \u2014 tell users when AI is involved",
+            "Step 4: Assign accountability \u2014 define who is responsible for AI decisions",
+            "Step 5: Report harmful AI uses \u2014 do not misuse AI tools"
           ],
           "accentColor": "blue"
         },
@@ -129,7 +131,7 @@
             "title": "Think of Responsible AI as a Safety Checklist",
             "description": "Ensure AI is transparent, fair, and private",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "emoji": "\ud83d\udca1"
           },
           "visualization": {
             "type": "flow",
@@ -149,9 +151,16 @@
           }
         },
         {
+          "type": "code_example",
+          "title": "Detecting Bias in Data",
+          "language": "python",
+          "code": "# Demonstrate bias in training data\napplicants = [\n    {\"gender\": \"M\", \"score\": 85},\n    {\"gender\": \"M\", \"score\": 78},\n    {\"gender\": \"F\", \"score\": 92},\n    {\"gender\": \"M\", \"score\": 70},\n]\n\n# Model selects top 50% by score\nsorted_apps = sorted(applicants, key=lambda x: x[\"score\"], reverse=True)[:2]\nselected_male = sum(1 for a in sorted_apps if a[\"gender\"] == \"M\")\nselected_female = sum(1 for a in sorted_apps if a[\"gender\"] == \"F\")\n\nprint(f\"Selected: {selected_male} male, {selected_female} female\")\nprint(f\"Bias: {selected_male}/{len(sorted_apps)} selected are male\")",
+          "expectedOutput": "Selected: 1 male, 1 female\nBias: 1/2 selected are male"
+        },
+        {
           "type": "practice",
           "title": "Practice Exercise",
-          "instructions": "Find a real news story about AI causing harm — identify which ethical issue it relates to and write 3 sentences",
+          "instructions": "Find a real news story about AI causing harm \u2014 identify which ethical issue it relates to and write 3 sentences",
           "starterCode": "# Write your summary\n",
           "solution": "# Discuss bias, privacy, or hallucination",
           "hint": "Look up recent AI news."

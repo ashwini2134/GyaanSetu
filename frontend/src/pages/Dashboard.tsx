@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { api, type Course, getSubmissionHistory } from "../api";
 import { useAuth } from "../auth";
-import { Card, CourseSearchFilters, NoResultsState, DynamicCourseIcon } from "../components";
+import { Card, DynamicCourseIcon } from "../components";
 
 import { useGamification, ACHIEVEMENTS } from "../progress";
 
@@ -79,8 +79,6 @@ export default function Dashboard() {
   const [courses, setCourses] = useState<Course[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [submissionHistory, setSubmissionHistory] = useState<Record<string, number>>({});
-  const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
 
   
   // Use our centralized Gamification hook
@@ -89,6 +87,7 @@ export default function Dashboard() {
   const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
   const [activeStatId, setActiveStatId] = useState<string | null>(null);
   const [activeBadgeId, setActiveBadgeId] = useState<string | null>(null);
+  const [lectureCounts, setLectureCounts] = useState<Record<string, number>>({});
 
   const handleCourseClick = (slug: string) => {
     setActiveCourseId(slug);
@@ -156,9 +155,23 @@ export default function Dashboard() {
   useEffect(() => {
     api
       .courses()
-      .then(setCourses)
+      .then(async (cs) => {
+        setCourses(cs);
+        const counts: Record<string, number> = {};
+        for (const c of cs) {
+          try {
+            const lectures = await api.courseLectures(c.slug);
+            counts[c.slug] = lectures.length;
+          } catch {
+            counts[c.slug] = 0;
+          }
+        }
+        setLectureCounts(counts);
+      })
       .catch((e: Error) => setErr(e.message));
   }, []);
+
+
 
   const totalCompleted = stats.tasksSubmitted + stats.projectsSolved;
 
@@ -410,103 +423,202 @@ export default function Dashboard() {
                 </button>
               </div>
 
-              {/* Course Search & Catalog Section */}
+              {/* Premium Course Carousel Section */}
               {courses !== null && (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between mb-6">
+                <div className="space-y-5">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="text-white">
                         <IconBook />
                       </div>
                       <h2 className="text-xl font-bold text-white tracking-tight">Your Courses</h2>
                     </div>
-                    <Link
-                      to="/courses"
-                      className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
-                    >
-                      View Catalog →
-                    </Link>
+                    <div className="flex items-center gap-3">
+                      <Link
+                        to="/courses"
+                        className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
+                      >
+                        View Catalog →
+                      </Link>
+                    </div>
                   </div>
 
-                  <CourseSearchFilters
-                    courses={courses}
-                    searchQuery={searchQuery}
-                    setSearchQuery={setSearchQuery}
-                    onFilteredCoursesChange={setFilteredCourses}
-                  />
-
-                  {filteredCourses.length === 0 ? (
-                    <NoResultsState query={searchQuery} onSelectSuggestion={setSearchQuery} />
+                  {courses.length === 0 ? (
+                    <div className="text-center py-16 text-slate-500">
+                      <IconBook />
+                      <p className="text-sm mt-2">No courses available yet.</p>
+                    </div>
                   ) : (
-                    <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                      {filteredCourses.map((c) => {
-                        const progress = courseStatsMap[c.slug] || { completed: 0, inProgressLectures: 0, total: 10, lecturesCompleted: 0, percentage: 0, status: 'not_started' };
+                    <div className="flex flex-col gap-5">
+                      <style>{`div::-webkit-scrollbar { display: none; }`}</style>
+                      {courses.map((c, idx) => {
+                        const progress = courseStatsMap[c.slug] || { completed: 0, inProgressLectures: 0, total: lectureCounts[c.slug] || 0, lecturesCompleted: 0, percentage: 0, status: 'not_started' };
                         const percent = progress.percentage;
-                        
-                        // Dynamic borders and badge colors
-                        let topBorderColor = "border-t-slate-700";
-                        if (c.category === "Programming") topBorderColor = "border-t-[#3B82F6]";
-                        else if (c.category === "Artificial Intelligence") topBorderColor = "border-t-[#A855F7]";
-                        else if (c.category === "Computer Science") topBorderColor = "border-t-[#22C55E]";
-
-                        let diffColor = "bg-green-500/10 border-green-500/20 text-green-400";
-                        if (c.level === "Intermediate") diffColor = "bg-amber-500/10 border-amber-500/20 text-amber-400";
-                        else if (c.level === "Advanced") diffColor = "bg-red-500/10 border-red-500/20 text-red-400";
-
+                        const total = progress.total || lectureCounts[c.slug] || 0;
                         const isCourseActive = activeCourseId === c.slug;
 
+                        let accentColor = "#3B82F6";
+                        let glowHover = "rgba(59,130,246,0.25)";
+                        if (c.category === "Artificial Intelligence") {
+                          accentColor = "#A855F7";
+                          glowHover = "rgba(168,85,247,0.25)";
+                        } else if (c.category === "Computer Science") {
+                          accentColor = "#22C55E";
+                          glowHover = "rgba(34,197,94,0.25)";
+                        }
+
+                        const durationHrs = total * 3;
+                        const skills = c.category === "Artificial Intelligence"
+                          ? ["Search Algorithms", "ML", "NLP"]
+                          : ["Python", "Problem Solving"];
+
                         return (
-                          <Link key={c.id} to={`/course/${c.slug}`} className="group block active:scale-[0.97] transition-all duration-300 h-full">
-                            <Card
-                              onClick={() => handleCourseClick(c.slug)}
-                              className={`relative p-6 bg-[#161B22] border-x border-b border-[#2D3748] border-t-4 ${topBorderColor} rounded-[12px] transition-all duration-300 h-full flex flex-col overflow-hidden hover:-translate-y-[3px] hover:shadow-[0_4px_20px_rgba(59,130,246,0.1)]`}
+                          <Link
+                            key={c.id}
+                            to={`/course/${c.slug}`}
+                            className="group w-full"
+
+                          >
+                            <div
+                              className="relative bg-[#161B22] border border-[#2D3748] rounded-2xl overflow-hidden transition-all duration-[280ms] group-hover:scale-[1.03] group-hover:-translate-y-1 group-hover:border-slate-700/80"
+                              style={{
+                                boxShadow: `0 0 0 transparent`,
+                                height: "320px",
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.boxShadow = `0 12px 40px ${glowHover}`;
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.boxShadow = `0 0 0 transparent`;
+                              }}
                             >
-                              {/* Top: Image and Tags */}
-                              <div className="flex flex-col items-center justify-center gap-4 mb-5">
-                                <div className="relative">
+                              {/* Background artwork - always visible */}
+                              <div className="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none">
+                                <div className="scale-[3] origin-center opacity-30 transition-opacity duration-[280ms]">
                                   <DynamicCourseIcon courseName={c.title} category={c.category} />
-                                  {isCourseActive && (
-                                    <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[64px] h-[64px] rounded-[16px] bg-cyan-400/20 animate-ping pointer-events-none" />
-                                  )}
                                 </div>
-                                {/* Metadata Badges */}
-                                <div className="flex flex-wrap gap-1.5 justify-center">
-                                  <span className={`inline-flex items-center justify-center whitespace-nowrap overflow-hidden text-ellipsis px-2.5 py-1 rounded-full text-[11px] font-semibold border leading-none ${diffColor}`}>
-                                    {c.level}
-                                  </span>
-                                  <span className="inline-flex items-center justify-center whitespace-nowrap overflow-hidden text-ellipsis px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#1F2937] border border-[#2D3748] text-slate-300 leading-none">
+                              </div>
+
+                              {/* Persistent accent color gradient */}
+                              <div className="absolute inset-0 pointer-events-none"
+                                style={{
+                                  background: `radial-gradient(900px circle at 50% -20%, ${accentColor}25, transparent 70%)`,
+                                }}
+                              />
+
+                              {/* Dark gradient overlay for readability */}
+                              <div className="absolute inset-0 bg-gradient-to-t from-[#161B22] via-[#161B22]/60 to-[#161B22]/30 pointer-events-none" />
+
+                              {/* Default visible content - fades out on hover */}
+                              <div className="absolute inset-0 z-10 flex flex-col p-6 opacity-100 group-hover:opacity-0 transition-opacity duration-[280ms] pointer-events-none">
+                                {/* Category badge */}
+                                <div className="flex items-center gap-2">
+                                  <span
+                                    className="text-[10px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-full"
+                                    style={{
+                                      color: accentColor,
+                                      backgroundColor: `${accentColor}18`,
+                                      border: `1px solid ${accentColor}30`,
+                                    }}
+                                  >
                                     {c.category}
                                   </span>
                                 </div>
-                              </div>
 
-                              {/* Middle: Title & Description */}
-                              <div className="text-center mb-6 flex-grow flex flex-col">
-                                <h3 className="text-[16px] font-bold text-white group-hover:text-[#3B82F6] transition-colors line-clamp-2">{c.title}</h3>
-                                <p className="text-xs text-slate-400 mt-2 line-clamp-3 leading-relaxed">{c.description}</p>
-                              </div>
-
-                              {/* Bottom: Progress & Button */}
-                              <div className="flex flex-col justify-end border-t border-slate-700/30 pt-5 mt-auto">
-                                <div className="space-y-3 mb-5">
-                                  <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 mb-2">
-                                    <span>Progress</span>
-                                    <span className="text-slate-300 whitespace-nowrap ml-2">{progress.completed} / {progress.total} Lectures ({percent}%)</span>
+                                {/* Title + info */}
+                                <div className="mt-auto mb-2">
+                                  <h3 className="text-xl font-bold text-white leading-tight">
+                                    {c.title}
+                                  </h3>
+                                  <div className="flex items-center gap-3 mt-2">
+                                    <span className="text-xs text-slate-400">{total} lectures</span>
+                                    <span className="w-1 h-1 rounded-full bg-slate-600" />
+                                    <span className="text-xs text-slate-400">~{durationHrs}h</span>
                                   </div>
-                                  <div className="w-full h-1.5 bg-[#1F2937] rounded-full overflow-hidden">
-                                    <div className="h-full bg-[#3B82F6] rounded-full transition-all duration-500" style={{ width: `${percent}%` }}></div>
-                                  </div>
-                                  {progress.inProgressLectures > 0 && (
-                                    <div className="text-[10px] text-amber-400 font-medium mt-1">
-                                      {progress.inProgressLectures} In Progress
-                                    </div>
-                                  )}
                                 </div>
-                                <button className={`w-full h-[36px] text-white rounded-[8px] flex items-center justify-center font-medium text-[13px] transition-colors border-none cursor-pointer ${percent === 100 ? 'bg-[#22C55E] hover:bg-[#16A34A]' : 'bg-[#3B82F6] hover:bg-[#2563EB]'}`}>
-                                  {percent === 100 ? "Completed" : percent > 0 ? "Continue" : "Start Course"}
-                                </button>
+
+                                {/* Progress bar */}
+                                <div>
+                                  <div className="flex items-center justify-between text-[10px] text-slate-500 mb-1.5">
+                                    <span>{percent > 0 ? `${percent}% Complete` : "Not started"}</span>
+                                  </div>
+                                  <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
+                                    <div
+                                      className="h-full rounded-full transition-all duration-500"
+                                      style={{
+                                        width: `${percent}%`,
+                                        backgroundColor: accentColor,
+                                      }}
+                                    />
+                                  </div>
+                                </div>
                               </div>
-                            </Card>
+
+                              {/* Hover content - fades in on hover, artwork visible behind */}
+                              <div className="absolute inset-0 z-10 flex flex-col p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-[280ms] pointer-events-none group-hover:pointer-events-auto">
+                                <div className="flex items-center gap-2">
+                                  <span
+                                    className="text-[10px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-full"
+                                    style={{
+                                      color: accentColor,
+                                      backgroundColor: `${accentColor}18`,
+                                      border: `1px solid ${accentColor}30`,
+                                    }}
+                                  >
+                                    {c.category}
+                                  </span>
+                                </div>
+
+                                <h3 className="text-lg font-bold text-white mt-12" style={{ color: accentColor }}>
+                                  {c.title}
+                                </h3>
+
+                                <p className="text-xs text-slate-300 mt-2 leading-relaxed line-clamp-3">
+                                  {c.description}
+                                </p>
+
+                                <div className="flex flex-wrap gap-1.5 mt-3">
+                                  <span className="text-[10px] text-slate-400 flex items-center gap-1 px-2 py-0.5 rounded bg-slate-800/60">
+                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    ~{durationHrs}h
+                                  </span>
+                                  {skills.map((s) => (
+                                    <span key={s} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800/60 text-slate-400">
+                                      {s}
+                                    </span>
+                                  ))}
+                                </div>
+
+                                <div className="mt-auto">
+                                  <div className="flex items-center justify-between text-[10px] text-slate-500 mb-1">
+                                    <span>Progress</span>
+                                    <span className="text-slate-300 font-medium">{percent}%</span>
+                                  </div>
+                                  <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mb-4">
+                                    <div
+                                      className={`h-full rounded-full transition-all duration-500 ${percent === 100 ? "bg-emerald-500" : "bg-blue-500"}`}
+                                      style={{ width: `${percent}%` }}
+                                    />
+                                  </div>
+                                  <div className={`w-full py-2.5 rounded-lg text-center text-xs font-semibold transition-colors ${
+                                    percent === 100
+                                      ? "bg-emerald-600/20 border border-emerald-500/20 text-emerald-400"
+                                      : percent > 0
+                                        ? "bg-blue-600/20 border border-blue-500/20 text-blue-400"
+                                        : "bg-slate-700/60 border border-slate-600/60 text-slate-200"
+                                  }`}>
+                                    {percent === 100 ? "View Certificate" : percent > 0 ? "Continue Learning" : "Start Course"}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Active ping */}
+                              {isCourseActive && (
+                                <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full" style={{ backgroundColor: accentColor }}>
+                                  <span className="absolute inset-0 rounded-full animate-ping" style={{ backgroundColor: accentColor }} />
+                                </span>
+                              )}
+                            </div>
                           </Link>
                         );
                       })}

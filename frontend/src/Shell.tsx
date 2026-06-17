@@ -59,7 +59,7 @@ export default function Shell() {
   const courseSlug = onCoursePage ? location.pathname.split("/")[2] : null;
 
   useEffect(() => {
-    api.courses().then(setCourses).catch(() => {});
+    api.courses().then(setCourses).catch(err => console.error('[shell] load courses failed', err));
   }, []);
 
   useEffect(() => {

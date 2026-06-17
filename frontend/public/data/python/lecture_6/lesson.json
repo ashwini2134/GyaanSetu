@@ -16,7 +16,7 @@
           "title": "The while Loop",
           "body": "A `while` loop keeps running as long as its condition is True. It checks the condition BEFORE each iteration.",
           "bullets": [
-            "while condition: — checks before each run",
+            "while condition: \u2014 checks before each run",
             "If True, the body runs, then checks again",
             "If False, the loop stops"
           ]
@@ -25,14 +25,14 @@
           "type": "analogy",
           "title": "while is Like Checking Your Phone",
           "emoji": "",
-          "text": "While waiting for a friend: check for messages. No message → wait. Message arrives → stop. The while loop checks a condition and keeps going until it changes."
+          "text": "While waiting for a friend: check for messages. No message \u2192 wait. Message arrives \u2192 stop. The while loop checks a condition and keeps going until it changes."
         },
         {
           "type": "think_of",
           "analogy": {
             "title": "Checking Your Phone",
             "description": "Keep checking until there are no more notifications",
-            "emoji": "📱",
+            "emoji": "\ud83d\udcf1",
             "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=800&q=80"
           },
           "visualization": {
@@ -76,7 +76,8 @@
           "instructions": "Ask for a number N. Use a while loop to calculate sum of 1 to N.",
           "starterCode": "n = int(input(\"Enter N: \"))\ncount = 1\ntotal = 0\nwhile count <= n:\n    total = \n    count = \nprint(f\"Sum: {total}\")",
           "solution": "n = int(input(\"Enter N: \"))\ncount = 1\ntotal = 0\nwhile count <= n:\n    total = total + count\n    count = count + 1\nprint(f\"Sum of 1 to {n} = {total}\")",
-          "hint": "Add count to total each iteration, then increment count."
+          "hint": "Add count to total each iteration, then increment count.",
+          "expectedOutput": "Sum of 1 to 10 = 55"
         }
       ]
     },
@@ -90,15 +91,15 @@
           "title": "Controlling Loop Flow",
           "body": "Sometimes you need to exit early or skip an iteration. break and continue give you this control.",
           "bullets": [
-            "break — exits the loop immediately",
-            "continue — skips to the next iteration",
+            "break \u2014 exits the loop immediately",
+            "continue \u2014 skips to the next iteration",
             "break is useful for 'found it!' scenarios",
             "continue is useful for 'skip this one' scenarios"
           ]
         },
         {
           "type": "code_example",
-          "title": "break — Exit Early",
+          "title": "break \u2014 Exit Early",
           "language": "python",
           "code": "for num in range(1, 10):\n    if num == 5:\n        print(\"Found 5! Stopping...\")\n        break\n    print(f\"Checking: {num}\")",
           "expectedOutput": "Checking: 1\nChecking: 2\nChecking: 3\nChecking: 4\nFound 5! Stopping..."
@@ -120,7 +121,8 @@
           "instructions": "Ask for a number N. Use a while loop to count down from N to 1, then print 'Blast off!'",
           "starterCode": "n = int(input(\"Enter a number: \"))\nwhile n > 0:\n    print(n)\n    n = \nprint(\"Blast off!\")",
           "solution": "n = int(input(\"Enter a number: \"))\nwhile n > 0:\n    print(n)\n    n -= 1\nprint(\"Blast off!\")",
-          "hint": "Decrease n by 1 inside the loop using n -= 1. The loop stops when n reaches 0."
+          "hint": "Decrease n by 1 inside the loop using n -= 1. The loop stops when n reaches 0.",
+          "expectedOutput": "5\n4\n3\n2\n1\nBlast off!"
         },
         {
           "type": "reflection",
@@ -141,11 +143,11 @@
         "text": "Always update the condition variable to avoid infinite loops"
       },
       {
-        "emoji": "⏹",
+        "emoji": "\u23f9",
         "text": "break exits the loop immediately"
       },
       {
-        "emoji": "⏭",
+        "emoji": "\u23ed",
         "text": "continue skips to the next iteration"
       },
       {
