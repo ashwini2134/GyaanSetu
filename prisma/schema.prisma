@@ -20,9 +20,10 @@ model User {
   lastActiveAt        DateTime             @default(now())
   emailVerified       Boolean              @default(false)
   role                String               @default("student")
-  updatedAt           DateTime             @updatedAt
-  overallProgress     Int                  @default(0)
   statsData           Json?
+  overallProgress     Int                  @default(0)
+  updatedAt           DateTime             @updatedAt
+  bio                 String               @default("")
   achievements        Achievement[]
   chatMessages        ChatMessage[]
   codeDrafts          CodeDraft[]

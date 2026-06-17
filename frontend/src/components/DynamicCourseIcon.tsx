@@ -1,4 +1,3 @@
-import React from 'react';
 import { Brain, Code, BookOpen } from 'lucide-react';
 
 export function getCourseIconDetails(courseName: string, category: string) {

@@ -225,7 +225,6 @@ def main():
             print("Invalid choice, please select 1-5.")
 `;
     const res = runValidationTest(code, ['5']);
-    console.log("TRANSPILLED JS:", res.error, require('./pythonRunnerInteractive').transpilePythonToJS(code));
     expect(res.error).toBeNull();
   });
 

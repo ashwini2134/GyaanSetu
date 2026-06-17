@@ -4,6 +4,7 @@ import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createApp } from "../src/app.js";
 import { closeDb, resetDbForTests } from "../src/db.js";
+import { prisma } from "../src/prisma.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const testDbPath = path.join(__dirname, "test-auth.db");
@@ -11,8 +12,9 @@ const testDbPath = path.join(__dirname, "test-auth.db");
 describe("Auth API", () => {
   let app: ReturnType<typeof createApp>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     resetDbForTests(testDbPath);
+    await prisma.user.deleteMany();
     app = createApp();
   });
 
@@ -101,7 +103,7 @@ describe("Auth API", () => {
       name: "Eve",
       password: "oldpassword1",
     });
-    const token = createPasswordResetToken(user.id);
+    const token = await createPasswordResetToken(user.id);
 
     const reset = await request(app)
       .post("/api/auth/reset-password")

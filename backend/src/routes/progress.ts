@@ -262,6 +262,23 @@ router.post("/action", requireAuth, async (req: AuthenticatedRequest, res, next)
         xpAmount = 20;
         reason = "Problem Solved";
         stats.tasksSubmitted += 1;
+        await prisma.submission.upsert({
+          where: {
+            userId_problemId: {
+              userId,
+              problemId: actionId,
+            },
+          },
+          update: {
+            status: "PASSED",
+          },
+          create: {
+            userId,
+            problemId: actionId,
+            status: "PASSED",
+            code: "",
+          },
+        });
         break;
       case "project":
         xpAmount = 100;

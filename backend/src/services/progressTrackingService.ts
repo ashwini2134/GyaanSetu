@@ -19,7 +19,7 @@ export async function recordQuizAttempt(
       score,
       total,
       passed,
-      answers,
+      answers: answers ?? {},
     },
   });
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, X, RotateCcw, Flame } from "lucide-react";
+import { Search, X } from "lucide-react";
 import type { Course } from "../api";
 
 interface CourseSearchFiltersProps {
@@ -62,11 +62,6 @@ export function CourseSearchFilters({ courses, searchQuery, setSearchQuery, onFi
     localStorage.setItem("fa_recent_searches", JSON.stringify(updated));
   };
 
-  const clearRecentSearches = () => {
-    setRecentSearches([]);
-    localStorage.removeItem("fa_recent_searches");
-  };
-
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     addRecentSearch(searchQuery);
@@ -75,16 +70,6 @@ export function CourseSearchFilters({ courses, searchQuery, setSearchQuery, onFi
   const handlePopularClick = (tag: string) => {
     setSearchQuery(tag);
     addRecentSearch(tag);
-  };
-
-  const handleRecentClick = (term: string) => {
-    setSearchQuery(term);
-  };
-
-  const handleResetFilters = () => {
-    setSearchQuery("");
-    setSelectedLevel("All");
-    setSelectedCategory("All");
   };
 
   // Unique categories and levels from input courses

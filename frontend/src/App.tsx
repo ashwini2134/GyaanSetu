@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import type { ReactNode } from "react";
 import { Suspense, lazy } from "react";
 
@@ -62,6 +62,10 @@ const ProfilePage = lazy(
   () => import("./pages/ProfilePage")
 );
 
+const LandingPage = lazy(
+  () => import("./pages/LandingPage")
+);
+
 // Loading Spinner
 function LoadingSpinner() {
 
@@ -111,24 +115,30 @@ function LoadingSpinner() {
   );
 }
 
-// Auth Wrapper
-function RequireAuth({
-  children,
-}: {
-  children: ReactNode;
-}) {
 
+// Landing or Dashboard Guard
+function LandingOrDashboardGuard() {
   const { user, ready } = useAuth();
+  const location = useLocation();
 
   if (!ready) {
     return <LoadingSpinner />;
   }
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
+  // If user is authenticated, render the main application Shell
+  if (user) {
+    return <Shell />;
   }
 
-  return <>{children}</>;
+  // If user is not authenticated:
+  const isRootPath = location.pathname === "/" || location.pathname === "";
+
+  if (isRootPath) {
+    return <LandingPage />;
+  }
+
+  // Redirect to login if accessing a private path while unauthenticated
+  return <Navigate to="/login" replace state={{ from: location }} />;
 }
 
 export function RequireRole({
@@ -187,11 +197,7 @@ export default function App() {
 
         <Route
           path="/"
-          element={
-            <RequireAuth>
-              <Shell />
-            </RequireAuth>
-          }
+          element={<LandingOrDashboardGuard />}
         >
 
           {/* Dashboard */}

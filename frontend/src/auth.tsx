@@ -39,8 +39,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loadMe();
   }, [loadMe]);
 
+  const clearLmsStorage = () => {
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (
+        key.startsWith("fa_") || 
+        key.startsWith("fraylon_") || 
+        key.startsWith("lms:")
+      )) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(k => localStorage.removeItem(k));
+  };
+
   useEffect(() => {
-    const onLogout = () => setUser(null);
+    const onLogout = () => {
+      clearLmsStorage();
+      setUser(null);
+    };
     window.addEventListener("fa:logout", onLogout);
     return () => window.removeEventListener("fa:logout", onLogout);
   }, []);
@@ -58,8 +76,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
-    await authApi.logout();
+    try {
+      await authApi.logout();
+    } catch {
+      // ignore
+    }
     clearToken();
+    clearLmsStorage();
     setUser(null);
   };
 

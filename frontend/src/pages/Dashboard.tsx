@@ -432,6 +432,7 @@ export default function Dashboard() {
                       {filteredCourses.map((c) => {
                         const progress = courseStatsMap[c.slug] || { completed: 0, total: 0, lecturesCompleted: 0 };
                         const percent = progress.total > 0 ? Math.round((progress.completed / progress.total) * 100) : 0;
+                        const isCourseActive = activeCourseId === c.slug;
                         
                         // Dynamic borders and badge colors
                         let topBorderColor = "border-t-slate-700";
