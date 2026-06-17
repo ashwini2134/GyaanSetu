@@ -3,7 +3,7 @@
   "courseSlug": "python",
   "number": 10,
   "title": "Functions",
-  "overview": "Functions are the building blocks of organized code. They let you package logic into reusable units \u2014 write once, use anywhere.",
+  "overview": "Functions are the building blocks of organized code. They let you package logic into reusable units — write once, use anywhere.",
   "estimatedMinutes": 50,
   "sections": [
     {
@@ -26,14 +26,14 @@
           "type": "analogy",
           "title": "A Function is Like a Vending Machine",
           "emoji": "",
-          "text": "You press A3 (parameters), the machine runs its code (function body), and out comes a snack (return value). You don't care HOW it works inside \u2014 just press the button and get the result."
+          "text": "You press A3 (parameters), the machine runs its code (function body), and out comes a snack (return value). You don't care HOW it works inside — just press the button and get the result."
         },
         {
           "type": "think_of",
           "analogy": {
             "title": "Vending Machine",
-            "description": "Insert coins (input) \u2192 Press button (call) \u2192 Get item (output)",
-            "emoji": "\ud83c\udfea",
+            "description": "Insert coins (input) → Press button (call) → Get item (output)",
+            "emoji": "🏪",
             "image": "https://images.unsplash.com/photo-1618506557292-ec1862b3c506?w=800&q=80"
           },
           "visualization": {
@@ -70,7 +70,7 @@
           "title": "How to Define a Function",
           "body": "Use `def` followed by the function name, parentheses for parameters, a colon, and an indented body.",
           "bullets": [
-            "def function_name(): \u2014 define a function",
+            "def function_name(): — define a function",
             "Parameters go inside parentheses: def add(a, b):",
             "Use return to send a value back",
             "If no return, the function returns None"
@@ -89,7 +89,7 @@
           "title": "Default Parameters",
           "body": "You can give parameters **default values**. If the caller doesn't provide that argument, the default is used.",
           "bullets": [
-            "def greet(name=\"Guest\"): \u2014 default value",
+            "def greet(name=\"Guest\"): — default value",
             "greet() uses \"Guest\", greet(\"Alice\") uses \"Alice\"",
             "Parameters with defaults must come LAST"
           ]
@@ -105,8 +105,7 @@
           "instructions": "Define a function square_perimeter(side) that returns the perimeter of a square. Test it with sides 5 and 12.",
           "starterCode": "def square_perimeter(side):\n    \n\nprint(square_perimeter(5))\nprint(square_perimeter(12))",
           "solution": "def square_perimeter(side):\n    return side * 4\n\nprint(square_perimeter(5))\nprint(square_perimeter(12))",
-          "hint": "The perimeter of a square is 4 times the side length. Use return to send the result back.",
-          "expectedOutput": "20\n48"
+          "hint": "The perimeter of a square is 4 times the side length. Use return to send the result back."
         }
       ]
     }

@@ -17,9 +17,9 @@
           "body": "Python can do all the math you learned in school. Arithmetic operators let you add, subtract, multiply, divide, and perform advanced operations.",
           "bullets": [
             "+ addition, - subtraction, * multiplication, / division",
-            "// floor division \u2014 divides and rounds down",
-            "% modulo \u2014 returns the remainder of division",
-            "** power (exponent) \u2014 raises a number to a power"
+            "// floor division — divides and rounds down",
+            "% modulo — returns the remainder of division",
+            "** power (exponent) — raises a number to a power"
           ]
         },
         {
@@ -32,7 +32,7 @@
         {
           "type": "explanation",
           "accentColor": "blue",
-          "title": "PEMDAS \u2014 Order of Operations",
+          "title": "PEMDAS — Order of Operations",
           "body": "Python follows standard math rules: Parentheses, Exponents, Multiplication/Division, Addition/Subtraction.",
           "bullets": [
             "Parentheses () have the highest priority",
@@ -46,7 +46,7 @@
           "analogy": {
             "title": "The Order Rulebook",
             "description": "PEMDAS tells Python which math operation to perform first",
-            "emoji": "\ud83d\udccf",
+            "emoji": "📏",
             "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&q=80"
           },
           "visualization": {
@@ -70,8 +70,7 @@
           "instructions": "Ask the user for marks obtained and total marks. Calculate percentage = (obtained / total) * 100. Print with 2 decimal places.",
           "starterCode": "obtained = int(input(\"Marks obtained: \"))\ntotal = int(input(\"Total marks: \"))\n\npercentage = \nprint(f\"Percentage: {percentage:.2f}%\")",
           "solution": "obtained = int(input(\"Marks obtained: \"))\ntotal = int(input(\"Total marks: \"))\npercentage = (obtained / total) * 100\nprint(f\"Percentage: {percentage:.2f}%\")",
-          "hint": "Use (obtained / total) * 100. The :.2f in f-string rounds to 2 decimal places.",
-          "expectedOutput": "Percentage: 85.00%"
+          "hint": "Use (obtained / total) * 100. The :.2f in f-string rounds to 2 decimal places."
         }
       ]
     },
@@ -109,8 +108,7 @@
           "instructions": "Ask the user for their age. Check if they are eligible to vote (age >= 18). Print the result.",
           "starterCode": "age = int(input(\"Enter your age: \"))\neligible = \nprint(f\"Eligible to vote: {eligible}\")",
           "solution": "age = int(input(\"Enter your age: \"))\neligible = age >= 18\nprint(f\"Eligible to vote: {eligible}\")",
-          "hint": "Use age >= 18 as the comparison. This gives a boolean True or False.",
-          "expectedOutput": "Eligible to vote: True"
+          "hint": "Use age >= 18 as the comparison. This gives a boolean True or False."
         }
       ]
     },
@@ -124,9 +122,9 @@
           "title": "Combining Conditions",
           "body": "**Logical operators** let you combine multiple conditions to make complex decisions.",
           "bullets": [
-            "and \u2014 True only if BOTH sides are True",
-            "or \u2014 True if AT LEAST ONE side is True",
-            "not \u2014 reverses the result (True becomes False)"
+            "and — True only if BOTH sides are True",
+            "or — True if AT LEAST ONE side is True",
+            "not — reverses the result (True becomes False)"
           ]
         },
         {
@@ -140,7 +138,7 @@
           "analogy": {
             "title": "Gatekeepers",
             "description": "and = BOTH must pass. or = AT LEAST ONE must pass.",
-            "emoji": "\ud83d\udea7",
+            "emoji": "🚧",
             "image": "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80"
           },
           "visualization": {
@@ -169,8 +167,7 @@
           "instructions": "Ask for marks and family income. Qualifies if marks >= 85 AND income < 50000.",
           "starterCode": "marks = int(input(\"Marks: \"))\nincome = int(input(\"Income: \"))\nqualifies = \nprint(f\"Qualifies: {qualifies}\")",
           "solution": "marks = int(input(\"Marks: \"))\nincome = int(input(\"Income: \"))\nqualifies = marks >= 85 and income < 50000\nprint(f\"Qualifies: {qualifies}\")",
-          "hint": "Use marks >= 85 and income < 50000 with the and operator.",
-          "expectedOutput": "Qualifies: True"
+          "hint": "Use marks >= 85 and income < 50000 with the and operator."
         }
       ]
     }
@@ -183,7 +180,7 @@
       },
       {
         "emoji": "",
-        "text": "PEMDAS rules apply \u2014 parentheses first, then exponents, etc."
+        "text": "PEMDAS rules apply — parentheses first, then exponents, etc."
       },
       {
         "emoji": "",
@@ -195,7 +192,7 @@
       },
       {
         "emoji": "",
-        "text": "= is assignment, == is comparison \u2014 don't mix them up"
+        "text": "= is assignment, == is comparison — don't mix them up"
       }
     ],
     "whatYouLearned": [

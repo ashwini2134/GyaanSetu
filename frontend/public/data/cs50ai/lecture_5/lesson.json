@@ -18,7 +18,7 @@
           "bullets": [
             "Traditional programming: rules + data = answers",
             "Machine Learning: data + correct answers = rules (AI figures out the rules itself)",
-            "Supervised Learning: training with labeled examples \u2014 input + correct output given",
+            "Supervised Learning: training with labeled examples — input + correct output given",
             "Classification: predict a category (spam or not spam, pass or fail)",
             "Regression: predict a number (house price, student score)"
           ],
@@ -30,7 +30,7 @@
             "title": "Think of ML as Learning to Sort Laundry",
             "description": "Learn patterns from labeled examples",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "\ud83d\udca1"
+            "emoji": "💡"
           },
           "visualization": {
             "type": "flow",
@@ -53,8 +53,7 @@
           "instructions": "Classify each problem as classification or regression.",
           "starterCode": "# Classify each problem\nproblems = [\n    \"Predict house price\",\n    \"Spam or not spam\",\n    \"Student exam score\",\n    \"Image: cat or dog\",\n]\nfor problem in problems:\n    if problem in [\"Predict house price\", \"Student exam score\"]:\n        print(f\"{problem}: regression\")\n    else:\n        print(f\"{problem}: classification\")",
           "solution": "problems = [\"Predict house price\", \"Spam or not spam\", \"Student exam score\", \"Image: cat or dog\"]\nfor problem in problems:\n    if problem in [\"Predict house price\", \"Student exam score\"]:\n        print(f\"{problem}: regression\")\n    else:\n        print(f\"{problem}: classification\")",
-          "hint": "Classification predicts a category. Regression predicts a number.",
-          "expectedOutput": "Predict house price: regression\nSpam or not spam: classification\nStudent exam score: regression\nImage: cat or dog: classification"
+          "hint": "Classification predicts a category. Regression predicts a number."
         }
       ]
     },
@@ -67,10 +66,10 @@
           "title": "What is Unsupervised & Reinforcement Learning?",
           "body": "Not all learning needs labels. Unsupervised learning finds patterns on its own. Reinforcement learning learns by trying and getting rewards.",
           "bullets": [
-            "Unsupervised Learning: finds patterns with no labels \u2014 grouping similar customers",
+            "Unsupervised Learning: finds patterns with no labels — grouping similar customers",
             "Clustering: grouping similar data points together automatically",
             "Reinforcement Learning: AI tries an action, gets a reward or penalty, learns over time",
-            "Example: chess AI learns by playing millions of games \u2014 rewarded for winning",
+            "Example: chess AI learns by playing millions of games — rewarded for winning",
             "Overfitting: model memorizes training data but fails on new data"
           ],
           "accentColor": "blue"
@@ -81,11 +80,11 @@
             "title": "Think of Reinforcement Learning as Training a Puppy",
             "description": "Learn by trial and error with rewards",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "\ud83d\udca1"
+            "emoji": "💡"
           },
           "visualization": {
             "type": "repetition",
-            "title": "RL: Actions \u2192 Rewards",
+            "title": "RL: Actions → Rewards",
             "items": [
               "Observe",
               "Act",
@@ -105,8 +104,7 @@
           "instructions": "Match each scenario to the correct learning paradigm: supervised, unsupervised, or reinforcement.",
           "starterCode": "# Identify the learning paradigm\nscenarios = [\n    \"Chess AI learns by playing games\",\n    \"Grouping customers by purchase patterns\",\n    \"Email spam detector trained on labeled emails\",\n]\nfor scenario in scenarios:\n    if \"labeled\" in scenario:\n        print(f\"{scenario}: supervised\")\n    elif \"grouping\" in scenario.lower():\n        print(f\"{scenario}: unsupervised\")\n    else:\n        print(f\"{scenario}: reinforcement\")",
           "solution": "scenarios = [\n    \"Chess AI learns by playing games\",\n    \"Grouping customers by purchase patterns\",\n    \"Email spam detector trained on labeled emails\",\n]\nfor scenario in scenarios:\n    if \"labeled\" in scenario:\n        print(f\"{scenario}: supervised\")\n    elif \"grouping\" in scenario.lower():\n        print(f\"{scenario}: unsupervised\")\n    else:\n        print(f\"{scenario}: reinforcement\")",
-          "hint": "Supervised uses labeled data, Unsupervised finds patterns, Reinforcement uses rewards.",
-          "expectedOutput": "Chess AI learns by playing games: reinforcement\nGrouping customers by purchase patterns: unsupervised\nEmail spam detector trained on labeled emails: supervised"
+          "hint": "Supervised uses labeled data, Unsupervised finds patterns, Reinforcement uses rewards."
         }
       ]
     },
@@ -119,11 +117,11 @@
           "title": "What is ML Steps?",
           "body": "The Machine Learning workflow.",
           "bullets": [
-            "Step 1: Collect data \u2014 gather examples of inputs and correct outputs",
-            "Step 2: Clean data \u2014 remove errors, fill missing values",
-            "Step 3: Train model \u2014 feed data to algorithm, it learns the pattern",
-            "Step 4: Test model \u2014 give it new unseen data, check accuracy",
-            "Step 5: Predict \u2014 use trained model on real-world inputs"
+            "Step 1: Collect data — gather examples of inputs and correct outputs",
+            "Step 2: Clean data — remove errors, fill missing values",
+            "Step 3: Train model — feed data to algorithm, it learns the pattern",
+            "Step 4: Test model — give it new unseen data, check accuracy",
+            "Step 5: Predict — use trained model on real-world inputs"
           ],
           "accentColor": "blue"
         },
@@ -133,7 +131,7 @@
             "title": "Think of ML Pipeline as a Factory Assembly Line",
             "description": "Raw data goes through stages to produce predictions",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "\ud83d\udca1"
+            "emoji": "💡"
           },
           "visualization": {
             "type": "flow",
@@ -162,7 +160,7 @@
         {
           "type": "practice",
           "title": "Practice Exercise",
-          "instructions": "Classify each example \u2014 Supervised / Unsupervised / Reinforcement: spam filter, Netflix recommendations, chess AI, customer grouping",
+          "instructions": "Classify each example — Supervised / Unsupervised / Reinforcement: spam filter, Netflix recommendations, chess AI, customer grouping",
           "starterCode": "# Write your classifications\n",
           "solution": "# Example: spam filter -> Supervised",
           "hint": "Think about whether labels or rewards are present."
@@ -178,7 +176,7 @@
       },
       {
         "emoji": "",
-        "text": "Supervised learning uses labeled data \u2014 input + correct output"
+        "text": "Supervised learning uses labeled data — input + correct output"
       },
       {
         "emoji": "",

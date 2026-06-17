@@ -3,7 +3,7 @@
   "courseSlug": "cs50ai",
   "number": 3,
   "title": "Probability & Uncertainty",
-  "overview": "The real world is rarely certain \u2014 AI uses probability to handle situations that are not clearly True or False",
+  "overview": "The real world is rarely certain — AI uses probability to handle situations that are not clearly True or False",
   "estimatedMinutes": 60,
   "nextUp": "Optimization",
   "sections": [
@@ -14,7 +14,7 @@
         {
           "type": "explanation",
           "title": "What is Probability Basics?",
-          "body": "The real world is rarely certain \u2014 AI uses probability to handle situations that are not clearly True or False",
+          "body": "The real world is rarely certain — AI uses probability to handle situations that are not clearly True or False",
           "bullets": [
             "Probability is a number between 0 and 1 showing how likely something is",
             "0 = impossible, 1 = certain, 0.7 = 70% likely",
@@ -30,7 +30,7 @@
             "title": "Think of Probability as a Weather Forecast",
             "description": "Quantify uncertainty with numbers between 0 and 1",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "\ud83d\udca1"
+            "emoji": "💡"
           },
           "visualization": {
             "type": "flow",
@@ -53,8 +53,7 @@
           "instructions": "Calculate probabilities for coin flips and dice rolls.",
           "starterCode": "# Calculate simple probabilities\np_head = 1 / 2\nprint(f\"P(Heads) = {p_head}\")\np_six = 1 / 6\nprint(f\"P(Rolling 6) = {p_six:.2f}\")\np_even = 3 / 6\nprint(f\"P(Even on die) = {p_even:.2f}\")",
           "solution": "p_head = 1 / 2\nprint(f\"P(Heads) = {p_head}\")\np_six = 1 / 6\nprint(f\"P(Rolling 6) = {p_six:.2f}\")\np_even = 3 / 6\nprint(f\"P(Even on die) = {p_even:.2f}\")",
-          "hint": "Probability = number of favorable outcomes / total possible outcomes.",
-          "expectedOutput": "P(Heads) = 0.5\nP(Rolling 6) = 0.17\nP(Even on die) = 0.50"
+          "hint": "Probability = number of favorable outcomes / total possible outcomes."
         }
       ]
     },
@@ -65,9 +64,9 @@
         {
           "type": "explanation",
           "title": "What is Conditional Probability & Bayes Theorem?",
-          "body": "Conditional probability asks \u2014 what is the chance of X given that Y already happened? Bayes Theorem lets AI update its belief when new evidence arrives.",
+          "body": "Conditional probability asks — what is the chance of X given that Y already happened? Bayes Theorem lets AI update its belief when new evidence arrives.",
           "bullets": [
-            "Conditional probability: P(A|B) \u2014 probability of A given B is already true",
+            "Conditional probability: P(A|B) — probability of A given B is already true",
             "Example: probability of wet roads given it rained = very high",
             "Bayes Theorem updates probability when new evidence arrives",
             "Spam filter example: AI updates its confidence that an email is spam as it reads more words",
@@ -81,7 +80,7 @@
             "title": "Think of Bayes' Rule as Updating Your Belief",
             "description": "Update probabilities when new evidence arrives",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "\ud83d\udca1"
+            "emoji": "💡"
           },
           "visualization": {
             "type": "flow",
@@ -104,8 +103,7 @@
           "instructions": "Use Bayes Theorem to calculate the probability an email is spam given it contains the word 'free'.",
           "starterCode": "# Bayes Theorem: spam detection\nprior = 0.4       # P(spam) = 40% of emails are spam\nlikelihood = 0.9  # P('free' | spam) = 90% of spam has 'free'\nevidence = 0.5    # P('free') = 50% of all emails have 'free'\nposterior = (prior * likelihood) / evidence\nprint(f\"P(spam | contains 'free') = {posterior:.0%}\")",
           "solution": "prior = 0.4\nlikelihood = 0.9\nevidence = 0.5\nposterior = (prior * likelihood) / evidence\nprint(f\"P(spam | 'free') = {posterior:.0%}\")",
-          "hint": "Bayes Theorem: posterior = (prior \u00d7 likelihood) / evidence.",
-          "expectedOutput": "P(spam | 'free') = 72%"
+          "hint": "Bayes Theorem: posterior = (prior × likelihood) / evidence."
         }
       ]
     },
@@ -132,7 +130,7 @@
             "title": "Think of Probability Flow as a Branching Path",
             "description": "Each decision leads to different possible outcomes",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "\ud83d\udca1"
+            "emoji": "💡"
           },
           "visualization": {
             "type": "decision",
@@ -173,7 +171,7 @@
       },
       {
         "emoji": "",
-        "text": "Real world decisions are rarely 100% certain \u2014 AI uses probability"
+        "text": "Real world decisions are rarely 100% certain — AI uses probability"
       },
       {
         "emoji": "",

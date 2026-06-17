@@ -3,7 +3,7 @@
   "courseSlug": "python",
   "number": 2,
   "title": "Input & Output",
-  "overview": "Programs are interactive \u2014 they ask for input, process it, and show output. In this lecture you'll master getting user input and formatting output like a pro.",
+  "overview": "Programs are interactive — they ask for input, process it, and show output. In this lecture you'll master getting user input and formatting output like a pro.",
   "estimatedMinutes": 45,
   "sections": [
     {
@@ -14,7 +14,7 @@
           "type": "explanation",
           "accentColor": "blue",
           "title": "Displaying Output with print()",
-          "body": "You already know print() displays text. But print() has superpowers \u2014 you can print multiple items, change separators, and control line endings.",
+          "body": "You already know print() displays text. But print() has superpowers — you can print multiple items, change separators, and control line endings.",
           "bullets": [
             "print() accepts multiple items separated by commas",
             "By default, items are separated by a space",
@@ -32,11 +32,10 @@
         {
           "type": "practice",
           "title": "Design Your Output",
-          "instructions": "Use print() with sep to display numbers 1 through 5 separated by arrows: \"1 \u2192 2 \u2192 3 \u2192 4 \u2192 5\"",
+          "instructions": "Use print() with sep to display numbers 1 through 5 separated by arrows: \"1 → 2 → 3 → 4 → 5\"",
           "starterCode": "# Print numbers with arrow separator\nprint(1, 2, 3, 4, 5, sep=\"\")",
-          "solution": "print(1, 2, 3, 4, 5, sep=\" \u2192 \")",
-          "hint": "Put your numbers as separate arguments to print(). Set sep=\" \u2192 \" with the arrow symbol.",
-          "expectedOutput": "1 \u2192 2 \u2192 3 \u2192 4 \u2192 5"
+          "solution": "print(1, 2, 3, 4, 5, sep=\" → \")",
+          "hint": "Put your numbers as separate arguments to print(). Set sep=\" → \" with the arrow symbol."
         },
         {
           "type": "reflection",
@@ -53,7 +52,7 @@
           "type": "explanation",
           "accentColor": "purple",
           "title": "Getting Input with input()",
-          "body": "The `input()` function waits for the user to type something and press Enter. It **always returns a string** \u2014 even if the user types a number.",
+          "body": "The `input()` function waits for the user to type something and press Enter. It **always returns a string** — even if the user types a number.",
           "bullets": [
             "input() pauses the program and waits for the user",
             "You can show a prompt: input(\"Enter your name: \")",
@@ -72,7 +71,7 @@
           "analogy": {
             "title": "Receptionist",
             "description": "Receptionist asks a question, waits for your answer, then tells the program",
-            "emoji": "\ud83e\uddd1\u200d\ud83d\udcbc",
+            "emoji": "🧑‍💼",
             "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&q=80"
           },
           "visualization": {
@@ -103,8 +102,7 @@
           "instructions": "Ask the user for their name (string), age (integer), and city (string). Then print all details in a formatted card using f-strings.",
           "starterCode": "# Get student details\nname = input(\"Enter your name: \")\nage = \ncity = \n\n# Print details card",
           "solution": "name = input(\"Enter your name: \")\nage = int(input(\"Enter your age: \"))\ncity = input(\"Enter your city: \")\n\nprint(f\"--- Student Card ---\")\nprint(f\"Name: {name}\")\nprint(f\"Age: {age}\")\nprint(f\"City: {city}\")",
-          "hint": "Use int(input()) for numbers. Use f-strings to format the output nicely.",
-          "expectedOutput": "--- Student Card ---\nName: Alice\nAge: 20\nCity: New York"
+          "hint": "Use int(input()) for numbers. Use f-strings to format the output nicely."
         }
       ]
     },
@@ -129,13 +127,13 @@
           "analogy": {
             "title": "Fill-In-The-Blank",
             "description": "Write the sentence with blanks { }, then fill them with variable values",
-            "emoji": "\ud83d\udcdd",
+            "emoji": "📝",
             "image": "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&q=80"
           },
           "visualization": {
             "type": "categories",
-            "title": "Template \u2192 Filled",
-            "centerLabel": "Template \u2192 Filled",
+            "title": "Template → Filled",
+            "centerLabel": "Template → Filled",
             "items": [
               "name",
               "age",
@@ -161,8 +159,7 @@
           "instructions": "Ask the user for two numbers. Convert them to integers. Print the sum, difference, and product using f-strings.",
           "starterCode": "# Get two numbers\nnum1 = int(input(\"Enter first number: \"))\nnum2 = \n\n# Calculate and print",
           "solution": "num1 = int(input(\"Enter first number: \"))\nnum2 = int(input(\"Enter second number: \"))\n\nprint(f\"Sum: {num1 + num2}\")\nprint(f\"Difference: {num1 - num2}\")\nprint(f\"Product: {num1 * num2}\")",
-          "hint": "Use int(input()) for both numbers. Use f-strings with {} to show calculations.",
-          "expectedOutput": "Sum: 15\nDifference: 5\nProduct: 50"
+          "hint": "Use int(input()) for both numbers. Use f-strings with {} to show calculations."
         }
       ]
     }
@@ -174,7 +171,7 @@
         "text": "print() can take multiple items, sep changes separator, end changes line ending"
       },
       {
-        "emoji": "\u2328",
+        "emoji": "⌨",
         "text": "input() gets text from the user, always returns a string"
       },
       {

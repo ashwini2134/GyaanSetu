@@ -5,68 +5,60 @@ import type { AuthenticatedRequest } from "../middleware/auth.js";
 
 const router = Router();
 
-// Dictionary of total lectures per course, falling back to 0 if unknown.
-// This is used for percentage calculations.
 const COURSE_LECTURE_COUNTS: Record<string, number> = {
-  "python-programming": 14,
-  "cs50p": 10,
-  "cs50ai": 7,
-  "ai": 7,
-  // Add more courses here as needed
+  "python": 14,
+  "cs50ai": 10,
 };
 
 router.get("/progress", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
     const userId = req.user!.id;
 
-    // Get all lecture progress for the user
-    const progressRecords = await prisma.lectureProgress.findMany({
-      where: { userId, isCompleted: true }
+    // Use progress.status "COMPLETED" as authoritative lecture completion
+    const completedLectures = await prisma.progress.findMany({
+      where: { userId, status: "COMPLETED" },
+      select: { courseSlug: true, lectureId: true },
     });
 
-    // Group by course and lecture
-    const lectureCompletionMap: Record<string, Record<string, number>> = {};
-    for (const p of progressRecords) {
-      if (!lectureCompletionMap[p.courseSlug]) lectureCompletionMap[p.courseSlug] = {};
-      if (!lectureCompletionMap[p.courseSlug][p.lectureId]) lectureCompletionMap[p.courseSlug][p.lectureId] = 0;
-      lectureCompletionMap[p.courseSlug][p.lectureId]++;
-    }
+    const courseStatsMap: Record<string, {
+      courseId: string;
+      completedLectures: number;
+      inProgressLectures: number;
+      totalLectures: number;
+      percentage: number;
+      status: "not_started" | "in_progress" | "completed";
+    }> = {};
 
-    // A course stats map
-    const courseStats: Record<string, { courseId: string; completedLectures: number; inProgressLectures: number; totalLectures: number; percentage: number; status: "not_started" | "in_progress" | "completed" }> = {};
-
-    for (const slug in lectureCompletionMap) {
-      const total = COURSE_LECTURE_COUNTS[slug] || 10;
-      courseStats[slug] = {
+    for (const [slug, total] of Object.entries(COURSE_LECTURE_COUNTS)) {
+      const done = new Set(completedLectures.filter(p => p.courseSlug === slug).map(p => p.lectureId));
+      const completed = done.size;
+      courseStatsMap[slug] = {
         courseId: slug,
-        completedLectures: 0,
+        completedLectures: completed,
         inProgressLectures: 0,
         totalLectures: total,
-        percentage: 0,
-        status: "in_progress"
+        percentage: Math.min(100, Math.round((completed / total) * 100)),
+        status: completed === 0 ? "not_started" : completed >= total ? "completed" : "in_progress",
       };
+    }
 
-      for (const lectureId in lectureCompletionMap[slug]) {
-        // Assume 6 sections total required for a fully completed lecture as per rules
-        const sectionsDone = lectureCompletionMap[slug][lectureId];
-        if (sectionsDone >= 6) {
-          courseStats[slug].completedLectures++;
-        } else if (sectionsDone > 0) {
-          courseStats[slug].inProgressLectures++;
-        }
+    // Also include any courses the user has progress in but aren't in the map
+    const allSlugs = new Set(Object.keys(courseStatsMap));
+    for (const p of completedLectures) {
+      if (!allSlugs.has(p.courseSlug)) {
+        courseStatsMap[p.courseSlug] = {
+          courseId: p.courseSlug,
+          completedLectures: 1,
+          inProgressLectures: 0,
+          totalLectures: COURSE_LECTURE_COUNTS[p.courseSlug] || 10,
+          percentage: 0,
+          status: "in_progress",
+        };
+        allSlugs.add(p.courseSlug);
       }
     }
 
-    // Calculate percentage and final status
-    for (const slug in courseStats) {
-      const stats = courseStats[slug];
-      stats.percentage = Math.min(100, Math.round((stats.completedLectures / stats.totalLectures) * 100));
-      if (stats.percentage >= 100) {
-        stats.status = "completed";
-      }
-    }
-
-    res.json(Object.values(courseStats));
+    res.json(Object.values(courseStatsMap));
   } catch (error) {
     next(error);
   }

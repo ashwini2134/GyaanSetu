@@ -116,7 +116,7 @@ export default function LecturePage() {
   const [openSimilarIndex, setOpenSimilarIndex] = useState<number>(-1);
 
   const { lessonData, loading, error } = useLessonData(slug, lectureNumber);
-  const { markSectionComplete, isSectionCompleted } = useLectureProgress(slug, lectureNumber ? String(lectureNumber) : undefined);
+  const { markSectionComplete, isSectionCompleted } = useLectureProgress(slug, !isNaN(lectureNumber) ? String(lectureNumber) : undefined);
   const { progress, markProblemCompleted, markQuizCompleted, markHandsOnTaskCompleted, markLectureCompleted: legacyMarkLectureCompleted, markPracticeAttempted, markPracticeCompleted } = useLegacyProgress(slug, lectureNumber);
   const { isLectureUnlocked } = useCourseProgress(slug);
 

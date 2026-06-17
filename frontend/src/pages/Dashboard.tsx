@@ -120,7 +120,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (!courses) return;
 
-    fetch('http://localhost:3000/api/courses/progress', {
+      fetch('/api/courses/progress', {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }

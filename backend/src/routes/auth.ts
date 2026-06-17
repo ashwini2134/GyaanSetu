@@ -38,11 +38,13 @@ const router = Router();
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 30,
+  max: 60,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many requests, please try again later" },
 });
+
+
 
 const registerSchema = z.object({
   email: z.string().email().max(255),
@@ -127,7 +129,7 @@ router.post("/logout", requireAuth, async (req: AuthenticatedRequest, res, next)
   }
 });
 
-router.post("/refresh", authLimiter, async (req, res, next) => {
+router.post("/refresh", async (req, res, next) => {
   try {
     const refreshToken = (req.cookies?.[REFRESH_COOKIE] as string | undefined) ?? req.body?.refresh_token;
     if (!refreshToken) throw new AppError("Refresh token required", 401);

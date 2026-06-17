@@ -16,10 +16,10 @@
           "title": "What is What is NLP & Tokenization?",
           "body": "NLP is AI understanding, processing, and generating human language.",
           "bullets": [
-            "NLP = Natural Language Processing \u2014 AI working with human language",
-            "Why language is hard for AI \u2014 same word can mean very different things depending on context",
-            "Tokenization \u2014 splitting text into individual words or parts AI can process",
-            "Bag of Words \u2014 representing text by counting how often each word appears",
+            "NLP = Natural Language Processing — AI working with human language",
+            "Why language is hard for AI — same word can mean very different things depending on context",
+            "Tokenization — splitting text into individual words or parts AI can process",
+            "Bag of Words — representing text by counting how often each word appears",
             "This concept is fundamental to AI development."
           ],
           "accentColor": "blue"
@@ -30,7 +30,7 @@
             "title": "Think of Tokenization as Slicing a Pizza",
             "description": "Split text into smaller pieces for processing",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "\ud83d\udca1"
+            "emoji": "💡"
           },
           "visualization": {
             "type": "flow",
@@ -54,8 +54,7 @@
           "instructions": "Tokenize a sentence and count word frequencies (Bag of Words).",
           "starterCode": "text = \"the cat sat on the mat\"\ntokens = text.split()\nprint(f\"Tokens: {tokens}\")\nfrom collections import Counter\nbow = Counter(tokens)\nfor word, count in bow.items():\n    print(f\"  '{word}': {count}\")",
           "solution": "text = \"the cat sat on the mat\"\ntokens = text.split()\nprint(f\"Tokens: {tokens}\")\nfrom collections import Counter\nbow = Counter(tokens)\nfor word, count in bow.items():\n    print(f\"  '{word}': {count}\")",
-          "hint": "Tokenization splits text into individual tokens. Bag of Words counts how often each word appears.",
-          "expectedOutput": "Tokens: ['the', 'cat', 'sat', 'on', 'the', 'mat']\n  'the': 2\n  'cat': 1\n  'sat': 1\n  'on': 1\n  'mat': 1"
+          "hint": "Tokenization splits text into individual tokens. Bag of Words counts how often each word appears."
         }
       ]
     },
@@ -68,11 +67,11 @@
           "title": "What is Word Embeddings & Large Language Models?",
           "body": "Word embeddings represent words as numbers. LLMs are very large neural networks trained on massive text.",
           "bullets": [
-            "Word Embeddings \u2014 words represented as numbers so AI can find similarities",
-            "Word math: King - Man + Woman = Queen \u2014 AI can do this kind of reasoning",
+            "Word Embeddings — words represented as numbers so AI can find similarities",
+            "Word math: King - Man + Woman = Queen — AI can do this kind of reasoning",
             "Language Models predict the next word given the previous words",
-            "LLMs (Large Language Models) \u2014 trained on massive text data (GPT, Gemini, Claude)",
-            "Transformers \u2014 the architecture behind modern LLMs \u2014 processes all words at once"
+            "LLMs (Large Language Models) — trained on massive text data (GPT, Gemini, Claude)",
+            "Transformers — the architecture behind modern LLMs — processes all words at once"
           ],
           "accentColor": "blue"
         },
@@ -82,12 +81,12 @@
             "title": "Think of Word Embeddings as a Map of Meanings",
             "description": "Similar words are close together in vector space",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "\ud83d\udca1"
+            "emoji": "💡"
           },
           "visualization": {
             "type": "categories",
-            "title": "Words \u2192 Meaning Vectors",
-            "centerLabel": "Words \u2192 Meaning Vectors",
+            "title": "Words → Meaning Vectors",
+            "centerLabel": "Words → Meaning Vectors",
             "items": [
               "king",
               "queen",
@@ -97,18 +96,17 @@
           },
           "code": {
             "language": "python",
-            "code": "# Word embedding: cosine similarity\nvecs = {\"king\": [0.8, 0.6], \"queen\": [0.7, 0.5], \"apple\": [0.2, 0.9]}\nk, q = vecs[\"king\"], vecs[\"queen\"]\nsim = sum(a*b for a,b in zip(k,q)) / (sum(a*a for a in k)**0.5 * sum(b*b for b in q)**0.5)\nprint(f\"king \u2194 queen similarity: {sim:.2f}\")",
-            "output": "king \u2194 queen similarity: 1.00"
+            "code": "# Word embedding: cosine similarity\nvecs = {\"king\": [0.8, 0.6], \"queen\": [0.7, 0.5], \"apple\": [0.2, 0.9]}\nk, q = vecs[\"king\"], vecs[\"queen\"]\nsim = sum(a*b for a,b in zip(k,q)) / (sum(a*a for a in k)**0.5 * sum(b*b for b in q)**0.5)\nprint(f\"king ↔ queen similarity: {sim:.2f}\")",
+            "output": "king ↔ queen similarity: 1.00"
           }
         },
         {
           "type": "practice",
           "title": "Computing Word Similarity",
           "instructions": "Calculate similarity between word pairs using letter overlap (simplified embedding).",
-          "starterCode": "# Word similarity using character overlap\ndef similarity(word1, word2):\n    common = len(set(word1) & set(word2))\n    total = len(set(word1) | set(word2))\n    return common / total if total > 0 else 0\npairs = [(\"king\", \"queen\"), (\"king\", \"apple\"), (\"apple\", \"orange\")]\nfor w1, w2 in pairs:\n    sim = similarity(w1, w2)\n    print(f\"{w1} \u2194 {w2}: {sim:.2f}\")",
-          "solution": "def similarity(word1, word2):\n    common = len(set(word1) & set(word2))\n    total = len(set(word1) | set(word2))\n    return common / total if total > 0 else 0\npairs = [(\"king\", \"queen\"), (\"king\", \"apple\"), (\"apple\", \"orange\")]\nfor w1, w2 in pairs:\n    sim = similarity(w1, w2)\n    print(f\"{w1} \u2194 {w2}: {sim:.2f}\")",
-          "hint": "Word embeddings place similar words close together in vector space. Similar words share more common letters.",
-          "expectedOutput": "king \u2194 queen: 0.14\nking \u2194 apple: 0.00\napple \u2194 orange: 0.25"
+          "starterCode": "# Word similarity using character overlap\ndef similarity(word1, word2):\n    common = len(set(word1) & set(word2))\n    total = len(set(word1) | set(word2))\n    return common / total if total > 0 else 0\npairs = [(\"king\", \"queen\"), (\"king\", \"apple\"), (\"apple\", \"orange\")]\nfor w1, w2 in pairs:\n    sim = similarity(w1, w2)\n    print(f\"{w1} ↔ {w2}: {sim:.2f}\")",
+          "solution": "def similarity(word1, word2):\n    common = len(set(word1) & set(word2))\n    total = len(set(word1) | set(word2))\n    return common / total if total > 0 else 0\npairs = [(\"king\", \"queen\"), (\"king\", \"apple\"), (\"apple\", \"orange\")]\nfor w1, w2 in pairs:\n    sim = similarity(w1, w2)\n    print(f\"{w1} ↔ {w2}: {sim:.2f}\")",
+          "hint": "Word embeddings place similar words close together in vector space. Similar words share more common letters."
         }
       ]
     },
@@ -122,10 +120,10 @@
           "body": "How text is processed by LLMs.",
           "bullets": [
             "Step 1: Take raw text input from user",
-            "Step 2: Tokenize \u2014 split into words or subwords",
+            "Step 2: Tokenize — split into words or subwords",
             "Step 3: Convert tokens to numbers (word embeddings)",
             "Step 4: Feed into language model",
-            "Step 5: Model predicts next token \u2192 generates output text"
+            "Step 5: Model predicts next token → generates output text"
           ],
           "accentColor": "blue"
         },
@@ -135,7 +133,7 @@
             "title": "Think of an LLM as a Very Well-Read Librarian",
             "description": "Predicts the next word based on billions of examples",
             "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "\ud83d\udca1"
+            "emoji": "💡"
           },
           "visualization": {
             "type": "flow",
@@ -162,7 +160,7 @@
         {
           "type": "practice",
           "title": "Practice Exercise",
-          "instructions": "Ask ChatGPT the same question 3 different ways \u2014 write down how the answer changes each time",
+          "instructions": "Ask ChatGPT the same question 3 different ways — write down how the answer changes each time",
           "starterCode": "# Notes on how ChatGPT responded\n",
           "solution": "# Observe differences in the answers",
           "hint": "See how minor wording changes affect the output."
@@ -186,7 +184,7 @@
       },
       {
         "emoji": "",
-        "text": "Word embeddings place words in number space \u2014 similar words are close together"
+        "text": "Word embeddings place words in number space — similar words are close together"
       },
       {
         "emoji": "",
@@ -194,7 +192,7 @@
       },
       {
         "emoji": "",
-        "text": "Transformers process all words at once \u2014 powering GPT, Gemini, Claude"
+        "text": "Transformers process all words at once — powering GPT, Gemini, Claude"
       }
     ],
     "whatYouLearned": [

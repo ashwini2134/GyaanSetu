@@ -65,8 +65,15 @@ export function useLectureProgress(courseSlug: string | undefined, lectureId: st
     loading,
     markSectionComplete,
     isSectionCompleted: (index: number) => !!sections[index],
-    // Helper to check if ALL 6 sections are completed
-    isLectureCompleted: [1, 2, 3, 4, 5, 6].every(i => sections[i])
+    isLectureCompleted: (sectionCount: number) => {
+      // A lecture is complete when all its sections are marked done
+      // sectionCount is the actual number of sections in this lecture
+      if (sectionCount <= 0) return false;
+      for (let i = 1; i <= sectionCount; i++) {
+        if (!sections[i]) return false;
+      }
+      return true;
+    },
   };
 }
 
@@ -76,8 +83,8 @@ export function useCourseProgress(courseSlug: string | undefined) {
   const fetchCourseProgress = useCallback(async () => {
     if (!courseSlug) return;
     try {
-      const data = await apiCall<any[]>(`/progress/course/${courseSlug}`);
-      // Group by lectureId
+      const data = await apiCall<any[]>(`/progress/lecture/${courseSlug}`);
+      // Group by lectureId, track completed sections
       const map: Record<string, number> = {};
       data.forEach(p => {
         if (p.isCompleted) {
@@ -89,8 +96,8 @@ export function useCourseProgress(courseSlug: string | undefined) {
         const sectionsDone = map[lectureId];
         result[lectureId] = {
           totalSections: sectionsDone,
-          isCompleted: sectionsDone >= 6,
-          inProgress: sectionsDone > 0 && sectionsDone < 6
+          isCompleted: sectionsDone > 0,
+          inProgress: sectionsDone > 0
         };
       });
       setLectureCompletions(result);
