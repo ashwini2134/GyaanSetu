@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Star, Crown } from 'lucide-react';
 import { api, type Lecture } from "../api";
-import { getCourseProgress, isLectureUnlocked, subscribeToProgressChanges } from "../hooks/useProgress";
+import { useCourseProgress } from "../hooks/useLectureProgress";
 import { useAuth } from "../auth";
 
 type LectureStatus = "completed" | "in-progress" | "available" | "locked";
@@ -30,25 +30,24 @@ export default function CoursePage() {
   const { user } = useAuth();
   const [lectures, setLectures] = useState<Lecture[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
+  // Progress stats
   const [lectureProjectCounts, setLectureProjectCounts] = useState<Record<number, number>>({});
   const courseTitle = slug === "cs50ai" ? "CS50 AI" : slug?.toUpperCase() ?? "";
   const lectureCount = lectures?.length ?? 0;
 
-  // Subscribe to progress changes for real-time UI updates
-  useEffect(() => {
-    const unsub = subscribeToProgressChanges(() => setRefreshKey(k => k + 1));
-    return unsub;
-  }, []);
+  const { lectureCompletions, isLectureUnlocked, refreshCourseProgress } = useCourseProgress(slug);
 
-  // ── All progress computed fresh every render via refreshKey ──
-  const courseProgress = useMemo(() => getCourseProgress(slug ?? ""), [slug, refreshKey]);
+  // Subscribe to progress changes (could implement a similar event listener if needed, 
+  // but for now refresh when component mounts)
+  useEffect(() => {
+    refreshCourseProgress();
+  }, [refreshCourseProgress]);
 
   const getLectureStatus = (lecture: Lecture): LectureStatus => {
-    const p = courseProgress[lecture.number];
-    if (p?.lectureCompleted) return "completed";
-    if (p && (p.quizCompleted || Object.keys(p.sections).length > 0)) return "in-progress";
-    if (isLectureUnlocked(lecture.number, courseProgress)) return "available";
+    const p = lectureCompletions[String(lecture.number)];
+    if (p?.isCompleted) return "completed";
+    if (p?.inProgress) return "in-progress";
+    if (isLectureUnlocked(lecture.number)) return "available";
     return "locked";
   };
 
@@ -56,8 +55,8 @@ export default function CoursePage() {
   const progressPercent = lectureCount > 0
     ? Math.round((completedCount / lectureCount) * 100)
     : 0;
-  const quizzesPassed = lectures?.filter((l) => courseProgress[l.number]?.quizCompleted).length ?? 0;
-  const projectsSubmitted = Object.values(courseProgress).reduce((acc, p) => acc + (p.problemsCompleted?.length || 0) + (p.projectCompleted ? 1 : 0), 0);
+  const quizzesPassed = 0; // Legacy
+  const projectsSubmitted = 0; // Legacy
 
   useEffect(() => {
     if (progressPercent === 100 && lectureCount > 0 && user?.name && slug) {
@@ -120,7 +119,7 @@ export default function CoursePage() {
       case "completed":
         return <span className="text-[11px] font-medium text-green-400 bg-green-500/10 px-2.5 py-0.5 rounded-full border border-green-500/20">Completed</span>;
       case "in-progress":
-        return <span className="text-[11px] font-medium text-blue-400 bg-blue-500/10 px-2.5 py-0.5 rounded-full border border-blue-500/20">In Progress</span>;
+        return <span className="text-[11px] font-medium text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">In Progress</span>;
       case "available":
         return <span className="text-[11px] font-medium text-slate-400 bg-slate-600/20 px-2.5 py-0.5 rounded-full border border-slate-600/30">Start</span>;
       case "locked":

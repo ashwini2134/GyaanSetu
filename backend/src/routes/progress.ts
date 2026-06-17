@@ -292,4 +292,62 @@ router.post("/action", requireAuth, async (req: AuthenticatedRequest, res, next)
     next(error);
   }
 });
+
+router.get("/lecture/:courseSlug/:lectureId", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const courseSlug = String(req.params.courseSlug);
+    const lectureId = String(req.params.lectureId);
+    const progress = await prisma.lectureProgress.findMany({
+      where: { userId, courseSlug, lectureId }
+    });
+    res.json(progress);
+  } catch (error) { next(error); }
+});
+
+router.get("/course/:courseSlug", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const courseSlug = String(req.params.courseSlug);
+    const progress = await prisma.lectureProgress.findMany({
+      where: { userId, courseSlug }
+    });
+    res.json(progress);
+  } catch (error) { next(error); }
+});
+
+router.patch("/lecture/:courseSlug/:lectureId", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const courseSlug = String(req.params.courseSlug);
+    const lectureId = String(req.params.lectureId);
+    const { sectionIndex, isCompleted } = req.body;
+
+    if (typeof sectionIndex !== 'number' || typeof isCompleted !== 'boolean') {
+      return res.status(400).json({ error: "Invalid payload" });
+    }
+
+    const progress = await prisma.lectureProgress.upsert({
+      where: {
+        userId_courseSlug_lectureId_sectionIndex: {
+          userId,
+          courseSlug,
+          lectureId,
+          sectionIndex
+        }
+      },
+      update: { isCompleted },
+      create: {
+        userId,
+        courseSlug,
+        lectureId,
+        sectionIndex,
+        isCompleted
+      }
+    });
+
+    res.json(progress);
+  } catch (error) { next(error); }
+});
+
 export default router;

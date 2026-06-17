@@ -74,6 +74,9 @@ function readSnapshot(key: string | null): LectureProgress | null {
   if (cached && cached.version === _storeVersion) return cached.value;
   const all = readCache();
   const value = all[key] ?? null;
+  if (value && !value.problemsCompleted) {
+    value.problemsCompleted = [];
+  }
   _snapCache.set(key, { version: _storeVersion, value });
   return value;
 }
