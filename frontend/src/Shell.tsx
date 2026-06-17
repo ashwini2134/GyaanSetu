@@ -9,7 +9,8 @@ import {
   Trophy,
   Menu,
   X,
-  User as UserIcon,
+  User,
+  Settings,
 } from "lucide-react";
 
 function Logo({ expanded }: { expanded: boolean }) {
@@ -137,6 +138,14 @@ export default function Shell() {
                 </span>
               </div>
             )}
+
+            <NavLink to="/profile" className="hidden md:flex rounded-lg bg-blue-600 hover:bg-blue-500 text-white px-3 md:px-4 py-2 text-sm font-medium transition-all duration-200 border border-blue-500/50 whitespace-nowrap">
+              Portfolio
+            </NavLink>
+            
+            <NavLink to="/profile" className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all duration-200 border border-transparent hover:border-slate-700/50">
+              <Settings size={20} />
+            </NavLink>
 
             <button
               type="button"
@@ -275,7 +284,7 @@ export default function Shell() {
               title="Profile"
             >
               <span className="w-5 h-5 flex items-center justify-center flex-shrink-0">
-                <UserIcon size={18} />
+                <User size={18} />
               </span>
               <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>
                 Profile

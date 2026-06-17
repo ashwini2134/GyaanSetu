@@ -1,906 +1,389 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../auth";
-import { getToken, authFetch } from "../authClient";
-import { getProjectMetadata } from "../api";
-import {
-  Settings,
-  BookOpen,
-  Trophy,
-  CheckCircle,
-  Calendar,
-  Code,
-  Award,
-  Flame,
-  ArrowRight,
-  Clock,
-  Lock,
-  Mail,
-  Briefcase,
-  Layers,
-  Check,
-  ChevronRight,
-  TrendingUp,
-  Sparkles,
-} from "lucide-react";
+import React, { useState } from 'react';
+import { 
+  MapPin, 
+  Calendar, 
+  Edit2, 
+  Download, 
+  BookOpen, 
+  Code, 
+  Award, 
+  Target,
+  User, 
+  Lock, 
+  Bell, 
+  Settings as SettingsIcon, 
+  Link as LinkIcon, 
+  Shield 
+} from 'lucide-react';
 
-// Types matching backend/database models
-interface ProgressRecord {
-  id: string;
-  courseSlug: string;
-  lectureId: string;
-  status: string;
-  completedAt: string | null;
-  practiceAttempted: boolean;
-  practiceCompleted: boolean;
-  projectCompleted: boolean;
-  projectId: string | null;
-}
-
-interface UserSummary {
-  lecturesCompleted: number;
-  quizzesPassed: number;
-  problemsSolved: number;
-  projectsCompleted: number;
-  xp: number;
-  streak: number;
-  lectureProgress: ProgressRecord[];
-}
-
-interface QuizAttempt {
-  id: string;
-  quizId: string;
-  score: number;
-  total: number;
-  passed: boolean;
-  createdAt: string;
-}
-
-interface TimelineItem {
-  id: string;
-  type: "lecture" | "project" | "quiz" | "milestone";
-  title: string;
-  subtitle: string;
-  date: Date;
-  xp?: number;
-}
+type TabView = 'profile' | 'settings';
 
 export default function ProfilePage() {
-  const navigate = useNavigate();
-  const { user, ready, checkAuth } = useAuth();
-  
-  // Navigation Tabs: 'portfolio' or 'settings'
-  const [activeTab, setActiveTab] = useState<"portfolio" | "settings">("portfolio");
+  const [view, setView] = useState<TabView>('profile');
+  const [settingsTab, setSettingsTab] = useState('profileInfo');
 
-  // Summary and Timeline Data
-  const [summary, setSummary] = useState<UserSummary | null>(null);
-  const [quizAttempts, setQuizAttempts] = useState<QuizAttempt[]>([]);
-  const [achievements, setAchievements] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  // Settings form states
-  const [name, setName] = useState("");
-  const [bio, setBio] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  
-  // Feedback states
-  const [settingsSuccess, setSettingsSuccess] = useState("");
-  const [settingsError, setSettingsError] = useState("");
-  const [updatingSettings, setUpdatingSettings] = useState(false);
-
-  useEffect(() => {
-    if (ready && !user) {
-      navigate("/login");
-    }
-  }, [ready, user, navigate]);
-
-  // Sync user info into form states
-  useEffect(() => {
-    if (user) {
-      setName(user.name ?? "");
-      setBio(user.bio ?? "");
-    }
-  }, [user]);
-
-  // Fetch API data
-  useEffect(() => {
-    async function fetchData() {
-      const token = getToken();
-      if (!token) return;
-
-      try {
-        setLoading(true);
-
-        // Fetch User Summary (API endpoint /api/progress/me)
-        const summaryData = await authFetch<UserSummary>("/progress/me");
-        setSummary(summaryData);
-
-        // Fetch Quiz Attempts (API endpoint /api/quiz-attempts)
-        try {
-          const qAttempts = await authFetch<QuizAttempt[]>("/quiz-attempts");
-          setQuizAttempts(qAttempts);
-        } catch (err) {
-          console.warn("Failed to fetch quiz attempts", err);
-        }
-
-        // Fetch Achievements (API endpoint /api/achievements)
-        try {
-          const achRes = await authFetch<{ achievements: string[] }>("/achievements");
-          setAchievements(achRes.achievements || []);
-        } catch (err) {
-          console.warn("Failed to fetch achievements", err);
-        }
-
-      } catch (error) {
-        console.error("Error loading profile data", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    if (user) {
-      fetchData();
-    }
-  }, [user]);
-
-  if (!ready || !user) {
+  if (view === 'settings') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0b0f19]">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="min-h-screen bg-[#0D1117] text-white p-4 md:p-8 font-sans">
+        <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-8">
+          
+          {/* LEFT MENU */}
+          <div className="w-full md:w-64 flex-shrink-0">
+            <button 
+              onClick={() => setView('profile')}
+              className="text-sm text-blue-400 hover:text-blue-300 mb-6 inline-block"
+            >
+              ← Back to Profile
+            </button>
+            <h2 className="text-xl font-bold text-white mb-4">Settings</h2>
+            <nav className="flex flex-col gap-1">
+              {[
+                { id: 'profileInfo', icon: User, label: 'Profile Information' },
+                { id: 'password', icon: Lock, label: 'Change Password' },
+                { id: 'notifications', icon: Bell, label: 'Notifications' },
+                { id: 'preferences', icon: SettingsIcon, label: 'Account Preferences' },
+                { id: 'connections', icon: LinkIcon, label: 'Connected Accounts' },
+                { id: 'privacy', icon: Shield, label: 'Privacy' },
+              ].map((item) => {
+                const active = settingsTab === item.id;
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setSettingsTab(item.id)}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                      active 
+                        ? 'bg-[#1F2937] text-blue-400 border-l-2 border-blue-500' 
+                        : 'text-slate-400 hover:bg-[#1F2937]/50 hover:text-slate-300 border-l-2 border-transparent'
+                    }`}
+                  >
+                    <Icon size={18} className={active ? "text-blue-500" : "text-slate-500"} />
+                    {item.label}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* RIGHT CONTENT */}
+          <div className="flex-1">
+            {settingsTab === 'profileInfo' && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div>
+                  <h3 className="text-[18px] font-bold text-white">Profile Information</h3>
+                  <p className="text-[13px] text-slate-400 mt-1">Update your personal information and how it appears on your profile.</p>
+                </div>
+                
+                <div className="bg-[#161B22] p-6 rounded-[12px] border border-[#2D3748] space-y-6">
+                  
+                  {/* Row 1: Profile Picture */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-3">Profile Picture</label>
+                    <div className="flex items-center gap-4">
+                      <div className="w-[72px] h-[72px] rounded-full bg-[#1F2937] flex items-center justify-center border-[3px] border-transparent"
+                           style={{ background: 'linear-gradient(#1F2937, #1F2937) padding-box, linear-gradient(135deg, #3B82F6, #A855F7) border-box' }}>
+                        <span className="text-xl font-bold text-white tracking-widest">NI</span>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <button className="px-4 py-2 bg-transparent border border-blue-500 text-blue-400 rounded-[8px] text-sm font-medium hover:bg-blue-500/10 transition-colors w-fit">
+                          Upload New
+                        </button>
+                        <span className="text-[11px] text-slate-500">JPG, PNG or GIF. Max size 2MB.</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Row 2: Name & Email */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Full Name</label>
+                      <input 
+                        type="text" 
+                        defaultValue="nishitha"
+                        className="w-full h-[44px] bg-[#0D1117] border border-[#2D3748] rounded-[8px] px-3 text-white text-sm focus:outline-none focus:border-blue-500 focus:shadow-[0_0_12px_rgba(59,130,246,0.2)] transition-shadow"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
+                      <input 
+                        type="email" 
+                        defaultValue="nishithaknidmegalpest@gmail.com"
+                        readOnly
+                        className="w-full h-[44px] bg-[#0D1117] border border-[#2D3748] rounded-[8px] px-3 text-slate-300 text-sm focus:outline-none opacity-70 cursor-not-allowed"
+                      />
+                      <p className="text-[11px] text-slate-500 mt-1.5">Email address cannot be changed.</p>
+                    </div>
+                  </div>
+
+                  {/* Row 3: Bio */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Portfolio Tagline</label>
+                    <textarea 
+                      defaultValue="Learning today, building tomorrow."
+                      rows={3}
+                      className="w-full bg-[#0D1117] border border-[#2D3748] rounded-[8px] p-3 text-white text-sm focus:outline-none focus:border-blue-500 focus:shadow-[0_0_12px_rgba(59,130,246,0.2)] transition-shadow resize-none"
+                    />
+                    <div className="text-right mt-1">
+                      <span className="text-[11px] text-slate-500">35/140 characters</span>
+                    </div>
+                  </div>
+
+                  {/* Row 4: Location & Date Joined */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Location</label>
+                      <div className="relative">
+                        <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                        <select className="w-full h-[44px] bg-[#0D1117] border border-[#2D3748] rounded-[8px] pl-9 pr-3 text-white text-sm focus:outline-none focus:border-blue-500 focus:shadow-[0_0_12px_rgba(59,130,246,0.2)] transition-shadow appearance-none">
+                          <option>Bengaluru, India</option>
+                          <option>Mumbai, India</option>
+                          <option>Delhi, India</option>
+                          <option>Other</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Date Joined</label>
+                      <div className="relative opacity-70">
+                        <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                        <input 
+                          type="text" 
+                          defaultValue="June 17, 2026"
+                          readOnly
+                          className="w-full h-[44px] bg-[#0D1117] border border-[#2D3748] rounded-[8px] pl-9 pr-3 text-slate-300 text-sm focus:outline-none cursor-not-allowed"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-4 border-t border-[#2D3748]">
+                    <button className="h-[44px] px-6 bg-blue-500 text-white rounded-[8px] font-medium text-sm hover:bg-blue-600 active:scale-95 transition-all">
+                      Save Changes
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+            {settingsTab !== 'profileInfo' && (
+              <div className="flex items-center justify-center h-64 text-slate-500">
+                This section is under construction.
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     );
   }
 
-  // Helper: Get user's initials for the avatar
-  const getInitials = (userName: string) => {
-    if (!userName) return "FA";
-    const parts = userName.trim().split(/\s+/);
-    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
-    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
-  };
-
-  // Helper: Format Date
-  const formatDate = (dateStr?: string | Date | null) => {
-    if (!dateStr) return "N/A";
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
-      month: "long",
-      year: "numeric",
-      day: "numeric",
-    });
-  };
-
-  // Helper: Handle Settings Update
-  const handleUpdateProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSettingsError("");
-    setSettingsSuccess("");
-
-    if (!name.trim()) {
-      setSettingsError("Name is required");
-      return;
-    }
-
-    if (password && password !== confirmPassword) {
-      setSettingsError("Passwords do not match");
-      return;
-    }
-
-    if (password && password.length < 8) {
-      setSettingsError("Password must be at least 8 characters");
-      return;
-    }
-
-    try {
-      setUpdatingSettings(true);
-      const updatePayload: { name: string; bio: string; password?: string } = {
-        name,
-        bio,
-      };
-
-      if (password) {
-        updatePayload.password = password;
-      }
-
-      await authFetch("/auth/profile", {
-        method: "PATCH",
-        body: JSON.stringify(updatePayload),
-      });
-
-      setSettingsSuccess("Profile updated successfully!");
-      setPassword("");
-      setConfirmPassword("");
-      
-      // Refresh user context
-      await checkAuth();
-    } catch (err: any) {
-      setSettingsError(err.message || "Failed to update profile");
-    } finally {
-      setUpdatingSettings(false);
-    }
-  };
-
-  // 1. Dynamic Skills Inference from coursework
-  const getSkillsGained = () => {
-    if (!summary?.lectureProgress) return ["Foundational Logic"];
-
-    const skills = new Set<string>();
-    summary.lectureProgress.forEach((progress) => {
-      if (progress.status === "COMPLETED") {
-        if (progress.courseSlug === "cs50ai") {
-          skills.add("Search Algorithms");
-          skills.add("Graph BFS/DFS");
-        }
-
-        if (progress.projectCompleted) {
-          skills.add("Hands-on Problem Solving");
-        }
-      }
-    });
-
-    if (skills.size === 0) {
-      skills.add("Introductory Syntax");
-    }
-
-    return Array.from(skills);
-  };
-
-  const skillsGained = getSkillsGained();
-
-  // 2. Completed Capstone Projects list
-  const getCompletedProjects = () => {
-    if (!summary?.lectureProgress) return [];
-    
-    return summary.lectureProgress
-      .filter((p) => p.projectCompleted && p.projectId)
-      .map((p) => {
-        const metadata = getProjectMetadata(p.projectId || "");
-        return {
-          id: p.projectId!,
-          courseSlug: p.courseSlug,
-          completedAt: p.completedAt,
-          metadata,
-        };
-      });
-  };
-
-  const completedProjects = getCompletedProjects();
-
-  // 3. Certificates Earned
-  const getEarnedCertificates = () => {
-    if (!summary?.lectureProgress) return [];
-    
-    // Group progress by course slug
-    const courseStats: Record<string, { total: number; completed: number; lastDate: Date }> = {};
-    
-    // Total lectures checklist in standard courses
-    // Expected lecture counts per course
-    const expectedLectures: Record<string, number> = {
-      cs50ai: 7,
-    };
-
-    summary.lectureProgress.forEach((p) => {
-      if (!courseStats[p.courseSlug]) {
-        courseStats[p.courseSlug] = { total: expectedLectures[p.courseSlug] || 5, completed: 0, lastDate: new Date(0) };
-      }
-      if (p.status === "COMPLETED") {
-        courseStats[p.courseSlug].completed += 1;
-        if (p.completedAt) {
-          const compDate = new Date(p.completedAt);
-          if (compDate > courseStats[p.courseSlug].lastDate) {
-            courseStats[p.courseSlug].lastDate = compDate;
-          }
-        }
-      }
-    });
-
-    const certs = [];
-    for (const [slug, stats] of Object.entries(courseStats)) {
-      // Award certificate if they have completed at least 80% of the course lectures
-      const pct = stats.completed / stats.total;
-      if (pct >= 0.8 || achievements.includes("course_completed")) {
-        certs.push({
-          id: `cert_${slug}`,
-          courseTitle: "Introduction to Artificial Intelligence with Python",
-          courseSlug: slug,
-          completedAt: stats.lastDate.getTime() === 0 ? new Date() : stats.lastDate,
-          credentialId: `FA-${slug.toUpperCase()}-${Math.floor(100000 + Math.random() * 900000)}`,
-        });
-      }
-    }
-
-    return certs;
-  };
-
-  const earnedCertificates = getEarnedCertificates();
-
-  // 4. Chronological Timeline list compilation
-  const getTimelineItems = (): TimelineItem[] => {
-    const items: TimelineItem[] = [];
-
-    // Milestone 1: User Registration
-    if (user.createdAt) {
-      items.push({
-        id: "signup",
-        type: "milestone",
-        title: "Joined Fraylon Academy",
-        subtitle: "Began the personal learning journey.",
-        date: new Date(user.createdAt),
-      });
-    }
-
-    if (!summary?.lectureProgress) return items.sort((a, b) => b.date.getTime() - a.date.getTime());
-
-    // Lecture Completions
-    summary.lectureProgress.forEach((p) => {
-      if (p.status === "COMPLETED" && p.completedAt) {
-        items.push({
-          id: `lect_${p.courseSlug}_${p.lectureId}`,
-          type: "lecture",
-          title: `Completed Lecture ${p.lectureId}`,
-          subtitle: "CS50 Artificial Intelligence",
-          date: new Date(p.completedAt),
-          xp: 50,
-        });
-
-        // Project Completion
-        if (p.projectCompleted) {
-          items.push({
-            id: `proj_${p.courseSlug}_${p.projectId}`,
-            type: "project",
-            title: `Submitted Capstone Project: ${p.projectId || "Final Assignment"}`,
-            subtitle: `Practiced hands-on programming topics in ${p.courseSlug.toUpperCase()}`,
-            date: new Date(p.completedAt),
-            xp: 100,
-          });
-        }
-      }
-    });
-
-    // Quiz Attempts
-    quizAttempts.forEach((q) => {
-      if (q.passed) {
-        items.push({
-          id: `quiz_${q.id}`,
-          type: "quiz",
-          title: `Passed Lecture Quiz`,
-          subtitle: `Scored ${q.score}/${q.total} on ${q.quizId}`,
-          date: new Date(q.createdAt),
-          xp: 30,
-        });
-      }
-    });
-
-    // Sort timeline descending (newest first)
-    return items.sort((a, b) => b.date.getTime() - a.date.getTime());
-  };
-
-  const timelineItems = getTimelineItems();
-
-  // 5. Recommended Next Steps
-  const getNextSteps = () => {
-    if (!summary?.lectureProgress || summary.lectureProgress.length === 0) {
-      return [
-        {
-          title: "Start Your First Course",
-          description: "Begin CS50 Artificial Intelligence: Search Algorithms.",
-          buttonText: "Start CS50 AI",
-          action: () => navigate("/course/cs50ai"),
-        },
-      ];
-    }
-
-    const nextSteps = [];
-
-    // Check progress of CS50 AI
-    const aiProgress = summary.lectureProgress.filter((p) => p.courseSlug === "cs50ai");
-    if (aiProgress.length === 0) {
-      nextSteps.push({
-        title: "Start CS50 Artificial Intelligence",
-        description: "Explore Search Algorithms, Knowledge Graphs, and Machine Learning models.",
-        buttonText: "Start CS50 AI",
-        action: () => navigate("/course/cs50ai"),
-      });
-    } else {
-      // AI in progress
-      const completedAi = aiProgress.filter((p) => p.status === "COMPLETED");
-      const completedIds = completedAi.map((p) => parseInt(p.lectureId)).filter((id) => !isNaN(id));
-      const maxCompleted = completedIds.length > 0 ? Math.max(...completedIds) : -1;
-      const nextLectureNum = maxCompleted + 1;
-
-      if (nextLectureNum < 7) {
-        nextSteps.push({
-          title: `Continue CS50 AI: Lecture ${nextLectureNum}`,
-          description: "Deep dive into state spaces, heuristic algorithms, and search models.",
-          buttonText: "Continue CS50 AI",
-          action: () => navigate(`/course/cs50ai/lecture/${nextLectureNum}`),
-        });
-      }
-    }
-
-    // Suggest solving a problem
-    nextSteps.push({
-      title: "Climb the Leaderboard",
-      description: "Solve more problems, earn XP points, and boost your streak rankings.",
-      buttonText: "View Leaderboard",
-      action: () => navigate("/leaderboard"),
-    });
-
-    return nextSteps;
-  };
-
-  const nextSteps = getNextSteps();
 
   return (
-    <div className="w-full min-h-screen bg-[#0b0f19] text-slate-100 pb-16">
-      {/* Header Splash */}
-      <div className="border-b border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950/20 px-4 md:px-8 py-8">
-        <div className="max-w-6xl mx-auto">
-          {/* Breadcrumbs */}
-          <nav className="flex items-center gap-2 text-xs text-slate-400 mb-6">
-            <button
-              onClick={() => navigate("/")}
-              className="text-blue-400 hover:text-blue-300 transition-colors"
-            >
-              Dashboard
-            </button>
-            <span className="text-slate-600">/</span>
-            <span className="text-slate-400 font-medium">Learner Profile</span>
-          </nav>
-
-          {/* Profile Basic Info Row */}
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-            {/* Initials Avatar */}
-            <div className="relative group">
-              <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center text-3xl md:text-4xl font-extrabold text-white shadow-xl shadow-blue-500/10 border-2 border-slate-700/50 group-hover:border-blue-400/50 transition-all duration-300">
-                {getInitials(user.name)}
-              </div>
-              <div className="absolute -bottom-2 -right-2 bg-blue-500 text-white p-1.5 rounded-lg border border-slate-800 shadow-md">
-                <Sparkles size={14} className="animate-pulse" />
-              </div>
-            </div>
-
-            {/* Title & Metadata */}
-            <div className="flex-1 text-center md:text-left">
-              <div className="flex flex-col md:flex-row md:items-center gap-3 justify-center md:justify-start">
-                <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight">
-                  {user.name}
-                </h1>
-                <span className="inline-flex mx-auto md:mx-0 items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 capitalize">
-                  {user.role} Learner
-                </span>
-              </div>
-
-              {/* Bio display */}
-              <p className="text-slate-300 mt-2 max-w-2xl text-sm leading-relaxed italic">
-                {user.bio ? `"${user.bio}"` : "No bio written yet. Customize your portfolio profile in settings!"}
-              </p>
-
-              {/* Joined and Email Metas */}
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-2 mt-4 text-xs text-slate-400">
-                <span className="flex items-center gap-1.5">
-                  <Calendar size={14} className="text-slate-500" />
-                  Member since {formatDate(user.createdAt)}
-                </span>
-                <span className="hidden md:inline text-slate-700">•</span>
-                <span className="flex items-center gap-1.5">
-                  <Mail size={14} className="text-slate-500" />
-                  {user.email}
-                </span>
-              </div>
-            </div>
-
-            {/* Profile Tab Toggles */}
-            <div className="flex items-center gap-2 bg-slate-900/60 p-1 rounded-xl border border-slate-800 mt-4 md:mt-0">
-              <button
-                onClick={() => setActiveTab("portfolio")}
-                className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
-                  activeTab === "portfolio"
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-600/10"
-                    : "text-slate-400 hover:text-slate-200"
-                }`}
-              >
-                <Layers size={14} />
-                My Portfolio
-              </button>
-              <button
-                onClick={() => setActiveTab("settings")}
-                className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
-                  activeTab === "settings"
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-600/10"
-                    : "text-slate-400 hover:text-slate-200"
-                }`}
-              >
-                <Settings size={14} />
-                Settings
-              </button>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen bg-[#0D1117] text-white pb-16 font-sans">
+      
+      {/* PROFILE HEADER */}
+      <div className="w-full h-[120px] relative" style={{ background: 'linear-gradient(to right, #1E3A5F, #0D1117)' }}>
+        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
       </div>
 
-      {/* Main Grid Content */}
-      <div className="max-w-6xl mx-auto px-4 md:px-8 mt-8">
-        {loading ? (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-24 bg-slate-900/40 animate-pulse border border-slate-800 rounded-2xl" />
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end -mt-10 mb-8 gap-4">
+          <div className="flex flex-col md:flex-row items-start md:items-end gap-5">
+            {/* Avatar */}
+            <div className="w-[72px] h-[72px] rounded-full bg-[#1F2937] flex items-center justify-center border-[3px] border-transparent shadow-lg z-10"
+                 style={{ background: 'linear-gradient(#1F2937, #1F2937) padding-box, linear-gradient(135deg, #3B82F6, #A855F7) border-box' }}>
+              <span className="text-xl font-bold text-white tracking-widest">NI</span>
+            </div>
+            <div className="mb-1">
+              <div className="flex items-center gap-3 mb-1">
+                <h1 className="text-[22px] font-bold text-white">nishitha</h1>
+                <span className="px-3 py-1 bg-blue-500/20 text-blue-400 text-xs font-semibold rounded-[20px] border border-blue-500/30">
+                  Student Learner
+                </span>
+              </div>
+              <p className="text-[14px] text-slate-400">Learning today, building tomorrow.</p>
+              <div className="flex items-center gap-4 mt-2 text-[12px] text-slate-500">
+                <span className="flex items-center gap-1.5"><MapPin size={14}/> Bengaluru, India</span>
+                <span className="flex items-center gap-1.5"><Calendar size={14}/> Joined Jun 2026</span>
+              </div>
+            </div>
+          </div>
+          
+          <button 
+            onClick={() => setView('settings')}
+            className="flex items-center gap-2 px-4 py-2 bg-transparent border border-blue-500 text-blue-400 rounded-[8px] text-sm font-medium hover:bg-blue-500/10 transition-colors"
+          >
+            <Edit2 size={16} /> Edit Profile
+          </button>
+        </div>
+
+        {/* STATS ROW */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+          {[
+            { label: 'Courses Completed', value: '2', icon: BookOpen, color: 'blue', colorHex: '#3B82F6' },
+            { label: 'Projects Built', value: '4', icon: Code, color: 'purple', colorHex: '#A855F7' },
+            { label: 'Certificates Earned', value: '2', icon: Award, color: 'green', colorHex: '#22C55E' },
+            { label: 'Challenges Passed', value: '1', icon: Target, color: 'amber', colorHex: '#F59E0B' },
+          ].map((stat, i) => {
+            const Icon = stat.icon;
+            return (
+              <div key={i} className="bg-[#161B22] rounded-[12px] border border-[#2D3748] p-5 relative overflow-hidden group hover:shadow-[0_0_12px_rgba(59,130,246,0.1)] transition-all">
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-[32px] font-bold text-white leading-none">{stat.value}</span>
+                  <div className={`p-2 rounded-lg bg-${stat.color}-500/10 text-${stat.color}-400`}>
+                    <Icon size={20} color={stat.colorHex} />
+                  </div>
+                </div>
+                <div className="text-[13px] text-slate-400 font-medium">{stat.label}</div>
+                <div className="absolute bottom-0 left-0 h-[3px] w-full bg-[#1F2937]">
+                  <div className="h-full" style={{ width: '100%', backgroundColor: stat.colorHex }} />
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* MY PROJECTS SECTION */}
+        <div className="mb-10">
+          <div className="flex justify-between items-end mb-4">
+            <h2 className="text-xl font-bold text-white">My Projects</h2>
+            <button className="text-sm text-blue-400 hover:text-blue-300">View all projects →</button>
+          </div>
+          
+          <div className="flex overflow-x-auto gap-4 pb-4 snap-x">
+            {[
+              { title: 'Calculator', tech: 'Python Flask', status: 'Completed', date: 'Jun 20 2026', color: 'green' },
+              { title: 'Expense Tracker', tech: 'Python Flask', status: 'Completed', date: 'Jun 24 2026', color: 'green' },
+              { title: 'Student Management System', tech: 'Python OOP', status: 'Completed', date: 'Jun 24 2026', color: 'green' },
+              { title: 'AI Research Assistant', tech: 'Python AI', status: 'In Progress', date: 'Jun 05 2026', color: 'amber' },
+            ].map((proj, i) => (
+              <div key={i} className="min-w-[280px] bg-[#161B22] rounded-[12px] border border-[#2D3748] p-5 snap-start group hover:-translate-y-1 hover:border-blue-500/50 hover:shadow-[0_0_12px_rgba(59,130,246,0.2)] transition-all cursor-pointer">
+                <div className="flex justify-between items-start mb-3">
+                  <h3 className="font-bold text-white text-[15px] leading-tight">{proj.title}</h3>
+                </div>
+                <p className="text-[13px] text-slate-400 mb-4">{proj.tech}</p>
+                <div className="flex justify-between items-center text-[11px]">
+                  <span className={`px-2 py-0.5 rounded-[20px] font-medium border ${
+                    proj.color === 'green' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                  }`}>
+                    {proj.status}
+                  </span>
+                  <span className="text-slate-500">{proj.date}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* CERTIFICATES & SKILLS */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+          
+          {/* Certificates */}
+          <div className="bg-[#161B22] rounded-[12px] border border-[#2D3748] p-6">
+            <h2 className="text-[18px] font-bold text-white mb-5">Certificates Earned</h2>
+            <div className="space-y-4">
+              {[
+                { name: 'Python Fundamentals', date: 'Jun 20 2026' },
+                { name: 'AI Foundations', date: 'Jun 09 2026' },
+              ].map((cert, i) => (
+                <div key={i} className="relative bg-[#0D1117] rounded-[8px] border border-[#2D3748] p-4 flex items-center justify-between group overflow-hidden">
+                  <div className="absolute top-0 left-0 w-8 h-8 bg-amber-500/20 rounded-br-full" />
+                  <div className="flex items-center gap-4 relative z-10">
+                    <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+                      <Award size={20} className="text-amber-400" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-[14px] text-white">{cert.name}</h4>
+                      <p className="text-[12px] text-slate-400">Earned {cert.date}</p>
+                    </div>
+                  </div>
+                  <button className="p-2 border border-[#2D3748] rounded-[8px] text-slate-400 hover:text-white hover:border-slate-500 transition-colors" title="Download">
+                    <Download size={16} />
+                  </button>
+                </div>
               ))}
             </div>
-            <div className="h-64 bg-slate-900/40 animate-pulse border border-slate-800 rounded-2xl" />
           </div>
-        ) : activeTab === "portfolio" ? (
-          // PORTFOLIO VIEW
-          <div className="space-y-8">
-            {/* 1. Learning Summary Cards */}
-            <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Total XP Card */}
-              <div className="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 shadow-sm hover:border-slate-700/60 transition-all flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
-                  <Trophy size={22} />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-white tracking-tight">{summary?.xp ?? 0}</div>
-                  <div className="text-xs text-slate-400">Total Experience Points</div>
-                </div>
-              </div>
 
-              {/* Streak Card */}
-              <div className="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 shadow-sm hover:border-slate-700/60 transition-all flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-                  <Flame size={22} className="animate-pulse" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-white tracking-tight">{summary?.streak ?? 0} Days</div>
-                  <div className="text-xs text-slate-400">Current Login Streak</div>
-                </div>
-              </div>
-
-              {/* Lectures Completed Card */}
-              <div className="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 shadow-sm hover:border-slate-700/60 transition-all flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-400">
-                  <BookOpen size={22} />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-white tracking-tight">{summary?.lecturesCompleted ?? 0}</div>
-                  <div className="text-xs text-slate-400">Lectures Completed</div>
-                </div>
-              </div>
-
-              {/* Tasks/Problems Completed Card */}
-              <div className="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 shadow-sm hover:border-slate-700/60 transition-all flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
-                  <Code size={22} />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-white tracking-tight">{summary?.problemsSolved ?? 0}</div>
-                  <div className="text-xs text-slate-400">Coding Labs Solved</div>
-                </div>
-              </div>
-            </section>
-
-            {/* Split Content: Skills + Next Steps & Certificates */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              {/* Left Column (8 cols): Projects, timeline */}
-              <div className="lg:col-span-8 space-y-8">
-                
-                {/* 2. Capstone Projects */}
-                <section>
-                  <h2 className="text-xl font-extrabold text-white mb-4 flex items-center gap-2">
-                    <Briefcase size={20} className="text-blue-400" />
-                    Milestone Capstone Projects
-                  </h2>
-                  
-                  {completedProjects.length === 0 ? (
-                    <div className="bg-slate-950/20 border border-slate-800/80 rounded-2xl p-6 text-center">
-                      <Code size={36} className="text-slate-600 mx-auto mb-2" />
-                      <p className="text-sm text-slate-400">No milestone projects completed yet.</p>
-                      <p className="text-xs text-slate-500 mt-1">Submit your code drafts for capstone projects inside lectures to show them off here!</p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {completedProjects.map((proj) => (
-                        <div
-                          key={proj.id}
-                          className="bg-slate-900/30 border border-slate-800 hover:border-blue-500/30 rounded-2xl p-5 hover:bg-slate-900/50 hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
-                        >
-                          <div>
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="text-[10px] uppercase font-bold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full">
-                                {proj.courseSlug.toUpperCase()} Project
-                              </span>
-                              <span className="text-[11px] text-slate-500 flex items-center gap-1">
-                                <Clock size={12} />
-                                {formatDate(proj.completedAt)}
-                              </span>
-                            </div>
-                            <h3 className="text-base font-bold text-slate-100 mt-3 capitalize">
-                              {proj.id.replace(/_/g, " ")}
-                            </h3>
-                            <p className="text-xs text-slate-400 mt-1 line-clamp-2">
-                              {proj.metadata.learningGoal || "Completed hands-on capstone milestone showing mastery of module concepts."}
-                            </p>
-                          </div>
-
-                          <div className="mt-4 pt-3 border-t border-slate-800/60 flex flex-wrap items-center justify-between gap-2">
-                            <div className="flex flex-wrap gap-1">
-                              {proj.metadata.tags.slice(0, 2).map((t) => (
-                                <span key={t} className="text-[9px] px-2 py-0.5 rounded-md bg-slate-800 text-slate-300">
-                                  {t}
-                                </span>
-                              ))}
-                            </div>
-                            <div className="text-xs font-semibold text-green-400 flex items-center gap-1">
-                              <CheckCircle size={12} />
-                              +{proj.metadata.xp} XP Earned
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </section>
-
-                {/* 3. Learning Timeline */}
-                <section>
-                  <h2 className="text-xl font-extrabold text-white mb-4 flex items-center gap-2">
-                    <Clock size={20} className="text-blue-400" />
-                    Learning Timeline
-                  </h2>
-
-                  <div className="bg-slate-900/30 border border-slate-800 rounded-2xl p-6">
-                    {timelineItems.length === 0 ? (
-                      <p className="text-sm text-slate-400 text-center py-6">Your activities will show up here as you learn.</p>
-                    ) : (
-                      <div className="relative pl-6 border-l border-slate-800 space-y-6">
-                        {timelineItems.slice(0, 10).map((item) => (
-                          <div key={item.id} className="relative">
-                            {/* Dot indicator */}
-                            <div className={`absolute -left-[31px] top-1.5 w-2.5 h-2.5 rounded-full border-2 border-slate-900 ${
-                              item.type === "milestone" ? "bg-amber-400 ring-4 ring-amber-400/20" :
-                              item.type === "project" ? "bg-purple-500 ring-4 ring-purple-500/20" :
-                              item.type === "quiz" ? "bg-emerald-400 ring-4 ring-emerald-400/20" :
-                              "bg-blue-400 ring-4 ring-blue-400/20"
-                            }`} />
-                            
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-                              <div>
-                                <p className="text-sm font-semibold text-slate-200">{item.title}</p>
-                                <p className="text-xs text-slate-400">{item.subtitle}</p>
-                              </div>
-                              <div className="flex items-center gap-3">
-                                {item.xp && (
-                                  <span className="text-[10px] font-bold text-green-400 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-md">
-                                    +{item.xp} XP
-                                  </span>
-                                )}
-                                <span className="text-xs text-slate-500">{formatDate(item.date)}</span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </section>
-              </div>
-
-              {/* Right Column (4 cols): Skills, Next Steps, Certificates */}
-              <div className="lg:col-span-4 space-y-8">
-                {/* 4. Skills Gained */}
-                <section className="bg-slate-900/30 border border-slate-800 rounded-2xl p-5">
-                  <h2 className="text-base font-extrabold text-white mb-3 flex items-center gap-2">
-                    <TrendingUp size={16} className="text-blue-400" />
-                    Skills Gained
-                  </h2>
+          {/* Skills */}
+          <div className="bg-[#161B22] rounded-[12px] border border-[#2D3748] p-6">
+            <h2 className="text-[18px] font-bold text-white mb-5">Skill Proficiency</h2>
+            <div className="space-y-5">
+              {[
+                { group: 'Languages', skills: [{ name: 'Python Fundamentals', val: 85 }, { name: 'Prompt Engineering', val: 70 }] },
+                { group: 'Concepts', skills: [{ name: 'Problem Solving', val: 90 }, { name: 'OOP Concepts', val: 65 }] },
+                { group: 'AI Tools', skills: [{ name: 'AI Foundations', val: 80 }] },
+              ].map((cat, i) => (
+                <div key={i}>
+                  <h4 className="text-[12px] uppercase tracking-wider text-slate-500 font-bold mb-3">{cat.group}</h4>
                   <div className="flex flex-wrap gap-2">
-                    {skillsGained.map((skill) => (
-                      <span
-                        key={skill}
-                        className="px-3 py-1 rounded-xl text-xs font-medium bg-gradient-to-r from-blue-900/30 to-indigo-900/30 text-blue-300 border border-blue-500/20"
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                </section>
-
-                {/* 5. Recommended Next Steps */}
-                <section className="bg-slate-900/30 border border-slate-800 rounded-2xl p-5 space-y-3">
-                  <h2 className="text-base font-extrabold text-white flex items-center gap-2">
-                    <ArrowRight size={16} className="text-blue-400" />
-                    Recommended Next Steps
-                  </h2>
-                  <div className="space-y-3">
-                    {nextSteps.map((step, idx) => (
-                      <div
-                        key={idx}
-                        className="p-3 bg-slate-950/40 border border-slate-800 hover:border-blue-500/20 rounded-xl transition-all"
-                      >
-                        <h3 className="text-xs font-bold text-slate-200">{step.title}</h3>
-                        <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">{step.description}</p>
-                        <button
-                          onClick={step.action}
-                          className="mt-3 flex items-center gap-1.5 text-[10px] font-bold text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-wider"
-                        >
-                          {step.buttonText}
-                          <ChevronRight size={12} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-
-                {/* 6. Earned Certificates */}
-                <section className="bg-slate-900/30 border border-slate-800 rounded-2xl p-5 space-y-3">
-                  <h2 className="text-base font-extrabold text-white flex items-center gap-2">
-                    <Award size={16} className="text-blue-400" />
-                    Course Certificates
-                  </h2>
-                  {earnedCertificates.length === 0 ? (
-                    <div className="p-4 bg-slate-950/20 rounded-xl text-center border border-slate-800/50">
-                      <Lock size={20} className="text-slate-600 mx-auto mb-1" />
-                      <p className="text-[11px] text-slate-500">No certificates earned yet.</p>
-                      <p className="text-[10px] text-slate-600 mt-1">Complete a course to unlock a Master Certificate.</p>
-                    </div>
-                  ) : (
-                    earnedCertificates.map((cert) => (
-                      <div
-                        key={cert.id}
-                        className="p-4 bg-gradient-to-br from-slate-900 to-indigo-950/30 border border-indigo-500/20 rounded-xl relative overflow-hidden group hover:border-indigo-500/40 transition-all duration-300"
-                      >
-                        <div className="absolute -top-8 -right-8 w-20 h-20 bg-indigo-500/5 rounded-full blur-xl group-hover:bg-indigo-500/10 transition-all" />
-                        <div className="flex items-start gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-400">
-                            <Award size={18} />
-                          </div>
-                          <div>
-                            <h3 className="text-xs font-bold text-slate-200">{cert.courseTitle}</h3>
-                            <p className="text-[10px] text-slate-500 mt-0.5">ID: {cert.credentialId}</p>
-                            <p className="text-[10px] text-slate-400 mt-2 flex items-center gap-1 font-semibold text-indigo-400">
-                              <Check size={12} /> Issued {formatDate(cert.completedAt)}
-                            </p>
-                          </div>
+                    {cat.skills.map((skill, j) => (
+                      <div key={j} className="relative group/pill">
+                        <div className="overflow-hidden bg-[#1F2937] rounded-[20px] border border-[#2D3748] relative">
+                          <div className="absolute top-0 left-0 h-full bg-blue-500/20" style={{ width: `${skill.val}%` }} />
+                          <span className="relative z-10 text-[13px] text-slate-300 font-medium px-4 py-1.5 block">
+                            {skill.name}
+                          </span>
+                        </div>
+                        {/* Tooltip */}
+                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-xs text-white px-2 py-1 rounded opacity-0 group-hover/pill:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                          Proficiency: {skill.val}%
                         </div>
                       </div>
-                    ))
-                  )}
-                </section>
-              </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        ) : (
-          // SETTINGS FORM VIEW
-          <div className="max-w-xl mx-auto bg-slate-900/40 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-xl">
-            <h2 className="text-2xl font-extrabold text-white mb-6 flex items-center gap-2">
-              <Settings size={22} className="text-blue-400" />
-              Edit Account Settings
-            </h2>
 
-            {settingsSuccess && (
-              <div className="mb-6 p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-sm flex items-center gap-2">
-                <CheckCircle size={16} />
-                {settingsSuccess}
-              </div>
-            )}
+        </div>
 
-            {settingsError && (
-              <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-2">
-                <span className="text-lg">⚠</span>
-                {settingsError}
-              </div>
-            )}
-
-            <form onSubmit={handleUpdateProfile} className="space-y-6">
-              {/* Profile Details Section */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">Profile Info</h3>
-                
-                {/* Name */}
-                <div>
-                  <label htmlFor="settings-name" className="block text-xs font-medium text-slate-400 mb-1.5">
-                    Your Name
-                  </label>
-                  <input
-                    type="text"
-                    id="settings-name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    placeholder="Enter full name"
-                    className="w-full bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all"
-                  />
-                </div>
-
-                {/* Bio */}
-                <div>
-                  <label htmlFor="settings-bio" className="block text-xs font-medium text-slate-400 mb-1.5">
-                    Profile Bio (Portfolio Tagline)
-                  </label>
-                  <textarea
-                    id="settings-bio"
-                    value={bio}
-                    onChange={(e) => setBio(e.target.value)}
-                    rows={3}
-                    maxLength={300}
-                    placeholder="Tell other learners about your interests or goals (e.g. 'Aspiring Data Analyst studying Python & AI')"
-                    className="w-full bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all resize-none"
-                  />
-                  <div className="text-[10px] text-slate-500 text-right mt-1">
-                    {bio.length}/300 characters
+        {/* TIMELINE & NEXT STEPS */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          {/* Timeline */}
+          <div className="bg-[#161B22] rounded-[12px] border border-[#2D3748] p-6">
+            <h2 className="text-[18px] font-bold text-white mb-6">Learning Timeline</h2>
+            <div className="space-y-6 relative before:absolute before:inset-0 before:ml-[11px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-[#2D3748] before:to-transparent">
+              {[
+                { date: 'Jun 28 2026', text: 'Completed Student Management System Project', color: 'purple' },
+                { date: 'Jun 26 2026', text: 'Completed Python Fundamentals', color: 'green' },
+                { date: 'Jun 17 2026', text: 'Joined Fraylon Academy', color: 'blue' },
+              ].map((item, i) => (
+                <div key={i} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                  <div className={`flex items-center justify-center w-6 h-6 rounded-full border-4 border-[#161B22] bg-${item.color}-500 absolute left-0 md:left-1/2 -translate-x-1/2 shrink-0 ${i === 0 ? 'shadow-[0_0_0_2px_rgba(255,255,255,0.2)] animate-pulse' : ''}`} />
+                  <div className="w-[calc(100%-2.5rem)] md:w-[calc(50%-2.5rem)] ml-8 md:ml-0 p-4 rounded-[8px] bg-[#0D1117] border border-[#2D3748]">
+                    <span className={`text-[11px] font-bold text-${item.color}-400 block mb-1`}>{item.date}</span>
+                    <p className="text-[13px] text-slate-300">{item.text}</p>
                   </div>
                 </div>
-              </div>
-
-              {/* Password Section */}
-              <div className="pt-4 border-t border-slate-800/80 space-y-4">
-                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">Change Password</h3>
-                
-                {/* New Password */}
-                <div>
-                  <label htmlFor="settings-password" className="block text-xs font-medium text-slate-400 mb-1.5">
-                    New Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="password"
-                      id="settings-password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Minimum 8 characters"
-                      className="w-full bg-slate-950/60 border border-slate-800 rounded-xl pl-10 pr-4 py-3 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all"
-                    />
-                    <Lock className="absolute left-3.5 top-3.5 text-slate-600" size={16} />
-                  </div>
-                </div>
-
-                {/* Confirm Password */}
-                <div>
-                  <label htmlFor="settings-confirm" className="block text-xs font-medium text-slate-400 mb-1.5">
-                    Confirm New Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="password"
-                      id="settings-confirm"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Re-enter password"
-                      className="w-full bg-slate-950/60 border border-slate-800 rounded-xl pl-10 pr-4 py-3 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all"
-                    />
-                    <Lock className="absolute left-3.5 top-3.5 text-slate-600" size={16} />
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="pt-6 border-t border-slate-800/80 flex items-center justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setName(user.name ?? "");
-                    setBio(user.bio ?? "");
-                    setPassword("");
-                    setConfirmPassword("");
-                    setActiveTab("portfolio");
-                  }}
-                  className="px-5 py-3 rounded-xl border border-slate-800 hover:bg-slate-900 text-slate-400 hover:text-slate-200 text-sm font-semibold transition-all"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={updatingSettings}
-                  className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 text-white text-sm font-semibold shadow-lg shadow-blue-600/10 hover:shadow-blue-600/20 transition-all flex items-center gap-2"
-                >
-                  {updatingSettings ? "Saving..." : "Save Changes"}
-                </button>
-              </div>
-            </form>
+              ))}
+            </div>
+            <button className="w-full mt-6 text-sm text-blue-400 hover:text-blue-300 font-medium">
+              View full timeline ↓
+            </button>
           </div>
-        )}
+
+          {/* Next Steps CTA */}
+          <div className="rounded-[12px] border border-[#2D3748] p-8 flex flex-col items-center justify-center text-center relative overflow-hidden"
+               style={{ background: 'linear-gradient(135deg, #1E3A5F, #1F2937)' }}>
+            <div className="relative w-[80px] h-[80px] mb-6">
+              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="8" />
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#3B82F6" strokeWidth="8" strokeDasharray="251.2" strokeDashoffset={251.2 * 0.25} strokeLinecap="round" />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center text-xl font-bold text-white">75%</div>
+            </div>
+            <h3 className="text-[20px] font-bold text-white mb-2">Take the next step in your learning journey</h3>
+            <p className="text-[14px] text-slate-300 mb-8 max-w-sm">
+              You're 1 challenge away from your next achievement. Keep going!
+            </p>
+            <button className="w-full h-[44px] bg-blue-500 text-white rounded-[8px] font-bold text-sm hover:bg-blue-600 transition-colors">
+              Explore Next Steps →
+            </button>
+          </div>
+
+        </div>
+
       </div>
     </div>
   );
