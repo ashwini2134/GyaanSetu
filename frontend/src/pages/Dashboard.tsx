@@ -438,7 +438,7 @@ export default function Dashboard() {
                   {filteredCourses.length === 0 ? (
                     <NoResultsState query={searchQuery} onSelectSuggestion={setSearchQuery} />
                   ) : (
-                    <div className="grid gap-6 grid-cols-1 xl:grid-cols-2">
+                    <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                       {filteredCourses.map((c) => {
                         const progress = courseStatsMap[c.slug] || { completed: 0, inProgressLectures: 0, total: 10, lecturesCompleted: 0, percentage: 0, status: 'not_started' };
                         const percent = progress.percentage;
@@ -459,51 +459,52 @@ export default function Dashboard() {
                           <Link key={c.id} to={`/course/${c.slug}`} className="group block active:scale-[0.97] transition-all duration-300 h-full">
                             <Card
                               onClick={() => handleCourseClick(c.slug)}
-                              className={`relative p-6 bg-[#161B22] border-y border-r border-[#2D3748] border-l-4 ${topBorderColor.replace('border-t-', 'border-l-')} rounded-[12px] transition-all duration-300 h-full flex flex-col sm:flex-row gap-6 items-start overflow-hidden hover:-translate-y-[3px] hover:shadow-[0_4px_20px_rgba(59,130,246,0.1)]`}
+                              className={`relative p-6 bg-[#161B22] border-x border-b border-[#2D3748] border-t-4 ${topBorderColor} rounded-[12px] transition-all duration-300 h-full flex flex-col overflow-hidden hover:-translate-y-[3px] hover:shadow-[0_4px_20px_rgba(59,130,246,0.1)]`}
                             >
-                              {/* Left Column: Image and Tags */}
-                              <div className="flex flex-col items-center sm:items-start shrink-0 sm:w-1/3 min-w-[140px]">
-                                <div className="relative mb-5 flex justify-center w-full">
+                              {/* Top: Image and Tags */}
+                              <div className="flex flex-col items-center justify-center gap-4 mb-5">
+                                <div className="relative">
                                   <DynamicCourseIcon courseName={c.title} category={c.category} />
                                   {isCourseActive && (
                                     <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[64px] h-[64px] rounded-[16px] bg-cyan-400/20 animate-ping pointer-events-none" />
                                   )}
                                 </div>
-                                <div className="flex flex-wrap gap-2 justify-center sm:justify-start w-full">
-                                  <span className={`inline-flex items-center justify-center whitespace-nowrap overflow-hidden text-ellipsis px-3 py-1 rounded-full text-[11px] font-semibold border leading-none ${diffColor}`}>
+                                {/* Metadata Badges */}
+                                <div className="flex flex-wrap gap-1.5 justify-center">
+                                  <span className={`inline-flex items-center justify-center whitespace-nowrap overflow-hidden text-ellipsis px-2.5 py-1 rounded-full text-[11px] font-semibold border leading-none ${diffColor}`}>
                                     {c.level}
                                   </span>
-                                  <span className="inline-flex items-center justify-center whitespace-nowrap overflow-hidden text-ellipsis px-3 py-1 rounded-full text-[11px] font-semibold bg-[#1F2937] border border-[#2D3748] text-slate-300 leading-none">
+                                  <span className="inline-flex items-center justify-center whitespace-nowrap overflow-hidden text-ellipsis px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#1F2937] border border-[#2D3748] text-slate-300 leading-none">
                                     {c.category}
                                   </span>
                                 </div>
                               </div>
 
-                              {/* Right Column: Details & Progress */}
-                              <div className="flex flex-col flex-grow w-full justify-between h-full min-h-[160px]">
-                                <div className="text-center sm:text-left mb-6">
-                                  <h3 className="text-[18px] font-bold text-white group-hover:text-[#3B82F6] transition-colors">{c.title}</h3>
-                                  <p className="text-[13px] text-slate-400 mt-2.5 line-clamp-2 leading-relaxed">{c.description}</p>
-                                </div>
-                                <div className="flex flex-col justify-end mt-auto">
-                                  <div className="space-y-2 mb-5">
-                                    <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400">
-                                      <span>Progress</span>
-                                      <span className="text-slate-300">{progress.completed} / {progress.total} Lectures ({percent}%)</span>
-                                    </div>
-                                    <div className="w-full h-1.5 bg-[#1F2937] rounded-full overflow-hidden">
-                                      <div className="h-full bg-[#3B82F6] rounded-full transition-all duration-500" style={{ width: `${percent}%` }}></div>
-                                    </div>
-                                    {progress.inProgressLectures > 0 && (
-                                      <div className="text-[10px] text-amber-400 font-medium mt-1">
-                                        {progress.inProgressLectures} In Progress
-                                      </div>
-                                    )}
+                              {/* Middle: Title & Description */}
+                              <div className="text-center mb-6 flex-grow flex flex-col">
+                                <h3 className="text-[16px] font-bold text-white group-hover:text-[#3B82F6] transition-colors line-clamp-2">{c.title}</h3>
+                                <p className="text-xs text-slate-400 mt-2 line-clamp-3 leading-relaxed">{c.description}</p>
+                              </div>
+
+                              {/* Bottom: Progress & Button */}
+                              <div className="flex flex-col justify-end border-t border-slate-700/30 pt-5 mt-auto">
+                                <div className="space-y-3 mb-5">
+                                  <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 mb-2">
+                                    <span>Progress</span>
+                                    <span className="text-slate-300 whitespace-nowrap ml-2">{progress.completed} / {progress.total} Lectures ({percent}%)</span>
                                   </div>
-                                  <button className={`w-full h-[38px] text-white rounded-[8px] flex items-center justify-center font-medium text-[13px] transition-colors border-none cursor-pointer shadow-sm ${percent === 100 ? 'bg-[#22C55E] hover:bg-[#16A34A] shadow-green-900/20' : 'bg-[#3B82F6] hover:bg-[#2563EB] shadow-blue-900/20'}`}>
-                                    {percent === 100 ? "Completed" : percent > 0 ? "Continue" : "Start Course"}
-                                  </button>
+                                  <div className="w-full h-1.5 bg-[#1F2937] rounded-full overflow-hidden">
+                                    <div className="h-full bg-[#3B82F6] rounded-full transition-all duration-500" style={{ width: `${percent}%` }}></div>
+                                  </div>
+                                  {progress.inProgressLectures > 0 && (
+                                    <div className="text-[10px] text-amber-400 font-medium mt-1">
+                                      {progress.inProgressLectures} In Progress
+                                    </div>
+                                  )}
                                 </div>
+                                <button className={`w-full h-[36px] text-white rounded-[8px] flex items-center justify-center font-medium text-[13px] transition-colors border-none cursor-pointer ${percent === 100 ? 'bg-[#22C55E] hover:bg-[#16A34A]' : 'bg-[#3B82F6] hover:bg-[#2563EB]'}`}>
+                                  {percent === 100 ? "Completed" : percent > 0 ? "Continue" : "Start Course"}
+                                </button>
                               </div>
                             </Card>
                           </Link>
