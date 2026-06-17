@@ -8,14 +8,6 @@
     "language": "Python"
   },
   {
-    "slug": "cs50p",
-    "title": "CS50 Python",
-    "description": "Harvard's Introduction to Programming with Python — from the basics of functions and variables through file I/O, OOP, and popular libraries.",
-    "level": "Intermediate",
-    "category": "Computer Science",
-    "language": "Python"
-  },
-  {
     "slug": "cs50ai",
     "title": "AI",
     "description": "Harvard's Introduction to Artificial Intelligence with Python — search algorithms, knowledge representation, uncertainty, optimization, machine learning, and natural language processing.",

@@ -222,7 +222,7 @@ export const api = {
     
     // Get problem details to extract course and lecture
     const problemDetail = _problemDetailCache.get(Number(problemId));
-    const courseSlug = problemDetail?.course_slug ?? 'cs50p';
+    const courseSlug = problemDetail?.course_slug ?? 'python';
     
     // Extract lecture number from problem (stored in common_mistakes or derived from slug)
     // For now, use a simple heuristic: problems are numbered sequentially

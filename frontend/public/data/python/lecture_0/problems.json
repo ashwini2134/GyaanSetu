@@ -2,15 +2,15 @@
   {
     "id": "hello_world",
     "title": "Hello World",
-    "description": "Write a program that prints 'Hello, World!' to the screen. Then add a second print statement that prints your favorite hobby.",
+    "description": "Write a program that prints 'Hello, World!' to the screen.",
     "difficulty": "easy",
-    "starterCode": "# Print Hello, World!\nprint()\n\n# Print your favorite hobby",
-    "solution": "print(\"Hello, World!\")\nprint(\"Coding\")",
+    "starterCode": "",
+    "solution": "print(\"Hello, World!\")",
     "testCases": [
       {
-        "label": "Basic output",
+        "label": "Prints Hello, World!",
         "input": "",
-        "expectedOutput": "Hello, World!\nCoding"
+        "expectedOutput": "Hello, World!"
       }
     ]
   },
@@ -19,14 +19,8 @@
     "title": "Personal Info",
     "description": "Write a program that prints your name, age, and the city you live in — each on a separate line using three print() statements.",
     "difficulty": "easy",
-    "starterCode": "# Print your personal info\nprint()\nprint()\nprint()",
-    "solution": "print(\"Lakshanya\")\nprint(\"20\")\nprint(\"Chennai\")",
-    "testCases": [
-      {
-        "label": "Three lines of info",
-        "input": "",
-        "expectedOutput": "Lakshanya\n20\nChennai"
-      }
-    ]
+    "starterCode": "",
+    "solution": "print(\"Your Name\")\nprint(\"Your Age\")\nprint(\"Your City\")",
+    "testCases": []
   }
 ]

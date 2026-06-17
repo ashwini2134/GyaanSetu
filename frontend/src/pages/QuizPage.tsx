@@ -28,7 +28,7 @@ export default function QuizPage() {
       .catch(e => { setError(e.message); setLoading(false); });
   }, [slug, number]);
 
-  const courseTitle = slug === 'cs50p' ? 'CS50 Python' : slug === 'cs50ai' ? 'AI' : (slug ?? '').toUpperCase();
+  const courseTitle = slug === 'cs50ai' ? 'AI' : (slug ?? '').toUpperCase();
 
   return (
     <div className="min-h-screen bg-slate-900 p-6 md:p-10">

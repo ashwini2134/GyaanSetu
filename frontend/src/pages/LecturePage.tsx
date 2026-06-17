@@ -78,7 +78,7 @@ function LockedLectureView({ slug, lectureNumber, courseTitle: _courseTitle }: {
 function LegacyLecturePage({ slug, lectureNumber }: { slug: string; lectureNumber: number }) {
   const navigate = useNavigate();
   const [content, setContent] = useState('');
-  const courseTitle = slug === 'cs50p' ? 'CS50 Python' : slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
+  const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
 
   useEffect(() => {
     const base = import.meta.env.BASE_URL ?? '/';
@@ -272,7 +272,7 @@ export default function LecturePage() {
 
   // Show locked view
   if (unlocked === false) {
-    const courseTitle = slug === 'cs50p' ? 'CS50 Python' : slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
+const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
     return <LockedLectureView slug={slug} lectureNumber={lectureNumber} courseTitle={courseTitle} />;
   }
 
@@ -295,7 +295,7 @@ export default function LecturePage() {
   if (!lessonData) return null;
 
   const nextLecture = allLectures.find(l => l.number === lectureNumber + 1);
-  const courseTitle = slug === 'cs50p' ? 'CS50 Python' : slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
+  const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
   const quiz = lessonData.quiz ?? [];
   const problems: CodingProblem[] = lessonData.problems ?? [];
   const projects: ProjectSummary[] = lessonData.projects ?? [];
@@ -516,7 +516,7 @@ export default function LecturePage() {
                     ];
 
                     return (
-                      <div className="mt-8 pt-6 border-t border-slate-700/30">
+                      <div className="mt-8 pt-6 border-t border-slate-700/30" id="similar-questions">
                         <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
                           <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -644,7 +644,7 @@ export default function LecturePage() {
                 </div>
               </section>
             )}
-            {showAllCompleted && (
+                  {showAllCompleted && (
               <div className="fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-300">
                 <div className="max-w-md w-full mx-4 p-8 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-emerald-500/30 text-center space-y-6 animate-in zoom-in duration-500">
                   <div className="w-20 h-20 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center mx-auto">
@@ -658,10 +658,15 @@ export default function LecturePage() {
                   </div>
                   <div className="flex gap-3 justify-center">
                     <button
-                      onClick={() => setShowAllCompleted(false)}
+                      onClick={() => {
+                        setShowAllCompleted(false);
+                        setTimeout(() => {
+                          document.getElementById('similar-questions')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 100);
+                      }}
                       className="text-sm font-medium px-5 py-2.5 rounded-xl border border-slate-600/50 text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all"
                     >
-                      Review Solutions
+                      View Similar Questions
                     </button>
                     <button
                       onClick={() => {

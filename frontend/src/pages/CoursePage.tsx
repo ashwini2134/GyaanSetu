@@ -5,7 +5,7 @@ import { api, type Lecture } from "../api";
 import { getCourseProgress, isLectureUnlocked, subscribeToProgressChanges } from "../hooks/useProgress";
 import { useAuth } from "../auth";
 
-type LectureStatus = "completed" | "in-progress" | "locked";
+type LectureStatus = "completed" | "in-progress" | "available" | "locked";
 
 function ProgressCircle({ percent, size = 96 }: { percent: number; size?: number }) {
   const strokeWidth = 6;
@@ -32,7 +32,7 @@ export default function CoursePage() {
   const [err, setErr] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [lectureProjectCounts, setLectureProjectCounts] = useState<Record<number, number>>({});
-  const courseTitle = slug === "cs50p" ? "CS50 Python" : slug === "cs50ai" ? "CS50 AI" : slug?.toUpperCase() ?? "";
+  const courseTitle = slug === "cs50ai" ? "CS50 AI" : slug?.toUpperCase() ?? "";
   const lectureCount = lectures?.length ?? 0;
 
   // Subscribe to progress changes for real-time UI updates
@@ -48,7 +48,7 @@ export default function CoursePage() {
     const p = courseProgress[lecture.number];
     if (p?.lectureCompleted) return "completed";
     if (p && (p.quizCompleted || Object.keys(p.sections).length > 0)) return "in-progress";
-    if (isLectureUnlocked(lecture.number, courseProgress)) return "in-progress";
+    if (isLectureUnlocked(lecture.number, courseProgress)) return "available";
     return "locked";
   };
 
@@ -96,6 +96,14 @@ export default function CoursePage() {
             </svg>
           </div>
         );
+      case "available":
+        return (
+          <div className="w-8 h-8 rounded-full bg-slate-700/30 flex items-center justify-center flex-shrink-0">
+            <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+          </div>
+        );
       case "locked":
         return (
           <div className="w-8 h-8 rounded-full bg-slate-700/40 flex items-center justify-center flex-shrink-0">
@@ -113,6 +121,8 @@ export default function CoursePage() {
         return <span className="text-[11px] font-medium text-green-400 bg-green-500/10 px-2.5 py-0.5 rounded-full border border-green-500/20">Completed</span>;
       case "in-progress":
         return <span className="text-[11px] font-medium text-blue-400 bg-blue-500/10 px-2.5 py-0.5 rounded-full border border-blue-500/20">In Progress</span>;
+      case "available":
+        return <span className="text-[11px] font-medium text-slate-400 bg-slate-600/20 px-2.5 py-0.5 rounded-full border border-slate-600/30">Start</span>;
       case "locked":
         return <span className="text-[11px] font-medium text-slate-500 bg-slate-600/20 px-2.5 py-0.5 rounded-full border border-slate-600/30">Locked</span>;
     }
@@ -243,9 +253,9 @@ export default function CoursePage() {
                         </div>
 
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors duration-200 ${
-                          isLocked ? "bg-slate-700/30" : "bg-blue-600/15 group-hover:bg-blue-600/25"
+                          isLocked ? "bg-slate-700/30" : status === "available" ? "bg-emerald-600/15" : "bg-blue-600/15 group-hover:bg-blue-600/25"
                         }`}>
-                          <svg className={`w-5 h-5 ${isLocked ? "text-slate-500" : "text-blue-400"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <svg className={`w-5 h-5 ${isLocked ? "text-slate-500" : status === "available" ? "text-emerald-400" : "text-blue-400"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                           </svg>
                         </div>

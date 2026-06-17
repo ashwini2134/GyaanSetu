@@ -4,11 +4,20 @@ import { getToken } from '../authClient';
 
 const PROGRESS_CHANGE_EVENT = 'lms:progress-change';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3001';
+const STORAGE_KEY = 'lms:progress';
 
 let _storeVersion = 0;
 let _cache: Record<string, LectureProgress> = {};
 
-// Simple in-memory cache (fallback if backend unavailable)
+function loadFromStorage(): Record<string, LectureProgress> {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
 function readCache(): Record<string, LectureProgress> {
   return { ..._cache };
 }
@@ -16,10 +25,12 @@ function readCache(): Record<string, LectureProgress> {
 function writeCache(data: Record<string, LectureProgress>) {
   _cache = { ...data };
   _storeVersion++;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(_cache));
+  } catch {}
   window.dispatchEvent(new CustomEvent(PROGRESS_CHANGE_EVENT));
 }
 
-// Backend API calls
 async function apiCall<T>(path: string, init: RequestInit = {}): Promise<T> {
   const token = getToken();
   const headers = new Headers(init.headers ?? {});
@@ -29,24 +40,12 @@ async function apiCall<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (init.body && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
   }
-  
   const res = await fetch(`${BACKEND_URL}/api${path}`, { ...init, headers });
   const data = await res.json().catch(() => ({})) as T;
   if (!res.ok) {
     console.warn(`API call failed: ${path}`, data);
-    // Fail gracefully - continue with cache
   }
   return data as T;
-}
-
-async function fetchLectureProgress(courseSlug: string, lectureNumber: number): Promise<LectureProgress | null> {
-  if (!getToken()) return null;
-  try {
-    const data = await apiCall<{ progress?: LectureProgress }>(`/progress/lecture/${courseSlug}/${lectureNumber}`);
-    return data.progress ?? null;
-  } catch {
-    return null;
-  }
 }
 
 function progressKey(courseSlug: string, lectureNumber: number) {
@@ -79,7 +78,6 @@ function readSnapshot(key: string | null): LectureProgress | null {
   return value;
 }
 
-// ── Check if lecture should be auto-completed ────────────────────────────
 function checkLectureCompletion(
   courseSlug: string,
   lectureNumber: number,
@@ -94,7 +92,6 @@ function checkLectureCompletion(
   if (!prev || prev.lectureCompleted) return;
 
   const sectionsVisited = Object.values(prev.sections).filter(s => s.visited).length;
-
   const allSectionsVisited = sectionsVisited >= totalSections;
   const quizDone = !hasQuiz || prev.quizCompleted;
   const problemsDone = prev.problemsCompleted.length >= totalProblems;
@@ -112,6 +109,11 @@ export function useProgress(courseSlug: string | undefined, lectureNumber: numbe
   const [version, setVersion] = useState(0);
 
   useEffect(() => {
+    _cache = loadFromStorage();
+    setVersion(v => v + 1);
+  }, []);
+
+  useEffect(() => {
     const onChange = () => setVersion(v => v + 1);
     window.addEventListener('storage', onChange);
     window.addEventListener(PROGRESS_CHANGE_EVENT, onChange);
@@ -120,19 +122,6 @@ export function useProgress(courseSlug: string | undefined, lectureNumber: numbe
       window.removeEventListener(PROGRESS_CHANGE_EVENT, onChange);
     };
   }, []);
-
-  // Load from backend on mount or when key changes
-  useEffect(() => {
-    if (!key || !courseSlug || lectureNumber === undefined) return;
-    
-    fetchLectureProgress(courseSlug, lectureNumber).then(progress => {
-      if (progress) {
-        const all = readCache();
-        all[key] = progress;
-        writeCache(all);
-      }
-    });
-  }, [key, courseSlug, lectureNumber]);
 
   const snapshot = useMemo(() => readSnapshot(key), [key, version]);
 
@@ -161,14 +150,11 @@ export function useProgress(courseSlug: string | undefined, lectureNumber: numbe
         sections: { ...prev.sections, [sectionId]: { ...existing, visited: true } },
       };
     });
-    
-    // Call backend API
     if (courseSlug && lectureNumber !== undefined) {
-      apiCall(`/progress/lecture/section`, {
+      apiCall(`/progress/section`, {
         method: 'POST',
-        body: JSON.stringify({ courseSlug, lectureNumber, sectionId, lastSection: sectionId }),
-      }).catch(err => console.warn('Failed to mark section visited', err));
-      
+        body: JSON.stringify({ courseSlug, lectureId: String(lectureNumber), practiceAttempted: true }),
+      }).catch(() => {});
       if (sectionId !== 'quiz' && sectionId !== 'problems') {
         import('../progress').then(m => m.completeAction('section', `${courseSlug}:${lectureNumber}:${sectionId}`));
       }
@@ -197,18 +183,24 @@ export function useProgress(courseSlug: string | undefined, lectureNumber: numbe
         sections: { ...prev.sections, [sectionId]: { ...existing, practiceCompleted: true } },
       };
     });
-  }, [updateProgress]);
+    if (courseSlug && lectureNumber !== undefined) {
+      apiCall(`/progress/section`, {
+        method: 'POST',
+        body: JSON.stringify({ courseSlug, lectureId: String(lectureNumber), practiceCompleted: true }),
+      }).catch(() => {});
+    }
+  }, [updateProgress, courseSlug, lectureNumber]);
 
   const markQuizCompleted = useCallback((score: number, total: number = 5) => {
     updateProgress(prev => ({ ...prev, quizScore: score, quizCompleted: true }));
-    
-    // Call backend API
     if (courseSlug && lectureNumber !== undefined) {
-      apiCall(`/progress/lecture/quiz`, {
+      apiCall(`/progress/quiz`, {
         method: 'POST',
-        body: JSON.stringify({ courseSlug, lectureNumber, score, total }),
-      }).catch(err => console.warn('Failed to mark quiz completed', err));
-      
+        body: JSON.stringify({
+          courseSlug, lectureId: String(lectureNumber), quizId: `${courseSlug}-${lectureNumber}`,
+          score, total,
+        }),
+      }).catch(() => {});
       if (score / total >= 0.6) {
         import('../progress').then(m => m.completeAction('quiz', `${courseSlug}:${lectureNumber}`));
       }
@@ -220,14 +212,7 @@ export function useProgress(courseSlug: string | undefined, lectureNumber: numbe
       if (prev.problemsCompleted.includes(problemId)) return prev;
       return { ...prev, problemsCompleted: [...prev.problemsCompleted, problemId] };
     });
-    
-    // Call backend API
     if (courseSlug && lectureNumber !== undefined) {
-      apiCall(`/progress/lecture/problem`, {
-        method: 'POST',
-        body: JSON.stringify({ courseSlug, lectureNumber, problemId }),
-      }).catch(err => console.warn('Failed to mark problem completed', err));
-      
       import('../progress').then(m => m.completeAction('problem', problemId));
     }
   }, [updateProgress, courseSlug, lectureNumber]);
@@ -241,20 +226,14 @@ export function useProgress(courseSlug: string | undefined, lectureNumber: numbe
       if (prev.lectureCompleted) return prev;
       return { ...prev, lectureCompleted: true, handsOnTaskCompleted: true };
     });
-    
-    // Call backend API
     if (courseSlug && lectureNumber !== undefined) {
-      apiCall(`/progress/lecture/complete`, {
+      apiCall(`/progress/lecture`, {
         method: 'POST',
-        body: JSON.stringify({ courseSlug, lectureNumber, totalSections: 0, totalProblems: 0, hasQuiz: false }),
-      }).catch(err => console.warn('Failed to mark lecture completed', err));
-      
+        body: JSON.stringify({ courseSlug, lectureId: String(lectureNumber), hasProject: false }),
+      }).catch(() => {});
       import('../progress').then(m => m.completeAction('lecture', `${courseSlug}:${lectureNumber}`));
     }
   }, [updateProgress, courseSlug, lectureNumber]);
-
-  // Auto-check lecture completion
-
 
   const visitedSections = useMemo(
     () => Object.values(progress.sections).filter(s => s.visited).length,
@@ -280,9 +259,8 @@ export function useProgress(courseSlug: string | undefined, lectureNumber: numbe
   };
 }
 
-// ── Utility: get progress for a course's lectures ────────────────────────────
 export function getCourseProgress(courseSlug: string): Record<number, LectureProgress> {
-  const all = readCache();
+  const all = { ..._cache, ...loadFromStorage() };
   const result: Record<number, LectureProgress> = {};
   for (const [k, v] of Object.entries(all)) {
     if (k.startsWith(`${courseSlug}:`)) {
@@ -292,7 +270,6 @@ export function getCourseProgress(courseSlug: string): Record<number, LecturePro
   return result;
 }
 
-// ── Course stats ─────────────────────────────────────────────────────────────
 export interface CourseStats {
   lecturesStarted: number;
   lecturesCompleted: number;
@@ -323,10 +300,8 @@ export function getCourseStats(courseSlug: string, totalLectures: number): Cours
   return { lecturesStarted, lecturesCompleted, quizzesPassed, handsOnTasksCompleted, totalLectures };
 }
 
-// ── Sequential unlocking (REVIEW_MODE enabled - bypasses prerequisite completion) ────────────────────────────────
 const REVIEW_MODE = true;
 
-// ── Sequential unlocking ─────────────────────────────────────────────────────
 export function isLectureUnlocked(
   lectureNumber: number,
   courseProgress: Record<number, LectureProgress>,
@@ -338,7 +313,6 @@ export function isLectureUnlocked(
   return prev.lectureCompleted;
 }
 
-// ── Subscribe to progress changes ─────────────────────────────────────
 export function subscribeToProgressChanges(cb: () => void) {
   window.addEventListener('storage', cb);
   window.addEventListener(PROGRESS_CHANGE_EVENT, cb);
@@ -349,10 +323,9 @@ export function subscribeToProgressChanges(cb: () => void) {
 }
 
 export function getAllProgress(): Record<string, LectureProgress> {
-  return readCache();
+  return { ..._cache, ...loadFromStorage() };
 }
 
-// ── Auto-complete check (called externally after mutations) ───────────────
 export function tryAutoCompleteLecture(
   courseSlug: string,
   lectureNumber: number,

@@ -78,7 +78,7 @@ export function useLessonData(
             if (rawProblems) {
               const problems: CodingProblem[] = [];
               for (const p of rawProblems) {
-                if (!p.starterCode) continue;
+                if (p.starterCode === undefined) continue;
                 const difficulty = (['easy', 'medium', 'hard'].includes(p.difficulty ?? '') ? p.difficulty : 'easy') as 'easy' | 'medium' | 'hard';
                 problems.push({
                   id: p.id,

@@ -228,35 +228,7 @@ export default function ProfilePage() {
     const skills = new Set<string>();
     summary.lectureProgress.forEach((progress) => {
       if (progress.status === "COMPLETED") {
-        if (progress.courseSlug === "cs50p") {
-          const num = progress.lectureId;
-          if (num.includes("0")) {
-            skills.add("Variables & Inputs");
-            skills.add("String Formats");
-          } else if (num.includes("1")) {
-            skills.add("Conditional Operations");
-            skills.add("Logical Comparison");
-          } else if (num.includes("2")) {
-            skills.add("Loops & Control Flow");
-            skills.add("Data Collections");
-          } else if (num.includes("3")) {
-            skills.add("Exception Handling");
-            skills.add("Tracebacks");
-          } else if (num.includes("4")) {
-            skills.add("Standard Libraries");
-            skills.add("Third-party APIs");
-          } else if (num.includes("6")) {
-            skills.add("File Operations");
-            skills.add("CSV Read/Write");
-          } else if (num.includes("7")) {
-            skills.add("Regex Validation");
-            skills.add("Text Processing");
-          } else if (num.includes("8")) {
-            skills.add("Classes & Objects");
-            skills.add("Object-Oriented Coding");
-            skills.add("Encapsulation");
-          }
-        } else if (progress.courseSlug === "cs50ai") {
+        if (progress.courseSlug === "cs50ai") {
           skills.add("Search Algorithms");
           skills.add("Graph BFS/DFS");
         }
@@ -303,9 +275,8 @@ export default function ProfilePage() {
     const courseStats: Record<string, { total: number; completed: number; lastDate: Date }> = {};
     
     // Total lectures checklist in standard courses
-    // In our LMS, cs50p has lectures 0-9 (some might not have quizzes or projects, let's look at counts)
+    // Expected lecture counts per course
     const expectedLectures: Record<string, number> = {
-      cs50p: 9,
       cs50ai: 7,
     };
 
@@ -331,7 +302,7 @@ export default function ProfilePage() {
       if (pct >= 0.8 || achievements.includes("course_completed")) {
         certs.push({
           id: `cert_${slug}`,
-          courseTitle: slug === "cs50p" ? "Introduction to Programming with Python" : "Introduction to Artificial Intelligence with Python",
+          courseTitle: "Introduction to Artificial Intelligence with Python",
           courseSlug: slug,
           completedAt: stats.lastDate.getTime() === 0 ? new Date() : stats.lastDate,
           credentialId: `FA-${slug.toUpperCase()}-${Math.floor(100000 + Math.random() * 900000)}`,
@@ -368,7 +339,7 @@ export default function ProfilePage() {
           id: `lect_${p.courseSlug}_${p.lectureId}`,
           type: "lecture",
           title: `Completed Lecture ${p.lectureId}`,
-          subtitle: p.courseSlug === "cs50p" ? "CS50 Introduction to Python" : "CS50 Artificial Intelligence",
+          subtitle: "CS50 Artificial Intelligence",
           date: new Date(p.completedAt),
           xp: 50,
         });
@@ -413,56 +384,38 @@ export default function ProfilePage() {
       return [
         {
           title: "Start Your First Course",
-          description: "Begin CS50 Python Lecture 0: Functions, Variables.",
-          buttonText: "Start CS50P",
-          action: () => navigate("/course/cs50p"),
+          description: "Begin CS50 Artificial Intelligence: Search Algorithms.",
+          buttonText: "Start CS50 AI",
+          action: () => navigate("/course/cs50ai"),
         },
       ];
     }
 
     const nextSteps = [];
 
-    // Check progress of CS50P
-    const cs50pProgress = summary.lectureProgress.filter((p) => p.courseSlug === "cs50p");
-    const completedLectures = cs50pProgress.filter((p) => p.status === "COMPLETED");
-
-    if (completedLectures.length < 9) {
-      // Find the highest lecture completed
-      const completedIds = completedLectures.map((p) => parseInt(p.lectureId)).filter((id) => !isNaN(id));
+    // Check progress of CS50 AI
+    const aiProgress = summary.lectureProgress.filter((p) => p.courseSlug === "cs50ai");
+    if (aiProgress.length === 0) {
+      nextSteps.push({
+        title: "Start CS50 Artificial Intelligence",
+        description: "Explore Search Algorithms, Knowledge Graphs, and Machine Learning models.",
+        buttonText: "Start CS50 AI",
+        action: () => navigate("/course/cs50ai"),
+      });
+    } else {
+      // AI in progress
+      const completedAi = aiProgress.filter((p) => p.status === "COMPLETED");
+      const completedIds = completedAi.map((p) => parseInt(p.lectureId)).filter((id) => !isNaN(id));
       const maxCompleted = completedIds.length > 0 ? Math.max(...completedIds) : -1;
       const nextLectureNum = maxCompleted + 1;
 
-      nextSteps.push({
-        title: `Continue CS50 Python: Lecture ${nextLectureNum}`,
-        description: "Advance your python scripting, debug logic, and take the quiz.",
-        buttonText: "Go to Lecture",
-        action: () => navigate(`/course/cs50p/lecture/${nextLectureNum}`),
-      });
-    } else {
-      // Completed python, suggest AI
-      const aiProgress = summary.lectureProgress.filter((p) => p.courseSlug === "cs50ai");
-      if (aiProgress.length === 0) {
+      if (nextLectureNum < 7) {
         nextSteps.push({
-          title: "Unlock CS50 Artificial Intelligence",
-          description: "Explore Search Algorithms, Knowledge Graphs, and Machine Learning models.",
-          buttonText: "Start CS50 AI",
-          action: () => navigate("/course/cs50ai"),
+          title: `Continue CS50 AI: Lecture ${nextLectureNum}`,
+          description: "Deep dive into state spaces, heuristic algorithms, and search models.",
+          buttonText: "Continue CS50 AI",
+          action: () => navigate(`/course/cs50ai/lecture/${nextLectureNum}`),
         });
-      } else {
-        // AI in progress
-        const completedAi = aiProgress.filter((p) => p.status === "COMPLETED");
-        const completedIds = completedAi.map((p) => parseInt(p.lectureId)).filter((id) => !isNaN(id));
-        const maxCompleted = completedIds.length > 0 ? Math.max(...completedIds) : -1;
-        const nextLectureNum = maxCompleted + 1;
-
-        if (nextLectureNum < 7) {
-          nextSteps.push({
-            title: `Continue CS50 AI: Lecture ${nextLectureNum}`,
-            description: "Deep dive into state spaces, heuristic algorithms, and search models.",
-            buttonText: "Continue CS50 AI",
-            action: () => navigate(`/course/cs50ai/lecture/${nextLectureNum}`),
-          });
-        }
       }
     }
 

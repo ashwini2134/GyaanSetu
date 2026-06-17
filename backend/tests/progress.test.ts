@@ -31,7 +31,7 @@ describe("Progress API", () => {
     const section = await request(app)
       .post("/api/progress/lecture/section")
       .set("Authorization", `Bearer ${token}`)
-      .send({ courseSlug: "cs50p", lectureNumber: 0, sectionId: "overview" });
+      .send({ courseSlug: "cs50ai", lectureNumber: 0, sectionId: "overview" });
 
     expect(section.status).toBe(200);
     expect(section.body.progress.sections.overview.visited).toBe(true);
@@ -39,7 +39,7 @@ describe("Progress API", () => {
     const quiz = await request(app)
       .post("/api/progress/lecture/quiz")
       .set("Authorization", `Bearer ${token}`)
-      .send({ courseSlug: "cs50p", lectureNumber: 0, score: 4, total: 5 });
+      .send({ courseSlug: "cs50ai", lectureNumber: 0, score: 4, total: 5 });
 
     expect(quiz.status).toBe(200);
     expect(quiz.body.passed).toBe(true);
@@ -47,7 +47,7 @@ describe("Progress API", () => {
     const problem = await request(app)
       .post("/api/progress/lecture/problem")
       .set("Authorization", `Bearer ${token}`)
-      .send({ courseSlug: "cs50p", lectureNumber: 0, problemId: "intro_problem" });
+      .send({ courseSlug: "cs50ai", lectureNumber: 0, problemId: "intro_problem" });
 
     expect(problem.status).toBe(200);
     expect(problem.body.progress.problemsCompleted).toContain("intro_problem");
@@ -55,7 +55,7 @@ describe("Progress API", () => {
     const complete = await request(app)
       .post("/api/progress/lecture/complete")
       .set("Authorization", `Bearer ${token}`)
-      .send({ courseSlug: "cs50p", lectureNumber: 0, totalSections: 1, totalProblems: 1, hasQuiz: true });
+      .send({ courseSlug: "cs50ai", lectureNumber: 0, totalSections: 1, totalProblems: 1, hasQuiz: true });
 
     expect(complete.status).toBe(200);
     expect(complete.body.progress.lectureCompleted).toBe(true);

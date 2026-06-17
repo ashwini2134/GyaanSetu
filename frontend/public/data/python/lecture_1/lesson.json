@@ -34,7 +34,7 @@
             "title": "Labeled Storage Box",
             "description": "Each box has a label and holds one item",
             "emoji": "🏷️",
-            "image": "https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=800&q=80"
+            "image": "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=80"
           },
           "visualization": {
             "type": "categories",

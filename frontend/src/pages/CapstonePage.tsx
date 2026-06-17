@@ -1381,7 +1381,7 @@ export default function CapstonePage() {
                   <div className="text-center space-y-6 py-6 font-serif">
                     <span className="text-[10px] uppercase font-bold tracking-[0.25em] text-amber-500">Certificate of Completion</span>
                     <p className="text-[11px] font-sans text-slate-400">This certifies that the user has successfully mastered all curriculum requirements for</p>
-                    <h3 className="text-2xl font-black font-sans text-white uppercase tracking-wider">{slug === 'cs50p' ? 'CS50 Introduction to Python' : 'Advanced Python Programming'}</h3>
+                    <h3 className="text-2xl font-black font-sans text-white uppercase tracking-wider">Advanced Python Programming</h3>
                     
                     <div className="w-16 h-px bg-amber-500/30 mx-auto" />
                     

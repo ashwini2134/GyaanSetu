@@ -44,7 +44,6 @@ LMS/
 │   └── workflows/
 │       └── deploy.yml          # GitHub Actions: build + deploy to gh-pages
 ├── content/                    # Source content (Markdown notes, problem JSON)
-│   ├── cs50p/
 │   └── cs50ai/
 ├── docs/                       # Vite build output — deployed to gh-pages
 │   ├── index.html
@@ -52,11 +51,6 @@ LMS/
 │   ├── assets/                 # Compiled JS + CSS bundles
 │   └── data/                   # Static JSON + Markdown served as API
 │       ├── courses.json
-│       ├── cs50p/
-│       │   ├── lectures.json
-│       │   └── lecture_N/
-│       │       ├── problems.json
-│       │       └── notes.md
 │       └── cs50ai/
 │           ├── lectures.json
 │           └── lecture_N/
@@ -201,23 +195,6 @@ Authentication is entirely client-side.
 ---
 
 ## Courses
-
-### CS50 Python (`cs50p`)
-
-Harvard's Introduction to Programming with Python. Ten weeks covering:
-
-| Week | Topic |
-|---|---|
-| 0 | Functions, Variables |
-| 1 | Conditionals |
-| 2 | Loops |
-| 3 | Exceptions |
-| 4 | Libraries |
-| 5 | Unit Tests |
-| 6 | File I/O |
-| 7 | Regular Expressions |
-| 8 | Object-Oriented Programming |
-| 9 | Et Cetera |
 
 ### CS50 AI (`cs50ai`)
 

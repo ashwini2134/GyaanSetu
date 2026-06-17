@@ -451,13 +451,9 @@ export default function Dashboard() {
                               <div className="flex flex-col gap-4">
                                 <div className="flex flex-col items-center justify-center gap-3">
                                   <div className="relative w-12 h-12 rounded-xl bg-slate-900/60 border border-slate-800/80 flex items-center justify-center flex-shrink-0">
-                                    {c.slug === 'cs50p' ? (
-                                      <span className="font-bold text-sm text-cyan-400">Py</span>
-                                    ) : (
-                                      <span className="text-slate-400">
-                                        <IconCourseCard />
-                                      </span>
-                                    )}
+                                    <span className="text-slate-400">
+                                      <IconCourseCard />
+                                    </span>
                                     {isCourseActive && (
                                       <span className="absolute inset-0 rounded-xl bg-cyan-400/20 animate-ping pointer-events-none" />
                                     )}

@@ -196,7 +196,6 @@ def validate_file(filepath):
 def main():
     base_dirs = [
         "frontend/public/data/python",
-        "frontend/public/data/cs50p",
         "frontend/public/data/cs50ai",
     ]
 
