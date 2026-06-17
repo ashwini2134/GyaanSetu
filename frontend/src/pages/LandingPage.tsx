@@ -600,7 +600,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-slate-900 bg-[#080b11]/80 py-16">
-        <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-5 gap-8 text-left text-xs">
+        <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-7 gap-8 text-left text-xs">
           <div className="col-span-2 space-y-4">
             <div className="flex items-center gap-2.5">
               <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="Fraylon Academy" className="h-7 w-auto object-contain" />
@@ -625,10 +625,16 @@ export default function LandingPage() {
           <div className="space-y-3">
             <h4 className="text-[10px] font-bold uppercase text-white tracking-widest">Courses</h4>
             <div className="flex flex-col gap-2 text-slate-500">
-              <button onClick={() => scrollToSection("paths")} className="text-left hover:text-white transition-colors cursor-pointer">Python</button>
-              <button onClick={() => scrollToSection("paths")} className="text-left hover:text-white transition-colors cursor-pointer">Artificial Intelligence</button>
-              <button onClick={() => scrollToSection("paths")} className="text-left hover:text-white transition-colors cursor-pointer">Web Development</button>
-              <button onClick={() => scrollToSection("paths")} className="text-left hover:text-white transition-colors cursor-pointer">Data Science</button>
+              <button onClick={() => scrollToSection("paths")} className="text-left hover:text-white transition-colors cursor-pointer">Python Programming</button>
+              <button onClick={() => scrollToSection("paths")} className="text-left hover:text-white transition-colors cursor-pointer">AI</button>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <h4 className="text-[10px] font-bold uppercase text-white tracking-widest">Projects</h4>
+            <div className="flex flex-col gap-2 text-slate-500">
+              <button onClick={() => scrollToSection("portfolio")} className="text-left hover:text-white transition-colors cursor-pointer">Capstone Projects</button>
+              <button onClick={() => scrollToSection("portfolio")} className="text-left hover:text-white transition-colors cursor-pointer">Interactive Sandboxes</button>
             </div>
           </div>
 
@@ -637,7 +643,14 @@ export default function LandingPage() {
             <div className="flex flex-col gap-2 text-slate-500">
               <button onClick={() => scrollToSection("community")} className="text-left hover:text-white transition-colors cursor-pointer">Mentorship</button>
               <button onClick={() => scrollToSection("community")} className="text-left hover:text-white transition-colors cursor-pointer">Peer Learning</button>
-              <button onClick={() => scrollToSection("community")} className="text-left hover:text-white transition-colors cursor-pointer">Collaboration</button>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <h4 className="text-[10px] font-bold uppercase text-white tracking-widest">Contact</h4>
+            <div className="flex flex-col gap-2 text-slate-500">
+              <a href="mailto:support@fraylon.academy" className="hover:text-white transition-colors text-left">Support Email</a>
+              <a href="https://github.com" target="_blank" rel="noreferrer" className="hover:text-white transition-colors text-left">GitHub</a>
             </div>
           </div>
         </div>
