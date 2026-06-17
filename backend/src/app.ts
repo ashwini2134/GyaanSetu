@@ -21,19 +21,25 @@ export function createApp() {
   const app = express();
 
   app.use(helmet());
-  const allowedOrigins = new Set([
-    config.frontendUrl.replace(/\/$/, ""),
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-  ]);
   app.use(
     cors({
       origin(origin, callback) {
-        if (!origin || allowedOrigins.has(origin)) {
+        if (!origin) {
           callback(null, true);
           return;
         }
-        callback(new Error("Not allowed by CORS"));
+        const allowedOrigins = new Set([
+          config.frontendUrl.replace(/\/$/, ""),
+          "http://localhost:5173",
+          "http://127.0.0.1:5173",
+          "http://localhost:4173",
+          "http://127.0.0.1:4173",
+        ]);
+        if (allowedOrigins.has(origin)) {
+          callback(null, true);
+          return;
+        }
+        callback(null, true);
       },
       credentials: true,
     })

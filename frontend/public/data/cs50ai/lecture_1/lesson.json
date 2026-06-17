@@ -45,11 +45,11 @@
         },
         {
           "type": "practice",
-          "title": "Practice Exercise",
-          "instructions": "Write a simple Python script demonstrating What is a Search Problem?.",
-          "starterCode": "# Write your code here\n",
-          "solution": "# Example solution\nprint('Done')",
-          "hint": "Start by defining the main function."
+          "title": "Modeling a Search Problem",
+          "instructions": "Model a search problem by defining a graph and identifying the start state, goal state, and valid paths.",
+          "starterCode": "# Define a graph as a dictionary\ngraph = {\n    'A': ['B', 'C'],\n    'B': ['D'],\n    'C': ['D'],\n    'D': []\n}\nstart = 'A'\ngoal = 'D'\n# Print the search problem definition\nprint(f\"Start state: {start}\")\nprint(f\"Goal state: {goal}\")\nprint(f\"Neighbors of A: {graph[start]}\")\nprint(f\"Possible paths: A → B → D or A → C → D\")",
+          "solution": "graph = {'A': ['B', 'C'], 'B': ['D'], 'C': ['D'], 'D': []}\nstart = 'A'\ngoal = 'D'\nprint(f\"Start state: {start}\")\nprint(f\"Goal state: {goal}\")\nprint(f\"Neighbors of A: {graph[start]}\")",
+          "hint": "Every search problem needs: a start state, actions (edges to neighbors), and a goal state."
         }
       ]
     },
@@ -107,11 +107,11 @@
         },
         {
           "type": "practice",
-          "title": "Practice Exercise",
-          "instructions": "Write a simple Python script demonstrating BFS & DFS.",
-          "starterCode": "# Write your code here\n",
-          "solution": "# Example solution\nprint('Done')",
-          "hint": "Start by defining the main function."
+          "title": "Implementing BFS Traversal",
+          "instructions": "Complete the BFS traversal code to visit all nodes level by level.",
+          "starterCode": "# BFS traversal\ngraph = {'A': ['B', 'C'], 'B': ['D'], 'C': ['E'], 'D': [], 'E': []}\nvisited = []\nqueue = ['A']\nwhile queue:\n    node = queue.pop(0)\n    visited.append(node)\n    for neighbor in graph[node]:\n        queue.append(neighbor)\nprint(' → '.join(visited))",
+          "solution": "graph = {'A': ['B', 'C'], 'B': ['D'], 'C': ['E'], 'D': [], 'E': []}\nvisited = []\nqueue = ['A']\nwhile queue:\n    node = queue.pop(0)\n    visited.append(node)\n    for neighbor in graph[node]:\n        queue.append(neighbor)\nprint(' → '.join(visited))",
+          "hint": "BFS uses a queue (FIFO): pop the first item, add all its neighbors to the end."
         }
       ]
     },

@@ -51,11 +51,11 @@
         },
         {
           "type": "practice",
-          "title": "Practice Exercise",
-          "instructions": "Write a simple Python script demonstrating What is a Neural Network.",
-          "starterCode": "# Write your code here\n",
-          "solution": "# Example solution\nprint('Done')",
-          "hint": "Start by defining the main function."
+          "title": "Computing a Neuron Output",
+          "instructions": "Calculate the output of a single neuron: weighted sum + bias, then apply ReLU activation.",
+          "starterCode": "# Single neuron computation\ninputs = [1.0, 0.5, 0.2]\nweights = [0.4, -0.3, 0.1]\nbias = 0.1\noutput = sum(i * w for i, w in zip(inputs, weights)) + bias\nprint(f\"Weighted sum + bias: {output:.2f}\")\nactivated = max(0, output)\nprint(f\"After ReLU: {activated:.2f}\")",
+          "solution": "inputs = [1.0, 0.5, 0.2]\nweights = [0.4, -0.3, 0.1]\nbias = 0.1\noutput = sum(i * w for i, w in zip(inputs, weights)) + bias\nprint(f\"Weighted sum + bias: {output:.2f}\")\nactivated = max(0, output)\nprint(f\"After ReLU: {activated:.2f}\")",
+          "hint": "Each neuron computes: sum(input × weight) + bias, then applies an activation function like ReLU."
         }
       ]
     },
@@ -103,11 +103,11 @@
         },
         {
           "type": "practice",
-          "title": "Practice Exercise",
-          "instructions": "Write a simple Python script demonstrating Deep Learning & CNNs.",
-          "starterCode": "# Write your code here\n",
-          "solution": "# Example solution\nprint('Done')",
-          "hint": "Start by defining the main function."
+          "title": "Applying a Convolution Filter",
+          "instructions": "Apply a 1D convolution filter to detect edges in a signal.",
+          "starterCode": "# Simple 1D convolution\nimage = [0, 1, 0, 1, 0, 1]\nfilter_kernel = [1, -1, 1]\noutput = []\nfor i in range(len(image) - len(filter_kernel) + 1):\n    result = sum(image[i+j] * filter_kernel[j] for j in range(len(filter_kernel)))\n    output.append(result)\nprint(f\"Original: {image}\")\nprint(f\"Filter: {filter_kernel}\")\nprint(f\"Output: {output}\")",
+          "solution": "image = [0, 1, 0, 1, 0, 1]\nfilter_kernel = [1, -1, 1]\noutput = []\nfor i in range(len(image) - len(filter_kernel) + 1):\n    result = sum(image[i+j] * filter_kernel[j] for j in range(len(filter_kernel)))\n    output.append(result)\nprint(f\"Original: {image}\")\nprint(f\"Filter: {filter_kernel}\")\nprint(f\"Output: {output}\")",
+          "hint": "A convolution filter slides over the input, multiplying and summing at each position."
         }
       ]
     },

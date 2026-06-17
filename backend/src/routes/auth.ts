@@ -222,19 +222,25 @@ router.get("/oauth/:provider", (req, res) => {
   try {
     const provider = req.params.provider;
     if (!isOAuthProvider(provider)) {
+      console.warn(`[oauth] Unknown provider requested: ${provider}`);
       oauthErrorRedirect(res, "Unknown OAuth provider");
       return;
     }
+    console.log(`[oauth] Initiating ${provider} OAuth flow`);
     const state = generateSecureToken();
     res.cookie(getOAuthStateCookieName(), state, {
       httpOnly: true,
       secure: !config.isDev,
       sameSite: "lax",
+      path: "/",
       maxAge: 10 * 60 * 1000,
     });
-    res.redirect(buildOAuthAuthorizeUrl(provider, state));
+    const url = buildOAuthAuthorizeUrl(provider, state);
+    console.log(`[oauth] Redirecting to ${provider} authorize URL`);
+    res.redirect(url);
   } catch (err) {
     const message = err instanceof AppError ? err.message : "OAuth failed";
+    console.error(`[oauth] Init failed for ${req.params.provider}:`, message);
     oauthErrorRedirect(res, message);
   }
 });
@@ -243,29 +249,47 @@ router.get("/oauth/:provider/callback", async (req, res) => {
   try {
     const provider = req.params.provider;
     if (!isOAuthProvider(provider)) {
+      console.error(`[oauth] Unknown provider in callback: ${req.params.provider}`);
       throw new AppError("Unknown OAuth provider", 400);
     }
 
     const { code, state, error } = req.query;
-    if (error) throw new AppError(String(error), 400);
-    if (!code || typeof code !== "string") throw new AppError("Missing authorization code", 400);
+    if (error) {
+      console.error(`[oauth] ${provider} returned error:`, error);
+      throw new AppError(String(error), 400);
+    }
+    if (!code || typeof code !== "string") {
+      console.error(`[oauth] Missing authorization code from ${provider}`);
+      throw new AppError("Missing authorization code", 400);
+    }
 
     const savedState = req.cookies?.[getOAuthStateCookieName()] as string | undefined;
-    if (!savedState || savedState !== state) throw new AppError("Invalid OAuth state", 400);
+    if (!savedState || savedState !== state) {
+      console.error(`[oauth] State mismatch for ${provider}: cookie=${savedState?.slice(0, 8)}..., query=${(state as string)?.slice(0, 8)}...`);
+      throw new AppError("Invalid OAuth state", 400);
+    }
+    console.log(`[oauth] ${provider} state validated, exchanging code...`);
 
     const profile = await exchangeOAuthCode(provider, code);
+    console.log(`[oauth] ${provider} profile: providerUserId=${profile.providerUserId.slice(0, 12)}..., email=${profile.email}`);
+
     const user = await findOrCreateOAuthUser({
       provider,
       providerUserId: profile.providerUserId,
       email: profile.email,
       name: profile.name,
     });
+    console.log(`[oauth] ${provider} user: id=${user.id}, email=${user.email}`);
 
+    res.clearCookie(getOAuthStateCookieName(), { path: "/", httpOnly: true });
     const exchangeCode = await createOAuthExchangeCode(user.id);
-    res.redirect(`${config.frontendUrl}/#/auth/oauth?code=${exchangeCode}`);
+    const redirectUrl = `${config.frontendUrl}/#/auth/oauth?code=${exchangeCode}`;
+    console.log(`[oauth] Redirecting to frontend with exchange code`);
+    res.redirect(redirectUrl);
   } catch (err) {
     const message =
       err instanceof AppError ? err.message : err instanceof Error ? err.message : "OAuth failed";
+    console.error(`[oauth] ${req.params.provider} callback error:`, message);
     oauthErrorRedirect(res, message);
   }
 });
@@ -273,13 +297,21 @@ router.get("/oauth/:provider/callback", async (req, res) => {
 router.post("/oauth/exchange", authLimiter, async (req, res, next) => {
   try {
     const code = z.string().min(1).parse(req.body?.code);
+    console.log(`[oauth] Exchanging OAuth code for tokens`);
     const userId = await consumeOAuthExchangeCode(code);
-    if (!userId) throw new AppError("Invalid or expired OAuth code", 400);
+    if (!userId) {
+      console.warn(`[oauth] Invalid or expired exchange code`);
+      throw new AppError("Invalid or expired OAuth code", 400);
+    }
     
     const user = await findUserById(userId);
-    if (!user) throw new AppError("User not found", 400);
+    if (!user) {
+      console.error(`[oauth] User not found for id=${userId}`);
+      throw new AppError("User not found", 400);
+    }
 
     const tokens = await issueAuthTokens(user);
+    console.log(`[oauth] Tokens issued for user ${user.email}`);
     res.json({ ...tokenResponse(res, tokens), user });
   } catch (err) {
     next(err instanceof z.ZodError ? new AppError("Invalid code") : err);

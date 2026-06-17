@@ -49,11 +49,11 @@
         },
         {
           "type": "practice",
-          "title": "Practice Exercise",
-          "instructions": "Write a simple Python script demonstrating Propositional Logic.",
-          "starterCode": "# Write your code here\n",
-          "solution": "# Example solution\nprint('Done')",
-          "hint": "Start by defining the main function."
+          "title": "Evaluating Logic Expressions",
+          "instructions": "Run the code to see how AND, OR, and NOT evaluate different logical expressions.",
+          "starterCode": "# Evaluate these logic expressions\nprint(\"True and True:\", True and True)\nprint(\"True and False:\", True and False)\nprint(\"True or False:\", True or False)\nprint(\"not True:\", not True)\nprint(\"(True or False) and not False:\", (True or False) and not False)",
+          "solution": "print(\"True and True:\", True and True)\nprint(\"True and False:\", True and False)\nprint(\"True or False:\", True or False)\nprint(\"not True:\", not True)\nprint(\"(True or False) and not False:\", (True or False) and not False)",
+          "hint": "AND needs both True, OR needs at least one True, NOT flips the value."
         }
       ]
     },
@@ -99,11 +99,11 @@
         },
         {
           "type": "practice",
-          "title": "Practice Exercise",
-          "instructions": "Write a simple Python script demonstrating Knowledge Base & Inference.",
-          "starterCode": "# Write your code here\n",
-          "solution": "# Example solution\nprint('Done')",
-          "hint": "Start by defining the main function."
+          "title": "Building a Knowledge Base",
+          "instructions": "Build a knowledge base with facts and use inference rules to derive new facts.",
+          "starterCode": "# Build a knowledge base with inference\nfacts = {\"has_wings\": True, \"is_bird\": True}\n# Rule: if has_wings AND is_bird THEN can_fly\nif facts[\"has_wings\"] and facts[\"is_bird\"]:\n    facts[\"can_fly\"] = True\n    print(\"Inferred: can_fly\")\nprint(f\"Facts: {facts}\")",
+          "solution": "facts = {\"has_wings\": True, \"is_bird\": True}\nif facts[\"has_wings\"] and facts[\"is_bird\"]:\n    facts[\"can_fly\"] = True\n    print(\"Inferred: can_fly\")\nprint(f\"Facts: {facts}\")",
+          "hint": "A Knowledge Base stores facts. Inference applies logical rules to derive new facts."
         }
       ]
     },

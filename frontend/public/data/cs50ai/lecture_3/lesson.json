@@ -49,11 +49,11 @@
         },
         {
           "type": "practice",
-          "title": "Practice Exercise",
-          "instructions": "Write a simple Python script demonstrating Probability Basics.",
-          "starterCode": "# Write your code here\n",
-          "solution": "# Example solution\nprint('Done')",
-          "hint": "Start by defining the main function."
+          "title": "Calculating Simple Probabilities",
+          "instructions": "Calculate probabilities for coin flips and dice rolls.",
+          "starterCode": "# Calculate simple probabilities\np_head = 1 / 2\nprint(f\"P(Heads) = {p_head}\")\np_six = 1 / 6\nprint(f\"P(Rolling 6) = {p_six:.2f}\")\np_even = 3 / 6\nprint(f\"P(Even on die) = {p_even:.2f}\")",
+          "solution": "p_head = 1 / 2\nprint(f\"P(Heads) = {p_head}\")\np_six = 1 / 6\nprint(f\"P(Rolling 6) = {p_six:.2f}\")\np_even = 3 / 6\nprint(f\"P(Even on die) = {p_even:.2f}\")",
+          "hint": "Probability = number of favorable outcomes / total possible outcomes."
         }
       ]
     },
@@ -99,11 +99,11 @@
         },
         {
           "type": "practice",
-          "title": "Practice Exercise",
-          "instructions": "Write a simple Python script demonstrating Conditional Probability & Bayes Theorem.",
-          "starterCode": "# Write your code here\n",
-          "solution": "# Example solution\nprint('Done')",
-          "hint": "Start by defining the main function."
+          "title": "Applying Bayes Theorem",
+          "instructions": "Use Bayes Theorem to calculate the probability an email is spam given it contains the word 'free'.",
+          "starterCode": "# Bayes Theorem: spam detection\nprior = 0.4       # P(spam) = 40% of emails are spam\nlikelihood = 0.9  # P('free' | spam) = 90% of spam has 'free'\nevidence = 0.5    # P('free') = 50% of all emails have 'free'\nposterior = (prior * likelihood) / evidence\nprint(f\"P(spam | contains 'free') = {posterior:.0%}\")",
+          "solution": "prior = 0.4\nlikelihood = 0.9\nevidence = 0.5\nposterior = (prior * likelihood) / evidence\nprint(f\"P(spam | 'free') = {posterior:.0%}\")",
+          "hint": "Bayes Theorem: posterior = (prior × likelihood) / evidence."
         }
       ]
     },

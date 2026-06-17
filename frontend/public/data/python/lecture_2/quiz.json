@@ -22,15 +22,15 @@
     "explanation": "input() pauses the program and waits for user input. It returns whatever the user typed as a string."
   },
   {
-    "question": "What is the output of print(2 + 3 * 4)?",
+    "question": "What will the following code print?\n\nname = \"Alice\"\nage = 20\nprint(f\"{name} is {age} years old\")",
     "options": [
-      "20",
-      "14",
-      "24",
-      "9"
+      "{name} is {age} years old",
+      "Alice is 20 years old",
+      "name is age years old",
+      "Error"
     ],
-    "answer": "14",
-    "explanation": "PEMDAS: multiplication first. 3 * 4 = 12, then 2 + 12 = 14."
+    "answer": "Alice is 20 years old",
+    "explanation": "f-strings substitute variables inside {} with their values. name becomes \"Alice\" and age becomes 20."
   },
   {
     "question": "Which f-string produces 'My name is Alice'?",
