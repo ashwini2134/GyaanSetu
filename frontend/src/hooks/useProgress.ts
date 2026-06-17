@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { LectureProgress, SectionProgress } from '../types/lesson';
 import { getToken } from '../authClient';
 
@@ -79,10 +79,6 @@ function readSnapshot(key: string | null): LectureProgress | null {
   return value;
 }
 
-function invalidateSnapshotCache() {
-  _snapCache.clear();
-}
-
 // ── Check if lecture should be auto-completed ────────────────────────────
 function checkLectureCompletion(
   courseSlug: string,
@@ -90,6 +86,7 @@ function checkLectureCompletion(
   totalSections: number,
   totalProblems: number,
   hasQuiz: boolean,
+  hasProject?: boolean,
 ) {
   const all = readCache();
   const key = progressKey(courseSlug, lectureNumber);
@@ -101,9 +98,10 @@ function checkLectureCompletion(
   const allSectionsVisited = sectionsVisited >= totalSections;
   const quizDone = !hasQuiz || prev.quizCompleted;
   const problemsDone = prev.problemsCompleted.length >= totalProblems;
+  const projectDone = !hasProject || !!prev.projectCompleted;
   const summaryReached = prev.lastSection === 'summary';
 
-  if (allSectionsVisited && quizDone && problemsDone && summaryReached) {
+  if (allSectionsVisited && quizDone && problemsDone && projectDone && summaryReached) {
     all[key] = { ...prev, lectureCompleted: true, handsOnTaskCompleted: true };
     writeCache(all);
   }
@@ -256,9 +254,7 @@ export function useProgress(courseSlug: string | undefined, lectureNumber: numbe
   }, [updateProgress, courseSlug, lectureNumber]);
 
   // Auto-check lecture completion
-  const totalSections = 0; // will be passed externally
-  const totalProblems = 0;
-  const hasQuiz = false;
+
 
   const visitedSections = useMemo(
     () => Object.values(progress.sections).filter(s => s.visited).length,
@@ -363,6 +359,7 @@ export function tryAutoCompleteLecture(
   totalSections: number,
   totalProblems: number,
   hasQuiz: boolean,
+  hasProject?: boolean,
 ) {
-  checkLectureCompletion(courseSlug, lectureNumber, totalSections, totalProblems, hasQuiz);
+  checkLectureCompletion(courseSlug, lectureNumber, totalSections, totalProblems, hasQuiz, hasProject);
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import type { CodingProblem } from '../../types/lesson';
 import CodeEditor from './CodeEditor';
 import { runPython } from '../../utils/pythonRunner';
@@ -92,7 +92,6 @@ export default function ProblemCard({ problem, index, completed, onComplete, isO
   const [tab, setTab] = useState<'description' | 'hints'>('description');
   const [testResults, setTestResults] = useState<TestResult[] | null>(null);
   const [allPassed, setAllPassed] = useState(completed ?? false);
-  const [submitting, setSubmitting] = useState(false);
   const [showCompletion, setShowCompletion] = useState(false);
 
   // Run-only state (separate from submission)
@@ -105,10 +104,8 @@ export default function ProblemCard({ problem, index, completed, onComplete, isO
   useEffect(() => {
     async function loadDraft() {
       try {
-        const res = await authFetch(`/api/drafts/${problem.id}?type=problem`);
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data.code) setSavedCode(data.code);
+        const data = await authFetch<{ code?: string }>(`/api/drafts/${problem.id}?type=problem`);
+        if (data && data.code) setSavedCode(data.code);
       } catch (err) {
         console.error('Failed to load problem draft', err);
       }
@@ -137,7 +134,7 @@ export default function ProblemCard({ problem, index, completed, onComplete, isO
   };
 
   // Run — just execute, show output, no test cases
-  const handleRun = (code: string, output: string, error: string | null) => {
+  const handleRun = (_code: string, output: string, error: string | null) => {
     setRunOutput(output);
     setRunError(error);
     // Clear any previous submission results when running new code
@@ -151,7 +148,6 @@ export default function ProblemCard({ problem, index, completed, onComplete, isO
       completeProblem();
       return;
     }
-    setSubmitting(true);
     setTestResults(null);
     setRunOutput(null);
     setRunError(null);
@@ -177,7 +173,6 @@ export default function ProblemCard({ problem, index, completed, onComplete, isO
       if (results.every(r => r.passed)) {
         completeProblem();
       }
-      setSubmitting(false);
     }, 100);
   };
 

@@ -36,7 +36,7 @@ function pageLabel(page: Page, sections: Array<{ label: string }>): string {
 
 type PageStatus = 'completed' | 'current' | 'upcoming';
 
-function LockedLectureView({ slug, lectureNumber, courseTitle }: { slug: string; lectureNumber: number; courseTitle: string }) {
+function LockedLectureView({ slug, lectureNumber, courseTitle: _courseTitle }: { slug: string; lectureNumber: number; courseTitle: string }) {
   const navigate = useNavigate();
   const prevLecture = lectureNumber > 0 ? lectureNumber - 1 : null;
 
@@ -79,7 +79,6 @@ function LegacyLecturePage({ slug, lectureNumber }: { slug: string; lectureNumbe
   const navigate = useNavigate();
   const [content, setContent] = useState('');
   const courseTitle = slug === 'cs50p' ? 'CS50 Python' : slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
-  const [retakingQuiz, setRetakingQuiz] = useState(false);
 
   useEffect(() => {
     const base = import.meta.env.BASE_URL ?? '/';
@@ -141,8 +140,13 @@ export default function LecturePage() {
     if (!slug) return;
     api.courseLectures(slug).then(lectures => {
       setAllLectures(lectures.map(l => ({ number: l.number, title: l.title })));
+      // Redirect to capstone page for the last lecture
+      const last = lectures[lectures.length - 1];
+      if (last && lectureNumber >= last.number) {
+        navigate(`/course/${slug}/capstone`, { replace: true });
+      }
     }).catch(() => {});
-  }, [slug]);
+  }, [slug, lectureNumber, navigate]);
 
   // Derive unlock status from stored progress (no state needed — avoids loops)
   const unlocked = useMemo(() => {
@@ -256,7 +260,7 @@ export default function LecturePage() {
       let isVisited = false;
       if (id === 'quiz') isVisited = progress.quizCompleted;
       else if (id === 'problems') isVisited = progress.problemsCompleted.length > 0;
-      else if (id === 'project') isVisited = progress.projectCompleted;
+      else if (id === 'project') isVisited = !!progress.projectCompleted;
       else if (id === 'summary') isVisited = progress.lectureCompleted;
       else isVisited = !!progress.sections[id]?.visited;
 
@@ -290,7 +294,6 @@ export default function LecturePage() {
 
   if (!lessonData) return null;
 
-  const prevLecture = allLectures.find(l => l.number === lectureNumber - 1);
   const nextLecture = allLectures.find(l => l.number === lectureNumber + 1);
   const courseTitle = slug === 'cs50p' ? 'CS50 Python' : slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
   const quiz = lessonData.quiz ?? [];
@@ -355,7 +358,6 @@ export default function LecturePage() {
               const label = pageLabel(page, lessonData.sections);
 
               const projectInProgress = id === 'project' && !progress.projectCompleted;
-
               return (
                 <button
                   key={id}
@@ -374,7 +376,7 @@ export default function LecturePage() {
                       <span className="w-2 h-2 rounded-full bg-blue-400 ring-1 ring-blue-400/50" />
                     ) : status === 'current' ? (
                       <span className="w-2 h-2 rounded-full bg-blue-400" />
-                    ) : progress.sections[id]?.visited ? (
+                    ) : progress.sections[id]?.visited || status === 'completed' ? (
                       <CheckCircle size={14} className="text-green-400" />
                     ) : (
                       <span className="w-2 h-2 rounded-full bg-slate-600" />
@@ -530,8 +532,7 @@ export default function LecturePage() {
                               isOpen={openSimilarIndex === i}
                               onOpenChange={(isOpen) => setOpenSimilarIndex(isOpen ? i : -1)}
                               completed={progress.problemsCompleted.includes(problem.id)}
-                              onComplete={(id) => {
-                                markProblemCompleted(id);
+                              onComplete={() => {
                                 if (i + 1 < similarProblems.length) {
                                   setTimeout(() => setOpenSimilarIndex(i + 1), 1500);
                                 }
@@ -643,7 +644,6 @@ export default function LecturePage() {
                 </div>
               </section>
             )}
-
             {showAllCompleted && (
               <div className="fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-300">
                 <div className="max-w-md w-full mx-4 p-8 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-emerald-500/30 text-center space-y-6 animate-in zoom-in duration-500">

@@ -292,5 +292,4 @@ router.post("/action", requireAuth, async (req: AuthenticatedRequest, res, next)
     next(error);
   }
 });
-
 export default router;

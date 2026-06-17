@@ -20,6 +20,7 @@ model User {
   lastActiveAt        DateTime             @default(now())
   emailVerified       Boolean              @default(false)
   role                String               @default("student")
+  bio                 String               @default("")
   statsData           Json?
   overallProgress     Int                  @default(0)
   updatedAt           DateTime             @updatedAt

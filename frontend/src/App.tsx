@@ -63,6 +63,10 @@ const ProfilePage = lazy(
 >>>>>>> Stashed changes
 );
 
+const ProfilePage = lazy(
+  () => import("./pages/ProfilePage")
+);
+
 // Loading Spinner
 function LoadingSpinner() {
 
@@ -132,7 +136,7 @@ function RequireAuth({
   return <>{children}</>;
 }
 
-function RequireRole({
+export function RequireRole({
   roles,
   children,
 }: {

@@ -1,0 +1,871 @@
+{
+  "id": "cs50p-lecture-1",
+  "courseSlug": "cs50p",
+  "number": 1,
+  "title": "Conditionals",
+  "overview": "Learn about the core concepts of this week's lecture.",
+  "estimatedMinutes": 45,
+  "sections": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Introduction to Conditionals",
+          "body": "Learn about the core concepts of this week's lecture.",
+          "bullets": [
+            "Understand the main principles of Conditionals",
+            "Learn through real-world visual analogies",
+            "Practice code examples interactively",
+            "Reinforce your knowledge with reflection checks"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "conditionals",
+      "label": "Conditionals",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Conditionals",
+          "body": "",
+          "bullets": [
+            "Conditionals allow you, the programmer, to allow your program to make decisions: as if your program has the choice between taking the left-hand road or the right-hand road based upon certain conditions.",
+            "Built within Python are a set of \"operators\" that are used to ask mathematical questions.",
+            "`>` and `<` symbols are probably quite familiar to you.",
+            "`>=` denotes \"greater than or equal to.\"",
+            "`<=` denotes \"less than or equal to.\"",
+            "`==` denotes \"equals\" — do notice the double equal sign! A single equal sign would assign a value. Double equal signs are used to compare variables.",
+            "`!=` denotes \"not equal to.\"",
+            "Conditional statements compare a left-hand term to a right-hand term."
+          ]
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Conditionals as A Traffic Light",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Traffic Light",
+            "description": "Green light means GO (True), Red light means STOP (False). The condition determines which path your code takes.",
+            "image": "https://images.unsplash.com/photo-1557404763-69708cd8b9ce?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "decision",
+            "condition": "x < y",
+            "trueLabel": "x is less",
+            "falseLabel": "x is not less",
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "if x < y:\n    print('x is less')\nelse:\n    print('x is not less')",
+            "language": "python",
+            "output": "x is less"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Does an if-else statement always execute exactly one branch?",
+          "answer": "Yes! If the condition is True, the 'if' branch runs. If False, the 'else' branch runs. They never run together."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Conditionals",
+          "instructions": "Write a simple Python script implementing or demonstrating Conditionals.",
+          "starterCode": "# Practice Conditionals\n# Write your code below\n",
+          "solution": "if x < y:\n    print('x is less')\nelse:\n    print('x is not less')",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "if-statements",
+      "label": "if Statements",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "if Statements",
+          "body": "",
+          "bullets": [
+            "In your terminal window, type `code compare.py`. In the text editor window, begin with the following:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "if Statements Example",
+          "language": "python",
+          "code": "x = int(input(\"What's x? \"))\ny = int(input(\"What's y? \"))\n\nif x < y:\n    print(\"x is less than y\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "if Statements",
+          "body": "  Your program takes the input of the user for both x and y, casting them as integers. Then, the `if` statement compares x and y. If the condition `x < y` is met, the `print` statement is executed.",
+          "bullets": [
+            "`if` statements use `bool` or boolean values (true or false) to decide whether or not to execute."
+          ]
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of if Statements as A Traffic Light",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Traffic Light",
+            "description": "Green light means GO (True), Red light means STOP (False). The condition determines which path your code takes.",
+            "image": "https://images.unsplash.com/photo-1557404763-69708cd8b9ce?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "decision",
+            "condition": "x < y",
+            "trueLabel": "x is less",
+            "falseLabel": "x is not less",
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "if x < y:\n    print('x is less')\nelse:\n    print('x is not less')",
+            "language": "python",
+            "output": "x is less"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Does an if-else statement always execute exactly one branch?",
+          "answer": "Yes! If the condition is True, the 'if' branch runs. If False, the 'else' branch runs. They never run together."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with if Statements",
+          "instructions": "Write a simple Python script implementing or demonstrating if Statements.",
+          "starterCode": "# Practice if Statements\n# Write your code below\n",
+          "solution": "if x < y:\n    print('x is less')\nelse:\n    print('x is not less')",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "control-flow-elif-and-else",
+      "label": "Control Flow, elif, and else",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Control Flow, elif, and else",
+          "body": "",
+          "bullets": [
+            "Further revise your code as follows:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Control Flow, elif, and else Example",
+          "language": "python",
+          "code": "x = int(input(\"What's x? \"))\ny = int(input(\"What's y? \"))\n\nif x < y:\n    print(\"x is less than y\")\nif x > y:\n    print(\"x is greater than y\")\nif x == y:\n    print(\"x is equal to y\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Control Flow, elif, and else",
+          "body": "  This flow of decisions is called \"control flow.\"",
+          "bullets": [
+            "This program can be improved by not asking three consecutive questions. After all, not all three questions can have an outcome of `true`:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Control Flow, elif, and else Example",
+          "language": "python",
+          "code": "x = int(input(\"What's x? \"))\ny = int(input(\"What's y? \"))\n\nif x < y:\n    print(\"x is less than y\")\nelif x > y:\n    print(\"x is greater than y\")\nelif x == y:\n    print(\"x is equal to y\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Control Flow, elif, and else",
+          "body": "  The use of `elif` allows the program to make fewer decisions.",
+          "bullets": [
+            "We can create a \"catch-all\" default outcome using an `else` statement:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Control Flow, elif, and else Example",
+          "language": "python",
+          "code": "x = int(input(\"What's x? \"))\ny = int(input(\"What's y? \"))\n\nif x < y:\n    print(\"x is less than y\")\nelif x > y:\n    print(\"x is greater than y\")\nelse:\n    print(\"x is equal to y\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Control Flow, elif, and else as A Traffic Light",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Traffic Light",
+            "description": "Green light means GO (True), Red light means STOP (False). The condition determines which path your code takes.",
+            "image": "https://images.unsplash.com/photo-1557404763-69708cd8b9ce?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "decision",
+            "condition": "x < y",
+            "trueLabel": "x is less",
+            "falseLabel": "x is not less",
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "if x < y:\n    print('x is less')\nelse:\n    print('x is not less')",
+            "language": "python",
+            "output": "x is less"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Does an if-else statement always execute exactly one branch?",
+          "answer": "Yes! If the condition is True, the 'if' branch runs. If False, the 'else' branch runs. They never run together."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Control Flow, elif, and else",
+          "instructions": "Write a simple Python script implementing or demonstrating Control Flow, elif, and else.",
+          "starterCode": "# Practice Control Flow, elif, and else\n# Write your code below\n",
+          "solution": "if x < y:\n    print('x is less')\nelse:\n    print('x is not less')",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "or",
+      "label": "or",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "or",
+          "body": "",
+          "bullets": [
+            "`or` allows your program to decide between one or more alternatives:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "or Example",
+          "language": "python",
+          "code": "x = int(input(\"What's x? \"))\ny = int(input(\"What's y? \"))\n\nif x < y or x > y:\n    print(\"x is not equal to y\")\nelse:\n    print(\"x is equal to y\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "or",
+          "body": "",
+          "bullets": [
+            "We could further edit our code to ask one and only one question:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "or Example",
+          "language": "python",
+          "code": "x = int(input(\"What's x? \"))\ny = int(input(\"What's y? \"))\n\nif x != y:\n    print(\"x is not equal to y\")\nelse:\n    print(\"x is equal to y\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "or",
+          "body": "",
+          "bullets": [
+            "For the purpose of illustration:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "or Example",
+          "language": "python",
+          "code": "x = int(input(\"What's x? \"))\ny = int(input(\"What's y? \"))\n\nif x == y:\n    print(\"x is equal to y\")\nelse:\n    print(\"x is not equal to y\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "or",
+          "body": "  Notice that the `==` operator evaluates if what is on the left and right are equal to one another. The use of double equal signs is very important."
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of or as A Traffic Light",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Traffic Light",
+            "description": "Green light means GO (True), Red light means STOP (False). The condition determines which path your code takes.",
+            "image": "https://images.unsplash.com/photo-1557404763-69708cd8b9ce?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "decision",
+            "condition": "x < y",
+            "trueLabel": "x is less",
+            "falseLabel": "x is not less",
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "if x < y:\n    print('x is less')\nelse:\n    print('x is not less')",
+            "language": "python",
+            "output": "x is less"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Does an if-else statement always execute exactly one branch?",
+          "answer": "Yes! If the condition is True, the 'if' branch runs. If False, the 'else' branch runs. They never run together."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with or",
+          "instructions": "Write a simple Python script implementing or demonstrating or.",
+          "starterCode": "# Practice or\n# Write your code below\n",
+          "solution": "if x < y:\n    print('x is less')\nelse:\n    print('x is not less')",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "and",
+      "label": "and",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "and",
+          "body": "",
+          "bullets": [
+            "Similar to `or`, `and` can be used within conditional statements.",
+            "Execute in the terminal window `code grade.py`. Start your new program as follows:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "and Example",
+          "language": "python",
+          "code": "score = int(input(\"Score: \"))\n\nif score >= 90 and score <= 100:\n    print(\"Grade: A\")\nelif score >= 80 and score < 90:\n    print(\"Grade: B\")\nelif score >= 70 and score < 80:\n    print(\"Grade: C\")\nelif score >= 60 and score < 70:\n    print(\"Grade: D\")\nelse:\n    print(\"Grade: F\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "and",
+          "body": "",
+          "bullets": [
+            "Python allows you to chain together the operators and conditions in a way quite uncommon to other programming languages:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "and Example",
+          "language": "python",
+          "code": "score = int(input(\"Score: \"))\n\nif 90 <= score <= 100:\n    print(\"Grade: A\")\nelif 80 <= score < 90:\n    print(\"Grade: B\")\nelif 70 <= score < 80:\n    print(\"Grade: C\")\nelif 60 <= score < 70:\n    print(\"Grade: D\")\nelse:\n    print(\"Grade: F\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "and",
+          "body": "",
+          "bullets": [
+            "Still, we can further improve our program by asking fewer questions:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "and Example",
+          "language": "python",
+          "code": "score = int(input(\"Score: \"))\n\nif score >= 90:\n    print(\"Grade: A\")\nelif score >= 80:\n    print(\"Grade: B\")\nelif score >= 70:\n    print(\"Grade: C\")\nelif score >= 60:\n    print(\"Grade: D\")\nelse:\n    print(\"Grade: F\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "and",
+          "body": "",
+          "bullets": [
+            "You can learn more in Python's documentation on [control flow](https://docs.python.org/3/tutorial/controlflow.html)."
+          ]
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of and as A Traffic Light",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Traffic Light",
+            "description": "Green light means GO (True), Red light means STOP (False). The condition determines which path your code takes.",
+            "image": "https://images.unsplash.com/photo-1557404763-69708cd8b9ce?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "decision",
+            "condition": "x < y",
+            "trueLabel": "x is less",
+            "falseLabel": "x is not less",
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "if x < y:\n    print('x is less')\nelse:\n    print('x is not less')",
+            "language": "python",
+            "output": "x is less"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Does an if-else statement always execute exactly one branch?",
+          "answer": "Yes! If the condition is True, the 'if' branch runs. If False, the 'else' branch runs. They never run together."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with and",
+          "instructions": "Write a simple Python script implementing or demonstrating and.",
+          "starterCode": "# Practice and\n# Write your code below\n",
+          "solution": "if x < y:\n    print('x is less')\nelse:\n    print('x is not less')",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "modulo",
+      "label": "Modulo",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Modulo",
+          "body": "",
+          "bullets": [
+            "In mathematics, parity refers to whether a number is either even or odd.",
+            "The modulo `%` operator in programming allows one to see if two numbers divide evenly or divide and have a remainder.",
+            "For example, `4 % 2` would result in zero, because it evenly divides. However, `3 % 2` does not divide evenly and would result in a number other than zero."
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Modulo Example",
+          "language": "python",
+          "code": "x = int(input(\"What's x? \"))\n\nif x % 2 == 0:\n    print(\"Even\")\nelse:\n    print(\"Odd\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Modulo as A Traffic Light",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Traffic Light",
+            "description": "Green light means GO (True), Red light means STOP (False). The condition determines which path your code takes.",
+            "image": "https://images.unsplash.com/photo-1557404763-69708cd8b9ce?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "decision",
+            "condition": "x < y",
+            "trueLabel": "x is less",
+            "falseLabel": "x is not less",
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "if x < y:\n    print('x is less')\nelse:\n    print('x is not less')",
+            "language": "python",
+            "output": "x is less"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Does an if-else statement always execute exactly one branch?",
+          "answer": "Yes! If the condition is True, the 'if' branch runs. If False, the 'else' branch runs. They never run together."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Modulo",
+          "instructions": "Write a simple Python script implementing or demonstrating Modulo.",
+          "starterCode": "# Practice Modulo\n# Write your code below\n",
+          "solution": "if x < y:\n    print('x is less')\nelse:\n    print('x is not less')",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "creating-our-own-parity-function",
+      "label": "Creating Our Own Parity Function",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Creating Our Own Parity Function",
+          "body": "",
+          "bullets": [
+            "We can create our own function to check whether a number is even or odd:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Creating Our Own Parity Function Example",
+          "language": "python",
+          "code": "def main():\n    x = int(input(\"What's x? \"))\n    if is_even(x):\n        print(\"Even\")\n    else:\n        print(\"Odd\")\n\n\ndef is_even(n):\n    if n % 2 == 0:\n        return True\n    else:\n        return False\n\n\nmain()",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Creating Our Own Parity Function",
+          "body": "  Our function returns a `bool` (true or false) back to the main function. The `if` statement simply evaluates whether or not `is_even` of `x` is true or false."
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Creating Our Own Parity Function as A Traffic Light",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Traffic Light",
+            "description": "Green light means GO (True), Red light means STOP (False). The condition determines which path your code takes.",
+            "image": "https://images.unsplash.com/photo-1557404763-69708cd8b9ce?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "decision",
+            "condition": "x < y",
+            "trueLabel": "x is less",
+            "falseLabel": "x is not less",
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "if x < y:\n    print('x is less')\nelse:\n    print('x is not less')",
+            "language": "python",
+            "output": "x is less"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Does an if-else statement always execute exactly one branch?",
+          "answer": "Yes! If the condition is True, the 'if' branch runs. If False, the 'else' branch runs. They never run together."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Creating Our Own Parity Function",
+          "instructions": "Write a simple Python script implementing or demonstrating Creating Our Own Parity Function.",
+          "starterCode": "# Practice Creating Our Own Parity Function\n# Write your code below\n",
+          "solution": "if x < y:\n    print('x is less')\nelse:\n    print('x is not less')",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "pythonic",
+      "label": "Pythonic",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Pythonic",
+          "body": "",
+          "bullets": [
+            "There are ways to program that are sometimes only seen in Python programming. Consider the following revision:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Pythonic Example",
+          "language": "python",
+          "code": "def main():\n    x = int(input(\"What's x? \"))\n    if is_even(x):\n        print(\"Even\")\n    else:\n        print(\"Odd\")\n\n\ndef is_even(n):\n    return True if n % 2 == 0 else False\n\n\nmain()",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Pythonic",
+          "body": "",
+          "bullets": [
+            "We can further revise our code and make it more and more readable:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Pythonic Example",
+          "language": "python",
+          "code": "def main():\n    x = int(input(\"What's x? \"))\n    if is_even(x):\n        print(\"Even\")\n    else:\n        print(\"Odd\")\n\n\ndef is_even(n):\n    return n % 2 == 0\n\n\nmain()",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Pythonic as A Traffic Light",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Traffic Light",
+            "description": "Green light means GO (True), Red light means STOP (False). The condition determines which path your code takes.",
+            "image": "https://images.unsplash.com/photo-1557404763-69708cd8b9ce?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "decision",
+            "condition": "x < y",
+            "trueLabel": "x is less",
+            "falseLabel": "x is not less",
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "if x < y:\n    print('x is less')\nelse:\n    print('x is not less')",
+            "language": "python",
+            "output": "x is less"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Does an if-else statement always execute exactly one branch?",
+          "answer": "Yes! If the condition is True, the 'if' branch runs. If False, the 'else' branch runs. They never run together."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Pythonic",
+          "instructions": "Write a simple Python script implementing or demonstrating Pythonic.",
+          "starterCode": "# Practice Pythonic\n# Write your code below\n",
+          "solution": "if x < y:\n    print('x is less')\nelse:\n    print('x is not less')",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "match",
+      "label": "match",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "match",
+          "body": "",
+          "bullets": [
+            "Similar to `if`, `elif`, and `else` statements, `match` statements can be used to conditionally run code that matches certain values.",
+            "Consider the following program:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "match Example",
+          "language": "python",
+          "code": "name = input(\"What's your name? \")\n\nif name == \"Harry\":\n    print(\"Gryffindor\")\nelif name == \"Hermione\":\n    print(\"Gryffindor\")\nelif name == \"Ron\":\n    print(\"Gryffindor\")\nelif name == \"Draco\":\n    print(\"Slytherin\")\nelse:\n    print(\"Who?\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "match",
+          "body": "",
+          "bullets": [
+            "We can improve this code slightly with the use of the `or` keyword:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "match Example",
+          "language": "python",
+          "code": "name = input(\"What's your name? \")\n\nif name == \"Harry\" or name == \"Hermione\" or name == \"Ron\":\n    print(\"Gryffindor\")\nelif name == \"Draco\":\n    print(\"Slytherin\")\nelse:\n    print(\"Who?\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "match",
+          "body": "",
+          "bullets": [
+            "Alternatively, we can use `match` statements to map names to houses:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "match Example",
+          "language": "python",
+          "code": "name = input(\"What's your name? \")\n\nmatch name:\n    case \"Harry\":\n        print(\"Gryffindor\")\n    case \"Hermione\":\n        print(\"Gryffindor\")\n    case \"Ron\":\n        print(\"Gryffindor\")\n    case \"Draco\":\n        print(\"Slytherin\")\n    case _:\n        print(\"Who?\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "match",
+          "body": "  The `_` symbol in the last case will match with any input, resulting in similar behavior as an `else` statement.",
+          "bullets": [
+            "We can improve the code using the single vertical bar `|`, which (much like the `or` keyword) allows us to check for multiple values in the same `case` statement:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "match Example",
+          "language": "python",
+          "code": "name = input(\"What's your name? \")\n\nmatch name:\n    case \"Harry\" | \"Hermione\" | \"Ron\":\n        print(\"Gryffindor\")\n    case \"Draco\":\n        print(\"Slytherin\")\n    case _:\n        print(\"Who?\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of match as A Traffic Light",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Traffic Light",
+            "description": "Green light means GO (True), Red light means STOP (False). The condition determines which path your code takes.",
+            "image": "https://images.unsplash.com/photo-1557404763-69708cd8b9ce?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "decision",
+            "condition": "x < y",
+            "trueLabel": "x is less",
+            "falseLabel": "x is not less",
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "if x < y:\n    print('x is less')\nelse:\n    print('x is not less')",
+            "language": "python",
+            "output": "x is less"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Does an if-else statement always execute exactly one branch?",
+          "answer": "Yes! If the condition is True, the 'if' branch runs. If False, the 'else' branch runs. They never run together."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with match",
+          "instructions": "Write a simple Python script implementing or demonstrating match.",
+          "starterCode": "# Practice match\n# Write your code below\n",
+          "solution": "if x < y:\n    print('x is less')\nelse:\n    print('x is not less')",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "summing-up",
+      "label": "Summing Up",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Summing Up",
+          "body": "You now have the power within Python to use conditional statements to ask questions and have your program take action accordingly. In this lecture, we discussed…",
+          "bullets": [
+            "Conditionals",
+            "`if` Statements",
+            "Control flow, `elif`, and `else`",
+            "`or`",
+            "`and`",
+            "Modulo",
+            "Creating your own function",
+            "Pythonic coding",
+            "`match`"
+          ]
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Summing Up as A Traffic Light",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Traffic Light",
+            "description": "Green light means GO (True), Red light means STOP (False). The condition determines which path your code takes.",
+            "image": "https://images.unsplash.com/photo-1557404763-69708cd8b9ce?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "decision",
+            "condition": "x < y",
+            "trueLabel": "x is less",
+            "falseLabel": "x is not less",
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "if x < y:\n    print('x is less')\nelse:\n    print('x is not less')",
+            "language": "python",
+            "output": "x is less"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Does an if-else statement always execute exactly one branch?",
+          "answer": "Yes! If the condition is True, the 'if' branch runs. If False, the 'else' branch runs. They never run together."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Summing Up",
+          "instructions": "Write a simple Python script implementing or demonstrating Summing Up.",
+          "starterCode": "# Practice Summing Up\n# Write your code below\n",
+          "solution": "if x < y:\n    print('x is less')\nelse:\n    print('x is not less')",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "label": "Summary",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "green",
+          "title": "Lecture Summary",
+          "body": "Congratulations! You've finished Lecture 1 on Conditionals.",
+          "bullets": [
+            "You explored the core syntax and commands",
+            "You viewed real-world analogies connecting physical objects to python code",
+            "You ran exercises to test validation and error correction"
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "keyTakeaways": [
+      {
+        "emoji": "📝",
+        "text": "Understand the core elements of Conditionals"
+      },
+      {
+        "emoji": "💡",
+        "text": "Apply physical analogies to visualize how Python processes statements"
+      },
+      {
+        "emoji": "🎯",
+        "text": "Run unit tests and exercises to ensure correctness"
+      }
+    ],
+    "whatYouLearned": [
+      "Core syntaxes of Conditionals",
+      "Applying functional concepts to resolve coding problems"
+    ],
+    "nextUp": "Next Lecture"
+  }
+}

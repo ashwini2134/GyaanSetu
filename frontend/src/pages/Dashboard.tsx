@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { api, type Course } from "../api";
+import { api, type Course, getSubmissionHistory } from "../api";
 import { useAuth } from "../auth";
-import { Card, LoadingCard, CourseSearchFilters, NoResultsState } from "../components";
-import { getCourseStats, subscribeToProgressChanges } from "../hooks/useProgress";
+import { Card, CourseSearchFilters, NoResultsState } from "../components";
+import { getCourseStats } from "../hooks/useProgress";
 import { useGamification, ACHIEVEMENTS, updateOverallProgress } from "../progress";
 
 const IconBook = () => (
@@ -77,12 +77,6 @@ const IconCourseCard = () => (
   </svg>
 );
 
-const IconSolved = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4" />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12a7 7 0 1114 0 7 7 0 01-14 0z" />
-  </svg>
-);
 
 
 export default function Dashboard() {
@@ -123,7 +117,7 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    setSubmissionHistory({});
+    setSubmissionHistory(getSubmissionHistory());
   }, []);
 
   const [courseStatsMap, setCourseStatsMap] = useState<Record<string, { completed: number; total: number; lecturesCompleted: number }>>({});

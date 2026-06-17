@@ -1,5 +1,5 @@
 import { PartyPopper, Book } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { authFetch } from '../../authClient';
 import type { QuizQuestion } from '../../types/lesson';
 
@@ -29,12 +29,9 @@ export default function QuizEngine({ quizId = 'default', questions, onComplete }
   const [history, setHistory] = useState<AttemptRecord[]>([]);
   const [viewHistoryIdx, setViewHistoryIdx] = useState<number>(0);
 
-  useEffect(() => {
     async function loadHistory() {
       try {
-        const res = await authFetch(`/api/quiz-attempts/${quizId}`);
-        if (!res.ok) return;
-        const parsed = await res.json();
+        const parsed = await authFetch<AttemptRecord[]>(`/api/quiz-attempts/${quizId}`);
         if (parsed && parsed.length > 0) {
           setHistory(parsed);
           setViewHistoryIdx(parsed.length - 1);
@@ -45,7 +42,6 @@ export default function QuizEngine({ quizId = 'default', questions, onComplete }
       }
     }
     loadHistory();
-  }, [quizId]);
 
   if (!questions.length) {
     return (
@@ -83,7 +79,7 @@ export default function QuizEngine({ quizId = 'default', questions, onComplete }
         return { qNum: i + 1, passed: userAns === q.answer, userAns };
       });
       
-      authFetch('/api/quiz-attempts', {
+      authFetch<AttemptRecord>('/api/quiz-attempts', {
         method: 'POST',
         body: JSON.stringify({
           quizId,
@@ -93,7 +89,6 @@ export default function QuizEngine({ quizId = 'default', questions, onComplete }
           answers: details
         })
       })
-      .then(res => res.json())
       .then((newAttempt) => {
         const updatedHistory = [...history, newAttempt];
         setHistory(updatedHistory);

@@ -24,10 +24,8 @@ export default function PracticeCard({ block, onAttempt, onComplete }: PracticeC
   useEffect(() => {
     async function loadDraft() {
       try {
-        const res = await authFetch(`/api/drafts/${encodeURIComponent(block.title)}?type=practice`);
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data.code) setSavedCode(data.code);
+        const data = await authFetch<{ code?: string }>(`/api/drafts/${encodeURIComponent(block.title)}?type=practice`);
+        if (data && data.code) setSavedCode(data.code);
       } catch (err) {
         console.error('Failed to load practice draft', err);
       }

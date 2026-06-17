@@ -5,7 +5,6 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import { getMentorHint, getFailureAnalysis, getProgressiveHints, reviewStudentCode, type FailureAnalysisResult, type ProgressiveHints, type CodeReviewResult } from './mentor';
 export type { FailureAnalysisResult, ProgressiveHints, CodeReviewCheck, CodeReviewResult } from './mentor';
-import { getProjectDefinition } from './projects/registry';
 import { authFetch } from './authClient';
 // ── Types (public API unchanged so pages need zero edits) ─────────────────────
 export type Course = {
@@ -30,17 +29,13 @@ export type ChatMsg = { role: string; content: string; created_at: string };
 
 export { getToken, setToken, clearToken } from "./authClient";
 
-import { authFetch } from "./authClient";
-
 const CHAT_KEY  = "fa_chat";
 
 // ── Chat storage ─────────────────────────────────────────────────────────────
 async function getChatHistory(problemId: number | string): Promise<ChatMsg[]> {
   try {
-    const res = await authFetch(`/api/chat/${problemId}`);
-    if (res.ok) {
-      return await res.json();
-    }
+    const res = await authFetch<ChatMsg[]>(`/api/chat/${problemId}`);
+    return res;
   } catch { /* ignore */ }
   return [];
 }
@@ -263,7 +258,6 @@ export const api = {
 
     const userMsg: ChatMsg  = { role: "user",   content: message, created_at: new Date().toISOString() };
     const asstMsg: ChatMsg  = { role: "assistant", content: reply, created_at: new Date().toISOString() };
-    
     await saveChatMessage(problemId, userMsg);
     await saveChatMessage(problemId, asstMsg);
     
@@ -338,11 +332,8 @@ export function getBadges(completedCount: number, streak: number): Badge[] {
 // ── XP & Gamification Helpers ──────────────────────────────────────────────────
 export async function getTotalXp(): Promise<number> {
   try {
-    const res = await authFetch('/api/xp');
-    if (res.ok) {
-      const json = await res.json();
-      return json.totalXp || 0;
-    }
+    const res = await authFetch<{ totalXp?: number }>('/api/xp');
+    return res.totalXp || 0;
   } catch {
     console.error("Failed to fetch XP");
   }
@@ -453,18 +444,7 @@ export function getProjectMetadata(projectId: string, customDifficulty?: string)
     };
   }
 
-  // Fallback: check project registry (Python course projects)
-  const regDef = getProjectDefinition(projectId);
-  if (regDef) {
-    return {
-      difficulty: regDef.difficulty,
-      xp: regDef.xp,
-      estimatedTime: regDef.estimatedTime,
-      tags: regDef.tags,
-      concepts: regDef.concepts,
-      learningGoal: regDef.learningGoal,
-    };
-  }
+
 
   // Generic fallback
   return {
@@ -511,6 +491,26 @@ export function getXpLevel(totalXp: number): { level: number; currentXp: number;
   return { level: currentLevel, currentXp, xpToNext, progress };
 }
 
+// ── Submission History for Heatmap ─────────────────────────────────────────────
+export interface SubmissionRecord {
+  date: string;
+  count: number;
+}
+
+export function getSubmissionHistory(): Record<string, number> {
+  try {
+    return JSON.parse(localStorage.getItem("fa_submission_history") ?? "{}");
+  } catch {
+    return {};
+  }
+}
+
+export function recordSubmission() {
+  const todayStr = new Date().toISOString().split("T")[0];
+  const history = getSubmissionHistory();
+  history[todayStr] = (history[todayStr] || 0) + 1;
+  localStorage.setItem("fa_submission_history", JSON.stringify(history));
+}
 // ── Daily Missions ─────────────────────────────────────────────────────────────
 export interface DailyMission {
   id: string;
@@ -524,11 +524,8 @@ export interface DailyMission {
 
 export async function getDailyMissions(): Promise<DailyMission[]> {
   try {
-    const res = await authFetch('/api/daily-missions');
-    if (res.ok) {
-      const data = await res.json();
-      return data.missions || [];
-    }
+    const data = await authFetch<{ missions?: DailyMission[] }>('/api/daily-missions');
+    return data.missions || [];
   } catch (err) {
     console.error("Failed to fetch daily missions", err);
   }

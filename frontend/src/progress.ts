@@ -44,7 +44,6 @@ function emit() {
 }
 
 // ── Toast Queue System ───────────────────────────────────────────────────────
-// We append a single container to body and manage queue items manually to avoid dependency.
 let toastQueue: Array<{ text: string; type: 'xp' | 'achievement' | 'streak'; duration: number }> = [];
 let isToastRunning = false;
 
@@ -100,10 +99,8 @@ function queueToast(text: string, type: 'xp' | 'achievement' | 'streak', duratio
 
 export async function handleDailyLogin() {
   try {
-    const res = await authFetch('/api/streaks', { method: 'POST' });
-    if (res.ok) {
-      emit();
-    }
+    await authFetch('/api/streaks', { method: 'POST' });
+    emit();
   } catch (err) {
     console.error("Failed to handle daily login", err);
   }
@@ -128,13 +125,22 @@ async function unlockAchievement(id: string) {
 }
 
 export async function checkAchievements() {
-  const stats = getStats();
-  
   try {
-    const res = await authFetch('/api/achievements');
-    if (!res.ok) return;
-    const json = await res.json();
-    const unlocked: string[] = json.achievements || [];
+    const [resStats, resAch] = await Promise.all([
+      authFetch<{ stats?: StatsData }>('/api/progress'),
+      authFetch<{ achievements?: string[] }>('/api/achievements')
+    ]);
+
+    const stats = resStats.stats || {
+      coursesStarted: 0,
+      coursesCompleted: 0,
+      lecturesCompleted: 0,
+      quizzesPassed: 0,
+      tasksSubmitted: 0,
+      projectsSolved: 0,
+    };
+
+    const unlocked: string[] = resAch.achievements || [];
 
     if (stats.lecturesCompleted >= 1 && !unlocked.includes('first_lecture')) await unlockAchievement('first_lecture');
     if (stats.quizzesPassed >= 1 && !unlocked.includes('first_quiz')) await unlockAchievement('first_quiz');
@@ -152,7 +158,6 @@ export async function completeAction(
   actionType: 'section' | 'lecture' | 'quiz' | 'problem' | 'course_start' | 'course_complete' | 'project',
   actionId: string
 ) {
-
   try {
     await authFetch('/api/progress/action', {
       method: 'POST',
@@ -169,9 +174,8 @@ export async function completeAction(
 
 export async function updateOverallProgress(totalLecturesAvailable: number) {
   try {
-    const res = await authFetch('/api/progress');
-    if (!res.ok) return 0;
-    const { stats } = await res.json();
+    const res = await authFetch<{ stats?: StatsData }>('/api/progress');
+    const stats = res.stats || { lecturesCompleted: 0 };
     
     if (totalLecturesAvailable === 0) return 0;
     const pct = Math.min(100, Math.round((stats.lecturesCompleted / totalLecturesAvailable) * 100));
@@ -207,26 +211,20 @@ export function useGamification() {
       if (!user) return;
       try {
         const [resXp, resAch, resStreak, resStats, resOverall] = await Promise.all([
-          authFetch('/api/xp'),
-          authFetch('/api/achievements'),
-          authFetch('/api/streaks'),
-          authFetch('/api/progress'),
-          authFetch('/api/progress/overall')
+          authFetch<{ totalXp?: number }>('/api/xp'),
+          authFetch<{ achievements?: string[] }>('/api/achievements'),
+          authFetch<StreakData>('/api/streaks'),
+          authFetch<{ stats?: StatsData }>('/api/progress'),
+          authFetch<{ overallProgress?: number }>('/api/progress/overall')
         ]);
         
-        let xp = 0;
-        let achievements: string[] = [];
-        let streak = data.streak;
-        let stats = data.stats;
-        let overallProgress = 0;
-        
-        if (resXp.ok) xp = (await resXp.json()).totalXp;
-        if (resAch.ok) achievements = (await resAch.json()).achievements;
-        if (resStreak.ok) streak = await resStreak.json();
-        if (resStats.ok) stats = (await resStats.json()).stats;
-        if (resOverall.ok) overallProgress = (await resOverall.json()).overallProgress;
+        const xp = resXp.totalXp || 0;
+        const achievements = resAch.achievements || [];
+        const streak = resStreak || { currentStreak: 0, lastLoginDate: null, longestStreak: 0 };
+        const stats = resStats.stats || { coursesStarted: 0, coursesCompleted: 0, lecturesCompleted: 0, quizzesPassed: 0, tasksSubmitted: 0, projectsSolved: 0 };
+        const overallProgress = resOverall.overallProgress || 0;
 
-        setData(prev => ({ ...prev, xp, achievements, streak, stats, overallProgress }));
+        setData({ xp, achievements, streak, stats, overallProgress });
       } catch (err) {
         console.error("Failed to load gamification data", err);
       }

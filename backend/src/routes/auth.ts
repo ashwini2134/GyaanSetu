@@ -21,6 +21,7 @@ import {
   findUserByEmail,
   findUserById,
   updatePassword,
+  updateProfile,
 } from "../services/userService.js";
 import type { OAuthProvider } from "../types.js";
 import { OAUTH_PROVIDERS } from "../types.js";
@@ -150,6 +151,35 @@ router.post("/refresh", authLimiter, async (req, res, next) => {
 
 router.get("/me", requireAuth, (req: AuthenticatedRequest, res) => {
   res.json({ user: req.user });
+});
+
+const profileSchema = z.object({
+  name: z.string().min(1).max(100).trim().optional(),
+  bio: z.string().max(500).trim().optional(),
+  password: z.string().min(8).max(128).optional(),
+});
+
+router.patch("/profile", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    if (!req.user) {
+      throw new AppError("Unauthorized", 401);
+    }
+    const body = profileSchema.parse(req.body);
+    
+    const user = await updateProfile(req.user.id, {
+      name: body.name,
+      bio: body.bio,
+    });
+    
+    if (body.password) {
+      await updatePassword(req.user.id, body.password);
+      await revokeAllRefreshTokens(req.user.id);
+    }
+    
+    res.json({ user });
+  } catch (err) {
+    next(err instanceof z.ZodError ? new AppError(err.errors[0]?.message ?? "Invalid input") : err);
+  }
 });
 
 router.post("/forgot-password", authLimiter, async (req, res, next) => {

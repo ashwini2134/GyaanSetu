@@ -6,6 +6,8 @@ export type AuthUser = {
   name: string;
   role: UserRole;
   emailVerified: boolean;
+  bio?: string;
+  createdAt?: string;
 };
 
 const TOKEN_KEY = "fa_token";

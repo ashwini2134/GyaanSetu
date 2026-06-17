@@ -76,7 +76,6 @@ export default function CoursePage() {
     if (!slug) return;
     api.lectureProjectsCounts(slug).then(setLectureProjectCounts).catch(() => {});
   }, [slug]);
-
   if (!slug) return null;
 
   const getStatusIcon = (status: LectureStatus) => {

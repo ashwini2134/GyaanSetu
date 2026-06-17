@@ -1,0 +1,600 @@
+{
+  "id": "cs50p-lecture-7",
+  "courseSlug": "cs50p",
+  "number": 7,
+  "title": "Regular Expressions",
+  "overview": "Learn about the core concepts of this week's lecture.",
+  "estimatedMinutes": 45,
+  "sections": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Introduction to Regular Expressions",
+          "body": "Learn about the core concepts of this week's lecture.",
+          "bullets": [
+            "Understand the main principles of Regular Expressions",
+            "Learn through real-world visual analogies",
+            "Practice code examples interactively",
+            "Reinforce your knowledge with reflection checks"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "regular-expressions",
+      "label": "Regular Expressions",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Regular Expressions",
+          "body": "",
+          "bullets": [
+            "Regular expressions or \"regexes\" will enable us to examine patterns within our code. For example, we might want to validate that an email address is formatted correctly.",
+            "To begin, consider validating an email address naively:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Regular Expressions Example",
+          "language": "python",
+          "code": "email = input(\"What's your email? \").strip()\n\nif \"@\" in email:\n    print(\"Valid\")\nelse:\n    print(\"Invalid\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Regular Expressions",
+          "body": "",
+          "bullets": [
+            "One could input `@@` alone and it would be regarded as valid. We could require at least one `@` and a `.`:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Regular Expressions Example",
+          "language": "python",
+          "code": "email = input(\"What's your email? \").strip()\n\nif \"@\" in email and \".\" in email:\n    print(\"Valid\")\nelse:\n    print(\"Invalid\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Regular Expressions",
+          "body": "```text\n.   any character except a new line\n+   1 or more repetitions\n?   0 or 1 repetition\n{m} m repetitions\n{m,n} m-n repetitions\n```",
+          "bullets": [
+            "Python has an existing library called `re` with functions that can validate user inputs against patterns. One of the most versatile is `search`, with signature `re.search(pattern, string, flags=0)`.",
+            "Many special symbols can be passed to the interpreter for validation. A non-exhaustive list:",
+            "  0 or more repetitions",
+            "Implementing this:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Regular Expressions Example",
+          "language": "python",
+          "code": "import re\n\nemail = input(\"What's your email? \").strip()\n\nif re.search(\".+@.+\", email):\n    print(\"Valid\")\nelse:\n    print(\"Invalid\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Regular Expressions",
+          "body": "  `.+` is used to determine if anything is to the left and right of the `@`.\n```text\n^   matches the start of the string\n$   matches the end of the string\n```",
+          "bullets": [
+            "We can be more precise. More symbols:",
+            "Then:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Regular Expressions Example",
+          "language": "python",
+          "code": "import re\n\nemail = input(\"What's your email? \").strip()\n\nif re.search(r\"^.+@.+\\.edu$\", email):\n    print(\"Valid\")\nelse:\n    print(\"Invalid\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Regular Expressions",
+          "body": "  We utilize the \"escape character\" `\\` to treat the `.` as a literal period. The `r` prefix makes this a \"raw string\" so the interpreter won't treat `\\.` as a special character.\n```text\n[]    set of characters\n[^]   complementing the set\n```",
+          "bullets": [
+            "More symbols for sets:",
+            "We can use these:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Regular Expressions Example",
+          "language": "python",
+          "code": "import re\n\nemail = input(\"What's your email? \").strip()\n\nif re.search(r\"^[^@]+@[^@]+\\.edu$\", email):\n    print(\"Valid\")\nelse:\n    print(\"Invalid\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Regular Expressions",
+          "body": "  `[^@]+` means any character except an `@`.\n```text\n\\d    decimal digit\n\\D    not a decimal digit\n\\s    whitespace characters\n\\S    not a whitespace character\n\\w    word character, as well as numbers and the underscore\n\\W    not a word character\n```\n  `\\w` is the same as `[a-zA-Z0-9_]`.",
+          "bullets": [
+            "Common patterns are built in:",
+            "We could support multiple TLDs using the `|` (\"or\"):"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Regular Expressions Example",
+          "language": "python",
+          "code": "import re\n\nemail = input(\"What's your email? \").strip()\n\nif re.search(r\"^\\w+@\\w+\\.(com|edu|gov|net|org)$\", email):\n    print(\"Valid\")\nelse:\n    print(\"Invalid\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Regular Expressions",
+          "body": "```text\nA|B     either A or B\n(...)   a group\n(?:...) non-capturing version\n```",
+          "bullets": [
+            "Grouping symbols:"
+          ]
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Regular Expressions as A Notebook",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Notebook",
+            "description": "You open the notebook, read notes, write down new entries, and close the cover so nothing gets lost or smudged.",
+            "image": "https://images.unsplash.com/photo-1517842645767-c639042777db?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "flow",
+            "flowSteps": [
+              "Open file",
+              "Read / Write lines",
+              "Close file"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "with open('names.txt', 'a') as f:\n    f.write('Alice\\n')",
+            "language": "python",
+            "output": "(writes 'Alice' to names.txt)"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Why is using 'with open' preferred over manually calling open() and close()?",
+          "answer": "Using 'with' creates a context manager that automatically closes the file for you, even if your code encounters an error."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Regular Expressions",
+          "instructions": "Write a simple Python script implementing or demonstrating Regular Expressions.",
+          "starterCode": "# Practice Regular Expressions\n# Write your code below\n",
+          "solution": "with open('names.txt', 'a') as f:\n    f.write('Alice\\n')",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "case-sensitivity",
+      "label": "Case Sensitivity",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Case Sensitivity",
+          "body": "",
+          "bullets": [
+            "Within `re.search`, there is a parameter for `flags`. Some built-in flag variables are `re.IGNORECASE`, `re.MULTILINE`, and `re.DOTALL`:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Case Sensitivity Example",
+          "language": "python",
+          "code": "import re\n\nemail = input(\"What's your email? \").strip()\n\nif re.search(r\"^\\w+@\\w+\\.edu$\", email, re.IGNORECASE):\n    print(\"Valid\")\nelse:\n    print(\"Invalid\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Case Sensitivity",
+          "body": "",
+          "bullets": [
+            "We can group together ideas to allow optional subdomains:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Case Sensitivity Example",
+          "language": "python",
+          "code": "import re\n\nemail = input(\"What's your email? \").strip()\n\nif re.search(r\"^\\w+@(\\w+\\.)?\\w+\\.edu$\", email, re.IGNORECASE):\n    print(\"Valid\")\nelse:\n    print(\"Invalid\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Case Sensitivity",
+          "body": "  The `(\\w+\\.)?` communicates that this expression can be there once or not at all."
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Case Sensitivity as A Notebook",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Notebook",
+            "description": "You open the notebook, read notes, write down new entries, and close the cover so nothing gets lost or smudged.",
+            "image": "https://images.unsplash.com/photo-1517842645767-c639042777db?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "flow",
+            "flowSteps": [
+              "Open file",
+              "Read / Write lines",
+              "Close file"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "with open('names.txt', 'a') as f:\n    f.write('Alice\\n')",
+            "language": "python",
+            "output": "(writes 'Alice' to names.txt)"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Why is using 'with open' preferred over manually calling open() and close()?",
+          "answer": "Using 'with' creates a context manager that automatically closes the file for you, even if your code encounters an error."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Case Sensitivity",
+          "instructions": "Write a simple Python script implementing or demonstrating Case Sensitivity.",
+          "starterCode": "# Practice Case Sensitivity\n# Write your code below\n",
+          "solution": "with open('names.txt', 'a') as f:\n    f.write('Alice\\n')",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "cleaning-up-user-input",
+      "label": "Cleaning Up User Input",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Cleaning Up User Input",
+          "body": "",
+          "bullets": [
+            "Consider standardizing a name typed as `Last, First`:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Cleaning Up User Input Example",
+          "language": "python",
+          "code": "name = input(\"What's your name? \").strip()\nif \",\" in name:\n    last, first = name.split(\", \")\n    name = f\"{first} {last}\"\nprint(f\"hello, {name}\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Cleaning Up User Input",
+          "body": "",
+          "bullets": [
+            "Using regular expressions:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Cleaning Up User Input Example",
+          "language": "python",
+          "code": "import re\n\nname = input(\"What's your name? \").strip()\nmatches = re.search(r\"^(.+), (.+)$\", name)\nif matches:\n    last, first = matches.groups()\n    name = first + \" \" + last\nprint(f\"hello, {name}\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Cleaning Up User Input",
+          "body": "",
+          "bullets": [
+            "We can request specific groups back using `matches.group`:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Cleaning Up User Input Example",
+          "language": "python",
+          "code": "import re\n\nname = input(\"What's your name? \").strip()\nmatches = re.search(r\"^(.+), (.+)$\", name)\nif matches:\n    name = matches.group(2) + \" \" + matches.group(1)\nprint(f\"hello, {name}\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Cleaning Up User Input",
+          "body": "",
+          "bullets": [
+            "We can combine the search and the assignment with the walrus `:=` operator:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Cleaning Up User Input Example",
+          "language": "python",
+          "code": "import re\n\nname = input(\"What's your name? \").strip()\nif matches := re.search(r\"^(.+), *(.+)$\", name):\n    name = matches.group(2) + \" \" + matches.group(1)\nprint(f\"hello, {name}\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Cleaning Up User Input as A Notebook",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Notebook",
+            "description": "You open the notebook, read notes, write down new entries, and close the cover so nothing gets lost or smudged.",
+            "image": "https://images.unsplash.com/photo-1517842645767-c639042777db?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "flow",
+            "flowSteps": [
+              "Open file",
+              "Read / Write lines",
+              "Close file"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "with open('names.txt', 'a') as f:\n    f.write('Alice\\n')",
+            "language": "python",
+            "output": "(writes 'Alice' to names.txt)"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Why is using 'with open' preferred over manually calling open() and close()?",
+          "answer": "Using 'with' creates a context manager that automatically closes the file for you, even if your code encounters an error."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Cleaning Up User Input",
+          "instructions": "Write a simple Python script implementing or demonstrating Cleaning Up User Input.",
+          "starterCode": "# Practice Cleaning Up User Input\n# Write your code below\n",
+          "solution": "with open('names.txt', 'a') as f:\n    f.write('Alice\\n')",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "extracting-user-input",
+      "label": "Extracting User Input",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Extracting User Input",
+          "body": "",
+          "bullets": [
+            "Now, let's extract specific information. To extract a Twitter username from a URL:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Extracting User Input Example",
+          "language": "python",
+          "code": "import re\n\nurl = input(\"URL: \").strip()\n\nusername = url.replace(\"https://twitter.com/\", \"\")\nprint(f\"Username: {username}\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Extracting User Input",
+          "body": "",
+          "bullets": [
+            "`removeprefix` is cleaner than `replace`:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Extracting User Input Example",
+          "language": "python",
+          "code": "import re\n\nurl = input(\"URL: \").strip()\n\nusername = url.removeprefix(\"https://twitter.com/\")\nprint(f\"Username: {username}\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Extracting User Input",
+          "body": "",
+          "bullets": [
+            "Using `re.sub` with signature `re.sub(pattern, repl, string, count=0, flags=0)`:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Extracting User Input Example",
+          "language": "python",
+          "code": "import re\n\nurl = input(\"URL: \").strip()\n\nusername = re.sub(r\"^(https?://)?(www\\.)?twitter\\.com/\", \"\", url)\nprint(f\"Username: {username}\")",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Extracting User Input",
+          "body": "",
+          "bullets": [
+            "Using `re.search` to be more robust:"
+          ]
+        },
+        {
+          "type": "code_example",
+          "title": "Extracting User Input Example",
+          "language": "python",
+          "code": "import re\n\nurl = input(\"URL: \").strip()\n\nif matches := re.search(r\"^https?://(?:www\\.)?twitter\\.com/([a-z0-9_]+)\", url, re.IGNORECASE):\n    print(f\"Username:\", matches.group(1))",
+          "expectedOutput": "Run this code to see the result."
+        },
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Extracting User Input",
+          "body": "  The `?:` tells the interpreter it does not have to capture what is in that spot.",
+          "bullets": [
+            "You can learn more in Python's documentation of [re](https://docs.python.org/3/library/re.html)."
+          ]
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Extracting User Input as A Notebook",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Notebook",
+            "description": "You open the notebook, read notes, write down new entries, and close the cover so nothing gets lost or smudged.",
+            "image": "https://images.unsplash.com/photo-1517842645767-c639042777db?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "flow",
+            "flowSteps": [
+              "Open file",
+              "Read / Write lines",
+              "Close file"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "with open('names.txt', 'a') as f:\n    f.write('Alice\\n')",
+            "language": "python",
+            "output": "(writes 'Alice' to names.txt)"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Why is using 'with open' preferred over manually calling open() and close()?",
+          "answer": "Using 'with' creates a context manager that automatically closes the file for you, even if your code encounters an error."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Extracting User Input",
+          "instructions": "Write a simple Python script implementing or demonstrating Extracting User Input.",
+          "starterCode": "# Practice Extracting User Input\n# Write your code below\n",
+          "solution": "with open('names.txt', 'a') as f:\n    f.write('Alice\\n')",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "summing-up",
+      "label": "Summing Up",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "blue",
+          "title": "Summing Up",
+          "body": "Now, you've learned a whole new language of regular expressions that can be utilized to validate, clean up, and extract user input.",
+          "bullets": [
+            "Regular Expressions",
+            "Case Sensitivity",
+            "Cleaning Up User Input",
+            "Extracting User Input"
+          ]
+        },
+        {
+          "type": "concept_visualization",
+          "title": "Think of Summing Up as A Notebook",
+          "accentColor": "purple",
+          "leftPanel": {
+            "label": "Real Life Analogy",
+            "emoji": "💡",
+            "title": "A Notebook",
+            "description": "You open the notebook, read notes, write down new entries, and close the cover so nothing gets lost or smudged.",
+            "image": "https://images.unsplash.com/photo-1517842645767-c639042777db?w=800&q=80"
+          },
+          "centerPanel": {
+            "label": "Programming Concept",
+            "visualType": "flow",
+            "flowSteps": [
+              "Open file",
+              "Read / Write lines",
+              "Close file"
+            ],
+            "textContent": "Learn and execute"
+          },
+          "rightPanel": {
+            "label": "Code Example",
+            "code": "with open('names.txt', 'a') as f:\n    f.write('Alice\\n')",
+            "language": "python",
+            "output": "(writes 'Alice' to names.txt)"
+          }
+        },
+        {
+          "type": "reflection",
+          "question": "Why is using 'with open' preferred over manually calling open() and close()?",
+          "answer": "Using 'with' creates a context manager that automatically closes the file for you, even if your code encounters an error."
+        },
+        {
+          "type": "practice",
+          "title": "Practice with Summing Up",
+          "instructions": "Write a simple Python script implementing or demonstrating Summing Up.",
+          "starterCode": "# Practice Summing Up\n# Write your code below\n",
+          "solution": "with open('names.txt', 'a') as f:\n    f.write('Alice\\n')",
+          "hint": "Refer to the code example panel above."
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "label": "Summary",
+      "blocks": [
+        {
+          "type": "explanation",
+          "accentColor": "green",
+          "title": "Lecture Summary",
+          "body": "Congratulations! You've finished Lecture 7 on Regular Expressions.",
+          "bullets": [
+            "You explored the core syntax and commands",
+            "You viewed real-world analogies connecting physical objects to python code",
+            "You ran exercises to test validation and error correction"
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "keyTakeaways": [
+      {
+        "emoji": "📝",
+        "text": "Understand the core elements of Regular Expressions"
+      },
+      {
+        "emoji": "💡",
+        "text": "Apply physical analogies to visualize how Python processes statements"
+      },
+      {
+        "emoji": "🎯",
+        "text": "Run unit tests and exercises to ensure correctness"
+      }
+    ],
+    "whatYouLearned": [
+      "Core syntaxes of Regular Expressions",
+      "Applying functional concepts to resolve coding problems"
+    ],
+    "nextUp": "Next Lecture"
+  }
+}
