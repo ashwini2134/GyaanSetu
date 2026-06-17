@@ -32,6 +32,7 @@ model User {
   oauthExchangeCodes  OAuthExchangeCode[]
   passwordResetTokens PasswordResetToken[]
   progress            Progress[]
+  lectureProgress     LectureProgress[]
   projects            Project[]
   quizAttempts        QuizAttempt[]
   refreshTokens       RefreshToken[]
@@ -53,6 +54,19 @@ model Progress {
   user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseSlug, lectureId])
+}
+
+model LectureProgress {
+  id           String   @id @default(uuid())
+  userId       String
+  courseSlug   String
+  lectureId    String
+  sectionIndex Int      
+  isCompleted  Boolean  @default(false)
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseSlug, lectureId, sectionIndex])
 }
 
 model QuizAttempt {

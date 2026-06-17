@@ -13,9 +13,10 @@ export function buildOAuthAuthorizeUrl(provider: OAuthProvider, state: string): 
   if (provider === "github") {
     const { clientId, callbackUrl } = config.oauth.github;
     if (!clientId) {
-      // Mock/stub fallback when credentials are not configured
+      console.warn(`[oauth] GitHub clientId not configured — using mock fallback`);
       return `${callbackUrl}?code=mock_github_code&state=${state}`;
     }
+    console.log(`[oauth] Building GitHub authorize URL with clientId=${clientId.slice(0, 8)}...`);
     const params = new URLSearchParams({
       client_id: clientId,
       redirect_uri: callbackUrl,
@@ -28,9 +29,10 @@ export function buildOAuthAuthorizeUrl(provider: OAuthProvider, state: string): 
   if (provider === "google") {
     const { clientId, callbackUrl } = config.oauth.google;
     if (!clientId) {
-      // Mock/stub fallback when credentials are not configured
+      console.warn(`[oauth] Google clientId not configured — using mock fallback`);
       return `${callbackUrl}?code=mock_google_code&state=${state}`;
     }
+    console.log(`[oauth] Building Google authorize URL with clientId=${clientId.slice(0, 8)}...`);
     const params = new URLSearchParams({
       client_id: clientId,
       redirect_uri: callbackUrl,
@@ -43,9 +45,10 @@ export function buildOAuthAuthorizeUrl(provider: OAuthProvider, state: string): 
 
   const { clientId, callbackUrl } = config.oauth.linkedin;
   if (!clientId) {
-    // Mock/stub fallback when credentials are not configured
+    console.warn(`[oauth] LinkedIn clientId not configured — using mock fallback`);
     return `${callbackUrl}?code=mock_linkedin_code&state=${state}`;
   }
+  console.log(`[oauth] Building LinkedIn authorize URL with clientId=${clientId.slice(0, 8)}...`);
   const params = new URLSearchParams({
     response_type: "code",
     client_id: clientId,
@@ -68,7 +71,7 @@ export async function exchangeOAuthCode(provider: OAuthProvider, code: string): 
 async function exchangeGitHubCode(code: string): Promise<OAuthProfile> {
   const { clientId, clientSecret, callbackUrl } = config.oauth.github;
   if (!clientId || !clientSecret) {
-    // Mock profile response for local dev/testing
+    console.warn(`[oauth] GitHub clientId or clientSecret missing — using mock profile`);
     return {
       providerUserId: "mock_github_user_12345",
       email: "mock.github.student@example.com",
@@ -76,6 +79,7 @@ async function exchangeGitHubCode(code: string): Promise<OAuthProfile> {
     };
   }
 
+  console.log(`[oauth] Exchanging GitHub code with clientId=${clientId.slice(0, 8)}... callbackUrl=${callbackUrl}`);
   const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
     method: "POST",
     headers: { Accept: "application/json", "Content-Type": "application/json" },
@@ -111,7 +115,7 @@ async function exchangeGitHubCode(code: string): Promise<OAuthProfile> {
 async function exchangeGoogleCode(code: string): Promise<OAuthProfile> {
   const { clientId, clientSecret, callbackUrl } = config.oauth.google;
   if (!clientId || !clientSecret) {
-    // Mock profile response for local dev/testing
+    console.warn(`[oauth] Google clientId or clientSecret missing — using mock profile`);
     return {
       providerUserId: "mock_google_user_12345",
       email: "mock.google.student@example.com",
@@ -119,6 +123,7 @@ async function exchangeGoogleCode(code: string): Promise<OAuthProfile> {
     };
   }
 
+  console.log(`[oauth] Exchanging Google code with clientId=${clientId.slice(0, 8)}... callbackUrl=${callbackUrl}`);
   const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -151,7 +156,7 @@ async function exchangeGoogleCode(code: string): Promise<OAuthProfile> {
 async function exchangeLinkedInCode(code: string): Promise<OAuthProfile> {
   const { clientId, clientSecret, callbackUrl } = config.oauth.linkedin;
   if (!clientId || !clientSecret) {
-    // Mock profile response for local dev/testing
+    console.warn(`[oauth] LinkedIn clientId or clientSecret missing — using mock profile`);
     return {
       providerUserId: "mock_linkedin_user_12345",
       email: "mock.linkedin.student@example.com",
@@ -159,6 +164,7 @@ async function exchangeLinkedInCode(code: string): Promise<OAuthProfile> {
     };
   }
 
+  console.log(`[oauth] Exchanging LinkedIn code with clientId=${clientId.slice(0, 8)}... callbackUrl=${callbackUrl}`);
   const tokenRes = await fetch("https://www.linkedin.com/oauth/v2/accessToken", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },

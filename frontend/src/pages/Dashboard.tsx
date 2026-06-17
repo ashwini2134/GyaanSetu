@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 import { api, type Course, getSubmissionHistory } from "../api";
 import { useAuth } from "../auth";
 import { Card, CourseSearchFilters, NoResultsState, DynamicCourseIcon } from "../components";
-import { getCourseStats } from "../hooks/useProgress";
-import { useGamification, ACHIEVEMENTS, updateOverallProgress } from "../progress";
+
+import { useGamification, ACHIEVEMENTS } from "../progress";
 
 const IconBook = () => (
   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -115,32 +115,42 @@ export default function Dashboard() {
     setSubmissionHistory(getSubmissionHistory());
   }, []);
 
-  const [courseStatsMap, setCourseStatsMap] = useState<Record<string, { completed: number; total: number; lecturesCompleted: number }>>({});
+  const [courseStatsMap, setCourseStatsMap] = useState<Record<string, { completed: number; inProgressLectures: number; total: number; lecturesCompleted: number; percentage: number; status: string }>>({});
+  const [dynamicStats, setDynamicStats] = useState({ coursesStarted: 0, coursesCompleted: 0, lecturesCompleted: 0 });
 
   useEffect(() => {
     if (!courses) return;
 
-    const map: Record<string, { completed: number; total: number; lecturesCompleted: number }> = {};
-    let totalAvail = 0;
-
-    Promise.all(courses.map(async (course) => {
-      try {
-        const lectures = await api.courseLectures(course.slug);
-        const lectureCount = lectures.length;
-        totalAvail += lectureCount;
-        const cStats = getCourseStats(course.slug, lectureCount);
-        map[course.slug] = {
-          completed: cStats.lecturesCompleted,
-          total: cStats.totalLectures,
-          lecturesCompleted: cStats.lecturesCompleted,
-        };
-      } catch {
-        map[course.slug] = { completed: 0, total: 0, lecturesCompleted: 0 };
+    fetch('http://localhost:3000/api/courses/progress', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
-    })).then(() => {
-      setCourseStatsMap(map);
-      updateOverallProgress(totalAvail);
-    });
+    })
+      .then(res => res.json())
+      .then(data => {
+        const map: Record<string, any> = {};
+        let started = 0;
+        let completed = 0;
+        let lectures = 0;
+
+        data.forEach((p: any) => {
+          map[p.courseId] = {
+            completed: p.completedLectures,
+            inProgressLectures: p.inProgressLectures || 0,
+            total: p.totalLectures,
+            lecturesCompleted: p.completedLectures,
+            percentage: p.percentage,
+            status: p.status
+          };
+          if (p.percentage > 0) started++;
+          if (p.percentage === 100) completed++;
+          lectures += p.completedLectures;
+        });
+
+        setCourseStatsMap(map);
+        setDynamicStats({ coursesStarted: started, coursesCompleted: completed, lecturesCompleted: lectures });
+      })
+      .catch(console.error);
   }, [courses]);
 
   useEffect(() => {
@@ -294,7 +304,7 @@ export default function Dashboard() {
                     )}
                   </div>
                   <div>
-                    <div className="text-3xl font-extrabold text-white leading-none mb-1">{stats.coursesStarted}</div>
+                    <div className="text-3xl font-extrabold text-white leading-none mb-1">{dynamicStats.coursesStarted}</div>
                     <div className="text-[11px] text-slate-400 font-medium">Courses Started</div>
                   </div>
                 </button>
@@ -314,7 +324,7 @@ export default function Dashboard() {
                     )}
                   </div>
                   <div>
-                    <div className="text-3xl font-extrabold text-white leading-none mb-1">{stats.coursesCompleted}</div>
+                    <div className="text-3xl font-extrabold text-white leading-none mb-1">{dynamicStats.coursesCompleted}</div>
                     <div className="text-[11px] text-slate-400 font-medium">Courses Completed</div>
                   </div>
                 </button>
@@ -334,7 +344,7 @@ export default function Dashboard() {
                     )}
                   </div>
                   <div>
-                    <div className="text-3xl font-extrabold text-white leading-none mb-1">{stats.lecturesCompleted}</div>
+                    <div className="text-3xl font-extrabold text-white leading-none mb-1">{dynamicStats.lecturesCompleted}</div>
                     <div className="text-[11px] text-slate-400 font-medium">Lectures Completed</div>
                   </div>
                 </button>
@@ -430,9 +440,8 @@ export default function Dashboard() {
                   ) : (
                     <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                       {filteredCourses.map((c) => {
-                        const progress = courseStatsMap[c.slug] || { completed: 0, total: 0, lecturesCompleted: 0 };
-                        const percent = progress.total > 0 ? Math.round((progress.completed / progress.total) * 100) : 0;
-                        const isCourseActive = activeCourseId === c.slug;
+                        const progress = courseStatsMap[c.slug] || { completed: 0, inProgressLectures: 0, total: 10, lecturesCompleted: 0, percentage: 0, status: 'not_started' };
+                        const percent = progress.percentage;
                         
                         // Dynamic borders and badge colors
                         let topBorderColor = "border-t-slate-700";
@@ -444,47 +453,57 @@ export default function Dashboard() {
                         if (c.level === "Intermediate") diffColor = "bg-amber-500/10 border-amber-500/20 text-amber-400";
                         else if (c.level === "Advanced") diffColor = "bg-red-500/10 border-red-500/20 text-red-400";
 
+                        const isCourseActive = activeCourseId === c.slug;
+
                         return (
                           <Link key={c.id} to={`/course/${c.slug}`} className="group block active:scale-[0.97] transition-all duration-300 h-full">
                             <Card
                               onClick={() => handleCourseClick(c.slug)}
-                              className={`relative p-6 bg-[#161B22] border-x border-b border-[#2D3748] border-t-4 ${topBorderColor} rounded-[12px] transition-all duration-300 h-full flex flex-col justify-between overflow-hidden hover:-translate-y-[3px] hover:shadow-[0_4px_20px_rgba(59,130,246,0.1)]`}
+                              className={`relative p-6 bg-[#161B22] border-x border-b border-[#2D3748] border-t-4 ${topBorderColor} rounded-[12px] transition-all duration-300 h-full flex flex-col overflow-hidden hover:-translate-y-[3px] hover:shadow-[0_4px_20px_rgba(59,130,246,0.1)]`}
                             >
-                              <div className="flex flex-col gap-4">
-                                <div className="flex flex-col items-center justify-center gap-3">
-                                  <div className="relative">
-                                    <DynamicCourseIcon courseName={c.title} category={c.category} />
-                                    {isCourseActive && (
-                                      <span className="absolute top-0 left-1/2 -translate-x-1/2 w-[64px] h-[64px] rounded-[16px] bg-cyan-400/20 animate-ping pointer-events-none" />
-                                    )}
-                                  </div>
-                                  {/* Metadata Badges */}
-                                  <div className="flex gap-1.5 justify-center">
-                                    <span className={`px-2 py-0.5 rounded-[20px] text-[10px] font-semibold border ${diffColor}`}>
-                                      {c.level}
-                                    </span>
-                                    <span className="px-2 py-0.5 rounded-[20px] text-[10px] font-semibold bg-[#1F2937] border border-[#2D3748] text-slate-300">
-                                      {c.category}
-                                    </span>
-                                  </div>
+                              {/* Top: Image and Tags */}
+                              <div className="flex flex-col items-center justify-center gap-4 mb-5">
+                                <div className="relative">
+                                  <DynamicCourseIcon courseName={c.title} category={c.category} />
+                                  {isCourseActive && (
+                                    <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[64px] h-[64px] rounded-[16px] bg-cyan-400/20 animate-ping pointer-events-none" />
+                                  )}
                                 </div>
-                                <div className="text-center mt-2">
-                                  <h3 className="text-[16px] font-bold text-white group-hover:text-[#3B82F6] transition-colors">{c.title}</h3>
-                                  <p className="text-xs text-slate-400 mt-2 line-clamp-3 leading-relaxed min-h-[48px]">{c.description}</p>
+                                {/* Metadata Badges */}
+                                <div className="flex flex-wrap gap-1.5 justify-center">
+                                  <span className={`inline-flex items-center justify-center whitespace-nowrap overflow-hidden text-ellipsis px-2.5 py-1 rounded-full text-[11px] font-semibold border leading-none ${diffColor}`}>
+                                    {c.level}
+                                  </span>
+                                  <span className="inline-flex items-center justify-center whitespace-nowrap overflow-hidden text-ellipsis px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#1F2937] border border-[#2D3748] text-slate-300 leading-none">
+                                    {c.category}
+                                  </span>
                                 </div>
                               </div>
-                              <div className="mt-4 flex flex-col justify-end flex-grow">
-                                <div className="space-y-2 mb-5">
-                                  <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400">
+
+                              {/* Middle: Title & Description */}
+                              <div className="text-center mb-6 flex-grow flex flex-col">
+                                <h3 className="text-[16px] font-bold text-white group-hover:text-[#3B82F6] transition-colors line-clamp-2">{c.title}</h3>
+                                <p className="text-xs text-slate-400 mt-2 line-clamp-3 leading-relaxed">{c.description}</p>
+                              </div>
+
+                              {/* Bottom: Progress & Button */}
+                              <div className="flex flex-col justify-end border-t border-slate-700/30 pt-5 mt-auto">
+                                <div className="space-y-3 mb-5">
+                                  <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 mb-2">
                                     <span>Progress</span>
-                                    <span className="text-slate-300">{progress.lecturesCompleted} / {progress.total} Lectures ({percent}%)</span>
+                                    <span className="text-slate-300 whitespace-nowrap ml-2">{progress.completed} / {progress.total} Lectures ({percent}%)</span>
                                   </div>
                                   <div className="w-full h-1.5 bg-[#1F2937] rounded-full overflow-hidden">
-                                    <div className="h-full bg-gradient-to-r from-[#3B82F6] to-[#A855F7] rounded-full transition-all duration-500" style={{ width: `${percent}%` }}></div>
+                                    <div className="h-full bg-[#3B82F6] rounded-full transition-all duration-500" style={{ width: `${percent}%` }}></div>
                                   </div>
+                                  {progress.inProgressLectures > 0 && (
+                                    <div className="text-[10px] text-amber-400 font-medium mt-1">
+                                      {progress.inProgressLectures} In Progress
+                                    </div>
+                                  )}
                                 </div>
-                                <button className="w-full h-[36px] bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-[8px] flex items-center justify-center font-medium text-[13px] transition-colors border-none cursor-pointer">
-                                  {progress.lecturesCompleted > 0 ? "Continue Course" : "Start Course"}
+                                <button className={`w-full h-[36px] text-white rounded-[8px] flex items-center justify-center font-medium text-[13px] transition-colors border-none cursor-pointer ${percent === 100 ? 'bg-[#22C55E] hover:bg-[#16A34A]' : 'bg-[#3B82F6] hover:bg-[#2563EB]'}`}>
+                                  {percent === 100 ? "Completed" : percent > 0 ? "Continue" : "Start Course"}
                                 </button>
                               </div>
                             </Card>

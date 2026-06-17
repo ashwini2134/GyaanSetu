@@ -47,11 +47,11 @@
         },
         {
           "type": "practice",
-          "title": "Practice Exercise",
-          "instructions": "Write a simple Python script demonstrating What is AI?.",
-          "starterCode": "# Write your code here\n",
-          "solution": "# Example solution\nprint('Done')",
-          "hint": "Start by defining the main function."
+          "title": "Classifying AI vs Rule-Based Tasks",
+          "instructions": "Given a list of tasks, identify which ones use AI (learn from data) and which are rule-based (follow fixed instructions).",
+          "starterCode": "tasks = [\n    \"Sorting numbers\",\n    \"Translating language\",\n    \"Adding two numbers\",\n    \"Recognizing faces\",\n]\n# Print each task with \"Uses AI\" or \"Rule-based\"\nfor task in tasks:\n    if task == \"Sorting numbers\":\n        print(f\"{task} - Rule-based\")\n    elif task == \"Translating language\":\n        print(f\"{task} - Uses AI\")\n    elif task == \"Adding two numbers\":\n        print(f\"{task} - Rule-based\")\n    elif task == \"Recognizing faces\":\n        print(f\"{task} - Uses AI\")",
+          "solution": "tasks = [\"Sorting numbers\", \"Translating language\", \"Adding two numbers\", \"Recognizing faces\"]\nfor task in tasks:\n    if task in [\"Translating language\", \"Recognizing faces\"]:\n        print(f\"{task} - Uses AI\")\n    else:\n        print(f\"{task} - Rule-based\")",
+          "hint": "Think about which tasks require learning from examples vs. following fixed instructions."
         }
       ]
     },
@@ -109,11 +109,11 @@
         },
         {
           "type": "practice",
-          "title": "Practice Exercise",
-          "instructions": "Write a simple Python script demonstrating AI vs ML vs DL.",
-          "starterCode": "# Write your code here\n",
-          "solution": "# Example solution\nprint('Done')",
-          "hint": "Start by defining the main function."
+          "title": "Categorizing AI Subfields",
+          "instructions": "Categorize each technology as AI, ML, or Deep Learning.",
+          "starterCode": "terms = {\n    \"Spam filter\": \"\",\n    \"Face recognition\": \"\",\n    \"Chatbot\": \"\",\n}\n# Fill in: AI, ML, or DL\nterms[\"Spam filter\"] = \"ML\"\nterms[\"Face recognition\"] = \"DL\"\nterms[\"Chatbot\"] = \"AI\"\nfor term, category in terms.items():\n    print(f\"{term}: {category}\")",
+          "solution": "terms = {\"Spam filter\": \"ML\", \"Face recognition\": \"DL\", \"Chatbot\": \"AI\"}\nfor term, category in terms.items():\n    print(f\"{term}: {category}\")",
+          "hint": "AI is the broadest category. ML learns from data. Deep Learning uses neural networks with many layers."
         }
       ]
     },

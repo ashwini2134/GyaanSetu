@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api, getProjectMetadata } from '../api';
 import { useLessonData } from '../hooks/useLessonData';
-import { useProgress, getCourseProgress, isLectureUnlocked, tryAutoCompleteLecture } from '../hooks/useProgress';
+import { useLectureProgress, useCourseProgress } from '../hooks/useLectureProgress';
+import { useProgress as useLegacyProgress } from '../hooks/useProgress';
 import {
   LessonSection,
   QuizEngine,
@@ -10,7 +11,7 @@ import {
   SummaryCard,
 } from '../components/lesson';
 import type { CodingProblem, ProjectSummary } from '../types/lesson';
-import { ArrowLeft, ArrowRight, CheckCircle, Lock } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Check, X, Lock } from 'lucide-react';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -115,24 +116,40 @@ export default function LecturePage() {
   const [openSimilarIndex, setOpenSimilarIndex] = useState<number>(-1);
 
   const { lessonData, loading, error } = useLessonData(slug, lectureNumber);
-  const { 
-    progress, markSectionVisited, markPracticeAttempted, markPracticeCompleted, 
-    markQuizCompleted, markProblemCompleted, markHandsOnTaskCompleted, markLectureCompleted
-  } = useProgress(slug, lectureNumber);
+  const { markSectionComplete, isSectionCompleted } = useLectureProgress(slug, lectureNumber ? String(lectureNumber) : undefined);
+  const { progress, markProblemCompleted, markQuizCompleted, markHandsOnTaskCompleted, markLectureCompleted: legacyMarkLectureCompleted, markPracticeAttempted, markPracticeCompleted } = useLegacyProgress(slug, lectureNumber);
+  const { isLectureUnlocked } = useCourseProgress(slug);
 
   const [currentPageIdx, setCurrentPageIdx] = useState(0);
   const [allLectures, setAllLectures] = useState<Array<{ number: number; title: string }>>([]);
   const [hasResumed, setHasResumed] = useState(false);
   const [showAllCompleted, setShowAllCompleted] = useState(false);
-  const visitedRef = useRef<Set<number>>(new Set());
+  const [scrolledToBottom, setScrolledToBottom] = useState(false);
+  const scrollRef = useRef<HTMLElement>(null);
+  const [skippedSections, setSkippedSections] = useState<Set<number>>(new Set());
+
+  // Check if content fits without scrolling
+  useEffect(() => {
+    setScrolledToBottom(false);
+    const timer = setTimeout(() => {
+      if (scrollRef.current) {
+        const { clientHeight, scrollHeight } = scrollRef.current;
+        if (scrollHeight <= clientHeight + 300) {
+          setScrolledToBottom(true);
+        }
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [currentPageIdx, lessonData]);
 
   // Reset state when navigating to a different lecture
   useEffect(() => {
     setCurrentPageIdx(0);
     setHasResumed(false);
-    visitedRef.current.clear();
+    setSkippedSections(new Set());
     setRetakingQuiz(false);
     setShowAllCompleted(false);
+    setScrolledToBottom(false);
   }, [slug, lectureNumber]);
 
   // Load lecture list for prev/next lecture navigation
@@ -148,13 +165,12 @@ export default function LecturePage() {
     }).catch(() => {});
   }, [slug, lectureNumber, navigate]);
 
-  // Derive unlock status from stored progress (no state needed — avoids loops)
+  // Derive unlock status from stored progress
   const unlocked = useMemo(() => {
     if (!slug) return null;
     if (lectureNumber === 0) return true;
-    const cp = getCourseProgress(slug);
-    return isLectureUnlocked(lectureNumber, cp);
-  }, [slug, lectureNumber]);
+    return isLectureUnlocked(lectureNumber);
+  }, [slug, lectureNumber, isLectureUnlocked]);
 
   // Build ordered page list
   const pages: Page[] = useMemo(() => {
@@ -179,12 +195,9 @@ export default function LecturePage() {
     }
   }, [pages.length, currentPageIdx]);
 
-  // Resume from last visited section when re-entering a lecture
-
+  // Resume logic
   useEffect(() => {
     if (!lessonData || !pages.length) return;
-    
-    let targetIdx = currentPageIdx;
     
     // First run: attempt to resume
     if (!hasResumed) {
@@ -197,76 +210,51 @@ export default function LecturePage() {
         const summaryIdx = pages.findIndex(p => p.type === 'summary');
         if (summaryIdx >= 0) {
           setCurrentPageIdx(summaryIdx);
-          targetIdx = summaryIdx;
           // Clean URL
           window.history.replaceState({}, '', window.location.pathname);
         }
       } else {
-        const lastId = progress.lastSection;
-        if (lastId && lastId !== 'overview' && lastId !== 'summary') {
-          const idx = pages.findIndex(p => {
-            if (p.type === 'section') return lessonData.sections[p.index]?.id === lastId;
-            return p.type === lastId;
-          });
-          if (idx > 0) {
-            setCurrentPageIdx(idx);
-            targetIdx = idx;
+        // Resume to the first uncompleted section
+        for (let i = 0; i < pages.length; i++) {
+          if (!isSectionCompleted(i + 1)) {
+            setCurrentPageIdx(i);
+            break;
           }
         }
       }
     }
-
-    // Now mark as visited
-    const page = pages[targetIdx];
-    if (!page) return;
-    if (visitedRef.current.has(targetIdx)) return;
-    visitedRef.current.add(targetIdx);
-    
-    // Check if lecture can be auto-completed when summary is reached
-    if (page.type === 'summary' && slug && lessonData) {
-      const totalProblems = (lessonData.problems ?? []).length;
-      const hasQuiz = (lessonData.quiz ?? []).length > 0;
-      const hasProject = (lessonData.projects ?? []).length > 0;
-      tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, totalProblems, hasQuiz, hasProject);
-    }
-
-    if (page.type === 'section') {
-      markSectionVisited(lessonData.sections[page.index].id);
-    } else {
-      markSectionVisited(page.type);
-    }
-
-    // Trigger auto-complete check after marking section as visited
-    setTimeout(() => {
-      if (slug) {
-        tryAutoCompleteLecture(
-          slug, 
-          lectureNumber, 
-          lessonData.sections.length, 
-          lessonData.problems?.length ?? 0, 
-          (lessonData.quiz?.length ?? 0) > 0,
-          (lessonData.projects?.length ?? 0) > 0,
-        );
-      }
-    }, 0);
-  }, [lessonData, pages, progress.lastSection, hasResumed, currentPageIdx, markSectionVisited, slug, lectureNumber]);
+  }, [lessonData, pages, hasResumed, isSectionCompleted]);
 
   // Compute status for each page item
   const pageStatuses: PageStatus[] = useMemo(() => {
-    return pages.map((page, idx) => {
+    return pages.map((_, idx) => {
       if (idx === currentPageIdx) return 'current';
-      
-      const id = pageId(page, lessonData?.sections ?? []);
-      let isVisited = false;
-      if (id === 'quiz') isVisited = progress.quizCompleted;
-      else if (id === 'problems') isVisited = progress.problemsCompleted.length > 0;
-      else if (id === 'project') isVisited = !!progress.projectCompleted;
-      else if (id === 'summary') isVisited = progress.lectureCompleted;
-      else isVisited = !!progress.sections[id]?.visited;
-
-      return isVisited ? 'completed' : 'upcoming';
+      if (isSectionCompleted(idx + 1)) return 'completed';
+      return 'upcoming';
     });
-  }, [pages, currentPageIdx, progress, lessonData]);
+  }, [pages, currentPageIdx, isSectionCompleted]);
+
+  // Sync legacy progress (quiz, problems) to the new strict sections system
+  useEffect(() => {
+    if (!pages.length || !lessonData) return;
+
+    // Sync Quiz
+    if (progress.quizCompleted) {
+      const quizIdx = pages.findIndex(p => p.type === 'quiz');
+      if (quizIdx !== -1 && !isSectionCompleted(quizIdx + 1)) {
+        markSectionComplete(quizIdx + 1);
+      }
+    }
+
+    // Sync Problems
+    const problemsIdx = pages.findIndex(p => p.type === 'problems');
+    if (problemsIdx !== -1) {
+      const requiredProblems = Math.min(2, lessonData.problems?.length ?? 0);
+      if (requiredProblems > 0 && progress.problemsCompleted.length >= requiredProblems && !isSectionCompleted(problemsIdx + 1)) {
+        markSectionComplete(problemsIdx + 1);
+      }
+    }
+  }, [pages, lessonData, progress.quizCompleted, progress.problemsCompleted.length, isSectionCompleted, markSectionComplete]);
 
   if (!slug) return null;
 
@@ -299,7 +287,6 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
   const quiz = lessonData.quiz ?? [];
   const problems: CodingProblem[] = lessonData.problems ?? [];
   const projects: ProjectSummary[] = lessonData.projects ?? [];
-  const hasProject = projects.length > 0;
   const summary = lessonData.summary;
 
   const currentPage = pages[currentPageIdx];
@@ -307,6 +294,18 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
   const isLastPage = currentPageIdx === pages.length - 1;
 
   const goNext = () => {
+    if (currentPage?.type === 'section') {
+      if (scrolledToBottom) {
+        markSectionComplete(currentPageIdx + 1);
+      } else {
+        setSkippedSections(prev => new Set(prev).add(currentPageIdx));
+      }
+    } else if (currentPage?.type === 'quiz' || currentPage?.type === 'problems') {
+      if (!isSectionCompleted(currentPageIdx + 1)) {
+        setSkippedSections(prev => new Set(prev).add(currentPageIdx));
+      }
+    }
+    
     if (!isLastPage) setCurrentPageIdx(c => c + 1);
   };
   const goPrev = () => {
@@ -356,8 +355,9 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
               const status = pageStatuses[idx];
               const id = pageId(page, lessonData.sections);
               const label = pageLabel(page, lessonData.sections);
+              const solvedProblemsCount = progress.problemsCompleted.length;
+              const problemsAttempted = progress.sections['problems']?.practiceAttempted;
 
-              const projectInProgress = id === 'project' && !progress.projectCompleted;
               return (
                 <button
                   key={id}
@@ -371,15 +371,35 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
                   {/* Status indicator */}
                   <span className="w-4 h-4 flex items-center justify-center flex-shrink-0">
                     {id === 'project' && progress.projectCompleted ? (
-                      <CheckCircle size={14} className="text-green-400" />
-                    ) : projectInProgress ? (
-                      <span className="w-2 h-2 rounded-full bg-blue-400 ring-1 ring-blue-400/50" />
+                      <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
+                        <Check size={10} className="text-white" strokeWidth={3} />
+                      </div>
+                    ) : id === 'problems' ? (
+                      solvedProblemsCount >= 2 ? (
+                        <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
+                          <Check size={10} className="text-white" strokeWidth={3} />
+                        </div>
+                      ) : problemsAttempted || skippedSections.has(idx) ? (
+                        <div className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center">
+                          <X size={10} className="text-white" strokeWidth={3} />
+                        </div>
+                      ) : status === 'current' ? (
+                        <div className="w-4 h-4 rounded-full bg-blue-500" />
+                      ) : (
+                        <div className="w-4 h-4 rounded-full border-2 border-slate-500" />
+                      )
+                    ) : isSectionCompleted(idx + 1) ? (
+                      <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
+                        <Check size={10} className="text-white" strokeWidth={3} />
+                      </div>
                     ) : status === 'current' ? (
-                      <span className="w-2 h-2 rounded-full bg-blue-400" />
-                    ) : progress.sections[id]?.visited || status === 'completed' ? (
-                      <CheckCircle size={14} className="text-green-400" />
+                      <div className="w-4 h-4 rounded-full bg-blue-500" />
+                    ) : skippedSections.has(idx) ? (
+                      <div className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center">
+                        <X size={10} className="text-white" strokeWidth={3} />
+                      </div>
                     ) : (
-                      <span className="w-2 h-2 rounded-full bg-slate-600" />
+                      <div className="w-4 h-4 rounded-full border-2 border-slate-500" />
                     )}
                   </span>
                   <span className="truncate">{label}</span>
@@ -390,9 +410,17 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
         </aside>
 
         {/* Right: lecture content */}
-        <main className="flex-1 overflow-y-auto">
+        <main 
+          ref={scrollRef}
+          className="flex-1 overflow-y-auto"
+          onScroll={(e) => {
+            const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
+            if (scrollTop + clientHeight >= scrollHeight - 300) {
+              setScrolledToBottom(true);
+            }
+          }}
+        >
           <div className="p-6 max-w-4xl mx-auto">
-            {/* ── Current page ── */}
             {currentPage?.type === 'section' && (
               <LessonSection
                 section={lessonData.sections[currentPage.index]}
@@ -400,9 +428,6 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
                   onPracticeAttempt={() => markPracticeAttempted(lessonData.sections[currentPage.index].id)}
                   onPracticeComplete={() => {
                     markPracticeCompleted(lessonData.sections[currentPage.index].id);
-                    if (slug && lessonData) {
-                      tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, problems.length, quiz.length > 0, hasProject);
-                    }
                   }}
               />
             )}
@@ -447,12 +472,7 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
                       onComplete={(score, total) => {
                         setRetakingQuiz(false);
                         markQuizCompleted(score, total);
-                        if (score / total >= 0.6) {
-                          markSectionVisited('quiz');
-                          if (slug && lessonData) {
-                            tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, problems.length, quiz.length > 0, hasProject);
-                          }
-                        }
+                        markSectionComplete(currentPageIdx + 1);
                       }}
                     />
                   )}
@@ -478,7 +498,11 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
                     )}
                   </p>
                   <div className="space-y-3">
-                    {problems.map((problem, i) => (
+                    {problems.length === 0 ? (
+                      <div className="p-8 text-center bg-slate-900/30 border border-slate-800 rounded-2xl">
+                        <p className="text-slate-400">No problems available yet for this module.</p>
+                      </div>
+                    ) : problems.map((problem, i) => (
                       <ProblemCard
                         key={problem.id}
                         problem={problem}
@@ -486,16 +510,17 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
                         isOpen={openProblemIndex === i}
                         onOpenChange={(isOpen) => setOpenProblemIndex(isOpen ? i : -1)}
                         completed={progress.problemsCompleted.includes(problem.id)}
+                        onAttempt={() => markPracticeAttempted('problems')}
                         onComplete={(id) => {
                           const alreadySolved = progress.problemsCompleted.includes(id);
                           markProblemCompleted(id);
-                          markSectionVisited('problems');
                           markHandsOnTaskCompleted();
-                          if (slug && lessonData) {
-                            tryAutoCompleteLecture(slug, lectureNumber, lessonData.sections.length, problems.length, quiz.length > 0, hasProject);
-                          }
+                          
+                          // Problem logic for Section 5: there are exactly 2 required problems.
+                          // If this brings our total solved to 2 or more, mark section complete.
                           if (!alreadySolved) {
-                            if (progress.problemsCompleted.length + 1 >= problems.length) {
+                            if (progress.problemsCompleted.length + 1 >= Math.min(2, problems.length)) {
+                              markSectionComplete(currentPageIdx + 1);
                               setTimeout(() => {
                                 setOpenProblemIndex(-1);
                                 setShowAllCompleted(true);
@@ -690,14 +715,10 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
                   lectureTitle={lessonData.title}
                   nextLectureTitle={nextLecture?.title}
                   onNext={() => {
-                    const sectionsVisited = Object.values(progress.sections).filter(s => s.visited).length;
-                    const allSectionsDone = sectionsVisited >= lessonData.sections.length;
-                    const quizDone = !quiz.length || progress.quizCompleted;
-                    const problemsDone = progress.problemsCompleted.length >= problems.length;
-                    const projectDone = !hasProject || progress.projectCompleted;
-                    if (allSectionsDone && quizDone && problemsDone && projectDone) {
-                      markLectureCompleted();
-                    }
+                    // Mark summary section (section 6 or equivalent) as complete
+                    markSectionComplete(currentPageIdx + 1);
+                    legacyMarkLectureCompleted();
+                    
                     if (nextLecture) {
                       navigate(`/course/${slug}/lecture/${nextLecture.number}`);
                     } else {

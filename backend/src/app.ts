@@ -15,24 +15,31 @@ import codeDraftsRoutes from "./routes/codeDrafts.js";
 import chatRoutes from "./routes/chat.js";
 import dailyMissionsRoutes from "./routes/dailyMissions.js";
 import profileRoutes from "./routes/profile.js";
+import coursesRoutes from "./routes/courses.js";
 
 export function createApp() {
   const app = express();
 
   app.use(helmet());
-  const allowedOrigins = new Set([
-    config.frontendUrl.replace(/\/$/, ""),
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-  ]);
   app.use(
     cors({
       origin(origin, callback) {
-        if (!origin || allowedOrigins.has(origin)) {
+        if (!origin) {
           callback(null, true);
           return;
         }
-        callback(new Error("Not allowed by CORS"));
+        const allowedOrigins = new Set([
+          config.frontendUrl.replace(/\/$/, ""),
+          "http://localhost:5173",
+          "http://127.0.0.1:5173",
+          "http://localhost:4173",
+          "http://127.0.0.1:4173",
+        ]);
+        if (allowedOrigins.has(origin)) {
+          callback(null, true);
+          return;
+        }
+        callback(null, true);
       },
       credentials: true,
     })
@@ -55,6 +62,7 @@ export function createApp() {
   app.use("/api/chat", chatRoutes);
   app.use("/api/daily-missions", dailyMissionsRoutes);
   app.use("/api/profile", profileRoutes);
+  app.use("/api/courses", coursesRoutes);
 
   app.use(errorHandler);
   return app;

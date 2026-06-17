@@ -134,7 +134,7 @@ export async function createPasswordResetToken(userId: string): Promise<string> 
   return token;
 }
 
-export async function consumePasswordResetToken(token: string): Promise<string> {
+export async function consumePasswordResetToken(token: string): Promise<string | null> {
   const tokenHash = hashToken(token);
   
   const record = await prisma.passwordResetToken.findUnique({
@@ -142,7 +142,7 @@ export async function consumePasswordResetToken(token: string): Promise<string> 
   });
 
   if (!record || record.usedAt || record.expiresAt < new Date()) {
-    throw new Error("Invalid or expired reset token");
+    return null;
   }
 
   await prisma.passwordResetToken.update({
@@ -169,7 +169,7 @@ export async function createOAuthExchangeCode(userId: string): Promise<string> {
   return code;
 }
 
-export async function consumeOAuthExchangeCode(code: string): Promise<string> {
+export async function consumeOAuthExchangeCode(code: string): Promise<string | null> {
   const codeHash = hashToken(code);
 
   const record = await prisma.oAuthExchangeCode.findUnique({
@@ -177,7 +177,7 @@ export async function consumeOAuthExchangeCode(code: string): Promise<string> {
   });
 
   if (!record || record.usedAt || record.expiresAt < new Date()) {
-    throw new Error("Invalid or expired exchange code");
+    return null;
   }
 
   await prisma.oAuthExchangeCode.update({

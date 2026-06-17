@@ -49,11 +49,11 @@
         },
         {
           "type": "practice",
-          "title": "Practice Exercise",
-          "instructions": "Write a simple Python script demonstrating What is Machine Learning & Supervised Learning.",
-          "starterCode": "# Write your code here\n",
-          "solution": "# Example solution\nprint('Done')",
-          "hint": "Start by defining the main function."
+          "title": "Classifying ML Problems",
+          "instructions": "Classify each problem as classification or regression.",
+          "starterCode": "# Classify each problem\nproblems = [\n    \"Predict house price\",\n    \"Spam or not spam\",\n    \"Student exam score\",\n    \"Image: cat or dog\",\n]\nfor problem in problems:\n    if problem in [\"Predict house price\", \"Student exam score\"]:\n        print(f\"{problem}: regression\")\n    else:\n        print(f\"{problem}: classification\")",
+          "solution": "problems = [\"Predict house price\", \"Spam or not spam\", \"Student exam score\", \"Image: cat or dog\"]\nfor problem in problems:\n    if problem in [\"Predict house price\", \"Student exam score\"]:\n        print(f\"{problem}: regression\")\n    else:\n        print(f\"{problem}: classification\")",
+          "hint": "Classification predicts a category. Regression predicts a number."
         }
       ]
     },
@@ -100,11 +100,11 @@
         },
         {
           "type": "practice",
-          "title": "Practice Exercise",
-          "instructions": "Write a simple Python script demonstrating Unsupervised & Reinforcement Learning.",
-          "starterCode": "# Write your code here\n",
-          "solution": "# Example solution\nprint('Done')",
-          "hint": "Start by defining the main function."
+          "title": "Identifying Learning Paradigms",
+          "instructions": "Match each scenario to the correct learning paradigm: supervised, unsupervised, or reinforcement.",
+          "starterCode": "# Identify the learning paradigm\nscenarios = [\n    \"Chess AI learns by playing games\",\n    \"Grouping customers by purchase patterns\",\n    \"Email spam detector trained on labeled emails\",\n]\nfor scenario in scenarios:\n    if \"labeled\" in scenario:\n        print(f\"{scenario}: supervised\")\n    elif \"grouping\" in scenario.lower():\n        print(f\"{scenario}: unsupervised\")\n    else:\n        print(f\"{scenario}: reinforcement\")",
+          "solution": "scenarios = [\n    \"Chess AI learns by playing games\",\n    \"Grouping customers by purchase patterns\",\n    \"Email spam detector trained on labeled emails\",\n]\nfor scenario in scenarios:\n    if \"labeled\" in scenario:\n        print(f\"{scenario}: supervised\")\n    elif \"grouping\" in scenario.lower():\n        print(f\"{scenario}: unsupervised\")\n    else:\n        print(f\"{scenario}: reinforcement\")",
+          "hint": "Supervised uses labeled data, Unsupervised finds patterns, Reinforcement uses rewards."
         }
       ]
     },

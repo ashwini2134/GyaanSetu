@@ -50,11 +50,11 @@
         },
         {
           "type": "practice",
-          "title": "Practice Exercise",
-          "instructions": "Write a simple Python script demonstrating What is NLP & Tokenization.",
-          "starterCode": "# Write your code here\n",
-          "solution": "# Example solution\nprint('Done')",
-          "hint": "Start by defining the main function."
+          "title": "Tokenizing Text & Bag of Words",
+          "instructions": "Tokenize a sentence and count word frequencies (Bag of Words).",
+          "starterCode": "text = \"the cat sat on the mat\"\ntokens = text.split()\nprint(f\"Tokens: {tokens}\")\nfrom collections import Counter\nbow = Counter(tokens)\nfor word, count in bow.items():\n    print(f\"  '{word}': {count}\")",
+          "solution": "text = \"the cat sat on the mat\"\ntokens = text.split()\nprint(f\"Tokens: {tokens}\")\nfrom collections import Counter\nbow = Counter(tokens)\nfor word, count in bow.items():\n    print(f\"  '{word}': {count}\")",
+          "hint": "Tokenization splits text into individual tokens. Bag of Words counts how often each word appears."
         }
       ]
     },
@@ -102,11 +102,11 @@
         },
         {
           "type": "practice",
-          "title": "Practice Exercise",
-          "instructions": "Write a simple Python script demonstrating Word Embeddings & Large Language Models.",
-          "starterCode": "# Write your code here\n",
-          "solution": "# Example solution\nprint('Done')",
-          "hint": "Start by defining the main function."
+          "title": "Computing Word Similarity",
+          "instructions": "Calculate similarity between word pairs using letter overlap (simplified embedding).",
+          "starterCode": "# Word similarity using character overlap\ndef similarity(word1, word2):\n    common = len(set(word1) & set(word2))\n    total = len(set(word1) | set(word2))\n    return common / total if total > 0 else 0\npairs = [(\"king\", \"queen\"), (\"king\", \"apple\"), (\"apple\", \"orange\")]\nfor w1, w2 in pairs:\n    sim = similarity(w1, w2)\n    print(f\"{w1} ↔ {w2}: {sim:.2f}\")",
+          "solution": "def similarity(word1, word2):\n    common = len(set(word1) & set(word2))\n    total = len(set(word1) | set(word2))\n    return common / total if total > 0 else 0\npairs = [(\"king\", \"queen\"), (\"king\", \"apple\"), (\"apple\", \"orange\")]\nfor w1, w2 in pairs:\n    sim = similarity(w1, w2)\n    print(f\"{w1} ↔ {w2}: {sim:.2f}\")",
+          "hint": "Word embeddings place similar words close together in vector space. Similar words share more common letters."
         }
       ]
     },

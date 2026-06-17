@@ -78,11 +78,12 @@ interface ProblemCardProps {
   index: number;
   completed?: boolean;
   onComplete?: (id: string) => void;
+  onAttempt?: () => void;
   isOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
 
-export default function ProblemCard({ problem, index, completed, onComplete, isOpen, onOpenChange }: ProblemCardProps) {
+export default function ProblemCard({ problem, index, completed, onComplete, onAttempt, isOpen, onOpenChange }: ProblemCardProps) {
   const [localOpen, setLocalOpen] = useState(false);
   const open = isOpen !== undefined ? isOpen : localOpen;
   const setOpen = (val: boolean) => {
@@ -135,6 +136,7 @@ export default function ProblemCard({ problem, index, completed, onComplete, isO
 
   // Run — just execute, show output, no test cases
   const handleRun = (_code: string, output: string, error: string | null) => {
+    onAttempt?.();
     setRunOutput(output);
     setRunError(error);
     // Clear any previous submission results when running new code
@@ -143,6 +145,7 @@ export default function ProblemCard({ problem, index, completed, onComplete, isO
 
   // Submit — run test cases, show submission results, update progress
   const handleSubmit = (code: string, _output: string, _error: string | null) => {
+    onAttempt?.();
     if (allPassed) return;
     if (problem.testCases.length === 0) {
       completeProblem();

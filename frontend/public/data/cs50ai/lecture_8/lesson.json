@@ -47,11 +47,11 @@
         },
         {
           "type": "practice",
-          "title": "Practice Exercise",
-          "instructions": "Write a simple Python script demonstrating AI Bias & Privacy.",
-          "starterCode": "# Write your code here\n",
-          "solution": "# Example solution\nprint('Done')",
-          "hint": "Start by defining the main function."
+          "title": "Detecting Bias in Training Data",
+          "instructions": "Analyze training data to detect gender bias when data excludes certain groups.",
+          "starterCode": "# Detect bias in training data\napplicants = [\n    {\"name\": \"Alice\", \"gender\": \"F\", \"score\": 92},\n    {\"name\": \"Bob\", \"gender\": \"M\", \"score\": 78},\n    {\"name\": \"Eve\", \"gender\": \"F\", \"score\": 95},\n    {\"name\": \"Dave\", \"gender\": \"M\", \"score\": 85},\n]\nmale_scores = [a[\"score\"] for a in applicants if a[\"gender\"] == \"M\"]\navg = sum(male_scores) / len(male_scores)\nprint(f\"Model trained on {len(male_scores)} male applicants\")\nprint(f\"Average male score: {avg}\")\nprint(f\"Alice ({applicants[0]['score']}) would be compared to male average: {avg}\")\nprint(\"Issue: Female applicants excluded from training data!\")",
+          "solution": "applicants = [{\"name\": \"Alice\", \"gender\": \"F\", \"score\": 92}, {\"name\": \"Bob\", \"gender\": \"M\", \"score\": 78}, {\"name\": \"Eve\", \"gender\": \"F\", \"score\": 95}, {\"name\": \"Dave\", \"gender\": \"M\", \"score\": 85}]\nmale_scores = [a[\"score\"] for a in applicants if a[\"gender\"] == \"M\"]\navg = sum(male_scores) / len(male_scores)\nprint(f\"Model trained on {len(male_scores)} male applicants\")\nprint(f\"Average male score: {avg}\")\nprint(f\"Alice ({applicants[0]['score']}) would be compared to male average: {avg}\")",
+          "hint": "Bias occurs when training data doesn't represent all groups fairly."
         }
       ]
     },
@@ -98,11 +98,11 @@
         },
         {
           "type": "practice",
-          "title": "Practice Exercise",
-          "instructions": "Write a simple Python script demonstrating Hallucinations, Deepfakes & Accountability.",
-          "starterCode": "# Write your code here\n",
-          "solution": "# Example solution\nprint('Done')",
-          "hint": "Start by defining the main function."
+          "title": "Simulating AI Hallucination",
+          "instructions": "Simulate how an AI responds to known vs unknown questions — and see when hallucination can occur.",
+          "starterCode": "# Simulating AI responses\nknowledge_base = {\n    \"capital of France\": \"Paris\",\n    \"largest ocean\": \"Pacific\",\n}\nquestions = [\"capital of France\", \"population of Mars\", \"largest ocean\"]\nprint(\"AI Responses:\")\nfor q in questions:\n    if q in knowledge_base:\n        print(f\"  Q: {q}\\n  A: {knowledge_base[q]} ✅\")\n    else:\n        print(f\"  Q: {q}\\n  A: (AI might hallucinate a plausible answer) ❌\")\nprint(\"\\nAlways verify AI outputs!\")",
+          "solution": "knowledge_base = {\"capital of France\": \"Paris\", \"largest ocean\": \"Pacific\"}\nquestions = [\"capital of France\", \"population of Mars\", \"largest ocean\"]\nfor q in questions:\n    if q in knowledge_base:\n        print(f\"  Q: {q}\\n  A: {knowledge_base[q]} ✅\")\n    else:\n        print(f\"  Q: {q}\\n  A: (AI might hallucinate) ❌\")\nprint(\"Always verify AI outputs!\")",
+          "hint": "Hallucinations happen when AI confidently generates false information because it doesn't know the answer."
         }
       ]
     },

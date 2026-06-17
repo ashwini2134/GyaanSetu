@@ -56,10 +56,10 @@ export default function CoursesPage() {
 
                     {/* Metadata Badges */}
                     <div className="flex gap-1.5">
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                      <span className="inline-flex items-center justify-center whitespace-nowrap overflow-hidden text-ellipsis px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-500/10 border border-blue-500/20 text-blue-400 leading-none">
                         {course.level}
                       </span>
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-800 border border-slate-700 text-slate-300">
+                      <span className="inline-flex items-center justify-center whitespace-nowrap overflow-hidden text-ellipsis px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-800 border border-slate-700 text-slate-300 leading-none">
                         {course.category}
                       </span>
                     </div>

@@ -53,11 +53,11 @@
         },
         {
           "type": "practice",
-          "title": "Practice Exercise",
-          "instructions": "Write a simple Python script demonstrating What You Have Learned.",
-          "starterCode": "# Write your code here\n",
-          "solution": "# Example solution\nprint('Done')",
-          "hint": "Start by defining the main function."
+          "title": "Planning Your AI Project",
+          "instructions": "Define a project plan with name, AI concept, inputs, and outputs.",
+          "starterCode": "# Define your project plan\nproject = {\n    \"name\": \"AI Chatbot\",\n    \"ai_concept\": \"NLP\",\n    \"input\": \"User question\",\n    \"output\": \"AI answer\"\n}\nfor key, value in project.items():\n    print(f\"{key}: {value}\")",
+          "solution": "project = {\"name\": \"AI Chatbot\", \"ai_concept\": \"NLP\", \"input\": \"User question\", \"output\": \"AI answer\"}\nfor key, value in project.items():\n    print(f\"{key}: {value}\")",
+          "hint": "Think about which AI topic from the course you want to apply in your project."
         }
       ]
     },
@@ -105,11 +105,11 @@
         },
         {
           "type": "practice",
-          "title": "Practice Exercise",
-          "instructions": "Write a simple Python script demonstrating Choose Your Project.",
-          "starterCode": "# Write your code here\n",
-          "solution": "# Example solution\nprint('Done')",
-          "hint": "Start by defining the main function."
+          "title": "Selecting Your Project Path",
+          "instructions": "Review the available project options and select one that matches your interests.",
+          "starterCode": "# Explore your project options\noptions = [\n    \"1. AI Chatbot - NLP & prompt engineering\",\n    \"2. Story Generator - language models\",\n    \"3. Resume Builder - text generation\",\n    \"4. Search Visualizer - BFS/DFS algorithms\",\n]\nprint(\"Available Projects:\")\nfor opt in options:\n    print(f\"  {opt}\")\nchoice = 1\nprint(f\"\\nI choose option {choice}!\")\nprint(\"Reason: I want to learn how chatbots process language.\")",
+          "solution": "options = [\"1. AI Chatbot - NLP\", \"2. Story Generator\", \"3. Resume Builder\", \"4. Search Visualizer\"]\nfor opt in options:\n    print(f\"  {opt}\")\nchoice = 1\nprint(f\"\\nI choose option {choice}!\")",
+          "hint": "Pick a project that matches the AI topic you enjoyed most in the course."
         }
       ]
     },
