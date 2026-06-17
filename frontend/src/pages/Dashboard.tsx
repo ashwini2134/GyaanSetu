@@ -437,54 +437,62 @@ export default function Dashboard() {
                       {filteredCourses.map((c) => {
                         const progress = courseStatsMap[c.slug] || { completed: 0, total: 0, lecturesCompleted: 0 };
                         const percent = progress.total > 0 ? Math.round((progress.completed / progress.total) * 100) : 0;
-                        const isCourseActive = activeCourseId === c.slug;
+                        
+                        // Dynamic borders and badge colors
+                        let topBorderColor = "border-t-slate-700";
+                        if (c.category === "Programming") topBorderColor = "border-t-[#3B82F6]";
+                        else if (c.category === "Artificial Intelligence") topBorderColor = "border-t-[#A855F7]";
+                        else if (c.category === "Computer Science") topBorderColor = "border-t-[#22C55E]";
+
+                        let diffColor = "bg-green-500/10 border-green-500/20 text-green-400";
+                        if (c.level === "Intermediate") diffColor = "bg-amber-500/10 border-amber-500/20 text-amber-400";
+                        else if (c.level === "Advanced") diffColor = "bg-red-500/10 border-red-500/20 text-red-400";
+
                         return (
-                          <Link key={c.id} to={`/course/${c.slug}`} className="group block active:scale-[0.97] transition-all duration-300">
+                          <Link key={c.id} to={`/course/${c.slug}`} className="group block active:scale-[0.97] transition-all duration-300 h-full">
                             <Card
                               onClick={() => handleCourseClick(c.slug)}
-                              className={`relative p-6 bg-slate-950/40 border rounded-3xl transition-all duration-300 h-full flex flex-col justify-between overflow-hidden ${
-                                isCourseActive
-                                  ? 'border-cyan-500/80 bg-cyan-950/5 scale-[1.02] shadow-lg shadow-cyan-500/10'
-                                  : 'border-slate-800/60 hover:shadow-xl hover:shadow-cyan-950/10 hover:border-cyan-500/20'
-                              }`}
+                              className={`relative p-6 bg-[#161B22] border-x border-b border-[#2D3748] border-t-4 ${topBorderColor} rounded-[12px] transition-all duration-300 h-full flex flex-col justify-between overflow-hidden hover:-translate-y-[3px] hover:shadow-[0_4px_20px_rgba(59,130,246,0.1)]`}
                             >
                               <div className="flex flex-col gap-4">
                                 <div className="flex flex-col items-center justify-center gap-3">
-                                  <div className="relative w-12 h-12 rounded-xl bg-slate-900/60 border border-slate-800/80 flex items-center justify-center flex-shrink-0">
+                                  <div className="relative w-12 h-12 rounded-[12px] bg-[#1F2937] border border-[#2D3748] flex items-center justify-center flex-shrink-0">
                                     {c.slug === 'cs50p' ? (
-                                      <span className="font-bold text-sm text-cyan-400">Py</span>
+                                      <span className="font-bold text-sm text-[#3B82F6]">Py</span>
                                     ) : (
                                       <span className="text-slate-400">
                                         <IconCourseCard />
                                       </span>
                                     )}
-                                    {isCourseActive && (
-                                      <span className="absolute inset-0 rounded-xl bg-cyan-400/20 animate-ping pointer-events-none" />
-                                    )}
                                   </div>
                                   {/* Metadata Badges */}
                                   <div className="flex gap-1.5 justify-center">
-                                    <span className="px-2 py-0.5 rounded-md text-[9px] font-semibold bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                                    <span className={`px-2 py-0.5 rounded-[20px] text-[10px] font-semibold border ${diffColor}`}>
                                       {c.level}
                                     </span>
-                                    <span className="px-2 py-0.5 rounded-md text-[9px] font-semibold bg-slate-800 border border-slate-700 text-slate-300">
+                                    <span className="px-2 py-0.5 rounded-[20px] text-[10px] font-semibold bg-[#1F2937] border border-[#2D3748] text-slate-300">
                                       {c.category}
                                     </span>
                                   </div>
                                 </div>
                                 <div className="text-center mt-2">
-                                  <h3 className="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors">{c.title}</h3>
+                                  <h3 className="text-[16px] font-bold text-white group-hover:text-[#3B82F6] transition-colors">{c.title}</h3>
                                   <p className="text-xs text-slate-400 mt-2 line-clamp-3 leading-relaxed min-h-[48px]">{c.description}</p>
                                 </div>
                               </div>
-                              <div className="mt-6 space-y-2">
-                                <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400">
-                                  <span>Progress</span>
-                                  <span className="text-slate-300">{progress.lecturesCompleted} / {progress.total} Lectures ({percent}%)</span>
+                              <div className="mt-4 flex flex-col justify-end flex-grow">
+                                <div className="space-y-2 mb-5">
+                                  <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400">
+                                    <span>Progress</span>
+                                    <span className="text-slate-300">{progress.lecturesCompleted} / {progress.total} Lectures ({percent}%)</span>
+                                  </div>
+                                  <div className="w-full h-1.5 bg-[#1F2937] rounded-full overflow-hidden">
+                                    <div className="h-full bg-gradient-to-r from-[#3B82F6] to-[#A855F7] rounded-full transition-all duration-500" style={{ width: `${percent}%` }}></div>
+                                  </div>
                                 </div>
-                                <div className="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden">
-                                  <div className="h-full bg-gradient-to-r from-blue-500 via-cyan-400 to-indigo-500 rounded-full transition-all duration-500" style={{ width: `${percent}%` }}></div>
-                                </div>
+                                <button className="w-full h-[36px] bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-[8px] flex items-center justify-center font-medium text-[13px] transition-colors border-none cursor-pointer">
+                                  {progress.lecturesCompleted > 0 ? "Continue Course" : "Start Course"}
+                                </button>
                               </div>
                             </Card>
                           </Link>
