@@ -14,6 +14,7 @@ import quizAttemptsRoutes from "./routes/quizAttempts.js";
 import codeDraftsRoutes from "./routes/codeDrafts.js";
 import chatRoutes from "./routes/chat.js";
 import dailyMissionsRoutes from "./routes/dailyMissions.js";
+import profileRoutes from "./routes/profile.js";
 
 export function createApp() {
   const app = express();
@@ -53,6 +54,7 @@ export function createApp() {
   app.use("/api/drafts", codeDraftsRoutes);
   app.use("/api/chat", chatRoutes);
   app.use("/api/daily-missions", dailyMissionsRoutes);
+  app.use("/api/profile", profileRoutes);
 
   app.use(errorHandler);
   return app;

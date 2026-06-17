@@ -250,6 +250,13 @@ export default function App() {
             element={<ProfilePage />}
           />
 
+          {/* Settings */}
+
+          <Route
+            path="settings"
+            element={<ProfilePage />}
+          />
+
         </Route>
 
         {/* FALLBACK */}

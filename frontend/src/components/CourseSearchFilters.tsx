@@ -93,8 +93,13 @@ export function CourseSearchFilters({ courses, searchQuery, setSearchQuery, onFi
   const popularSearches = ["Python", "AI", "Beginner", "Computer Science"];
 
   return (
-    <div className="w-full bg-[#0c101b]/50 border border-slate-800/60 rounded-3xl p-5 md:p-6 backdrop-blur-md mb-6">
-      <form onSubmit={handleSearchSubmit} className="relative flex items-center mb-4">
+    <div className="w-full bg-[#161B22] border border-[#2D3748] rounded-[12px] p-[20px] mb-6 shadow-md">
+      <div className="flex items-center gap-2 mb-4">
+        <Search className="w-4 h-4 text-white" />
+        <h2 className="text-[14px] font-semibold text-white">Find Your Course</h2>
+      </div>
+
+      <form onSubmit={handleSearchSubmit} className="relative flex items-center mb-5">
         <Search className="absolute left-4 w-5 h-5 text-slate-500" />
         <input
           type="text"
@@ -102,13 +107,13 @@ export function CourseSearchFilters({ courses, searchQuery, setSearchQuery, onFi
           onChange={(e) => setSearchQuery(e.target.value)}
           onBlur={() => searchQuery.trim() && addRecentSearch(searchQuery)}
           placeholder="Search courses by name or description..."
-          className="w-full pl-12 pr-10 py-3 bg-slate-950/50 border border-slate-800 focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/10 focus:outline-none rounded-2xl text-sm text-slate-100 placeholder-slate-500 transition-all"
+          className="w-full h-[48px] pl-12 pr-10 bg-[#161B22] border border-[#2D3748] focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)] focus:outline-none rounded-[10px] text-sm text-white placeholder-slate-500 transition-all"
         />
         {searchQuery && (
           <button
             type="button"
             onClick={() => setSearchQuery("")}
-            className="absolute right-4 p-1 rounded-full text-slate-500 hover:bg-slate-800 hover:text-slate-300 transition-colors"
+            className="absolute right-4 p-1 rounded-full text-slate-500 hover:bg-[#1F2937] hover:text-slate-300 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -116,71 +121,54 @@ export function CourseSearchFilters({ courses, searchQuery, setSearchQuery, onFi
       </form>
 
       {/* Grid of Search Metadata and Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {/* Left Column: Recent and Popular searches */}
-        <div className="space-y-3">
-          {/* Popular Searches */}
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="text-slate-400 font-medium flex items-center gap-1">
-              <Flame className="w-3.5 h-3.5 text-amber-500" /> Popular:
-            </span>
-            {popularSearches.map((tag) => (
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
+        {/* Left: Popular searches */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-slate-400 font-medium text-[12px]">
+            Popular:
+          </span>
+          {popularSearches.map((tag) => {
+            const isActive = searchQuery.toLowerCase() === tag.toLowerCase();
+            return (
               <button
                 key={tag}
                 type="button"
                 onClick={() => handlePopularClick(tag)}
-                className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 hover:border-blue-500/30 hover:bg-slate-800/50 text-slate-300 hover:text-white transition-all cursor-pointer"
+                className={`px-3 py-1 rounded-[20px] border text-[13px] font-medium transition-all cursor-pointer ${
+                  isActive 
+                    ? 'bg-[#3B82F6] border-[#3B82F6] text-white'
+                    : 'bg-[#1F2937] border-[#2D3748] text-slate-300 hover:border-[#3B82F6] hover:text-[#3B82F6]'
+                }`}
               >
                 {tag}
               </button>
-            ))}
-          </div>
-
-          {/* Recent Searches */}
-          {recentSearches.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2 text-xs">
-              <span className="text-slate-400 font-medium flex items-center gap-1">
-                <RotateCcw className="w-3.5 h-3.5 text-slate-500" /> Recent:
-              </span>
-              {recentSearches.map((term, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => handleRecentClick(term)}
-                  className="px-2 py-0.5 rounded bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-all cursor-pointer"
-                >
-                  {term}
-                </button>
-              ))}
-              <button
-                type="button"
-                onClick={clearRecentSearches}
-                className="text-[10px] text-slate-500 hover:text-red-400 font-semibold underline ml-1 cursor-pointer"
-              >
-                Clear
-              </button>
-            </div>
-          )}
+            );
+          })}
         </div>
 
-        {/* Right Column: Level & Category Filters */}
-        <div className="flex flex-wrap gap-4 md:justify-end items-center">
+        {/* Right: Level & Category Filters */}
+        <div className="flex items-center gap-4">
           {/* Level Filter */}
           <div className="flex flex-col gap-1.5 min-w-[140px]">
             <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
               Difficulty Level
             </label>
-            <select
-              value={selectedLevel}
-              onChange={(e) => setSelectedLevel(e.target.value)}
-              className="px-3 py-2 bg-slate-950/50 border border-slate-800 rounded-xl text-xs text-slate-300 focus:outline-none focus:border-blue-500/50 transition-all cursor-pointer"
-            >
-              {levels.map((lvl) => (
-                <option key={lvl} value={lvl} className="bg-[#0b0f19]">
-                  {lvl === "All" ? "All Levels" : lvl}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={selectedLevel}
+                onChange={(e) => setSelectedLevel(e.target.value)}
+                className="w-full h-[40px] px-3 bg-[#161B22] border border-[#2D3748] rounded-[8px] text-xs text-slate-300 focus:outline-none focus:border-[#3B82F6] transition-all cursor-pointer appearance-none"
+              >
+                {levels.map((lvl) => (
+                  <option key={lvl} value={lvl} className="bg-[#161B22]">
+                    {lvl === "All" ? "All Levels" : lvl}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg>
+              </div>
+            </div>
           </div>
 
           {/* Category Filter */}
@@ -188,29 +176,23 @@ export function CourseSearchFilters({ courses, searchQuery, setSearchQuery, onFi
             <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
               Topic / Category
             </label>
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 bg-slate-950/50 border border-slate-800 rounded-xl text-xs text-slate-300 focus:outline-none focus:border-blue-500/50 transition-all cursor-pointer"
-            >
-              {categories.map((cat) => (
-                <option key={cat} value={cat} className="bg-[#0b0f19]">
-                  {cat === "All" ? "All Categories" : cat}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full h-[40px] px-3 bg-[#161B22] border border-[#2D3748] rounded-[8px] text-xs text-slate-300 focus:outline-none focus:border-[#3B82F6] transition-all cursor-pointer appearance-none"
+              >
+                {categories.map((cat) => (
+                  <option key={cat} value={cat} className="bg-[#161B22]">
+                    {cat === "All" ? "All Categories" : cat}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg>
+              </div>
+            </div>
           </div>
-
-          {/* Reset Filters button */}
-          {(searchQuery || selectedLevel !== "All" || selectedCategory !== "All") && (
-            <button
-              type="button"
-              onClick={handleResetFilters}
-              className="md:mt-5 text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
-            >
-              Reset Filters
-            </button>
-          )}
         </div>
       </div>
     </div>
