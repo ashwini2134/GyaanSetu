@@ -89,8 +89,8 @@ export default function CoursePage() {
         );
       case "in-progress":
         return (
-          <div className="w-8 h-8 rounded-full bg-blue-500/15 flex items-center justify-center ring-2 ring-blue-500/40 flex-shrink-0">
-            <svg className="w-4 h-4 text-blue-400 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+          <div className="w-8 h-8 rounded-full bg-amber-500/15 flex items-center justify-center ring-2 ring-amber-500/40 flex-shrink-0">
+            <svg className="w-4 h-4 text-amber-400 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z" />
             </svg>
           </div>

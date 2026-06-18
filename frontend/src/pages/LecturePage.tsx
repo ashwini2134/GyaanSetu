@@ -141,7 +141,7 @@ export default function LecturePage() {
     const timer = setTimeout(() => {
       if (scrollRef.current) {
         const { clientHeight, scrollHeight } = scrollRef.current;
-        if (scrollHeight <= clientHeight + 300) {
+        if (scrollHeight <= clientHeight + 10) {
           setScrolledToBottom(true);
         }
       }
@@ -302,10 +302,13 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
   const isLastPage = currentPageIdx === pages.length - 1;
 
   const goNext = () => {
+    console.log("goNext called! currentPageIdx:", currentPageIdx, "type:", currentPage?.type, "scrolledToBottom:", scrolledToBottom);
     if (currentPage?.type === 'section') {
       if (scrolledToBottom) {
+        console.log("Marking section complete:", currentPageIdx + 1);
         markSectionComplete(currentPageIdx + 1);
       } else {
+        console.log("Not marking complete, scrolledToBottom is false");
         setSkippedSections(prev => new Set(prev).add(currentPageIdx));
       }
     } else if (currentPage?.type === 'quiz' || currentPage?.type === 'problems') {
@@ -401,10 +404,6 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
                       </div>
                     ) : status === 'current' ? (
                       <div className="w-4 h-4 rounded-full bg-blue-500" />
-                    ) : skippedSections.has(idx) ? (
-                      <div className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center">
-                        <X size={10} className="text-white" strokeWidth={3} />
-                      </div>
                     ) : (
                       <div className="w-4 h-4 rounded-full border-2 border-slate-500" />
                     )}
@@ -422,7 +421,8 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
           className="flex-1 overflow-y-auto"
           onScroll={(e) => {
             const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
-            if (scrollTop + clientHeight >= scrollHeight - 300) {
+            console.log("onScroll:", { scrollTop, clientHeight, scrollHeight, sum: scrollTop + clientHeight, threshold: scrollHeight - 10 });
+            if (scrollTop + clientHeight >= scrollHeight - 10) {
               setScrolledToBottom(true);
             }
           }}

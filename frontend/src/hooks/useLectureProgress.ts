@@ -59,13 +59,16 @@ export function useLectureProgress(courseSlug: string | undefined, lectureId: st
   }, [fetchProgress]);
 
   const markSectionComplete = useCallback(async (index: number) => {
+    console.log("markSectionComplete called for index:", index);
     if (!courseSlug || !lectureId) return;
     setSections(prev => ({ ...prev, [index]: true }));
     try {
+      console.log(`Sending PATCH request to /api/progress/lecture/${courseSlug}/${lectureId} for sectionIndex ${index}`);
       await apiCall(`/progress/lecture/${courseSlug}/${lectureId}`, {
         method: 'PATCH',
         body: JSON.stringify({ sectionIndex: index, isCompleted: true })
       });
+      console.log("PATCH request successful");
     } catch (e) {
       console.error("Failed to update section progress", e);
       setSections(prev => ({ ...prev, [index]: false }));

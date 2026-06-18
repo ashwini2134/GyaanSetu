@@ -1,0 +1,52 @@
+[
+  {
+    "id": "hello_world",
+    "title": "Hello World",
+    "description": "Write a Python program that prints \"Hello, World!\" to the screen.\n\n**Sample Output:**\nHello, World!\n\n**Constraints:**\nUse the `print()` function.",
+    "check50_slug": "content/cs50p/lecture_0/test_hello_world.py",
+    "difficulty": "Easy",
+    "common_mistakes": [
+      "Forgetting quotation marks around the string"
+    ]
+  },
+  {
+    "id": "sum",
+    "title": "Sum of Two Numbers",
+    "description": "Write a program that takes two numbers as input and prints their sum.\n\n**Sample Input:**\n3\n5\n\n**Sample Output:**\n8\n\n**Constraints:**\nUse the `input()` function and `int()` to convert.",
+    "check50_slug": "content/cs50p/lecture_0/test_sum.py",
+    "difficulty": "Easy",
+    "common_mistakes": [
+      "Forgetting to cast input() to an int"
+    ]
+  },
+  {
+    "id": "even_odd",
+    "title": "Even or Odd",
+    "description": "Write a program that takes a number as input and prints \"Even\" if it is even, or \"Odd\" if it is odd.\n\n**Sample Input:**\n4\n\n**Sample Output:**\nEven\n\n**Constraints:**\nUse the modulo operator `%`.",
+    "check50_slug": "content/cs50p/lecture_0/test_even_odd.py",
+    "difficulty": "Easy",
+    "common_mistakes": [
+      "Using division (/) instead of modulo (%)"
+    ]
+  },
+  {
+    "id": "square",
+    "title": "Square of a Number",
+    "description": "Write a program that takes a number as input and prints its square.\n\n**Sample Input:**\n6\n\n**Sample Output:**\n36\n\n**Constraints:**\nUse the `**` operator or multiply the number by itself.",
+    "check50_slug": "content/cs50p/lecture_0/test_square.py",
+    "difficulty": "Easy",
+    "common_mistakes": [
+      "Using ^ instead of **"
+    ]
+  },
+  {
+    "id": "simple_calculator",
+    "title": "Simple Calculator",
+    "description": "Write a program that takes two numbers and an operator (+, -, *, /) as input and prints the result.\n\n**Sample Input:**\n10\n5\n+\n\n**Sample Output:**\n15\n\n**Constraints:**\nHandle all four basic operators.",
+    "check50_slug": "content/cs50p/lecture_0/test_calculator.py",
+    "difficulty": "Easy",
+    "common_mistakes": [
+      "Not handling division properly"
+    ]
+  }
+]

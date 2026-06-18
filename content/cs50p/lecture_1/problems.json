@@ -1,0 +1,38 @@
+[
+  {
+    "id": "indoor",
+    "title": "Indoor Voice",
+    "description": "Write a program in Python that prompts the user for input and then outputs that same input in lowercase. Assume the user's input will be in English.",
+    "check50_slug": "cs50/problems/2022/python/indoor",
+    "difficulty": "easy",
+    "common_mistakes": [
+      "Forgetting to call input() to read user input",
+      "Calling str.lower() on the class instead of an instance",
+      "Not understanding that lower() returns a new string, it does not modify in place"
+    ]
+  },
+  {
+    "id": "playback",
+    "title": "Playback Speed",
+    "description": "Write a program that prompts the user for input and then outputs that same input, replacing each space with ... (three periods).",
+    "check50_slug": "cs50/problems/2022/python/playback",
+    "difficulty": "easy",
+    "common_mistakes": [
+      "Using split() and join() incorrectly",
+      "Replacing only the first space using str.replace with a count argument",
+      "Forgetting that replace() returns a new string"
+    ]
+  },
+  {
+    "id": "faces",
+    "title": "Making Faces",
+    "description": "Implement a function called convert that accepts a str as input and returns that same input with :) converted to the emoji and :( converted to the emoji. Then, in the same file, implement a function called main that prompts the user for a string of text, calls convert on that input, and prints the result.",
+    "check50_slug": "cs50/problems/2022/python/faces",
+    "difficulty": "easy",
+    "common_mistakes": [
+      "Not defining both main() and convert() as separate functions",
+      "Forgetting to call main() at the bottom of the file",
+      "Using the wrong emoji characters"
+    ]
+  }
+]
