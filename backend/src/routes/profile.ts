@@ -5,28 +5,6 @@ import type { AuthenticatedRequest } from "../middleware/auth.js";
 
 const router = Router();
 
-// Simple dictionary mapping projectId to metadata.
-const PROJECT_METADATA: Record<string, { name: string; techStack: string; description: string }> = {
-  "story_generator": { name: "Story Generator", techStack: "Python", description: "Use user input and variables to generate a simple story." },
-  "rock_paper_scissors": { name: "Rock Paper Scissors", techStack: "Python", description: "Build a rock-paper-scissors game using conditional logic." },
-  "multiplication_explorer": { name: "Multiplication Explorer", techStack: "Python", description: "Generate a multiplication table using nested loops." },
-  "guessing_game_project": { name: "Guessing Game", techStack: "Python", description: "Create a number guessing game with loop control." },
-  "shopping_list": { name: "Shopping List", techStack: "Python", description: "Build an interactive shopping list manager." },
-  "contact_book": { name: "Contact Book", techStack: "Python", description: "Create a contact book that stores and retrieves information." },
-  "unit_converter": { name: "Unit Converter", techStack: "Python", description: "Build a unit converter using reusable functions." },
-  "text_analyzer": { name: "Text Analyzer", techStack: "Python", description: "Analyze text to count characters, words, and letter frequency." },
-  "personal_diary": { name: "Personal Diary", techStack: "Python", description: "Build a personal diary app that saves entries to files." },
-  "grade_tracker": { name: "Grade Tracker", techStack: "Python", description: "Create a complete grade tracking system that reads, processes, and saves student grades." }
-};
-
-function formatMetadata(projectId: string) {
-  if (PROJECT_METADATA[projectId]) {
-    return PROJECT_METADATA[projectId];
-  }
-  const name = projectId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-  return { name, techStack: "Programming", description: "A programming project." };
-}
-
 function formatDate(date: Date) {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
@@ -34,21 +12,31 @@ function formatDate(date: Date) {
 router.get("/projects", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
     const userId = req.user!.id;
-    const projects = await prisma.project.findMany({
-      where: { userId },
+    const userProjects = await prisma.project.findMany({
+      where: { userId, status: "COMPLETED" },
       orderBy: { updatedAt: "desc" }
     });
 
-    const formattedProjects = projects.map(p => {
-      const meta = formatMetadata(p.projectId);
+    const templates = await prisma.projectTemplate.findMany({
+      where: { id: { in: userProjects.map(p => p.projectId) } }
+    });
+
+    const templateMap = new Map(templates.map(t => [t.id, t]));
+
+    const formattedProjects = userProjects.map(p => {
+      const t = templateMap.get(p.projectId);
       return {
         id: p.id,
-        name: meta.name,
-        description: meta.description,
-        techStack: meta.techStack,
-        status: p.status === "Completed" ? "Completed" : "In Progress",
+        projectId: p.projectId,
+        name: t?.title || p.projectId,
+        description: t?.shortDescription || "",
+        submittedDescription: p.description,
+        techStack: t?.technologies?.join(", ") || "Programming",
+        status: p.status,
+        githubUrl: p.githubUrl,
+        liveDemoUrl: p.liveDemoUrl,
         completedAt: p.completedAt ? formatDate(p.completedAt) : null,
-        createdAt: formatDate(p.updatedAt) // using updatedAt since createdAt isn't in Prisma schema for Project
+        createdAt: formatDate(p.updatedAt)
       };
     });
 
@@ -97,19 +85,29 @@ router.get("/timeline", requireAuth, async (req: AuthenticatedRequest, res, next
 
     // 3. Projects
     const projects = await prisma.project.findMany({
-      where: { userId, status: "Completed", completedAt: { not: null } }
+      where: { userId, status: "COMPLETED", completedAt: { not: null } }
     });
-    projects.forEach(p => {
-      if (p.completedAt) {
-        const meta = formatMetadata(p.projectId);
-        events.push({
-          rawDate: p.completedAt,
-          date: formatDate(p.completedAt),
-          type: "project",
-          title: `Completed ${meta.name} Project`
-        });
-      }
-    });
+    
+    if (projects.length > 0) {
+      const templates = await prisma.projectTemplate.findMany({
+        where: { id: { in: projects.map(p => p.projectId) } }
+      });
+      const templateMap = new Map(templates.map(t => [t.id, t]));
+      
+      projects.forEach(p => {
+        if (p.completedAt) {
+          const t = templateMap.get(p.projectId);
+          const name = t?.title || p.projectId;
+          events.push({
+            rawDate: p.completedAt,
+            date: formatDate(p.completedAt),
+            type: "project",
+            projectId: p.projectId,
+            title: `Completed ${name} Project`
+          });
+        }
+      });
+    }
 
     // 4. QuizAttempt
     const quizzes = await prisma.quizAttempt.findMany({
@@ -128,12 +126,12 @@ router.get("/timeline", requireAuth, async (req: AuthenticatedRequest, res, next
     // Sort ascending by rawDate
     events.sort((a, b) => a.rawDate.getTime() - b.rawDate.getTime());
 
-    // Map to remove rawDate
-    const formattedEvents = events.map(e => ({
+    const formattedEvents = events.map((e: any) => ({
       date: e.date,
       type: e.type,
       title: e.title,
-      description: e.description
+      description: e.description,
+      projectId: e.projectId
     }));
 
     res.json(formattedEvents);

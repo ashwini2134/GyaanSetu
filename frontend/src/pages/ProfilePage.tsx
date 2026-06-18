@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useAuth } from '../auth';
 import { authFetch } from '../authClient';
 import { useGamification } from '../progress';
+import { projectsData } from '../data/projectsData';
 import { 
   MapPin, 
   Calendar,
@@ -45,7 +46,21 @@ export default function ProfilePage() {
           authFetch<any[]>('/profile/projects').catch(() => []),
           authFetch<any[]>('/profile/timeline').catch(() => [])
         ]);
-        setProjects(projRes);
+        
+        const enrichedProjects = projRes.map(p => {
+          const matched = projectsData.find(d => d.id === p.projectId);
+          if (matched) {
+            return {
+              ...p,
+              name: matched.title,
+              techStack: matched.technologies.join(', '),
+              difficulty: matched.difficulty,
+            };
+          }
+          return p;
+        });
+
+        setProjects(enrichedProjects);
         setTimelineEvents(timeRes);
       } catch (err) {
         console.error("Failed to fetch profile data", err);
@@ -297,23 +312,52 @@ export default function ProfilePage() {
           ) : (
             <div className="flex overflow-x-auto gap-4 pb-4 snap-x">
               {projects.map((proj, i) => {
-                const color = proj.status === 'Completed' ? 'green' : proj.status === 'In Progress' ? 'amber' : 'slate';
+                const color = proj.status === 'COMPLETED' ? 'green' : proj.status === 'IN_PROGRESS' ? 'amber' : 'slate';
+                const displayStatus = proj.status === 'COMPLETED' ? 'Completed' : proj.status === 'IN_PROGRESS' ? 'In Progress' : proj.status;
+                
                 return (
-                  <div key={i} className="min-w-[280px] bg-[#161B22] rounded-[12px] border border-[#2D3748] p-5 snap-start group hover:-translate-y-1 hover:border-blue-500/50 hover:shadow-[0_0_12px_rgba(59,130,246,0.2)] transition-all cursor-pointer">
-                    <div className="flex justify-between items-start mb-3">
-                      <h3 className="font-bold text-white text-[15px] leading-tight">{proj.name}</h3>
+                  <div key={i} className="min-w-[320px] max-w-[320px] bg-[#161B22] rounded-[12px] border border-[#2D3748] p-5 snap-start group hover:-translate-y-1 hover:border-blue-500/50 hover:shadow-[0_0_12px_rgba(59,130,246,0.2)] transition-all cursor-pointer flex flex-col">
+                    <div className="flex justify-between items-start mb-3 gap-2">
+                      <h3 className="font-bold text-white text-[15px] leading-tight truncate">{proj.name}</h3>
+                      {proj.difficulty && (
+                        <span className="px-2 py-0.5 rounded-[20px] text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 whitespace-nowrap">
+                          {proj.difficulty}
+                        </span>
+                      )}
                     </div>
-                    <p className="text-[13px] text-slate-400 mb-4">{proj.techStack}</p>
-                    <div className="flex justify-between items-center text-[11px]">
+                    <p className="text-[13px] text-slate-400 mb-4 line-clamp-1">{proj.techStack}</p>
+                    <div className="flex justify-between items-center text-[11px] mt-auto">
                       <span className={`px-2 py-0.5 rounded-[20px] font-medium border ${
                         color === 'green' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 
                         color === 'amber' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
                         'bg-slate-500/10 text-slate-400 border-slate-500/20'
                       }`}>
-                        {proj.status}
+                        {displayStatus}
                       </span>
                       <span className="text-slate-500">{proj.completedAt || proj.createdAt}</span>
                     </div>
+                    
+                    {proj.status === 'COMPLETED' && (
+                      <div className="mt-4 pt-4 border-t border-[#2D3748] space-y-2">
+                        <div className="flex items-center gap-3">
+                          {proj.githubUrl && (
+                            <a href={proj.githubUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-[11px] text-blue-400 hover:text-blue-300 hover:underline">
+                              <Code size={12} /> GitHub
+                            </a>
+                          )}
+                          {proj.liveDemoUrl && (
+                            <a href={proj.liveDemoUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-[11px] text-blue-400 hover:text-blue-300 hover:underline">
+                              <LinkIcon size={12} /> Live Demo
+                            </a>
+                          )}
+                        </div>
+                        {proj.submittedDescription && (
+                          <p className="text-[11px] text-slate-400 line-clamp-2 italic" title={proj.submittedDescription}>
+                            "{proj.submittedDescription}"
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}
