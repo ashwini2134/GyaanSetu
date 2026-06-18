@@ -161,6 +161,7 @@ export default function LecturePage() {
     setRetakingQuiz(false);
     setShowAllCompleted(false);
     setScrolledToBottom(false);
+    setCompletedProblems([]);
   }, [slug, lectureNumber]);
 
   // Load lecture list for prev/next lecture navigation
@@ -258,17 +259,21 @@ export default function LecturePage() {
   // Mark quiz section complete when quiz has been passed
   useEffect(() => {
     if (!pages.length || !lessonData) return;
+    if (lessonData.courseSlug !== slug || lessonData.number !== lectureNumber) return;
+    
     if (quizScore !== null) {
       const quizIdx = pages.findIndex(p => p.type === 'quiz');
       if (quizIdx !== -1 && !isSectionCompleted(quizIdx + 1)) {
         markSectionComplete(quizIdx + 1);
       }
     }
-  }, [pages, lessonData, quizScore, isSectionCompleted, markSectionComplete]);
+  }, [pages, lessonData, quizScore, isSectionCompleted, markSectionComplete, slug, lectureNumber]);
 
   // Mark problems section complete when enough problems are done
   useEffect(() => {
     if (!pages.length || !lessonData) return;
+    if (lessonData.courseSlug !== slug || lessonData.number !== lectureNumber) return;
+    
     const problemsIdx = pages.findIndex(p => p.type === 'problems');
     if (problemsIdx !== -1) {
       const requiredProblems = Math.min(2, lessonData.problems?.length ?? 0);
@@ -276,7 +281,7 @@ export default function LecturePage() {
         markSectionComplete(problemsIdx + 1);
       }
     }
-  }, [pages, lessonData, completedProblems.length, isSectionCompleted, markSectionComplete]);
+  }, [pages, lessonData, completedProblems.length, isSectionCompleted, markSectionComplete, slug, lectureNumber]);
 
   if (!slug) return null;
 

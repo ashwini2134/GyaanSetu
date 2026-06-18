@@ -35,6 +35,10 @@ export function useLectureProgress(courseSlug: string | undefined, lectureId: st
   const fetchProgress = useCallback(async () => {
     if (!courseSlug || !lectureId) return;
     setLoading(true);
+    setSections({});
+    setLectureCompleted(false);
+    setQuizScore(null);
+    setQuizTotal(null);
     try {
       const data = await apiCall<LectureData>(`/progress/lecture/${courseSlug}/${lectureId}`);
       const map: Record<number, boolean> = {};

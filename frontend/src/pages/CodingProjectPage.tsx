@@ -202,7 +202,7 @@ export default function CodingProjectPage() {
       if (!module || typeof module.runTests !== "function") {
         throw new Error("runTests(code) function not found in tests.js");
       }
-      return await module.runTests(code);
+      return await module.runTests(code, { runPythonMock });
     } finally {
       URL.revokeObjectURL(blobUrl);
     }
