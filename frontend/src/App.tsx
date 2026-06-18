@@ -58,6 +58,14 @@ const CapstonePage = lazy(
   () => import("./pages/CapstonePage")
 );
 
+const Projects = lazy(
+  () => import("./pages/Projects")
+);
+
+const ProjectDetailsPage = lazy(
+  () => import("./pages/ProjectDetailsPage")
+);
+
 const ProfilePage = lazy(
   () => import("./pages/ProfilePage")
 );
@@ -251,6 +259,17 @@ export default function App() {
           <Route
             path="leaderboard"
             element={<LeaderboardPage />}
+          />
+
+          {/* Projects */}
+
+          <Route
+            path="projects"
+            element={<Projects />}
+          />
+          <Route
+            path="projects/:projectId"
+            element={<ProjectDetailsPage />}
           />
 
           {/* Profile */}
