@@ -37,6 +37,7 @@ model User {
   quizAttempts        QuizAttempt[]
   refreshTokens       RefreshToken[]
   submissions         Submission[]
+  practiceSubmissions PracticeSubmission[]
   xpHistory           XpTransaction[]
 }
 
@@ -201,4 +202,31 @@ model DailyMission {
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, date])
+}
+
+model PracticeExercise {
+  id          String   @id @default(uuid())
+  lessonId    String
+  title       String
+  description String
+  type        String
+  xpReward    Int      @default(30)
+  createdAt   DateTime @default(now())
+  submissions PracticeSubmission[]
+
+  @@unique([lessonId, type])
+}
+
+model PracticeSubmission {
+  id              String           @id @default(uuid())
+  exerciseId      String
+  userId          String
+  promptUsed      String
+  generatedOutput String
+  reflection      String
+  submittedAt     DateTime         @default(now())
+  exercise        PracticeExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, exerciseId])
 }

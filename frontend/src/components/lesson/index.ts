@@ -12,3 +12,4 @@ export { default as ProgressWidget } from './ProgressWidget';
 export { default as LessonSidebar } from './LessonSidebar';
 export { default as VisualAidCard } from './VisualAidCard';
 export { default as LessonSection } from './LessonSection';
+export { default as PracticeExercise } from './PracticeExercise';

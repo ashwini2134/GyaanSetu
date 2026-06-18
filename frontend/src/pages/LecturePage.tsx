@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { api, getProjectMetadata } from '../api';
+import { api, authFetch, getProjectMetadata } from '../api';
 import { useLessonData } from '../hooks/useLessonData';
 import { useLectureProgress, useCourseProgress } from '../hooks/useLectureProgress';
 import {
@@ -9,6 +9,7 @@ import {
   ProblemCard,
   SummaryCard,
 } from '../components/lesson';
+import PracticeExercise from '../components/lesson/PracticeExercise';
 import type { CodingProblem, ProjectSummary } from '../types/lesson';
 import { ArrowLeft, ArrowRight, CheckCircle, Check, X, Lock } from 'lucide-react';
 
@@ -19,6 +20,7 @@ type Page =
   | { type: 'quiz' }
   | { type: 'problems' }
   | { type: 'project' }
+  | { type: 'practice' }
   | { type: 'summary' };
 
 function pageId(page: Page, sections: Array<{ id: string }>): string {
@@ -31,6 +33,7 @@ function pageLabel(page: Page, sections: Array<{ label: string }>): string {
   if (page.type === 'quiz') return 'Quiz';
   if (page.type === 'problems') return 'Problems';
   if (page.type === 'project') return 'Project';
+  if (page.type === 'practice') return 'Practice';
   return 'Summary';
 }
 
@@ -134,6 +137,7 @@ export default function LecturePage() {
   const [skippedSections, setSkippedSections] = useState<Set<number>>(new Set());
   const [completedProblems, setCompletedProblems] = useState<string[]>([]);
   const [projectCompleted] = useState(false);
+  const [hasPractice, setHasPractice] = useState(false);
 
   // Check if content fits without scrolling
   useEffect(() => {
@@ -172,6 +176,15 @@ export default function LecturePage() {
     }).catch(err => console.error('[lecture] load lectures failed', err));
   }, [slug, lectureNumber, navigate]);
 
+  // Check if practice exercises exist for this lecture
+  useEffect(() => {
+    if (!slug || isNaN(lectureNumber)) return;
+    const lessonId = `${slug}_${lectureNumber}`;
+    authFetch<any[]>(`/practice-exercises/${lessonId}`)
+      .then(data => setHasPractice(data.length > 0))
+      .catch(() => setHasPractice(false));
+  }, [slug, lectureNumber]);
+
   // Derive unlock status from stored progress
   const unlocked = useMemo(() => {
     if (!slug) return null;
@@ -191,9 +204,10 @@ export default function LecturePage() {
     if (quiz.length > 0) result.push({ type: 'quiz' });
     if (problems.length > 0) result.push({ type: 'problems' });
     if (projects.length > 0) result.push({ type: 'project' });
+    if (hasPractice) result.push({ type: 'practice' });
     if (summary) result.push({ type: 'summary' });
     return result;
-  }, [lessonData]);
+  }, [lessonData, hasPractice]);
 
   // Keep currentPageIdx in bounds
   useEffect(() => {
@@ -302,16 +316,13 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
   const isLastPage = currentPageIdx === pages.length - 1;
 
   const goNext = () => {
-    console.log("goNext called! currentPageIdx:", currentPageIdx, "type:", currentPage?.type, "scrolledToBottom:", scrolledToBottom);
     if (currentPage?.type === 'section') {
       if (scrolledToBottom) {
-        console.log("Marking section complete:", currentPageIdx + 1);
         markSectionComplete(currentPageIdx + 1);
       } else {
-        console.log("Not marking complete, scrolledToBottom is false");
         setSkippedSections(prev => new Set(prev).add(currentPageIdx));
       }
-    } else if (currentPage?.type === 'quiz' || currentPage?.type === 'problems') {
+    } else if (currentPage?.type === 'quiz' || currentPage?.type === 'problems' || currentPage?.type === 'practice') {
       if (!isSectionCompleted(currentPageIdx + 1)) {
         setSkippedSections(prev => new Set(prev).add(currentPageIdx));
       }
@@ -366,7 +377,6 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
               const status = pageStatuses[idx];
               const id = pageId(page, lessonData.sections);
               const label = pageLabel(page, lessonData.sections);
-              const solvedProblemsCount = completedProblems.length;
 
               return (
                 <button
@@ -384,20 +394,6 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
                       <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
                         <Check size={10} className="text-white" strokeWidth={3} />
                       </div>
-                    ) : id === 'problems' ? (
-                      solvedProblemsCount >= 2 ? (
-                        <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
-                          <Check size={10} className="text-white" strokeWidth={3} />
-                        </div>
-                      ) : skippedSections.has(idx) ? (
-                        <div className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center">
-                          <X size={10} className="text-white" strokeWidth={3} />
-                        </div>
-                      ) : status === 'current' ? (
-                        <div className="w-4 h-4 rounded-full bg-blue-500" />
-                      ) : (
-                        <div className="w-4 h-4 rounded-full border-2 border-slate-500" />
-                      )
                     ) : isSectionCompleted(idx + 1) ? (
                       <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
                         <Check size={10} className="text-white" strokeWidth={3} />
@@ -710,6 +706,17 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
                   </div>
                 </div>
               </div>
+            )}
+
+            {currentPage?.type === 'practice' && (
+              <section id="section-practice">
+                <PracticeExercise
+                  lessonId={`${slug}_${lectureNumber}`}
+                  onComplete={() => {
+                    markSectionComplete(currentPageIdx + 1);
+                  }}
+                />
+              </section>
             )}
 
             {currentPage?.type === 'summary' && (

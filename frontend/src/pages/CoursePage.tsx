@@ -31,7 +31,6 @@ export default function CoursePage() {
   const [lectures, setLectures] = useState<Lecture[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
   // Progress stats
-  const [lectureProjectCounts, setLectureProjectCounts] = useState<Record<number, number>>({});
   const courseTitle = slug === "cs50ai" ? "CS50 AI" : slug?.toUpperCase() ?? "";
   const lectureCount = lectures?.length ?? 0;
 
@@ -71,10 +70,7 @@ export default function CoursePage() {
     api.courseLectures(slug).then(setLectures).catch((e: Error) => setErr(e.message));
   }, [slug]);
 
-  useEffect(() => {
-    if (!slug) return;
-    api.lectureProjectsCounts(slug).then(setLectureProjectCounts).catch(err => console.error('[course] load project counts failed', err));
-  }, [slug]);
+
   if (!slug) return null;
 
   const getStatusIcon = (status: LectureStatus) => {
@@ -268,9 +264,6 @@ export default function CoursePage() {
                           </div>
                           <p className={`text-xs mt-0.5 ${isLocked ? "text-slate-600" : "text-slate-400"}`}>
                             Lecture {lecture.number + 1}
-                            {(lectureProjectCounts[lecture.number] ?? 0) > 0 && (
-                              <span className="ml-2 text-slate-500">· Project</span>
-                            )}
                             {isLocked && lecture.number > 0 && (
                               <span className="ml-2 text-slate-500">— Complete Lecture {lecture.number} to unlock</span>
                             )}
