@@ -120,7 +120,7 @@ export default function ProblemCard({ problem, index, completed, onComplete, onA
 
   const handleSave = (code: string) => {
     setSavedCode(code);
-    authFetch('/api/drafts', {
+    authFetch('/drafts', {
       method: 'POST',
       body: JSON.stringify({
         lectureId: problem.id,

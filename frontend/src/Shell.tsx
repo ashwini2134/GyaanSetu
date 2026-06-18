@@ -11,6 +11,7 @@ import {
   X,
   User,
   Settings,
+  ShieldCheck,
 } from "lucide-react";
 
 function Logo({ expanded }: { expanded: boolean }) {
@@ -256,6 +257,25 @@ export default function Shell() {
                 </div>
               </div>
             </div>
+
+            {/* QA Center (admin only) */}
+            {user?.role === "admin" || user?.role === "instructor" ? (
+              <NavLink
+                to="/qa"
+                onClick={() => setSidebarOpen(false)}
+                className={({ isActive }) =>
+                  `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`
+                }
+                title="QA Center"
+              >
+                <span className="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                  <ShieldCheck size={18} />
+                </span>
+                <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>
+                  QA Center
+                </span>
+              </NavLink>
+            ) : null}
 
             {/* Leaderboard */}
             <NavLink

@@ -23,13 +23,8 @@ export async function recordQuizAttempt(
     },
   });
 
-  if (passed) {
-    // Award 30 XP for passing quiz
-    // Use actionId to prevent duplicate XP for the same quiz
-    await awardXp(userId, 30, "Passed Quiz", `quiz_pass_${courseSlug}_${lectureId}_${quizId}`);
-  } else {
-    // Record activity but 0 XP just to update streak
-    await awardXp(userId, 0, "Attempted Quiz", undefined); 
+  if (!passed) {
+    await awardXp(userId, 0, "Attempted Quiz", undefined);
   }
 
   return { attempt, passed };

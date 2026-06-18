@@ -8,26 +8,49 @@ const router = Router();
 
 import { getUserSummary, getLeaderboard, awardXp } from "../services/gamificationService.js";
 import { recordQuizAttempt } from "../services/progressTrackingService.js";
+import { COURSE_LECTURE_COUNTS } from "./courses.js";
 
 router.get("/", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
     const userId = req.user!.id;
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    const statsData = (user?.statsData as any) || {
-      coursesStarted: 0,
-      coursesCompleted: 0,
-      lecturesCompleted: 0,
-      quizzesPassed: 0,
-      tasksSubmitted: 0,
-      projectsSolved: 0,
+
+    const [completedLectures, quizzesPassedCount, submissionsCount, projectsCount] = await Promise.all([
+      prisma.progress.count({ where: { userId, status: "COMPLETED" } }),
+      prisma.quizAttempt.count({ where: { userId, passed: true } }),
+      prisma.submission.count({ where: { userId, status: "PASSED" } }),
+      prisma.project.count({ where: { userId, status: "COMPLETED" } }),
+    ]);
+
+    const courseSlugs = await prisma.progress.groupBy({
+      by: ['courseSlug'],
+      where: { userId },
+    });
+    const coursesStarted = courseSlugs.length;
+
+    let coursesCompleted = 0;
+    for (const { courseSlug } of courseSlugs) {
+      const total = COURSE_LECTURE_COUNTS[courseSlug];
+      if (!total) continue;
+      const done = await prisma.progress.count({
+        where: { userId, courseSlug, status: "COMPLETED" }
+      });
+      if (done >= total) coursesCompleted++;
+    }
+
+    const stats = {
+      coursesStarted,
+      coursesCompleted,
+      lecturesCompleted: completedLectures,
+      quizzesPassed: quizzesPassedCount,
+      tasksSubmitted: submissionsCount,
+      projectsSolved: projectsCount,
     };
-    
-    // Satisfy specific legacy requirements plus frontend StatsData
+
     res.json({
-      moduleProgress: statsData.coursesStarted || 0,
-      lectureProgress: statsData.lecturesCompleted || 0,
-      completedModules: statsData.coursesCompleted || 0,
-      stats: statsData
+      moduleProgress: coursesStarted,
+      lectureProgress: completedLectures,
+      completedModules: coursesCompleted,
+      stats,
     });
   } catch (error) { next(error); }
 });
@@ -205,10 +228,6 @@ router.post("/lecture", requireAuth, async (req: AuthenticatedRequest, res, next
       },
     });
 
-    if (shouldComplete) {
-      await awardXp(userId, 50, "Completed Lecture", `lecture_complete_${courseSlug}_${lectureId}`);
-    }
-
     res.json(progress);
   } catch (error) {
     next(error);
@@ -225,21 +244,6 @@ router.post("/action", requireAuth, async (req: AuthenticatedRequest, res, next)
     const userId = req.user!.id;
     const { actionType, actionId } = actionSchema.parse(req.body);
 
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) return res.status(404).json({ error: "User not found" });
-
-    let stats = user.statsData as any;
-    if (!stats) {
-      stats = {
-        coursesStarted: 0,
-        coursesCompleted: 0,
-        lecturesCompleted: 0,
-        quizzesPassed: 0,
-        tasksSubmitted: 0,
-        projectsSolved: 0,
-      };
-    }
-
     let xpAmount = 0;
     let reason = "";
 
@@ -251,17 +255,14 @@ router.post("/action", requireAuth, async (req: AuthenticatedRequest, res, next)
       case "lecture":
         xpAmount = 50;
         reason = "Full Lecture Completed";
-        stats.lecturesCompleted += 1;
         break;
       case "quiz":
         xpAmount = 30;
         reason = "Quiz Passed";
-        stats.quizzesPassed += 1;
         break;
       case "problem":
         xpAmount = 20;
         reason = "Problem Solved";
-        stats.tasksSubmitted += 1;
         await prisma.submission.upsert({
           where: {
             userId_problemId: {
@@ -283,28 +284,20 @@ router.post("/action", requireAuth, async (req: AuthenticatedRequest, res, next)
       case "project":
         xpAmount = 100;
         reason = "Capstone Project Solved";
-        stats.projectsSolved += 1;
         break;
       case "course_start":
-        stats.coursesStarted += 1;
         break;
       case "course_complete":
         xpAmount = 200;
         reason = "Course Completed";
-        stats.coursesCompleted += 1;
         break;
     }
-
-    await prisma.user.update({
-      where: { id: userId },
-      data: { statsData: stats }
-    });
 
     if (xpAmount > 0) {
       await awardXp(userId, xpAmount, reason, `${actionType}_${actionId}`);
     }
 
-    res.json({ ok: true, stats });
+    res.json({ ok: true });
   } catch (error) {
     next(error);
   }
@@ -315,10 +308,26 @@ router.get("/lecture/:courseSlug/:lectureId", requireAuth, async (req: Authentic
     const userId = req.user!.id;
     const courseSlug = String(req.params.courseSlug);
     const lectureId = String(req.params.lectureId);
-    const progress = await prisma.lectureProgress.findMany({
-      where: { userId, courseSlug, lectureId }
+    const [sections, lectureProgress, quizAttempts] = await Promise.all([
+      prisma.lectureProgress.findMany({
+        where: { userId, courseSlug, lectureId }
+      }),
+      prisma.progress.findUnique({
+        where: {
+          userId_courseSlug_lectureId: { userId, courseSlug, lectureId }
+        }
+      }),
+      prisma.quizAttempt.findMany({
+        where: { userId, quizId: `${courseSlug}-${lectureId}` },
+        orderBy: { createdAt: 'desc' },
+        take: 1
+      })
+    ]);
+    res.json({
+      sections,
+      lectureCompleted: lectureProgress?.status === "COMPLETED",
+      quizAttempt: quizAttempts[0] || null,
     });
-    res.json(progress);
   } catch (error) { next(error); }
 });
 
@@ -326,10 +335,16 @@ router.get("/course/:courseSlug", requireAuth, async (req: AuthenticatedRequest,
   try {
     const userId = req.user!.id;
     const courseSlug = String(req.params.courseSlug);
-    const progress = await prisma.lectureProgress.findMany({
-      where: { userId, courseSlug }
-    });
-    res.json(progress);
+    const [sectionProgress, lectureCompletions] = await Promise.all([
+      prisma.lectureProgress.findMany({
+        where: { userId, courseSlug }
+      }),
+      prisma.progress.findMany({
+        where: { userId, courseSlug, status: "COMPLETED" },
+        select: { lectureId: true, status: true, completedAt: true }
+      })
+    ]);
+    res.json({ sections: sectionProgress, lectureCompletions });
   } catch (error) { next(error); }
 });
 

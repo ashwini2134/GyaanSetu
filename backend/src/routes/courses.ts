@@ -5,7 +5,7 @@ import type { AuthenticatedRequest } from "../middleware/auth.js";
 
 const router = Router();
 
-const COURSE_LECTURE_COUNTS: Record<string, number> = {
+export const COURSE_LECTURE_COUNTS: Record<string, number> = {
   "python": 14,
   "cs50ai": 10,
 };

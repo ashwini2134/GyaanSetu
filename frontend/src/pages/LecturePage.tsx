@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { api, getProjectMetadata } from '../api';
 import { useLessonData } from '../hooks/useLessonData';
 import { useLectureProgress, useCourseProgress } from '../hooks/useLectureProgress';
-import { useProgress as useLegacyProgress } from '../hooks/useProgress';
 import {
   LessonSection,
   QuizEngine,
@@ -116,8 +115,14 @@ export default function LecturePage() {
   const [openSimilarIndex, setOpenSimilarIndex] = useState<number>(-1);
 
   const { lessonData, loading, error } = useLessonData(slug, lectureNumber);
-  const { markSectionComplete, isSectionCompleted } = useLectureProgress(slug, !isNaN(lectureNumber) ? String(lectureNumber) : undefined);
-  const { progress, markProblemCompleted, markQuizCompleted, markHandsOnTaskCompleted, markLectureCompleted: legacyMarkLectureCompleted, markPracticeAttempted, markPracticeCompleted } = useLegacyProgress(slug, lectureNumber);
+  const {
+    markSectionComplete,
+    markQuizCompleted,
+    markProblemCompleted,
+    markLectureCompleted,
+    isSectionCompleted,
+    quizScore,
+  } = useLectureProgress(slug, !isNaN(lectureNumber) ? String(lectureNumber) : undefined);
   const { isLectureUnlocked } = useCourseProgress(slug);
 
   const [currentPageIdx, setCurrentPageIdx] = useState(0);
@@ -127,6 +132,8 @@ export default function LecturePage() {
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
   const scrollRef = useRef<HTMLElement>(null);
   const [skippedSections, setSkippedSections] = useState<Set<number>>(new Set());
+  const [completedProblems, setCompletedProblems] = useState<string[]>([]);
+  const [projectCompleted] = useState(false);
 
   // Check if content fits without scrolling
   useEffect(() => {
@@ -234,27 +241,28 @@ export default function LecturePage() {
     });
   }, [pages, currentPageIdx, isSectionCompleted]);
 
-  // Sync legacy progress (quiz, problems) to the new strict sections system
+  // Mark quiz section complete when quiz has been passed
   useEffect(() => {
     if (!pages.length || !lessonData) return;
-
-    // Sync Quiz
-    if (progress.quizCompleted) {
+    if (quizScore !== null) {
       const quizIdx = pages.findIndex(p => p.type === 'quiz');
       if (quizIdx !== -1 && !isSectionCompleted(quizIdx + 1)) {
         markSectionComplete(quizIdx + 1);
       }
     }
+  }, [pages, lessonData, quizScore, isSectionCompleted, markSectionComplete]);
 
-    // Sync Problems
+  // Mark problems section complete when enough problems are done
+  useEffect(() => {
+    if (!pages.length || !lessonData) return;
     const problemsIdx = pages.findIndex(p => p.type === 'problems');
     if (problemsIdx !== -1) {
       const requiredProblems = Math.min(2, lessonData.problems?.length ?? 0);
-      if (requiredProblems > 0 && progress.problemsCompleted.length >= requiredProblems && !isSectionCompleted(problemsIdx + 1)) {
+      if (requiredProblems > 0 && completedProblems.length >= requiredProblems && !isSectionCompleted(problemsIdx + 1)) {
         markSectionComplete(problemsIdx + 1);
       }
     }
-  }, [pages, lessonData, progress.quizCompleted, progress.problemsCompleted.length, isSectionCompleted, markSectionComplete]);
+  }, [pages, lessonData, completedProblems.length, isSectionCompleted, markSectionComplete]);
 
   if (!slug) return null;
 
@@ -355,8 +363,7 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
               const status = pageStatuses[idx];
               const id = pageId(page, lessonData.sections);
               const label = pageLabel(page, lessonData.sections);
-              const solvedProblemsCount = progress.problemsCompleted.length;
-              const problemsAttempted = progress.sections['problems']?.practiceAttempted;
+              const solvedProblemsCount = completedProblems.length;
 
               return (
                 <button
@@ -370,7 +377,7 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
                 >
                   {/* Status indicator */}
                   <span className="w-4 h-4 flex items-center justify-center flex-shrink-0">
-                    {id === 'project' && progress.projectCompleted ? (
+                    {id === 'project' && projectCompleted ? (
                       <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
                         <Check size={10} className="text-white" strokeWidth={3} />
                       </div>
@@ -379,7 +386,7 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
                         <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
                           <Check size={10} className="text-white" strokeWidth={3} />
                         </div>
-                      ) : problemsAttempted || skippedSections.has(idx) ? (
+                      ) : skippedSections.has(idx) ? (
                         <div className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center">
                           <X size={10} className="text-white" strokeWidth={3} />
                         </div>
@@ -425,10 +432,8 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
               <LessonSection
                 section={lessonData.sections[currentPage.index]}
                 index={currentPage.index}
-                  onPracticeAttempt={() => markPracticeAttempted(lessonData.sections[currentPage.index].id)}
-                  onPracticeComplete={() => {
-                    markPracticeCompleted(lessonData.sections[currentPage.index].id);
-                  }}
+                  onPracticeAttempt={() => {}}
+                  onPracticeComplete={() => {}}
               />
             )}
 
@@ -442,7 +447,7 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
                     Quiz
                   </h2>
                   
-                  {progress.quizCompleted && progress.quizScore === quiz.length ? (
+                  {quizScore !== null && quizScore === quiz.length ? (
                     <div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-600/10 to-slate-800/40 p-8 text-center space-y-4">
                       <div className="w-16 h-16 rounded-2xl bg-emerald-600/20 flex items-center justify-center mx-auto">
                         <CheckCircle size={32} className="text-emerald-400" />
@@ -452,11 +457,11 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
                         <p className="text-slate-400 mt-2">You have completely mastered this section.</p>
                       </div>
                     </div>
-                  ) : progress.quizCompleted && !retakingQuiz ? (
+                  ) : quizScore !== null && !retakingQuiz ? (
                     <div className="rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-600/10 to-slate-800/40 p-8 text-center space-y-4">
                       <div>
                         <p className="text-xl font-bold text-white">Quiz Completed</p>
-                        <p className="text-slate-400 mt-2">You scored {progress.quizScore} out of {quiz.length}.</p>
+                        <p className="text-slate-400 mt-2">You scored {quizScore} out of {quiz.length}.</p>
                       </div>
                       <button
                         onClick={() => setRetakingQuiz(true)}
@@ -491,9 +496,9 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
                   </h2>
                   <p className="text-sm text-slate-400">
                     Apply what you've learned by solving these coding challenges.
-                    {progress.problemsCompleted.length > 0 && (
+                    {completedProblems.length > 0 && (
                       <span className="ml-2 text-orange-400 font-medium">
-                        {progress.problemsCompleted.length}/{problems.length} solved
+                        {completedProblems.length}/{problems.length} solved
                       </span>
                     )}
                   </p>
@@ -509,17 +514,16 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
                         index={i}
                         isOpen={openProblemIndex === i}
                         onOpenChange={(isOpen) => setOpenProblemIndex(isOpen ? i : -1)}
-                        completed={progress.problemsCompleted.includes(problem.id)}
-                        onAttempt={() => markPracticeAttempted('problems')}
+                        completed={completedProblems.includes(problem.id)}
                         onComplete={(id) => {
-                          const alreadySolved = progress.problemsCompleted.includes(id);
-                          markProblemCompleted(id);
-                          markHandsOnTaskCompleted();
-                          
-                          // Problem logic for Section 5: there are exactly 2 required problems.
-                          // If this brings our total solved to 2 or more, mark section complete.
+                          const alreadySolved = completedProblems.includes(id);
                           if (!alreadySolved) {
-                            if (progress.problemsCompleted.length + 1 >= Math.min(2, problems.length)) {
+                            setCompletedProblems(prev => [...prev, id]);
+                          }
+                          markProblemCompleted(id);
+                          
+                          const newTotal = alreadySolved ? completedProblems.length : completedProblems.length + 1;
+                          if (newTotal >= Math.min(2, problems.length)) {
                               markSectionComplete(currentPageIdx + 1);
                               setTimeout(() => {
                                 setOpenProblemIndex(-1);
@@ -529,7 +533,7 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
                               setTimeout(() => setOpenProblemIndex(i + 1), 1500);
                             }
                           }
-                        }}
+                        }
                       />
                     ))}
                   </div>
@@ -556,7 +560,7 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
                               index={i}
                               isOpen={openSimilarIndex === i}
                               onOpenChange={(isOpen) => setOpenSimilarIndex(isOpen ? i : -1)}
-                              completed={progress.problemsCompleted.includes(problem.id)}
+                              completed={completedProblems.includes(problem.id)}
                               onComplete={() => {
                                 if (i + 1 < similarProblems.length) {
                                   setTimeout(() => setOpenSimilarIndex(i + 1), 1500);
@@ -587,7 +591,7 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
                     </div>
                   </div>
 
-                  {progress.projectCompleted && (
+                  {projectCompleted && (
                     <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-3 flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
                         <CheckCircle size={16} className="text-emerald-400" />
@@ -645,7 +649,7 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
                             </div>
                           </div>
                           <div className="mt-4 pt-4 border-t border-slate-700/20 flex items-center justify-between">
-                            {progress.projectCompleted && progress.projectId === project.id ? (
+                            {projectCompleted ? (
                               <span className="text-[11px] text-emerald-400 flex items-center gap-1.5 font-medium">
                                 <CheckCircle size={12} /> Completed — review your workspace or continue
                               </span>
@@ -656,7 +660,7 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
                               onClick={() => navigate(`/course/${slug}/lecture/${lectureNumber}/project/${project.id}`)}
                               className="text-xs font-semibold text-white px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 transition-all shadow-md shadow-purple-900/20 flex items-center gap-2"
                             >
-                              {progress.projectCompleted && progress.projectId === project.id ? 'Open Workspace' : 'Start Building'}
+                              {projectCompleted ? 'Open Workspace' : 'Start Building'}
                               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                               </svg>
@@ -715,9 +719,8 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
                   lectureTitle={lessonData.title}
                   nextLectureTitle={nextLecture?.title}
                   onNext={() => {
-                    // Mark summary section (section 6 or equivalent) as complete
                     markSectionComplete(currentPageIdx + 1);
-                    legacyMarkLectureCompleted();
+                    markLectureCompleted(pages.filter(p => p.type === 'section').length);
                     
                     if (nextLecture) {
                       navigate(`/course/${slug}/lecture/${nextLecture.number}`);

@@ -34,7 +34,7 @@ export default function PracticeCard({ block, onAttempt, onComplete }: PracticeC
   }, [block.title]);
 
   const saveCode = useCallback((code: string) => {
-    authFetch('/api/drafts', {
+    authFetch('/drafts', {
       method: 'POST',
       body: JSON.stringify({
         lectureId: block.title,

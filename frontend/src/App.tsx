@@ -62,6 +62,10 @@ const ProfilePage = lazy(
   () => import("./pages/ProfilePage")
 );
 
+const QACenter = lazy(
+  () => import("./pages/QACenter")
+);
+
 const LandingPage = lazy(
   () => import("./pages/LandingPage")
 );
@@ -254,6 +258,17 @@ export default function App() {
           <Route
             path="profile"
             element={<ProfilePage />}
+          />
+
+          {/* QA Center (admin only) */}
+
+          <Route
+            path="qa"
+            element={
+              <RequireRole roles={["admin", "instructor"]}>
+                <QACenter />
+              </RequireRole>
+            }
           />
 
           {/* Settings */}

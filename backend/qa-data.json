@@ -1,0 +1,40 @@
+{
+  "python": {
+    "lecturesReviewed": {
+      "status": "completed",
+      "reviewedBy": "QA Admin",
+      "reviewDate": "2026-06-18T04:58:47.416Z",
+      "notes": "All lectures verified"
+    },
+    "exercisesReviewed": {
+      "status": "pending",
+      "reviewedBy": "",
+      "reviewDate": null,
+      "notes": ""
+    },
+    "assessmentsReviewed": {
+      "status": "pending",
+      "reviewedBy": "",
+      "reviewDate": null,
+      "notes": ""
+    },
+    "projectsReviewed": {
+      "status": "pending",
+      "reviewedBy": "",
+      "reviewDate": null,
+      "notes": ""
+    },
+    "certificateTested": {
+      "status": "pending",
+      "reviewedBy": "",
+      "reviewDate": null,
+      "notes": ""
+    },
+    "e2eFlowTested": {
+      "status": "pending",
+      "reviewedBy": "",
+      "reviewDate": null,
+      "notes": ""
+    }
+  }
+}

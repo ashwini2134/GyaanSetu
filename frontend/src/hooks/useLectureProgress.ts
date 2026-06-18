@@ -1,11 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
-import { getToken } from '../authClient';
+import { authFetch, getToken } from '../authClient';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3001';
 
 export interface SectionProgress {
   sectionIndex: number;
   isCompleted: boolean;
+}
+
+interface LectureData {
+  sections: SectionProgress[];
+  lectureCompleted: boolean;
+  quizAttempt: { score: number; total: number; passed: boolean } | null;
 }
 
 async function apiCall<T>(path: string, init: RequestInit = {}): Promise<T> {
@@ -21,18 +27,26 @@ async function apiCall<T>(path: string, init: RequestInit = {}): Promise<T> {
 
 export function useLectureProgress(courseSlug: string | undefined, lectureId: string | undefined) {
   const [sections, setSections] = useState<Record<number, boolean>>({});
+  const [lectureCompleted, setLectureCompleted] = useState(false);
+  const [quizScore, setQuizScore] = useState<number | null>(null);
+  const [quizTotal, setQuizTotal] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 
   const fetchProgress = useCallback(async () => {
     if (!courseSlug || !lectureId) return;
     setLoading(true);
     try {
-      const data = await apiCall<SectionProgress[]>(`/progress/lecture/${courseSlug}/${lectureId}`);
+      const data = await apiCall<LectureData>(`/progress/lecture/${courseSlug}/${lectureId}`);
       const map: Record<number, boolean> = {};
-      data.forEach(p => {
+      data.sections.forEach(p => {
         map[p.sectionIndex] = p.isCompleted;
       });
       setSections(map);
+      setLectureCompleted(data.lectureCompleted);
+      if (data.quizAttempt) {
+        setQuizScore(data.quizAttempt.score);
+        setQuizTotal(data.quizAttempt.total);
+      }
     } catch (e) {
       console.error("Failed to fetch lecture progress", e);
     } finally {
@@ -46,7 +60,6 @@ export function useLectureProgress(courseSlug: string | undefined, lectureId: st
 
   const markSectionComplete = useCallback(async (index: number) => {
     if (!courseSlug || !lectureId) return;
-    // Optimistic UI update
     setSections(prev => ({ ...prev, [index]: true }));
     try {
       await apiCall(`/progress/lecture/${courseSlug}/${lectureId}`, {
@@ -55,19 +68,82 @@ export function useLectureProgress(courseSlug: string | undefined, lectureId: st
       });
     } catch (e) {
       console.error("Failed to update section progress", e);
-      // Revert if failed (optional, but good practice)
       setSections(prev => ({ ...prev, [index]: false }));
     }
   }, [courseSlug, lectureId]);
 
+  const completeAction = useCallback(async (actionType: string, actionId: string) => {
+    try {
+      await authFetch('/progress/action', {
+        method: 'POST',
+        body: JSON.stringify({ actionType, actionId }),
+      });
+    } catch (e) {
+      console.error(`[progress] action ${actionType} failed`, e);
+    }
+  }, []);
+
+  const markQuizCompleted = useCallback(async (score: number, total: number) => {
+    if (!courseSlug || !lectureId) return;
+    setQuizScore(score);
+    setQuizTotal(total);
+    try {
+      const data = await authFetch<{ passed: boolean }>('/progress/quiz', {
+        method: 'POST',
+        body: JSON.stringify({
+          courseSlug,
+          lectureId,
+          quizId: `${courseSlug}-${lectureId}`,
+          score,
+          total,
+        }),
+      });
+      if (data.passed) {
+        await completeAction('quiz', `${courseSlug}:${lectureId}`);
+      }
+    } catch (e) {
+      console.error('[progress] save quiz failed', e);
+    }
+  }, [courseSlug, lectureId, completeAction]);
+
+  const markProblemCompleted = useCallback(async (problemId: string) => {
+    if (!courseSlug || !lectureId) return;
+    await completeAction('problem', problemId);
+  }, [courseSlug, lectureId, completeAction]);
+
+  const markLectureCompleted = useCallback(async (sectionCount: number) => {
+    if (!courseSlug || !lectureId) return;
+    const allDone = (() => {
+      for (let i = 1; i <= sectionCount; i++) {
+        if (!sections[i]) return false;
+      }
+      return true;
+    })();
+    if (!allDone) return;
+    setLectureCompleted(true);
+    try {
+      await apiCall('/progress/lecture', {
+        method: 'POST',
+        body: JSON.stringify({ courseSlug, lectureId, hasProject: false })
+      });
+      await completeAction('lecture', `${courseSlug}:${lectureId}`);
+    } catch (e) {
+      console.error('[progress] save lecture completion failed', e);
+    }
+  }, [courseSlug, lectureId, sections, completeAction]);
+
   return {
     sections,
+    lectureCompleted,
+    quizScore,
+    quizTotal,
     loading,
     markSectionComplete,
+    markQuizCompleted,
+    markProblemCompleted,
+    markLectureCompleted,
     isSectionCompleted: (index: number) => !!sections[index],
     isLectureCompleted: (sectionCount: number) => {
-      // A lecture is complete when all its sections are marked done
-      // sectionCount is the actual number of sections in this lecture
       if (sectionCount <= 0) return false;
       for (let i = 1; i <= sectionCount; i++) {
         if (!sections[i]) return false;
@@ -78,28 +154,35 @@ export function useLectureProgress(courseSlug: string | undefined, lectureId: st
 }
 
 export function useCourseProgress(courseSlug: string | undefined) {
-  const [lectureCompletions, setLectureCompletions] = useState<Record<string, { totalSections: number; isCompleted: boolean; inProgress: boolean }>>({});
-  
+  const [lectureCompletions, setLectureCompletions] = useState<Record<string, { lectureCompleted: boolean; completedSections: number }>>({});
+
   const fetchCourseProgress = useCallback(async () => {
     if (!courseSlug) return;
     try {
-      const data = await apiCall<any[]>(`/progress/lecture/${courseSlug}`);
-      // Group by lectureId, track completed sections
-      const map: Record<string, number> = {};
-      data.forEach(p => {
+      const data = await apiCall<{ sections: any[]; lectureCompletions: { lectureId: string }[] }>(`/progress/course/${courseSlug}`);
+      const completedLectureIds = new Set(data.lectureCompletions.map((l: any) => l.lectureId));
+
+      const sectionMap: Record<string, number> = {};
+      data.sections.forEach((p: any) => {
         if (p.isCompleted) {
-          map[p.lectureId] = (map[p.lectureId] || 0) + 1;
+          sectionMap[p.lectureId] = (sectionMap[p.lectureId] || 0) + 1;
         }
       });
-      const result: Record<string, { totalSections: number; isCompleted: boolean; inProgress: boolean }> = {};
-      Object.keys(map).forEach(lectureId => {
-        const sectionsDone = map[lectureId];
+
+      const result: Record<string, { lectureCompleted: boolean; completedSections: number }> = {};
+      Object.keys(sectionMap).forEach(lectureId => {
         result[lectureId] = {
-          totalSections: sectionsDone,
-          isCompleted: sectionsDone > 0,
-          inProgress: sectionsDone > 0
+          completedSections: sectionMap[lectureId],
+          lectureCompleted: completedLectureIds.has(lectureId),
         };
       });
+
+      completedLectureIds.forEach(id => {
+        if (!result[id]) {
+          result[id] = { lectureCompleted: true, completedSections: 0 };
+        }
+      });
+
       setLectureCompletions(result);
     } catch (e) {
       console.error("Failed to fetch course progress", e);
@@ -114,11 +197,9 @@ export function useCourseProgress(courseSlug: string | undefined) {
     lectureCompletions,
     refreshCourseProgress: fetchCourseProgress,
     isLectureUnlocked: (lectureNumber: number) => {
-      // Lecture 0 (or 1) is always unlocked
       if (lectureNumber <= 1) return true;
-      // To unlock N, N-1 must be completed
       const prev = lectureCompletions[String(lectureNumber - 1)];
-      return prev?.isCompleted ?? false;
+      return prev?.lectureCompleted ?? false;
     }
   };
 }

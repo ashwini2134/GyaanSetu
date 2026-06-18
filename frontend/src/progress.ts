@@ -99,7 +99,7 @@ function queueToast(text: string, type: 'xp' | 'achievement' | 'streak', duratio
 
 export async function handleDailyLogin() {
   try {
-    await authFetch('/api/streaks', { method: 'POST' });
+    await authFetch('/streaks', { method: 'POST' });
     emit();
   } catch (err) {
     console.error("Failed to handle daily login", err);
@@ -108,7 +108,7 @@ export async function handleDailyLogin() {
 
 async function unlockAchievement(id: string) {
   try {
-    await authFetch('/api/achievements', {
+    await authFetch('/achievements', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ achievementId: id })
@@ -159,7 +159,7 @@ export async function completeAction(
   actionId: string
 ) {
   try {
-    await authFetch('/api/progress/action', {
+    await authFetch('/progress/action', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ actionType, actionId })
@@ -180,7 +180,7 @@ export async function updateOverallProgress(totalLecturesAvailable: number) {
     if (totalLecturesAvailable === 0) return 0;
     const pct = Math.min(100, Math.round((stats.lecturesCompleted / totalLecturesAvailable) * 100));
     
-    await authFetch('/api/progress/overall', {
+    await authFetch('/progress/overall', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ overallProgress: pct })

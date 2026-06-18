@@ -45,8 +45,8 @@ export default function CoursePage() {
 
   const getLectureStatus = (lecture: Lecture): LectureStatus => {
     const p = lectureCompletions[String(lecture.number)];
-    if (p?.isCompleted) return "completed";
-    if (p?.inProgress) return "in-progress";
+    if (p?.lectureCompleted) return "completed";
+    if (p && p.completedSections > 0) return "in-progress";
     if (isLectureUnlocked(lecture.number)) return "available";
     return "locked";
   };
@@ -55,8 +55,8 @@ export default function CoursePage() {
   const progressPercent = lectureCount > 0
     ? Math.round((completedCount / lectureCount) * 100)
     : 0;
-  const quizzesPassed = 0; // Legacy
-  const projectsSubmitted = 0; // Legacy
+  const quizzesPassed = completedCount;
+  const projectsSubmitted = 0;
 
   useEffect(() => {
     if (progressPercent === 100 && lectureCount > 0 && user?.name && slug) {

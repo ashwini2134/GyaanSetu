@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { api, type Course, getSubmissionHistory } from "../api";
+import { api, type Course, authFetch } from "../api";
 import { useAuth } from "../auth";
 import { Card, DynamicCourseIcon } from "../components";
 
@@ -78,23 +78,14 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [courses, setCourses] = useState<Course[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  const [submissionHistory, setSubmissionHistory] = useState<Record<string, number>>({});
-
   
   // Use our centralized Gamification hook
   const { xp, achievements: unlockedAchievements, streak, stats, overallProgress } = useGamification();
 
-  const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
+  const [activeCourseId] = useState<string | null>(null);
   const [activeStatId, setActiveStatId] = useState<string | null>(null);
   const [activeBadgeId, setActiveBadgeId] = useState<string | null>(null);
   const [lectureCounts, setLectureCounts] = useState<Record<string, number>>({});
-
-  const handleCourseClick = (slug: string) => {
-    setActiveCourseId(slug);
-    window.setTimeout(() => {
-      setActiveCourseId((current) => (current === slug ? null : current));
-    }, 700);
-  };
 
   const handleStatClick = (id: string) => {
     setActiveStatId(id);
@@ -110,22 +101,13 @@ export default function Dashboard() {
     }, 900);
   };
 
-  useEffect(() => {
-    setSubmissionHistory(getSubmissionHistory());
-  }, []);
-
   const [courseStatsMap, setCourseStatsMap] = useState<Record<string, { completed: number; inProgressLectures: number; total: number; lecturesCompleted: number; percentage: number; status: string }>>({});
   const [dynamicStats, setDynamicStats] = useState({ coursesStarted: 0, coursesCompleted: 0, lecturesCompleted: 0 });
 
   useEffect(() => {
     if (!courses) return;
 
-      fetch('/api/courses/progress', {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
-    })
-      .then(res => res.json())
+      authFetch<any[]>('/courses/progress')
       .then(data => {
         const map: Record<string, any> = {};
         let started = 0;
@@ -179,17 +161,18 @@ export default function Dashboard() {
   const getStreakDays = () => {
     const days = [];
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const today = new Date().toISOString().split('T')[0];
+    const lastActive = streak.lastLoginDate === today;
     for (let i = 6; i >= 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
-      const hasActivity = submissionHistory[dateStr] > 0;
       const isToday = i === 0;
+      const hasActivity = lastActive && (streak.currentStreak > (6 - i) || isToday);
       days.push({
         name: dayNames[date.getDay()],
         hasActivity,
         isToday,
-        count: submissionHistory[dateStr] || 0
+        count: hasActivity ? 1 : 0
       });
     }
     return days;
@@ -451,7 +434,7 @@ export default function Dashboard() {
                   ) : (
                     <div className="flex flex-col gap-5">
                       <style>{`div::-webkit-scrollbar { display: none; }`}</style>
-                      {courses.map((c, idx) => {
+                      {courses.map((c) => {
                         const progress = courseStatsMap[c.slug] || { completed: 0, inProgressLectures: 0, total: lectureCounts[c.slug] || 0, lecturesCompleted: 0, percentage: 0, status: 'not_started' };
                         const percent = progress.percentage;
                         const total = progress.total || lectureCounts[c.slug] || 0;

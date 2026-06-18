@@ -28,7 +28,7 @@ export function clearToken(): void {
   localStorage.removeItem(TOKEN_KEY);
 }
 
-class AuthApiError extends Error {
+export class AuthApiError extends Error {
   status: number;
   constructor(message: string, status: number) {
     super(message);

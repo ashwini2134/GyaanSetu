@@ -1,25 +1,19 @@
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createApp } from "../src/app.js";
-import { closeDb, resetDbForTests } from "../src/db.js";
-import { prisma } from "../src/prisma.js";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const testDbPath = path.join(__dirname, "test-auth.db");
+import { prisma } from "../src/prisma.js";
 
 describe("Auth API", () => {
   let app: ReturnType<typeof createApp>;
 
   beforeEach(async () => {
-    resetDbForTests(testDbPath);
     await prisma.user.deleteMany();
     app = createApp();
   });
 
   afterAll(() => {
-    closeDb();
+    prisma.$disconnect();
   });
 
   it("registers a new user", async () => {

@@ -16,6 +16,7 @@ import chatRoutes from "./routes/chat.js";
 import dailyMissionsRoutes from "./routes/dailyMissions.js";
 import profileRoutes from "./routes/profile.js";
 import coursesRoutes from "./routes/courses.js";
+import qaRoutes from "./routes/qa.js";
 
 export function createApp() {
   const app = express();
@@ -63,6 +64,7 @@ export function createApp() {
   app.use("/api/daily-missions", dailyMissionsRoutes);
   app.use("/api/profile", profileRoutes);
   app.use("/api/courses", coursesRoutes);
+  app.use("/api/qa", qaRoutes);
 
   app.use(errorHandler);
   return app;

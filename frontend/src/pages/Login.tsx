@@ -4,6 +4,16 @@ import { AlertCircle, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../auth";
 import { AuthLayout, Button, Input } from "../components";
 import { OAuthButtons } from "../components/OAuthButtons";
+import { AuthApiError } from "../authClient";
+
+const isDev = import.meta.env.DEV;
+
+function userFacingMessage(status: number, fallback: string): string {
+  if (status === 401) return "Invalid email or password.";
+  if (status === 429) return "Too many login attempts. Please try again later.";
+  if (status >= 500) return "Something went wrong. Please try again.";
+  return fallback;
+}
 
 export default function Login() {
   const { user, login } = useAuth();
@@ -21,10 +31,29 @@ export default function Login() {
     e.preventDefault();
     setErr(null);
     setBusy(true);
+
+    if (isDev) console.log("[auth] Login request started");
+
     try {
       await login(email, password);
-    } catch {
-      setErr("Invalid email or password.");
+      if (isDev) console.log("[auth] Login response received — 200");
+    } catch (err) {
+      let message: string;
+      let status = 0;
+
+      if (err instanceof AuthApiError) {
+        status = err.status;
+        message = userFacingMessage(status, err.message);
+        if (isDev) console.log(`[auth] Login response received — ${status}`, err.message);
+      } else if (err instanceof TypeError && err.message === "Failed to fetch") {
+        message = "Unable to connect to the server.";
+        if (isDev) console.log("[auth] Network error — server unreachable");
+      } else {
+        message = "Something went wrong. Please try again.";
+        if (isDev) console.log("[auth] Unexpected error", err);
+      }
+
+      setErr(message);
     } finally {
       setBusy(false);
     }
