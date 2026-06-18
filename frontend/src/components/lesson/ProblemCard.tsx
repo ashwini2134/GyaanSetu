@@ -164,8 +164,27 @@ export default function ProblemCard({ problem, index, completed, onComplete, onA
         }
         const result = runPython(fullCode);
         const actual = result.error ? result.error : result.output;
-        const { diffLines, explanation } = lineDiff(tc.expectedOutput, actual);
-        const passed = actual.trim() === tc.expectedOutput.trim();
+        let passed = false;
+        let diffLines: DiffLine[] = [];
+        let explanation = '';
+
+        if (tc.matchType === 'regex') {
+          try {
+            const regex = new RegExp(tc.expectedOutput);
+            passed = regex.test(actual.trim());
+          } catch (e) {}
+          if (!passed) explanation = "Output does not match the required pattern.";
+        } else if (tc.matchType === 'any_lines') {
+          const expectedLinesCount = tc.expectedOutput.trim().split('\\n').length;
+          const actualLines = actual.trim().split('\\n').filter(l => l.trim().length > 0);
+          passed = actualLines.length === expectedLinesCount;
+          if (!passed) explanation = `Expected exactly ${expectedLinesCount} non-empty lines, but got ${actualLines.length}.`;
+        } else {
+          const diff = lineDiff(tc.expectedOutput, actual);
+          diffLines = diff.diffLines;
+          explanation = diff.explanation;
+          passed = actual.trim() === tc.expectedOutput.trim();
+        }
         results.push({ label: tc.label, passed, expected: tc.expectedOutput, actual, diffLines });
         // Store explanation on first failed test case
         if (!passed && results.filter(r => !r.passed).length === 1) {

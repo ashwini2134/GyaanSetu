@@ -23,9 +23,10 @@
     "solution": "print(\"Your Name\")\nprint(\"Your Age\")\nprint(\"Your City\")",
     "testCases": [
       {
-        "label": "Verify expected output",
+        "label": "Prints 3 lines of output",
         "input": "",
-        "expectedOutput": "Your Name\nYour Age\nYour City"
+        "expectedOutput": "Line 1\nLine 2\nLine 3",
+        "matchType": "any_lines"
       }
     ]
   }

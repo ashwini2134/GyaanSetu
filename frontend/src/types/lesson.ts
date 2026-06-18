@@ -183,6 +183,7 @@ export interface TestCase {
   label: string;
   input: string;
   expectedOutput: string;
+  matchType?: 'exact' | 'regex' | 'any_lines';
 }
 
 export interface CodingProblem {
