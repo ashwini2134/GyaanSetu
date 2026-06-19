@@ -62,6 +62,10 @@ const Projects = lazy(
   () => import("./pages/Projects")
 );
 
+const AssessmentsSection = lazy(
+  () => import("./pages/AssessmentsSection")
+);
+
 const ProjectDetailsPage = lazy(
   () => import("./pages/ProjectDetailsPage")
 );
@@ -270,6 +274,13 @@ export default function App() {
           <Route
             path="projects/:projectId"
             element={<ProjectDetailsPage />}
+          />
+
+          {/* Assessments */}
+
+          <Route
+            path="assessments"
+            element={<AssessmentsSection />}
           />
 
           {/* Profile */}

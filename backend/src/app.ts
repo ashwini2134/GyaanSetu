@@ -18,6 +18,7 @@ import profileRoutes from "./routes/profile.js";
 import coursesRoutes from "./routes/courses.js";
 import qaRoutes from "./routes/qa.js";
 import practiceExercisesRoutes from "./routes/practiceExercises.js";
+import assessmentsRoutes from "./routes/assessments.js";
 
 export function createApp() {
   const app = express();
@@ -67,6 +68,7 @@ export function createApp() {
   app.use("/api/courses", coursesRoutes);
   app.use("/api/qa", qaRoutes);
   app.use("/api/practice-exercises", practiceExercisesRoutes);
+  app.use("/api/assessments", assessmentsRoutes);
 
   app.use(errorHandler);
   return app;

@@ -255,3 +255,19 @@ model PracticeSubmission {
 
   @@unique([userId, exerciseId])
 }
+
+model AssessmentQuestion {
+  id            String   @id @default(cuid())
+  category      String
+  subsection    String
+  type          String   // "mcq" or "coding"
+  question      String
+  options       String[] // for MCQ only, array of 4 options
+  correctAnswer String   // for MCQ: the correct option text. For coding: expected output
+  starterCode   String?  // for coding questions only
+  language      String?  // for coding: "python", "javascript" etc
+  difficulty    String   @default("medium") // "easy", "medium", "hard"
+  createdAt     DateTime @default(now())
+
+  @@map("assessment_questions")
+}

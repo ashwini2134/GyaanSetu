@@ -13,6 +13,7 @@ import {
   Settings,
   ShieldCheck,
   FolderKanban,
+  ClipboardList,
 } from "lucide-react";
 
 function Logo({ expanded }: { expanded: boolean }) {
@@ -309,6 +310,23 @@ export default function Shell() {
               </span>
               <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>
                 Projects
+              </span>
+            </NavLink>
+
+            {/* Assessments */}
+            <NavLink
+              to="/assessments"
+              onClick={() => setSidebarOpen(false)}
+              className={({ isActive }) =>
+                `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`
+              }
+              title="Assessments"
+            >
+              <span className="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                <ClipboardList size={18} />
+              </span>
+              <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>
+                Assessments
               </span>
             </NavLink>
 
