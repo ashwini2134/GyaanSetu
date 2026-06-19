@@ -1,16 +1,14 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, CheckCircle, Clock, PlayCircle, Trophy, RefreshCw, Loader2 } from "lucide-react";
+import { ArrowLeft, CheckCircle, Clock, PlayCircle, Trophy, RefreshCw, Loader2, AlertCircle } from "lucide-react";
 import { api } from "../api";
 import { useAuth } from "../auth";
 
 interface Question {
   id: string;
-  type: "mcq" | "coding";
+  type: "mcq";
   question: string;
   options: string[] | null;
   correctAnswer: string;
-  starterCode: string | null;
-  language: string | null;
 }
 
 interface AssessmentPlayerProps {
@@ -24,6 +22,7 @@ export default function AssessmentPlayer({ category, subsection, onClose, onComp
   const { user } = useAuth();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -38,22 +37,38 @@ export default function AssessmentPlayer({ category, subsection, onClose, onComp
     let isMounted = true;
     const fetchQuestions = async () => {
       try {
-        const res = await api.client.get(`/api/assessments/questions/${encodeURIComponent(category)}/${encodeURIComponent(subsection)}`);
+        const encodedCategory = encodeURIComponent(category.trim());
+        const encodedSubsection = encodeURIComponent(subsection.trim());
+        const response = await fetch(`/api/assessments/questions/${encodedCategory}/${encodedSubsection}`);
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          if (isMounted) {
+            setError(errorData.message || 'No questions found for this assessment.');
+            setLoading(false);
+          }
+          return;
+        }
+
+        const data = await response.json();
+        if (!data.questions || data.questions.length === 0) {
+          if (isMounted) {
+            setError('No questions found for this assessment.');
+            setLoading(false);
+          }
+          return;
+        }
+
         if (isMounted) {
-          // Initialize answers object with starter code for coding questions
-          const initialAnswers: Record<string, string> = {};
-          res.data.forEach((q: Question) => {
-            if (q.type === "coding" && q.starterCode) {
-              initialAnswers[q.id] = q.starterCode;
-            }
-          });
-          setAnswers(initialAnswers);
-          setQuestions(res.data);
+          setQuestions(data.questions);
           setLoading(false);
         }
       } catch (err) {
         console.error("Failed to fetch questions:", err);
-        if (isMounted) setLoading(false);
+        if (isMounted) {
+          setError('Failed to connect to server.');
+          setLoading(false);
+        }
       }
     };
     fetchQuestions();
@@ -83,29 +98,51 @@ export default function AssessmentPlayer({ category, subsection, onClose, onComp
   };
 
   const handleSubmit = async () => {
-    setIsSubmitting(true);
-    let calculatedScore = 0;
-    questions.forEach(q => {
-      if (q.type === "mcq" && answers[q.id] === q.correctAnswer) {
-        calculatedScore += 1;
-      } else if (q.type === "coding") {
-        // Dummy check for coding
-        calculatedScore += 1; 
-      }
-    });
-
     try {
-      const payload = {
-        userId: user?.id,
+      setIsSubmitting(true);
+
+      const userId = user?.id;
+
+      if (!userId) {
+        alert('You must be logged in to submit.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const correctCount = questions.reduce((count, q) => {
+        return answers[q.id] === q.correctAnswer ? count + 1 : count;
+      }, 0);
+
+      const requestBody = {
+        userId,
         category,
         subsection,
-        score: calculatedScore,
+        score: correctCount,
         totalQuestions: questions.length,
         timeTaken: timeSeconds,
-        answers: Object.entries(answers).map(([qId, ans]) => ({ questionId: qId, userAnswer: ans }))
+        answers: questions.map((q) => ({
+          questionId: q.id,
+          userAnswer: answers[q.id] || ''
+        }))
       };
-      const res = await api.client.post("/api/assessments/submit", payload);
-      setResult(res.data);
+
+      const response = await fetch('/api/assessments/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Submit failed:', errorData);
+        throw new Error(errorData.error || 'Submission failed');
+      }
+
+      const data = await response.json();
+      setResult(data);
+
     } catch (err) {
       console.error("Failed to submit assessment:", err);
       alert("Failed to submit assessment. Please try again.");
@@ -122,12 +159,23 @@ export default function AssessmentPlayer({ category, subsection, onClose, onComp
     );
   }
 
-  if (questions.length === 0) {
+  if (questions.length === 0 || error) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a0f1e]">
-        <div className="text-white text-center">
-          <p>No questions found for this assessment.</p>
-          <button onClick={onClose} className="mt-4 px-4 py-2 bg-white/10 rounded-lg">Go Back</button>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a0f1e]/95 backdrop-blur-md">
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-10 max-w-md w-full text-center flex flex-col items-center">
+          <div className="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center mb-6">
+            <AlertCircle size={40} className="text-amber-400" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-3">Questions Coming Soon</h2>
+          <p className="text-white/60 mb-8 leading-relaxed">
+            We are still preparing questions for <span className="text-white font-medium">{subsection}</span>. Please check back soon.
+          </p>
+          <button 
+            onClick={onClose} 
+            className="w-full py-3.5 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl transition-all"
+          >
+            Go Back
+          </button>
         </div>
       </div>
     );
@@ -230,7 +278,7 @@ export default function AssessmentPlayer({ category, subsection, onClose, onComp
             {currentQ.question}
           </h2>
 
-          {currentQ.type === "mcq" && currentQ.options && (
+          {currentQ.options && (
             <div className="space-y-4">
               {currentQ.options.map((opt, idx) => {
                 const isSelected = answers[currentQ.id] === opt;
@@ -253,29 +301,6 @@ export default function AssessmentPlayer({ category, subsection, onClose, onComp
                   </button>
                 );
               })}
-            </div>
-          )}
-
-          {currentQ.type === "coding" && (
-            <div className="flex flex-col gap-4">
-              <div className="relative rounded-xl overflow-hidden border border-white/10">
-                <div className="absolute top-0 right-0 px-3 py-1 bg-white/10 text-white/50 text-xs uppercase font-bold rounded-bl-lg">
-                  {currentQ.language}
-                </div>
-                <textarea
-                  className="w-full bg-[#1e1e2e] text-white p-6 pt-10 font-mono text-sm leading-relaxed resize-y min-h-[300px] focus:outline-none focus:ring-1 focus:ring-purple-500/50 scrollbar-thin scrollbar-thumb-white/10"
-                  value={answers[currentQ.id] || ""}
-                  onChange={(e) => setAnswers({ ...answers, [currentQ.id]: e.target.value })}
-                  spellCheck={false}
-                />
-              </div>
-              <div className="flex justify-between items-center bg-white/5 p-4 rounded-xl border border-white/10">
-                <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/30 transition-colors font-medium text-sm">
-                  <PlayCircle size={18} />
-                  Run Code
-                </button>
-                <span className="text-white/40 text-sm italic">Code execution coming soon...</span>
-              </div>
             </div>
           )}
         </div>

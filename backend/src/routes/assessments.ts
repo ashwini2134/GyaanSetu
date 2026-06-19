@@ -105,50 +105,104 @@ router.get("/subsection-status/:userId", requireAuth, async (req: AuthenticatedR
   }
 });
 
-router.get("/questions/:category/:subsection", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+router.get('/questions/:category/:subsection', async (req, res) => {
   try {
-    const category = decodeURIComponent(req.params.category);
-    const subsection = decodeURIComponent(req.params.subsection);
+    const category = decodeURIComponent(req.params.category).trim();
+    const subsection = decodeURIComponent(req.params.subsection).trim();
 
     const questions = await prisma.assessmentQuestion.findMany({
       where: {
-        category: category,
-        subsection: subsection
+        category: {
+          equals: category,
+          mode: 'insensitive'
+        },
+        subsection: {
+          equals: subsection,
+          mode: 'insensitive'
+        }
+      },
+      orderBy: {
+        createdAt: 'asc'
       }
     });
 
     if (!questions || questions.length === 0) {
-      return res.status(404).json({ error: "No questions found for this assessment.", category, subsection });
+      return res.status(404).json({
+        error: 'No questions found',
+        message: `No questions available for ${category} - ${subsection}`,
+        category,
+        subsection
+      });
     }
 
-    res.json(questions);
+    return res.status(200).json({ questions });
   } catch (error) {
-    next(error);
+    console.error('Error fetching questions:', error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-router.post("/submit", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+router.post('/submit', async (req, res) => {
   try {
-    const userId = req.user!.id;
-    const { category, subsection, score, totalQuestions, timeTaken, answers } = req.body;
+    const { userId, category, subsection, score, totalQuestions, timeTaken, answers } = req.body;
 
-    const passed = (score / totalQuestions) >= 0.6;
-    const quizId = `assessment::${category}::${subsection}`;
+    if (!userId || !category || !subsection) {
+      return res.status(400).json({ 
+        error: 'Missing required fields', 
+        required: ['userId', 'category', 'subsection'] 
+      });
+    }
 
-    await prisma.quizAttempt.create({
-      data: {
+    const scoreNum = Number(score) || 0;
+    const totalNum = Number(totalQuestions) || 0;
+    const timeNum = Number(timeTaken) || 0;
+    const passed = totalNum > 0 && (scoreNum / totalNum) >= 0.6;
+    const status = passed ? 'completed' : 'in_progress';
+
+    const result = await prisma.assessmentProgress.upsert({
+      where: {
+        userId_category_subsection: {
+          userId,
+          category,
+          subsection
+        }
+      },
+      update: {
+        score: scoreNum,
+        totalQuestions: totalNum,
+        timeTaken: timeNum,
+        status,
+        attempts: { increment: 1 },
+        lastAttemptAt: new Date()
+      },
+      create: {
         userId,
-        quizId,
-        score,
-        total: totalQuestions,
-        passed,
-        answers: { timeTaken, answers }
+        category,
+        subsection,
+        score: scoreNum,
+        totalQuestions: totalNum,
+        timeTaken: timeNum,
+        status,
+        attempts: 1,
+        lastAttemptAt: new Date()
       }
     });
 
-    res.json({ success: true, score, passed });
-  } catch (error) {
-    next(error);
+    return res.status(200).json({
+      success: true,
+      score: scoreNum,
+      totalQuestions: totalNum,
+      passed,
+      status,
+      result
+    });
+
+  } catch (error: any) {
+    console.error('Assessment submit error:', error);
+    return res.status(500).json({ 
+      error: 'Failed to submit assessment', 
+      details: error.message 
+    });
   }
 });
 

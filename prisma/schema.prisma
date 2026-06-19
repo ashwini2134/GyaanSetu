@@ -35,6 +35,7 @@ model User {
   lectureProgress     LectureProgress[]
   projects            Project[]
   quizAttempts        QuizAttempt[]
+  assessmentProgress  AssessmentProgress[]
   refreshTokens       RefreshToken[]
   submissions         Submission[]
   practiceSubmissions PracticeSubmission[]
@@ -270,4 +271,23 @@ model AssessmentQuestion {
   createdAt     DateTime @default(now())
 
   @@map("assessment_questions")
+}
+
+model AssessmentProgress {
+  id             String   @id @default(uuid())
+  userId         String
+  category       String
+  subsection     String
+  score          Int
+  totalQuestions Int
+  timeTaken      Int
+  status         String
+  attempts       Int      @default(1)
+  lastAttemptAt  DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, category, subsection])
+  @@map("assessment_progress")
 }
