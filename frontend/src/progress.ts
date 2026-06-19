@@ -127,8 +127,8 @@ async function unlockAchievement(id: string) {
 export async function checkAchievements() {
   try {
     const [resStats, resAch] = await Promise.all([
-      authFetch<{ stats?: StatsData }>('/api/progress'),
-      authFetch<{ achievements?: string[] }>('/api/achievements')
+      authFetch<{ stats?: StatsData }>('/progress'),
+      authFetch<{ achievements?: string[] }>('/achievements')
     ]);
 
     const stats = resStats.stats || {
@@ -174,7 +174,7 @@ export async function completeAction(
 
 export async function updateOverallProgress(totalLecturesAvailable: number) {
   try {
-    const res = await authFetch<{ stats?: StatsData }>('/api/progress');
+    const res = await authFetch<{ stats?: StatsData }>('/progress');
     const stats = res.stats || { lecturesCompleted: 0 };
     
     if (totalLecturesAvailable === 0) return 0;
@@ -211,11 +211,11 @@ export function useGamification() {
       if (!user) return;
       try {
         const [resXp, resAch, resStreak, resStats, resOverall] = await Promise.all([
-          authFetch<{ totalXp?: number }>('/api/xp'),
-          authFetch<{ achievements?: string[] }>('/api/achievements'),
-          authFetch<StreakData>('/api/streaks'),
-          authFetch<{ stats?: StatsData }>('/api/progress'),
-          authFetch<{ overallProgress?: number }>('/api/progress/overall')
+          authFetch<{ totalXp?: number }>('/xp'),
+          authFetch<{ achievements?: string[] }>('/achievements'),
+          authFetch<StreakData>('/streaks'),
+          authFetch<{ stats?: StatsData }>('/progress'),
+          authFetch<{ overallProgress?: number }>('/progress/overall')
         ]);
         
         const xp = resXp.totalXp || 0;

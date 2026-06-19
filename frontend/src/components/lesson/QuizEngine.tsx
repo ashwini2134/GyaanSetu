@@ -31,7 +31,7 @@ export default function QuizEngine({ quizId = 'default', questions, onComplete }
 
     async function loadHistory() {
       try {
-        const parsed = await authFetch<AttemptRecord[]>(`/api/quiz-attempts/${quizId}`);
+        const parsed = await authFetch<AttemptRecord[]>(`/quiz-attempts/${quizId}`);
         if (parsed && parsed.length > 0) {
           setHistory(parsed);
           setViewHistoryIdx(parsed.length - 1);
@@ -79,7 +79,7 @@ export default function QuizEngine({ quizId = 'default', questions, onComplete }
         return { qNum: i + 1, passed: userAns === q.answer, userAns };
       });
       
-      authFetch<AttemptRecord>('/api/quiz-attempts', {
+      authFetch<AttemptRecord>('/quiz-attempts', {
         method: 'POST',
         body: JSON.stringify({
           quizId,

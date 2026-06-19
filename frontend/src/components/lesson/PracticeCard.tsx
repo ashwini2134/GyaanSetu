@@ -242,7 +242,7 @@ export default function PracticeCard({ block, courseSlug, lectureNumber, onAttem
   useEffect(() => {
     async function loadDraft() {
       try {
-        const data = await authFetch<{ code?: string }>(`/api/drafts/${encodeURIComponent(block.title)}?type=practice`);
+        const data = await authFetch<{ code?: string }>(`/drafts/${encodeURIComponent(block.title)}?type=practice`);
         if (data && data.code) setSavedCode(data.code);
       } catch (err) {
         console.error('Failed to load practice draft', err);

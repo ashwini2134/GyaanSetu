@@ -105,7 +105,7 @@ export default function ProblemCard({ problem, index, completed, onComplete, onA
   useEffect(() => {
     async function loadDraft() {
       try {
-        const data = await authFetch<{ code?: string }>(`/api/drafts/${problem.id}?type=problem`);
+        const data = await authFetch<{ code?: string }>(`/drafts/${problem.id}?type=problem`);
         if (data && data.code) setSavedCode(data.code);
       } catch (err) {
         console.error('Failed to load problem draft', err);
