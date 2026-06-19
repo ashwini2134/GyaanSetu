@@ -9,7 +9,6 @@ import {
   ProblemCard,
   SummaryCard,
 } from '../components/lesson';
-import PracticeExercise from '../components/lesson/PracticeExercise';
 import type { CodingProblem, ProjectSummary } from '../types/lesson';
 import { ArrowLeft, ArrowRight, CheckCircle, Check, X, Lock } from 'lucide-react';
 
@@ -137,8 +136,6 @@ export default function LecturePage() {
   const [skippedSections, setSkippedSections] = useState<Set<number>>(new Set());
   const [completedProblems, setCompletedProblems] = useState<string[]>([]);
   const [projectCompleted] = useState(false);
-  const [hasPractice, setHasPractice] = useState(false);
-
   // Check if content fits without scrolling
   useEffect(() => {
     setScrolledToBottom(false);
@@ -177,15 +174,6 @@ export default function LecturePage() {
     }).catch(err => console.error('[lecture] load lectures failed', err));
   }, [slug, lectureNumber, navigate]);
 
-  // Check if practice exercises exist for this lecture
-  useEffect(() => {
-    if (!slug || isNaN(lectureNumber)) return;
-    const lessonId = `${slug}_${lectureNumber}`;
-    authFetch<any[]>(`/practice-exercises/${lessonId}`)
-      .then(data => setHasPractice(data.length > 0))
-      .catch(() => setHasPractice(false));
-  }, [slug, lectureNumber]);
-
   // Derive unlock status from stored progress
   const unlocked = useMemo(() => {
     if (!slug) return null;
@@ -205,10 +193,9 @@ export default function LecturePage() {
     if (quiz.length > 0) result.push({ type: 'quiz' });
     if (problems.length > 0) result.push({ type: 'problems' });
     if (projects.length > 0) result.push({ type: 'project' });
-    if (hasPractice) result.push({ type: 'practice' });
     if (summary) result.push({ type: 'summary' });
     return result;
-  }, [lessonData, hasPractice]);
+  }, [lessonData]);
 
   // Keep currentPageIdx in bounds
   useEffect(() => {
@@ -327,7 +314,7 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
       } else {
         setSkippedSections(prev => new Set(prev).add(currentPageIdx));
       }
-    } else if (currentPage?.type === 'quiz' || currentPage?.type === 'problems' || currentPage?.type === 'practice') {
+    } else if (currentPage?.type === 'quiz' || currentPage?.type === 'problems') {
       if (!isSectionCompleted(currentPageIdx + 1)) {
         setSkippedSections(prev => new Set(prev).add(currentPageIdx));
       }
@@ -422,7 +409,6 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
           className="flex-1 overflow-y-auto"
           onScroll={(e) => {
             const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
-            console.log("onScroll:", { scrollTop, clientHeight, scrollHeight, sum: scrollTop + clientHeight, threshold: scrollHeight - 10 });
             if (scrollTop + clientHeight >= scrollHeight - 10) {
               setScrolledToBottom(true);
             }
@@ -433,8 +419,8 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
               <LessonSection
                 section={lessonData.sections[currentPage.index]}
                 index={currentPage.index}
-                  onPracticeAttempt={() => {}}
-                  onPracticeComplete={() => {}}
+                onPracticeAttempt={() => {}}
+                onPracticeComplete={() => {}}
               />
             )}
 
@@ -711,17 +697,6 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
                   </div>
                 </div>
               </div>
-            )}
-
-            {currentPage?.type === 'practice' && (
-              <section id="section-practice">
-                <PracticeExercise
-                  lessonId={`${slug}_${lectureNumber}`}
-                  onComplete={() => {
-                    markSectionComplete(currentPageIdx + 1);
-                  }}
-                />
-              </section>
             )}
 
             {currentPage?.type === 'summary' && (

@@ -29,6 +29,7 @@ export const config = {
     accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN ?? "15m",
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? "30d",
   },
+  groqApiKey: process.env.GROQ_API_KEY ?? "",
   oauth: {
     github: {
       clientId: process.env.GITHUB_CLIENT_ID ?? "",

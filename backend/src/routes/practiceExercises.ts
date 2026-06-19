@@ -4,8 +4,16 @@ import { prisma } from "../prisma.js";
 import type { AuthenticatedRequest } from "../middleware/auth.js";
 import { z } from "zod";
 import { awardXp } from "../services/gamificationService.js";
+import { generateContent } from "../services/gemini.js";
 
 const router = Router();
+
+function parseLessonId(lessonId: string): { courseSlug: string; lectureId: string } {
+  const parts = lessonId.split("_");
+  const courseSlug = parts[0];
+  const lectureId = parts[1] ?? "0";
+  return { courseSlug, lectureId };
+}
 
 router.get("/:lessonId", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
@@ -14,6 +22,37 @@ router.get("/:lessonId", requireAuth, async (req: AuthenticatedRequest, res, nex
       where: { lessonId },
     });
     res.json(exercises);
+  } catch (error) {
+    next(error);
+  }
+});
+
+const generateSchema = z.object({
+  lessonId: z.string(),
+  sectionIndex: z.number().optional(),
+  prompt: z.string().min(1),
+  exerciseType: z.string(),
+  exerciseTitle: z.string(),
+  exerciseDescription: z.string(),
+});
+
+router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const { lessonId, prompt, exerciseType, exerciseTitle, exerciseDescription } = generateSchema.parse(req.body);
+
+    const systemInstruction = `You are an AI tutor helping students practice what they learned. Generate creative, educational content based on the student's request. Be concise but thorough (2-4 paragraphs).`;
+
+    const userMessage = `I am working on an exercise titled "${exerciseTitle}".
+Description: ${exerciseDescription}
+Exercise type: ${exerciseType}
+
+My prompt to you: ${prompt}
+
+Please generate the requested output based on my prompt above. Format it cleanly without extra commentary.`;
+
+    const generatedOutput = await generateContent(systemInstruction, userMessage);
+
+    res.json({ generatedOutput });
   } catch (error) {
     next(error);
   }
@@ -61,10 +100,7 @@ router.post("/submit", requireAuth, async (req: AuthenticatedRequest, res, next)
 
     await awardXp(userId, exercise.xpReward, "AI Practice Completed", `practice_exercise_${exerciseId}`);
 
-    const lessonId = exercise.lessonId;
-    const [courseSlug, lectureId] = lessonId.includes("_")
-      ? [lessonId.split("_")[0], lessonId.split("_").slice(1).join("_")]
-      : [lessonId, "0"];
+    const { courseSlug, lectureId } = parseLessonId(exercise.lessonId);
 
     await prisma.progress.upsert({
       where: {
