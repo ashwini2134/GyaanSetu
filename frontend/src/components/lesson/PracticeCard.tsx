@@ -92,7 +92,7 @@ function AIPracticeCard({ block, courseSlug, lectureNumber, onAttempt, onComplet
           </div>
           <div className="flex-1">
             <p className="text-xs font-semibold text-amber-300 uppercase tracking-wider mb-1">Practice Exercise</p>
-            <p className="text-sm font-medium text-slate-200 mb-1">{config?.title ?? block.title}</p>
+            <p className="text-sm font-medium text-slate-200 mb-1">Introduction to AI</p>
             <button
               onClick={() => setOpen(true)}
               className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-white px-4 py-2 rounded-lg bg-amber-600/80 hover:bg-amber-600 transition-all"
@@ -111,7 +111,7 @@ function AIPracticeCard({ block, courseSlug, lectureNumber, onAttempt, onComplet
       <div className="px-5 py-3 bg-slate-800/40 border-b border-slate-700/20 flex items-center justify-between">
         <div>
           <p className="text-xs font-semibold text-amber-300 uppercase tracking-wider">Practice Exercise</p>
-          <p className="text-sm font-medium text-slate-200 mt-0.5">{config?.title ?? block.title}</p>
+          <p className="text-sm font-medium text-slate-200 mt-0.5">Introduction to AI</p>
         </div>
         <button
           onClick={() => setOpen(false)}
