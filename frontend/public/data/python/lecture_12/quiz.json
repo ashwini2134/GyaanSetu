@@ -2,9 +2,9 @@
   {
     "question": "What does open('file.txt', 'w') do?",
     "options": [
-      "Opens file for reading",
-      "Opens file for writing (creates/overwrites)",
       "Opens file for appending",
+      "Opens file for writing (creates/overwrites)",
+      "Opens file for reading",
       "Deletes the file"
     ],
     "answer": "Opens file for writing (creates/overwrites)",
@@ -13,8 +13,8 @@
   {
     "question": "What is the advantage of using 'with open()'?",
     "options": [
-      "Faster file access",
       "Automatically closes the file",
+      "Faster file access",
       "Reads the entire file at once",
       "No need to specify mode"
     ],
@@ -25,8 +25,8 @@
     "question": "Which mode adds content without deleting existing content?",
     "options": [
       "'r'",
-      "'w'",
       "'a'",
+      "'w'",
       "'x'"
     ],
     "answer": "'a'",
@@ -36,8 +36,8 @@
     "question": "What does readlines() return?",
     "options": [
       "A single string",
-      "A list of strings (one per line)",
       "A list of characters",
+      "A list of strings (one per line)",
       "An integer"
     ],
     "answer": "A list of strings (one per line)",
@@ -46,10 +46,10 @@
   {
     "question": "What happens if you open a non-existent file in 'r' mode?",
     "options": [
-      "Creates the file",
       "Returns empty string",
-      "Raises FileNotFoundError",
-      "Returns None"
+      "Returns None",
+      "Creates the file",
+      "Raises FileNotFoundError"
     ],
     "answer": "Raises FileNotFoundError",
     "explanation": "Opening a non-existent file in read mode raises a FileNotFoundError."

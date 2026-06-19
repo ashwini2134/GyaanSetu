@@ -4,8 +4,8 @@
     "options": [
       "3",
       "1",
-      "0",
-      "3.33"
+      "3.33",
+      "0"
     ],
     "answer": "1",
     "explanation": "The modulo (%) operator returns the remainder. 10 ÷ 3 = 3 remainder 1."
@@ -13,9 +13,9 @@
   {
     "question": "Which operator checks if two values are equal?",
     "options": [
+      "!=",
       "=",
       "==",
-      "!=",
       "==="
     ],
     "answer": "==",
@@ -25,9 +25,9 @@
     "question": "What is the result of (2 + 3) * 4?",
     "options": [
       "14",
-      "20",
+      "9",
       "24",
-      "9"
+      "20"
     ],
     "answer": "20",
     "explanation": "Parentheses have the highest precedence. (2 + 3) = 5, then 5 * 4 = 20."
@@ -35,9 +35,9 @@
   {
     "question": "What does the expression not (10 > 5) return?",
     "options": [
+      "10",
       "True",
       "False",
-      "10",
       "None"
     ],
     "answer": "False",
@@ -46,10 +46,10 @@
   {
     "question": "Which operator raises a number to a power?",
     "options": [
-      "^",
       "**",
-      "pow",
-      "^^"
+      "^^",
+      "^",
+      "pow"
     ],
     "answer": "**",
     "explanation": "The ** operator is used for exponentiation in Python: 2 ** 3 = 8."

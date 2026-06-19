@@ -36,10 +36,14 @@ export default function CoursePage() {
 
   const { lectureCompletions, isLectureUnlocked, refreshCourseProgress } = useCourseProgress(slug);
 
-  // Subscribe to progress changes (could implement a similar event listener if needed, 
-  // but for now refresh when component mounts)
+  // Subscribe to progress changes and refresh when progress updates
   useEffect(() => {
     refreshCourseProgress();
+    const handler = () => {
+      refreshCourseProgress();
+    };
+    window.addEventListener('fraylon:progress:update', handler);
+    return () => window.removeEventListener('fraylon:progress:update', handler);
   }, [refreshCourseProgress]);
 
   const getLectureStatus = (lecture: Lecture): LectureStatus => {

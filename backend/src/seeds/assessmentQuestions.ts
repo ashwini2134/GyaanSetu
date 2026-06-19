@@ -1,6 +1,6 @@
 import { prisma } from "../prisma.js";
 
-const seedData = [
+export const seedData = [
   // APTITUDE
   // Quantitative Aptitude
   {

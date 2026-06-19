@@ -3,8 +3,8 @@
     "question": "What is the index of the first element in a list?",
     "options": [
       "1",
-      "0",
       "-1",
+      "0",
       "First"
     ],
     "answer": "0",
@@ -24,10 +24,10 @@
   {
     "question": "What does [1, 2, 3, 4, 5][1:4] return?",
     "options": [
-      "[1, 2, 3]",
+      "[1, 2, 3, 4]",
       "[2, 3, 4]",
       "[2, 3, 4, 5]",
-      "[1, 2, 3, 4]"
+      "[1, 2, 3]"
     ],
     "answer": "[2, 3, 4]",
     "explanation": "Slicing [1:4] starts at index 1 and goes up to (not including) index 4."
@@ -35,9 +35,9 @@
   {
     "question": "Which method adds an item to the end of a list?",
     "options": [
-      "add()",
-      "insert()",
       "append()",
+      "insert()",
+      "add()",
       "push()"
     ],
     "answer": "append()",
@@ -46,10 +46,10 @@
   {
     "question": "What does [3, 1, 2].sort() do?",
     "options": [
-      "Returns [1, 2, 3]",
-      "Sorts the list in place to [1, 2, 3]",
       "Creates a new sorted list",
-      "Returns None"
+      "Returns None",
+      "Sorts the list in place to [1, 2, 3]",
+      "Returns [1, 2, 3]"
     ],
     "answer": "Sorts the list in place to [1, 2, 3]",
     "explanation": "sort() sorts the list in-place, modifying the original list."

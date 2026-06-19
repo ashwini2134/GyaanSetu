@@ -3,8 +3,8 @@
     "question": "ML learns rules from?",
     "options": [
       "Examples and data",
-      "A programmer writing rules",
       "Random guessing",
+      "A programmer writing rules",
       "Search algorithms"
     ],
     "answer": "Examples and data",
@@ -13,9 +13,9 @@
   {
     "question": "Supervised learning requires?",
     "options": [
-      "Labeled data",
-      "No data",
       "Unlabeled data",
+      "No data",
+      "Labeled data",
       "Rewards"
     ],
     "answer": "Labeled data",
@@ -24,10 +24,10 @@
   {
     "question": "Unsupervised learning finds?",
     "options": [
-      "Patterns without labels",
+      "Shortest paths",
       "Labeled patterns",
       "Rewards",
-      "Shortest paths"
+      "Patterns without labels"
     ],
     "answer": "Patterns without labels",
     "explanation": "The correct answer is Patterns without labels."
@@ -35,10 +35,10 @@
   {
     "question": "Reinforcement learning uses?",
     "options": [
-      "Rewards and penalties",
-      "Labels",
       "Rules",
-      "Probability only"
+      "Probability only",
+      "Labels",
+      "Rewards and penalties"
     ],
     "answer": "Rewards and penalties",
     "explanation": "The correct answer is Rewards and penalties."
@@ -46,10 +46,10 @@
   {
     "question": "Overfitting means?",
     "options": [
-      "Model memorizes training data and fails on new data",
       "Model learns too slowly",
       "Model has too little data",
-      "Model is too simple"
+      "Model is too simple",
+      "Model memorizes training data and fails on new data"
     ],
     "answer": "Model memorizes training data and fails on new data",
     "explanation": "The correct answer is Model memorizes training data and fails on new data."

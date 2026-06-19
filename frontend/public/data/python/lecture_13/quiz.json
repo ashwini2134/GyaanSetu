@@ -2,10 +2,10 @@
   {
     "question": "What is the goal of the mini project?",
     "options": [
+      "Copy code from examples",
       "Write one long program",
       "Apply all concepts learned",
-      "Use only one feature",
-      "Copy code from examples"
+      "Use only one feature"
     ],
     "answer": "Apply all concepts learned",
     "explanation": "The mini project is designed to apply everything you've learned in the course."
@@ -13,9 +13,9 @@
   {
     "question": "Which of these is NOT a project option?",
     "options": [
+      "Web Browser",
       "Student Management System",
       "Expense Tracker",
-      "Web Browser",
       "To-Do List"
     ],
     "answer": "Web Browser",
@@ -24,10 +24,10 @@
   {
     "question": "How many functions minimum should your project have?",
     "options": [
-      "1",
       "2",
+      "5",
       "3",
-      "5"
+      "1"
     ],
     "answer": "3",
     "explanation": "The project requires a minimum of 3 functions."
@@ -35,10 +35,10 @@
   {
     "question": "Which data structure is required for the project?",
     "options": [
-      "Only lists",
-      "Only dictionaries",
       "A list or dictionary",
-      "Only sets"
+      "Only sets",
+      "Only lists",
+      "Only dictionaries"
     ],
     "answer": "A list or dictionary",
     "explanation": "The project must use at least one list or dictionary."

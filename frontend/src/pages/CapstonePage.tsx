@@ -7,6 +7,8 @@ import {
 import MonacoEditor from '@monaco-editor/react';
 import { runInteractive, runValidationTest, type ExecEvent, type ExecResult } from '../utils/pythonRunnerInteractive';
 import VisualPreview from '../components/lesson/VisualPreview';
+import { api } from '../api';
+import { authFetch } from '../authClient';
 import { completeAction } from '../progress';
 
 type CapstoneProject = {
@@ -606,6 +608,7 @@ export default function CapstonePage() {
   const [step, setStep] = useState<Step>('Choose Project');
   const [selected, setSelected] = useState<CapstoneProject | null>(null);
   const [code, setCode] = useState('# Write your Python project here\n');
+  const [lastLectureNumber, setLastLectureNumber] = useState<number | null>(null);
   const [consoleEntries, setConsoleEntries] = useState<{ type: 'stdout' | 'stderr' | 'stdin-prompt' | 'stdin-value'; text: string }[]>([]);
   const [awaitingInput, setAwaitingInput] = useState(false);
   const [inputPrompt, setInputPrompt] = useState('');
@@ -641,6 +644,19 @@ export default function CapstonePage() {
       inputRef.current.focus();
     }
   }, [awaitingInput]);
+
+  useEffect(() => {
+    if (!slug) return;
+    api.courseLectures(slug)
+      .then((lectures) => {
+        if (lectures.length > 0) {
+          setLastLectureNumber(lectures[lectures.length - 1].number);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load course lectures for capstone progress', err);
+      });
+  }, [slug]);
 
   // Handle selected project changes
   useEffect(() => {
@@ -827,6 +843,15 @@ export default function CapstonePage() {
       setSubmitted(true);
       setStep('Submit');
       try {
+        if (slug && lastLectureNumber !== null) {
+          await authFetch('/projects/complete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ courseSlug: slug, lectureId: String(lastLectureNumber), projectId: project.id })
+          });
+        } else {
+          console.warn('Capstone completion skipped because lecture number is unknown');
+        }
         await completeAction('project', project.id);
         await completeAction('course_complete', slug ?? 'python');
       } catch (e) {

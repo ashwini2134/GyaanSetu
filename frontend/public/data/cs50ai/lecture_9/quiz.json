@@ -2,10 +2,10 @@
   {
     "question": "Which AI concept does a chatbot use?",
     "options": [
-      "NLP",
-      "Search",
       "Optimization",
-      "Logic only"
+      "NLP",
+      "Logic only",
+      "Search"
     ],
     "answer": "NLP",
     "explanation": "The correct answer is NLP."
@@ -13,10 +13,10 @@
   {
     "question": "A story generator uses which technique?",
     "options": [
-      "Language Models",
-      "BFS",
       "CSP",
-      "Probability only"
+      "BFS",
+      "Probability only",
+      "Language Models"
     ],
     "answer": "Language Models",
     "explanation": "The correct answer is Language Models."
@@ -24,8 +24,8 @@
   {
     "question": "Search Visualizer demonstrates?",
     "options": [
-      "Search Algorithms",
       "Neural Networks",
+      "Search Algorithms",
       "NLP",
       "Ethics"
     ],
@@ -35,10 +35,10 @@
   {
     "question": "Every project must include?",
     "options": [
-      "An ethical consideration",
       "A neural network",
       "Supervised learning",
-      "A database"
+      "A database",
+      "An ethical consideration"
     ],
     "answer": "An ethical consideration",
     "explanation": "The correct answer is An ethical consideration."
@@ -46,10 +46,10 @@
   {
     "question": "The final reflection should cover?",
     "options": [
-      "What surprised you about how AI actually works",
       "Your grade",
       "Your code length",
-      "Your time spent"
+      "Your time spent",
+      "What surprised you about how AI actually works"
     ],
     "answer": "What surprised you about how AI actually works",
     "explanation": "The correct answer is What surprised you about how AI actually works."

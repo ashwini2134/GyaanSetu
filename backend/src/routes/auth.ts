@@ -4,6 +4,7 @@ import { z } from "zod";
 import { config } from "../config.js";
 import { type AuthenticatedRequest, requireAuth, requireRole } from "../middleware/auth.js";
 import { AppError } from "../middleware/errorHandler.js";
+import { prisma } from "../prisma.js";
 import { sendPasswordResetEmail } from "../services/emailService.js";
 import {
   buildOAuthAuthorizeUrl,
@@ -320,8 +321,26 @@ router.post("/oauth/exchange", authLimiter, async (req, res, next) => {
   }
 });
 
-router.get("/admin/users", requireAuth, requireRole("admin"), (_req, res) => {
-  res.json({ message: "Admin endpoint — list users would go here" });
+router.get("/admin/users", requireAuth, requireRole("admin"), async (_req, res, next) => {
+  try {
+    const users = await prisma.user.findMany({
+      orderBy: [{ createdAt: "desc" }],
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        emailVerified: true,
+        totalXp: true,
+        currentStreak: true,
+        lastActiveAt: true,
+        createdAt: true,
+      },
+    });
+    res.json({ users });
+  } catch (err) {
+    next(err);
+  }
 });
 
 export default router;

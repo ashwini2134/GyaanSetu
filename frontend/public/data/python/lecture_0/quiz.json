@@ -2,10 +2,10 @@
   {
     "question": "What does the print() function do in Python?",
     "options": [
-      "Reads user input",
-      "Displays output on the screen",
+      "Calculates math expressions",
       "Creates a new file",
-      "Calculates math expressions"
+      "Displays output on the screen",
+      "Reads user input"
     ],
     "answer": "Displays output on the screen",
     "explanation": "print() is used to display text, numbers, or other values on the screen."
@@ -14,9 +14,9 @@
     "question": "What does print(\"Hello\" + \" \" + \"World\") output?",
     "options": [
       "Hello World",
-      "HelloWorld",
       "Hello + World",
-      "Error"
+      "Error",
+      "HelloWorld"
     ],
     "answer": "Hello World",
     "explanation": "The + operator concatenates strings, joining them together."
@@ -25,9 +25,9 @@
     "question": "Which of the following is a valid variable name in Python?",
     "options": [
       "2nd_place",
-      "my-var",
+      "class",
       "_count",
-      "class"
+      "my-var"
     ],
     "answer": "_count",
     "explanation": "Variable names can start with a letter or underscore, but not a number."
@@ -37,8 +37,8 @@
     "options": [
       "3.4",
       "3",
-      "2",
-      "4"
+      "4",
+      "2"
     ],
     "answer": "3",
     "explanation": "Floor division (//) divides and rounds down to the nearest whole number."
@@ -46,10 +46,10 @@
   {
     "question": "What type of value does input() always return?",
     "options": [
-      "Integer",
-      "Float",
       "String",
-      "Boolean"
+      "Integer",
+      "Boolean",
+      "Float"
     ],
     "answer": "String",
     "explanation": "input() always returns a string, even if the user types a number. Use int() to convert."

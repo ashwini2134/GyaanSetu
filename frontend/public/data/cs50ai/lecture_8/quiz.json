@@ -2,9 +2,9 @@
   {
     "question": "AI bias comes from?",
     "options": [
+      "Fast computers",
       "Unfair or unrepresentative training data",
       "Too much data",
-      "Fast computers",
       "Large models"
     ],
     "answer": "Unfair or unrepresentative training data",
@@ -14,9 +14,9 @@
     "question": "AI hallucination means?",
     "options": [
       "AI states wrong facts confidently",
-      "AI crashes",
       "AI slows down",
-      "AI forgets data"
+      "AI forgets data",
+      "AI crashes"
     ],
     "answer": "AI states wrong facts confidently",
     "explanation": "The correct answer is AI states wrong facts confidently."
@@ -24,10 +24,10 @@
   {
     "question": "Deepfakes use AI to?",
     "options": [
-      "Generate fake videos and audio",
+      "Store videos",
       "Speed up videos",
-      "Translate videos",
-      "Store videos"
+      "Generate fake videos and audio",
+      "Translate videos"
     ],
     "answer": "Generate fake videos and audio",
     "explanation": "The correct answer is Generate fake videos and audio."
@@ -35,10 +35,10 @@
   {
     "question": "Transparency in AI means?",
     "options": [
-      "People should know when interacting with AI",
       "AI should be invisible",
+      "AI should be fast",
       "AI should be free",
-      "AI should be fast"
+      "People should know when interacting with AI"
     ],
     "answer": "People should know when interacting with AI",
     "explanation": "The correct answer is People should know when interacting with AI."
@@ -46,10 +46,10 @@
   {
     "question": "Who is responsible when AI causes harm?",
     "options": [
+      "No one",
       "Developers, companies, and users share responsibility",
-      "Only the user",
       "Only the company",
-      "No one"
+      "Only the user"
     ],
     "answer": "Developers, companies, and users share responsibility",
     "explanation": "The correct answer is Developers, companies, and users share responsibility."

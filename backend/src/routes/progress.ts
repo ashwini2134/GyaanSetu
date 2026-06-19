@@ -102,7 +102,7 @@ router.get("/me", requireAuth, async (req: AuthenticatedRequest, res, next) => {
 
 router.get("/leaderboard", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
-    const leaderboard = await getLeaderboard();
+    const leaderboard = await getLeaderboard(req.user!.id);
     res.json({ leaderboard });
   } catch (error) {
     next(error);

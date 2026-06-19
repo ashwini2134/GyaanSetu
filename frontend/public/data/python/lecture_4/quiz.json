@@ -4,8 +4,8 @@
     "options": [
       "Runs the indented block",
       "Skips the indented block",
-      "Shows an error",
-      "Asks the user"
+      "Asks the user",
+      "Shows an error"
     ],
     "answer": "Skips the indented block",
     "explanation": "When the if condition is False, the indented block is skipped."
@@ -13,10 +13,10 @@
   {
     "question": "Which keyword is used for 'else if' in Python?",
     "options": [
-      "elsif",
+      "else if",
       "elseif",
-      "elif",
-      "else if"
+      "elsif",
+      "elif"
     ],
     "answer": "elif",
     "explanation": "Python uses elif (short for else if) to chain additional conditions."
@@ -35,10 +35,10 @@
   {
     "question": "Which of these values is considered Falsy in Python?",
     "options": [
-      "1",
-      "\"False\"",
       "0",
-      "[1, 2, 3]"
+      "1",
+      "[1, 2, 3]",
+      "\"False\""
     ],
     "answer": "0",
     "explanation": "0 (integer zero) is falsy. All non-zero numbers and non-empty strings/lists are truthy."
@@ -47,9 +47,9 @@
     "question": "What is proper indentation in Python?",
     "options": [
       "2 spaces",
-      "4 spaces (standard)",
+      "Tabs only",
       "8 spaces",
-      "Tabs only"
+      "4 spaces (standard)"
     ],
     "answer": "4 spaces (standard)",
     "explanation": "Python's standard indentation is 4 spaces. Consistent indentation is critical."

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth';
-import { getToken } from '../authClient';
+import { authFetch } from '../authClient';
 import { Trophy, Flame, Medal, Crown, TrendingUp, BookOpen, Brain, Code, LayoutDashboard } from 'lucide-react';
 
 interface LeaderboardEntry {
@@ -16,18 +16,9 @@ interface LeaderboardEntry {
   score: number;
 }
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3001';
-
 async function fetchLeaderboard(): Promise<LeaderboardEntry[]> {
-  const token = getToken();
-  if (!token) return [];
-
   try {
-    const res = await fetch(`${BACKEND_URL}/api/progress/leaderboard`, {
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    });
-    if (!res.ok) return [];
-    const data = await res.json() as { leaderboard?: LeaderboardEntry[] };
+    const data = await authFetch<{ leaderboard?: LeaderboardEntry[] }>('/progress/leaderboard');
     return data.leaderboard ?? [];
   } catch (err) {
     console.warn('Failed to fetch leaderboard:', err);
@@ -98,12 +89,18 @@ export default function LeaderboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!user) {
+      setEntries([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     fetchLeaderboard().then(data => {
       setEntries(data);
       setLoading(false);
     });
-  }, []);
+  }, [user]);
 
   const top3 = entries.slice(0, 3);
   const rest = entries.slice(3);

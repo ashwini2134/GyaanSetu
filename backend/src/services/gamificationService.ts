@@ -69,7 +69,7 @@ export async function awardXp(userId: string, amount: number, reason: string, ac
   });
 }
 
-export async function getLeaderboard() {
+export async function getLeaderboard(currentUserId?: string) {
   const users = await prisma.user.findMany({
     orderBy: [
       { totalXp: "desc" },
@@ -93,7 +93,7 @@ export async function getLeaderboard() {
     }
   });
 
-  return users.map((u, index) => ({
+  const entries = users.map((u, index) => ({
     rank: index + 1,
     name: u.name,
     email: u.email,
@@ -104,6 +104,52 @@ export async function getLeaderboard() {
     streak: u.currentStreak,
     score: u.totalXp,
   }));
+
+  if (currentUserId && !users.some((u) => u.id === currentUserId)) {
+    const currentUser = await prisma.user.findUnique({
+      where: { id: currentUserId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        totalXp: true,
+        currentStreak: true,
+        _count: {
+          select: {
+            progress: { where: { status: "COMPLETED" } },
+            quizAttempts: { where: { passed: true } },
+            submissions: { where: { status: "PASSED" } },
+            projects: { where: { status: "COMPLETED" } }
+          }
+        }
+      }
+    });
+
+    if (currentUser) {
+      const rank = await prisma.user.count({
+        where: {
+          OR: [
+            { totalXp: { gt: currentUser.totalXp } },
+            { totalXp: currentUser.totalXp, currentStreak: { gt: currentUser.currentStreak } }
+          ]
+        }
+      }) + 1;
+
+      entries.push({
+        rank,
+        name: currentUser.name,
+        email: currentUser.email,
+        lecturesCompleted: currentUser._count.progress,
+        quizzesPassed: currentUser._count.quizAttempts,
+        problemsSolved: currentUser._count.submissions,
+        projectsCompleted: currentUser._count.projects,
+        streak: currentUser.currentStreak,
+        score: currentUser.totalXp,
+      });
+    }
+  }
+
+  return entries;
 }
 
 export async function getUserSummary(userId: string, courseSlug?: string) {
