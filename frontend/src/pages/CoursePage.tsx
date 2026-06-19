@@ -46,8 +46,7 @@ export default function CoursePage() {
     const p = lectureCompletions[String(lecture.number)];
     if (p?.lectureCompleted) return "completed";
     if (p && p.completedSections > 0) return "in-progress";
-    if (isLectureUnlocked(lecture.number)) return "available";
-    return "locked";
+    return "available";
   };
 
   const completedCount = lectures?.filter((l) => getLectureStatus(l) === "completed").length ?? 0;

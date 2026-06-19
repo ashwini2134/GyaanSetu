@@ -10,7 +10,7 @@ import {
   SummaryCard,
 } from '../components/lesson';
 import type { CodingProblem, ProjectSummary } from '../types/lesson';
-import { ArrowLeft, ArrowRight, CheckCircle, Check, X, Lock } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Check, X } from 'lucide-react';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -35,43 +35,6 @@ function pageLabel(page: Page, sections: Array<{ label: string }>): string {
 }
 
 type PageStatus = 'completed' | 'current' | 'upcoming';
-
-function LockedLectureView({ slug, lectureNumber, courseTitle: _courseTitle }: { slug: string; lectureNumber: number; courseTitle: string }) {
-  const navigate = useNavigate();
-  const prevLecture = lectureNumber > 0 ? lectureNumber - 1 : null;
-
-  return (
-    <div className="w-full h-full flex items-center justify-center bg-[#0b0f19]">
-      <div className="text-center max-w-md p-8">
-        <div className="w-20 h-20 rounded-2xl bg-slate-800/60 border border-slate-700/40 flex items-center justify-center mx-auto mb-6">
-          <Lock size={40} className="text-slate-500" />
-        </div>
-        <h2 className="text-2xl font-bold text-white mb-3">Lecture Locked</h2>
-        <p className="text-slate-400 text-sm mb-6">
-          Complete all sections of the current lecture to unlock the next lecture.
-        </p>
-        <div className="space-y-3">
-          {prevLecture !== null && (
-            <button
-              onClick={() => navigate(`/course/${slug}/lecture/${prevLecture}`)}
-              className="inline-flex items-center gap-2 text-sm font-medium text-white px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 transition-all"
-            >
-              <ArrowLeft size={16} />
-              Go to Lecture {prevLecture}
-            </button>
-          )}
-          <br />
-          <button
-            onClick={() => navigate(`/course/${slug}`)}
-            className="mt-2 text-xs text-blue-400 hover:text-blue-300"
-          >
-            Back to Course
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ── Fallback legacy renderer (notes.md) ──────────────────────────────────────
 
@@ -123,7 +86,7 @@ export default function LecturePage() {
     isSectionCompleted,
     quizScore,
   } = useLectureProgress(slug, !isNaN(lectureNumber) ? String(lectureNumber) : undefined);
-  const { isLectureUnlocked } = useCourseProgress(slug);
+  const { refreshCourseProgress } = useCourseProgress(slug);
 
   const [currentPageIdx, setCurrentPageIdx] = useState(0);
   const [allLectures, setAllLectures] = useState<Array<{ number: number; title: string }>>([]);
@@ -171,13 +134,6 @@ export default function LecturePage() {
       }
     }).catch(err => console.error('[lecture] load lectures failed', err));
   }, [slug, lectureNumber, navigate]);
-
-  // Derive unlock status from stored progress
-  const unlocked = useMemo(() => {
-    if (!slug) return null;
-    if (lectureNumber === 0) return true;
-    return isLectureUnlocked(lectureNumber);
-  }, [slug, lectureNumber, isLectureUnlocked]);
 
   // Build ordered page list
   const pages: Page[] = useMemo(() => {
@@ -270,18 +226,12 @@ export default function LecturePage() {
 
   if (!slug) return null;
 
-  // Show locked view
-  if (unlocked === false) {
-const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
-    return <LockedLectureView slug={slug} lectureNumber={lectureNumber} courseTitle={courseTitle} />;
-  }
-
   // Fallback to legacy renderer if no lesson.json
   if (!loading && (error === 'no-lesson-json' || (!lessonData && error))) {
     return <LegacyLecturePage slug={slug} lectureNumber={lectureNumber} />;
   }
 
-  if (loading || unlocked === null) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <svg className="h-7 w-7 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24">

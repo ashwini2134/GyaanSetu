@@ -203,10 +203,6 @@ export function useCourseProgress(courseSlug: string | undefined) {
   return {
     lectureCompletions,
     refreshCourseProgress: fetchCourseProgress,
-    isLectureUnlocked: (lectureNumber: number) => {
-      if (lectureNumber <= 1) return true;
-      const prev = lectureCompletions[String(lectureNumber - 1)];
-      return prev?.lectureCompleted ?? false;
-    }
+    isLectureUnlocked: (_lectureNumber: number) => true,
   };
 }
