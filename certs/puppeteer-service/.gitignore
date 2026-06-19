@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.env
+.env.local
+*.log
+.DS_Store
+
+# Local dev smoke-test + calibration artifacts
+smoke.pdf
+smoke.png
+smoke-middle.png
+smoke-name-*.png
+qr-area.png
+qr-zoom.png
+issued/
+FRY-*.pdf
+FRY-*.png
