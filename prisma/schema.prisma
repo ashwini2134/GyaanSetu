@@ -40,6 +40,8 @@ model User {
   submissions         Submission[]
   practiceSubmissions PracticeSubmission[]
   xpHistory           XpTransaction[]
+  projectFiles        ProjectFile[]
+  taskProgress        ProjectTaskProgress[]
 }
 
 model Progress {
@@ -118,8 +120,37 @@ model Project {
   description String?
   updatedAt   DateTime  @updatedAt
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  taskProgress ProjectTaskProgress[]
 
   @@unique([userId, projectId])
+}
+
+model ProjectFile {
+  id        String   @id @default(uuid())
+  userId    String
+  projectId String
+  fileId    String
+  content   String
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectId, fileId])
+}
+
+model ProjectTaskProgress {
+  id          String    @id @default(uuid())
+  userId      String
+  projectId   String
+  taskId      String
+  status      String    @default("NOT_STARTED")
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project     Project   @relation(fields: [userId, projectId], references: [userId, projectId], onDelete: Cascade)
+
+  @@unique([userId, projectId, taskId])
 }
 
 model ProjectTemplate {

@@ -4,6 +4,9 @@ import { prisma } from "../prisma.js";
 import type { AuthenticatedRequest } from "../middleware/auth.js";
 import { z } from "zod";
 import { awardXp } from "../services/gamificationService.js";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const archiver: (...args: any[]) => any = require("archiver");
 
 const router = Router();
 
@@ -48,6 +51,88 @@ router.post("/complete", requireAuth, async (req: AuthenticatedRequest, res, nex
     res.json(progress);
   } catch (error) {
     next(error);
+  }
+});
+
+/* GET /api/projects/files/:projectId — load all files for live workspace */
+router.get("/files/:projectId", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const projectId = req.params.projectId as string;
+
+    const dbFiles = await prisma.projectFile.findMany({
+      where: { userId, projectId },
+    });
+
+    const fileMap = dbFiles.reduce((acc, f) => {
+      acc[f.fileId] = f.content;
+      return acc;
+    }, {} as Record<string, string>);
+
+    res.json(fileMap);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/* PUT /api/projects/files/:projectId — save one file */
+const saveFileSchema = z.object({
+  fileId: z.string(),
+  content: z.string(),
+});
+
+router.put("/files/:projectId", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const projectId = req.params.projectId as string;
+    const { fileId, content } = saveFileSchema.parse(req.body);
+
+    await prisma.projectFile.upsert({
+      where: {
+        userId_projectId_fileId: { userId, projectId, fileId },
+      },
+      update: { content },
+      create: { userId, projectId, fileId, content },
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/* GET /api/projects/download/:projectId — download project as ZIP */
+router.get("/download/:projectId", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const projectId = req.params.projectId as string;
+
+    const dbFiles = await prisma.projectFile.findMany({
+      where: { userId, projectId },
+    });
+
+    if (dbFiles.length === 0) {
+      res.status(404).json({ error: "No files found for this project" });
+      return;
+    }
+
+    res.setHeader("Content-Type", "application/zip");
+    res.setHeader("Content-Disposition", `attachment; filename="${projectId}.zip"`);
+
+    const archive = archiver("zip", { zlib: { level: 9 } });
+    archive.pipe(res);
+
+    for (const f of dbFiles) {
+      const fileName = f.fileId === "html" ? "index.html"
+        : f.fileId === "css" ? "style.css"
+        : f.fileId === "js" ? "script.js"
+        : `${f.fileId}.txt`;
+      archive.append(f.content, { name: fileName });
+    }
+
+    await archive.finalize();
+  } catch (err) {
+    next(err);
   }
 });
 

@@ -6,22 +6,22 @@
 
 :root {
   /* Default: Midnight Blue */
-  --bg-main: #0b0f19;
-  --bg-surface: #0d111a;
-  --bg-sidebar: #0f172a;
-  --bg-header: #0f172a;
+  --bg-main: #050B1D;
+  --bg-surface: #0E1A35;
+  --bg-sidebar: #0E1A35;
+  --bg-header: #0E1A35;
   --bg-editor: #090d12;
   --bg-gutter: #070b0f;
   --border-primary: #1e293b;
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #94a3b8;
-  --accent: #2563eb; /* Cobalt Blue */
-  --accent-hover: #1d4ed8;
-  --accent-glow: rgba(37, 99, 235, 0.15);
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #94A3B8;
+  --accent: #3B82F6; /* Blue-500 */
+  --accent-hover: #2563eb;
+  --accent-glow: rgba(59, 130, 246, 0.15);
   --accent-text: #ffffff;
-  --accent-gradient: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
-  --accent-gradient-hover: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+  --accent-gradient: linear-gradient(135deg, #3B82F6 0%, #6366f1 100%);
+  --accent-gradient-hover: linear-gradient(135deg, #60a5fa 0%, #818cf8 100%);
 }
 
 [data-theme="cyberpunk"] {
@@ -90,6 +90,7 @@ div, header, aside, main, button, input, select, textarea, a, span {
 .bg-\[\#080c10\],
 .bg-\[\#080c14\],
 .bg-\[\#0b0f19\]\/50,
+.bg-\[\#0f172a\],
 .bg-slate-900 {
   background-color: var(--bg-main) !important;
 }

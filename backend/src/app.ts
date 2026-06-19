@@ -19,6 +19,7 @@ import coursesRoutes from "./routes/courses.js";
 import qaRoutes from "./routes/qa.js";
 import practiceExercisesRoutes from "./routes/practiceExercises.js";
 import assessmentsRoutes from "./routes/assessments.js";
+import projectTasksRoutes from "./routes/projectTasks.js";
 
 export function createApp() {
   const app = express();
@@ -57,6 +58,7 @@ export function createApp() {
   app.use("/api/auth", authRoutes);
   app.use("/api/progress", progressRoutes);
   app.use("/api/projects", projectRoutes);
+  app.use("/api/projects/tasks", projectTasksRoutes);
   app.use("/api/xp", xpRoutes);
   app.use("/api/achievements", achievementsRoutes);
   app.use("/api/streaks", streaksRoutes);

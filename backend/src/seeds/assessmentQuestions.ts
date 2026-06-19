@@ -19,6 +19,7 @@ const seedData = [
     options: ["110", "100", "70", "40"], correctAnswer: "110"
   },
   {
+    category: "Aptitude", subsection: "Quantitative Aptitude", type: "coding",
     question: "Write a function `calculateSimpleInterest(principal, rate, time)` that returns the simple interest.",
     options: [], correctAnswer: "", language: "javascript",
     starterCode: "function calculateSimpleInterest(principal, rate, time) {\n  // Write your code here\n  return (principal * rate * time) / 100;\n}"
@@ -41,6 +42,7 @@ const seedData = [
     options: ["Some cats are birds", "All birds are cats", "Some dogs are cats", "No conclusion can be drawn safely"], correctAnswer: "Some dogs are cats"
   },
   {
+    category: "Aptitude", subsection: "Logical Reasoning", type: "coding",
     question: "Write a function `findOdd(arr)` that returns the number that appears an odd number of times in the array.",
     options: [], correctAnswer: "", language: "javascript",
     starterCode: "function findOdd(arr) {\n  // Write your code here\n  return arr.reduce((a, b) => a ^ b, 0);\n}"
@@ -63,6 +65,7 @@ const seedData = [
     options: ["Total number of items", "Angles of sectors", "Both total and angles", "Neither"], correctAnswer: "Both total and angles"
   },
   {
+    category: "Aptitude", subsection: "Analytical Reasoning", type: "coding",
     question: "Write a function `solveSeating(n)` that returns an array of seats from 1 to n.",
     options: [], correctAnswer: "", language: "javascript",
     starterCode: "function solveSeating(n) {\n  // Write your code here\n  return Array.from({length: n}, (_, i) => i + 1);\n}"
@@ -85,6 +88,7 @@ const seedData = [
     options: ["for", "since", "from", "in"], correctAnswer: "since"
   },
   {
+    category: "Aptitude", subsection: "Verbal Ability", type: "coding",
     question: "Write a function `countVowels(str)` that returns the number of vowels in a string.",
     options: [], correctAnswer: "", language: "javascript",
     starterCode: "function countVowels(str) {\n  // Write your code here\n  return (str.match(/[aeiou]/gi) || []).length;\n}"
@@ -108,6 +112,7 @@ const seedData = [
     options: ["over", "in", "under", "with"], correctAnswer: "over"
   },
   {
+    category: "Communication Skills", subsection: "Grammar", type: "coding",
     question: "Write a function `capitalizeSentence(str)` that capitalizes the first letter of a sentence.",
     options: [], correctAnswer: "", language: "javascript",
     starterCode: "function capitalizeSentence(str) {\n  // Write your code here\n  if (!str) return str;\n  return str.charAt(0).toUpperCase() + str.slice(1);\n}"
@@ -130,6 +135,7 @@ const seedData = [
     options: ["Philanthropist", "Misanthrope", "Optimist", "Pessimist"], correctAnswer: "Misanthrope"
   },
   {
+    category: "Communication Skills", subsection: "Vocabulary", type: "coding",
     question: "Write a function `longestWord(sentence)` that returns the longest word in the sentence.",
     options: [], correctAnswer: "", language: "javascript",
     starterCode: "function longestWord(sentence) {\n  // Write your code here\n  let words = sentence.split(' ');\n  return words.reduce((longest, current) => current.length > longest.length ? current : longest, '');\n}"
@@ -152,6 +158,7 @@ const seedData = [
     options: ["The author's attitude", "The length of the passage", "The publication year", "The font size"], correctAnswer: "The author's attitude"
   },
   {
+    category: "Communication Skills", subsection: "Reading Comprehension", type: "coding",
     question: "Write a function `extractKeywords(paragraph)` that returns an array of words longer than 5 characters.",
     options: [], correctAnswer: "", language: "javascript",
     starterCode: "function extractKeywords(paragraph) {\n  // Write your code here\n  let words = paragraph.split(/\\W+/);\n  return words.filter(word => word.length > 5);\n}"
@@ -174,6 +181,7 @@ const seedData = [
     options: ["See ya", "Later", "Sincerely,", "Cheers"], correctAnswer: "Sincerely,"
   },
   {
+    category: "Communication Skills", subsection: "Email Writing", type: "coding",
     question: "Write a function `formatEmail(subject, body)` that returns a formatted string: 'Subject: <subject>\\n<body>'.",
     options: [], correctAnswer: "", language: "javascript",
     starterCode: "function formatEmail(subject, body) {\n  // Write your code here\n  return `Subject: ${subject}\\n${body}`;\n}"
@@ -196,6 +204,7 @@ const seedData = [
     options: ["Chronological (oldest first)", "Reverse chronological (newest first)", "Alphabetical", "Random"], correctAnswer: "Reverse chronological (newest first)"
   },
   {
+    category: "Communication Skills", subsection: "Resume Writing", type: "coding",
     question: "Write a function `countSections(resumeStr)` that counts the number of lines starting with '##' representing sections.",
     options: [], correctAnswer: "", language: "javascript",
     starterCode: "function countSections(resumeStr) {\n  // Write your code here\n  return (resumeStr.match(/^## /gm) || []).length;\n}"
@@ -219,6 +228,7 @@ const seedData = [
     options: ["Data types", "Direction of flow of logic", "Comments", "Loops"], correctAnswer: "Direction of flow of logic"
   },
   {
+    category: "Pseudocode & Problem Solving", subsection: "Flowcharts", type: "coding",
     question: "Write a simple function `traceLogic(n)` that returns 'Even' if n is even, else 'Odd'.",
     options: [], correctAnswer: "", language: "javascript",
     starterCode: "function traceLogic(n) {\n  // Write your code here\n  return n % 2 === 0 ? 'Even' : 'Odd';\n}"
@@ -241,6 +251,7 @@ const seedData = [
     options: ["continue", "break", "return", "exit"], correctAnswer: "break"
   },
   {
+    category: "Pseudocode & Problem Solving", subsection: "Loops", type: "coding",
     question: "Write a function `multiplyTable(n)` that returns an array of the first 10 multiples of n.",
     options: [], correctAnswer: "", language: "javascript",
     starterCode: "function multiplyTable(n) {\n  // Write your code here\n  let table = [];\n  for(let i=1; i<=10; i++) {\n    table.push(n * i);\n  }\n  return table;\n}"
@@ -263,6 +274,7 @@ const seedData = [
     options: ["Linear Search", "Binary Search", "Random Search", "Bubble Search"], correctAnswer: "Binary Search"
   },
   {
+    category: "Pseudocode & Problem Solving", subsection: "Arrays", type: "coding",
     question: "Write a function `findMax(arr)` that returns the largest element in an array of numbers.",
     options: [], correctAnswer: "", language: "javascript",
     starterCode: "function findMax(arr) {\n  // Write your code here\n  if (arr.length === 0) return null;\n  return Math.max(...arr);\n}"
@@ -285,6 +297,7 @@ const seedData = [
     options: ["To start a loop", "To output a value and exit the function", "To import a module", "To print to console"], correctAnswer: "To output a value and exit the function"
   },
   {
+    category: "Pseudocode & Problem Solving", subsection: "Functions", type: "coding",
     question: "Write a recursive function `factorial(n)` that calculates the factorial of n.",
     options: [], correctAnswer: "", language: "javascript",
     starterCode: "function factorial(n) {\n  // Write your code here\n  if (n <= 1) return 1;\n  return n * factorial(n - 1);\n}"
@@ -307,6 +320,7 @@ const seedData = [
     options: ["Queue", "Stack", "Linked List", "Graph"], correctAnswer: "Stack"
   },
   {
+    category: "Pseudocode & Problem Solving", subsection: "Recursion", type: "coding",
     question: "Write a recursive function `fibonacci(n)` returning the nth Fibonacci number.",
     options: [], correctAnswer: "", language: "javascript",
     starterCode: "function fibonacci(n) {\n  // Write your code here\n  if (n <= 1) return n;\n  return fibonacci(n - 1) + fibonacci(n - 2);\n}"
@@ -330,6 +344,7 @@ const seedData = [
     options: ["catch", "except", "error", "handle"], correctAnswer: "except"
   },
   {
+    category: "Technical Assessments", subsection: "Python", type: "coding",
     question: "Write a python function `reverse_string(s)` that returns the reversed string.",
     options: [], correctAnswer: "", language: "python",
     starterCode: "def reverse_string(s):\n  # Write your code here\n  return s[::-1]\n"
@@ -352,6 +367,7 @@ const seedData = [
     options: ["implements", "extends", "inherits", "overrides"], correctAnswer: "extends"
   },
   {
+    category: "Technical Assessments", subsection: "Java", type: "coding",
     question: "Write a simple Java method `public int add(int a, int b)` inside a class.",
     options: [], correctAnswer: "", language: "java",
     starterCode: "class Solution {\n  public int add(int a, int b) {\n    // Write your code here\n    return a + b;\n  }\n}"
@@ -374,6 +390,7 @@ const seedData = [
     options: ["var", "let", "const", "static"], correctAnswer: "const"
   },
   {
+    category: "Technical Assessments", subsection: "JavaScript", type: "coding",
     question: "Write a function `flatten(arr)` to flatten a nested array by one level.",
     options: [], correctAnswer: "", language: "javascript",
     starterCode: "function flatten(arr) {\n  // Write your code here\n  return arr.flat();\n}"
@@ -396,6 +413,7 @@ const seedData = [
     options: ["Structured Question Language", "Strong Question Language", "Structured Query Language", "System Query Language"], correctAnswer: "Structured Query Language"
   },
   {
+    category: "Technical Assessments", subsection: "SQL", type: "coding",
     question: "Write a query to find the second highest salary from a table `Employee`.",
     options: [], correctAnswer: "", language: "sql",
     starterCode: "SELECT MAX(salary) FROM Employee WHERE salary < (SELECT MAX(salary) FROM Employee);"
@@ -418,6 +436,7 @@ const seedData = [
     options: ["A primary key in the same table", "A key that links two tables together", "A key used for encryption", "A random unique identifier"], correctAnswer: "A key that links two tables together"
   },
   {
+    category: "Technical Assessments", subsection: "DBMS", type: "coding",
     question: "Write SQL to create a table `Users` with `id` as primary key.",
     options: [], correctAnswer: "", language: "sql",
     starterCode: "CREATE TABLE Users (\n  id INT PRIMARY KEY,\n  name VARCHAR(50)\n);"
@@ -440,6 +459,7 @@ const seedData = [
     options: ["A technique to execute processes that are not completely in memory", "RAM attached to the CPU", "Cloud storage", "A backup mechanism"], correctAnswer: "A technique to execute processes that are not completely in memory"
   },
   {
+    category: "Technical Assessments", subsection: "OS", type: "coding",
     question: "Simulate a round-robin schedule by returning the first process after one tick.",
     options: [], correctAnswer: "", language: "javascript",
     starterCode: "function simulateRR(queue) {\n  let p = queue.shift();\n  queue.push(p);\n  return p;\n}"
@@ -462,6 +482,7 @@ const seedData = [
     options: ["192.168.1.1", "127.0.0.1", "0.0.0.0", "255.255.255.255"], correctAnswer: "127.0.0.1"
   },
   {
+    category: "Technical Assessments", subsection: "Computer Networks", type: "coding",
     question: "Write a function `isValidIP(ip)` that returns true if it matches an IPv4 format.",
     options: [], correctAnswer: "", language: "javascript",
     starterCode: "function isValidIP(ip) {\n  return /^\\d{1,3}(\\.\\d{1,3}){3}$/.test(ip);\n}"
@@ -485,6 +506,7 @@ const seedData = [
     options: ["Provide a specific high number", "Refuse to answer", "Provide a range based on market research", "Say 'whatever you think is fair'"], correctAnswer: "Provide a range based on market research"
   },
   {
+    category: "AI Interview Practice", subsection: "HR Questions", type: "coding",
     question: "Format a STAR method response: Situation, Task, Action, Result.",
     options: [], correctAnswer: "", language: "javascript",
     starterCode: "function formatSTAR(s, t, a, r) {\n  return `S: ${s}\\nT: ${t}\\nA: ${a}\\nR: ${r}`;\n}"
@@ -507,6 +529,7 @@ const seedData = [
     options: ["Array", "Linked List", "Hash Set", "Binary Search Tree"], correctAnswer: "Hash Set"
   },
   {
+    category: "AI Interview Practice", subsection: "Technical Interview", type: "coding",
     question: "Write a function to reverse a linked list node.",
     options: [], correctAnswer: "", language: "javascript",
     starterCode: "function reverseList(head) {\n  let prev = null, curr = head;\n  while(curr) {\n    let next = curr.next;\n    curr.next = prev;\n    prev = curr;\n    curr = next;\n  }\n  return prev;\n}"
@@ -529,6 +552,7 @@ const seedData = [
     options: ["How would you...", "Tell me about a time when...", "What is the definition of...", "Can you write a code for..."], correctAnswer: "Tell me about a time when..."
   },
   {
+    category: "AI Interview Practice", subsection: "Behavioral Questions", type: "coding",
     question: "Write a function that counts words in a behavioral answer.",
     options: [], correctAnswer: "", language: "javascript",
     starterCode: "function countWords(answer) {\n  return answer.split(' ').length;\n}"
@@ -551,6 +575,7 @@ const seedData = [
     options: ["Confidence and engagement (eye contact, posture)", "Slouching to look relaxed", "Fidgeting to show energy", "Looking at your phone occasionally"], correctAnswer: "Confidence and engagement (eye contact, posture)"
   },
   {
+    category: "AI Interview Practice", subsection: "Mock Interviews", type: "coding",
     question: "Write a function that outputs a basic greeting.",
     options: [], correctAnswer: "", language: "javascript",
     starterCode: "function greet(name) {\n  return `Hello, my name is ${name} and I am excited to be here.`;\n}"
@@ -583,11 +608,13 @@ const seedData = [
     options: ["4", "NaN", "'22'", "TypeError"], correctAnswer: "'22'"
   },
   {
+    category: "Mock Tests", subsection: "Full Mock", type: "coding",
     question: "Write a function to reverse a string.",
     options: [], correctAnswer: "", language: "javascript",
     starterCode: "function reverseStr(str) {\n  return str.split('').reverse().join('');\n}"
   },
   {
+    category: "Mock Tests", subsection: "Full Mock", type: "coding",
     question: "Find duplicates in an array and return them.",
     options: [], correctAnswer: "", language: "javascript",
     starterCode: "function findDuplicates(arr) {\n  const seen = new Set();\n  const dups = new Set();\n  for(let x of arr) {\n    if (seen.has(x)) dups.add(x);\n    else seen.add(x);\n  }\n  return Array.from(dups);\n}"

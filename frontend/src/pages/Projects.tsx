@@ -236,7 +236,7 @@ function CarouselCard({ project, isExpanded, status, gradientIndex, onHover }: C
 
                 <Link
                   to={`/projects/${project.id}`}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white text-sm font-semibold transition-all duration-300 shadow-lg shadow-blue-600/20 hover:shadow-blue-500/30 hover:-translate-y-0.5"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white text-sm font-semibold transition-all duration-300 shadow-lg shadow-blue-500/20 hover:shadow-blue-400/30 hover:-translate-y-0.5"
                 >
                   {status === "COMPLETED" ? "Review Project" : status === "IN_PROGRESS" ? "Continue Project" : "Start Project"}
                   <ArrowRight size={15} />

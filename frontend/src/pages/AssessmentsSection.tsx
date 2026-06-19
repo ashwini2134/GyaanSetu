@@ -25,22 +25,22 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
 };
 
 const CATEGORY_GRADIENTS: Record<string, string> = {
-  "Aptitude": "from-purple-500/20 via-pink-500/10 to-transparent",
-  "Communication Skills": "from-blue-500/20 via-cyan-500/10 to-transparent",
-  "Pseudocode & Problem Solving": "from-orange-500/20 via-yellow-500/10 to-transparent",
-  "Technical Assessments": "from-green-500/20 via-teal-500/10 to-transparent",
-  "AI Interview Practice": "from-red-500/20 via-orange-500/10 to-transparent",
-  "Mock Tests": "from-indigo-500/20 via-purple-500/10 to-transparent",
-  "Reports & Analytics": "from-teal-500/20 via-cyan-500/10 to-transparent"
+  "Aptitude": "from-purple-500/10 via-pink-500/5 to-transparent",
+  "Communication Skills": "from-blue-500/10 via-cyan-500/5 to-transparent",
+  "Pseudocode & Problem Solving": "from-orange-500/10 via-yellow-500/5 to-transparent",
+  "Technical Assessments": "from-green-500/10 via-teal-500/5 to-transparent",
+  "AI Interview Practice": "from-red-500/10 via-orange-500/5 to-transparent",
+  "Mock Tests": "from-indigo-500/10 via-purple-500/5 to-transparent",
+  "Reports & Analytics": "from-teal-500/10 via-cyan-500/5 to-transparent"
 };
 
 const CARD_GRADIENTS: Record<string, string> = {
-  "Aptitude": "from-purple-600/25 via-pink-600/10 to-slate-900",
-  "Communication Skills": "from-blue-600/25 via-cyan-600/10 to-slate-900",
-  "Pseudocode & Problem Solving": "from-orange-600/25 via-yellow-600/10 to-slate-900",
-  "Technical Assessments": "from-green-600/25 via-teal-600/10 to-slate-900",
-  "AI Interview Practice": "from-red-600/25 via-orange-600/10 to-slate-900",
-  "Mock Tests": "from-indigo-600/25 via-purple-600/10 to-slate-900"
+  "Aptitude": "from-purple-600/12 via-pink-600/5 to-slate-900",
+  "Communication Skills": "from-blue-600/12 via-cyan-600/5 to-slate-900",
+  "Pseudocode & Problem Solving": "from-orange-600/12 via-yellow-600/5 to-slate-900",
+  "Technical Assessments": "from-green-600/12 via-teal-600/5 to-slate-900",
+  "AI Interview Practice": "from-red-600/12 via-orange-600/5 to-slate-900",
+  "Mock Tests": "from-indigo-600/12 via-purple-600/5 to-slate-900"
 };
 
 const BORDER_GRADIENTS: Record<string, string> = {

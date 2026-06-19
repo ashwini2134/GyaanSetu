@@ -1,3 +1,31 @@
+export interface ValidationRule {
+  id: string;
+  label: string;
+  type: 'element_exists' | 'code_contains' | 'css_rule';
+  target: string;
+  value?: string;
+  lang?: 'html' | 'css' | 'js';
+}
+
+export interface ProjectTask {
+  id: string;
+  title: string;
+  goal: string;
+  requirements: string[];
+  hints: string[];
+  commonMistakes: string[];
+  expectedOutput: string;
+  checklist: string[];
+  resources: { title: string; description: string }[];
+  validationRules: ValidationRule[];
+}
+
+export interface WorkspaceFileDef {
+  id: string;
+  path: string;
+  language: string;
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -15,6 +43,9 @@ export interface Project {
   image?: string;
   githubLink?: string;
   demoLink?: string;
+  tasks?: ProjectTask[];
+  starterCode?: { html: string; css: string; js: string };
+  workspaceFiles?: WorkspaceFileDef[];
 }
 
 export const projectsData: Project[] = [
@@ -37,7 +68,264 @@ export const projectsData: Project[] = [
     expectedOutput: "A visually appealing calculator that computes mathematical expressions accurately.",
     estimatedDuration: "2-4 hours",
     prerequisites: ["Basic HTML/CSS", "JavaScript functions and events"],
-    learningOutcomes: ["DOM manipulation", "Event listeners", "Basic algorithms"]
+    learningOutcomes: ["DOM manipulation", "Event listeners", "Basic algorithms"],
+    starterCode: {
+      html: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+</body>
+</html>`,
+      css: ``,
+      js: ``
+    },
+    workspaceFiles: [
+      { id: "html", path: "index.html", language: "html" },
+      { id: "css", path: "style.css", language: "css" },
+      { id: "js", path: "script.js", language: "javascript" },
+    ],
+    tasks: [
+      {
+        id: "setup",
+        title: "Setup Project Structure",
+        goal: "Create the HTML skeleton with linked CSS and JS files.",
+        requirements: [
+          "HTML5 document structure with proper meta tags",
+          "Linked styles.css in the head",
+          "Linked script.js before closing body"
+        ],
+        hints: [
+          "Use <!DOCTYPE html> declaration",
+          "Add viewport meta tag for responsive design"
+        ],
+        commonMistakes: [
+          "Incorrect file paths when linking resources",
+          "Missing meta charset tag"
+        ],
+        expectedOutput: "An HTML page with Calculator as the title, ready for styling and scripting.",
+        checklist: ["HTML5 template", "Linked CSS", "Linked JS"],
+        resources: [
+          { title: "HTML5 Boilerplate Guide", description: "Learn the standard HTML5 document structure." }
+        ],
+        validationRules: [
+          { id: "v1", label: "DOCTYPE declaration exists", type: "code_contains", target: "<!DOCTYPE html>", lang: "html" },
+          { id: "v2", label: "CSS file is linked", type: "code_contains", target: "styles.css", lang: "html" },
+          { id: "v3", label: "JS file is linked", type: "code_contains", target: "script.js", lang: "html" },
+          { id: "v4", label: "Page title is set", type: "code_contains", target: "<title>", lang: "html" }
+        ]
+      },
+      {
+        id: "display",
+        title: "Create Calculator Display",
+        goal: "Add a display area that shows numbers and results.",
+        requirements: [
+          "Display element at the top of the calculator",
+          "Display shows 0 by default",
+          "Display has right-aligned text"
+        ],
+        hints: [
+          "Use a div with class 'display' or id 'display'",
+          "Style the display with a different background color",
+          "Use text-align: right for the display"
+        ],
+        commonMistakes: [
+          "Forgetting to set the default display value to 0",
+          "Not making the display visually distinct"
+        ],
+        expectedOutput: "A dark display area at the top showing '0' with right-aligned text.",
+        checklist: ["Display element", "Shows 0", "Right-aligned"],
+        resources: [
+          { title: "CSS Text Alignment", description: "How to align text in CSS." }
+        ],
+        validationRules: [
+          { id: "v5", label: "Display element exists", type: "element_exists", target: ".display", lang: "html" },
+          { id: "v6", label: "Display shows default 0", type: "code_contains", target: ">0<", lang: "html" },
+          { id: "v7", label: "Display has right-aligned text", type: "css_rule", target: ".display", value: "text-align: right" }
+        ]
+      },
+      {
+        id: "number-buttons",
+        title: "Create Number Buttons",
+        goal: "Add buttons for digits 0-9 and a decimal point.",
+        requirements: [
+          "Number buttons 0-9 exist",
+          "Decimal point button exists",
+          "Buttons are styled and clickable"
+        ],
+        hints: [
+          "Use <button> elements with class 'btn-number'",
+          "Use CSS Grid for the button layout",
+          "Give equal width to all buttons"
+        ],
+        commonMistakes: [
+          "Missing some number buttons",
+          "Uneven button sizing"
+        ],
+        expectedOutput: "A grid of number buttons (0-9) with consistent sizing and spacing.",
+        checklist: ["0-9 buttons", "Decimal button", "Grid layout"],
+        resources: [
+          { title: "CSS Grid Layout Guide", description: "Learn to create grid layouts." }
+        ],
+        validationRules: [
+          { id: "v8", label: "Number buttons exist", type: "element_exists", target: ".btn-number", lang: "html" },
+          { id: "v9", label: "Buttons grid uses CSS Grid", type: "code_contains", target: "grid-template-columns", lang: "css" },
+          { id: "v10", label: "At least 10 number buttons", type: "code_contains", target: "btn-number", lang: "html" }
+        ]
+      },
+      {
+        id: "operator-buttons",
+        title: "Create Operator Buttons",
+        goal: "Add operator, equal, and clear buttons.",
+        requirements: [
+          "Addition (+) button",
+          "Subtraction (-) button",
+          "Multiplication (*) button",
+          "Division (/) button",
+          "Equal (=) button",
+          "Clear (C) button"
+        ],
+        hints: [
+          "Use class 'btn-operator' for operators, 'btn-equal' for =, 'btn-clear' for C",
+          "Give operators a distinct color",
+          "Make the clear button visually different"
+        ],
+        commonMistakes: [
+          "Not differentiating operator button styles",
+          "Missing the clear button"
+        ],
+        expectedOutput: "Operator buttons in a distinct color, with equal and clear buttons clearly visible.",
+        checklist: ["+ button", "- button", "* button", "/ button", "= button", "C button"],
+        resources: [
+          { title: "Button Styling", description: "Best practices for button design." }
+        ],
+        validationRules: [
+          { id: "v11", label: "Operator buttons exist", type: "element_exists", target: ".btn-operator", lang: "html" },
+          { id: "v12", label: "Equal button exists", type: "element_exists", target: ".btn-equal", lang: "html" },
+          { id: "v13", label: "Clear button exists", type: "element_exists", target: ".btn-clear", lang: "html" },
+          { id: "v14", label: "Operators have distinct style", type: "code_contains", target: "btn-operator", lang: "css" }
+        ]
+      },
+      {
+        id: "logic",
+        title: "Implement Calculator Logic",
+        goal: "Write JavaScript to perform arithmetic calculations.",
+        requirements: [
+          "Clicking a number shows it on the display",
+          "Clicking an operator stores the first number",
+          "Clicking = computes the result",
+          "Supports +, -, *, / operations"
+        ],
+        hints: [
+          "Use addEventListener on all buttons",
+          "Store the current value, previous value, and selected operation",
+          "Use parseFloat to convert strings to numbers"
+        ],
+        commonMistakes: [
+          "NaN from string concatenation instead of addition",
+          "Not handling decimal points correctly"
+        ],
+        expectedOutput: "Numbers appear on the display, operators chain correctly, and = shows the correct result.",
+        checklist: ["Number input", "Operation storage", "Computation", "Result display"],
+        resources: [
+          { title: "JavaScript Event Handling", description: "Learn addEventListener." },
+          { title: "Calculator Logic", description: "Standard calculator algorithm." }
+        ],
+        validationRules: [
+          { id: "v15", label: "Number buttons have click handlers", type: "code_contains", target: "addEventListener", lang: "js" },
+          { id: "v16", label: "Display updates on input", type: "code_contains", target: "updateDisplay", lang: "js" },
+          { id: "v17", label: "Arithmetic operations are handled", type: "code_contains", target: "operation", lang: "js" },
+          { id: "v18", label: "Equal button triggers computation", type: "code_contains", target: "btn-equal", lang: "js" }
+        ]
+      },
+      {
+        id: "clear",
+        title: "Add Clear Functionality",
+        goal: "Implement the clear button to reset the calculator.",
+        requirements: [
+          "Clear button resets the current input",
+          "After clear, display shows 0",
+          "All stored values are reset"
+        ],
+        hints: [
+          "Create a function to reset all state variables",
+          "Call it when the clear button is clicked"
+        ],
+        commonMistakes: [
+          "Not resetting all state variables",
+          "Not updating the display to 0"
+        ],
+        expectedOutput: "Clicking C resets the calculator to its initial empty state with 0 on the display.",
+        checklist: ["Reset current value", "Reset previous value", "Reset operation", "Display shows 0"],
+        resources: [
+          { title: "State Reset Patterns", description: "How to properly reset application state." }
+        ],
+        validationRules: [
+          { id: "v19", label: "Clear function exists", type: "code_contains", target: "clearDisplay", lang: "js" },
+          { id: "v20", label: "Clear resets display to 0", type: "code_contains", target: "updateDisplay('0')", lang: "js" },
+          { id: "v21", label: "Clear button has click handler", type: "code_contains", target: "btn-clear", lang: "js" }
+        ]
+      },
+      {
+        id: "edge-cases",
+        title: "Handle Edge Cases",
+        goal: "Make the calculator robust against edge cases.",
+        requirements: [
+          "Division by zero shows an error",
+          "Multiple decimals are prevented",
+          "Chained operations work correctly"
+        ],
+        hints: [
+          "Check if dividing by zero and show 'Error'",
+          "Prevent adding more than one decimal point to a number"
+        ],
+        commonMistakes: [
+          "Allowing division by zero without handling",
+          "Letting user type multiple decimal points"
+        ],
+        expectedOutput: "Division by zero shows 'Error'. Decimal can only be used once per number.",
+        checklist: ["Division by zero", "Single decimal", "Chained operations"],
+        resources: [
+          { title: "Edge Case Testing", description: "How to test boundary conditions." }
+        ],
+        validationRules: [
+          { id: "v22", label: "Division by zero is handled", type: "code_contains", target: "Error", lang: "js" },
+          { id: "v23", label: "Decimal point validation exists", type: "code_contains", target: "includes('.')", lang: "js" },
+          { id: "v24", label: "Chained operations work", type: "code_contains", target: "chooseOperation", lang: "js" }
+        ]
+      },
+      {
+        id: "final-testing",
+        title: "Final Testing & Polish",
+        goal: "Test all calculator features work together and the UI looks polished.",
+        requirements: [
+          "All buttons work correctly",
+          "The calculator looks visually polished",
+          "No console errors when using the calculator"
+        ],
+        hints: [
+          "Test the full workflow: enter numbers, perform operations, clear, and repeat",
+          "Check hover states on all buttons"
+        ],
+        commonMistakes: [
+          "Broken layout after adding all elements",
+          "JavaScript errors from missing element references"
+        ],
+        expectedOutput: "A fully functional, visually polished calculator that handles all basic arithmetic operations.",
+        checklist: ["All operations work", "Clean UI", "No console errors"],
+        resources: [
+          { title: "Debugging JavaScript", description: "Common debugging techniques." }
+        ],
+        validationRules: [
+          { id: "v25", label: "HTML structure is complete", type: "code_contains", target: "calculator", lang: "html" },
+          { id: "v26", label: "CSS is fully styled", type: "code_contains", target: "btn-equal", lang: "css" },
+          { id: "v27", label: "All operations implemented", type: "code_contains", target: "case '/':", lang: "js" }
+        ]
+      }
+    ]
   },
   {
     id: "to-do-app",
