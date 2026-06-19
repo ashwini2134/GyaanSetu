@@ -19,7 +19,6 @@ type Page =
   | { type: 'quiz' }
   | { type: 'problems' }
   | { type: 'project' }
-  | { type: 'practice' }
   | { type: 'summary' };
 
 function pageId(page: Page, sections: Array<{ id: string }>): string {
@@ -32,7 +31,6 @@ function pageLabel(page: Page, sections: Array<{ label: string }>): string {
   if (page.type === 'quiz') return 'Quiz';
   if (page.type === 'problems') return 'Problems';
   if (page.type === 'project') return 'Project';
-  if (page.type === 'practice') return 'Practice';
   return 'Summary';
 }
 
@@ -419,6 +417,8 @@ const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
               <LessonSection
                 section={lessonData.sections[currentPage.index]}
                 index={currentPage.index}
+                courseSlug={slug}
+                lectureNumber={lectureNumber}
                 onPracticeAttempt={() => {}}
                 onPracticeComplete={() => {}}
               />

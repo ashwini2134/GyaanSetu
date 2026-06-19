@@ -1,363 +1,301 @@
 import { useEffect, useState } from "react";
 import { authFetch } from "../../authClient";
-import { Sparkles, Wand2, CheckCircle, ArrowRight } from "lucide-react";
-
-interface Exercise {
-  id: string;
-  lessonId: string;
-  title: string;
-  description: string;
-  type: string;
-  xpReward: number;
-}
-
-interface SubmissionResult {
-  submission: {
-    id: string;
-    promptUsed: string;
-    generatedOutput: string;
-    reflection: string;
-    submittedAt: string;
-  };
-  xpAwarded: number;
-}
+import { getPracticeExercise } from "../../data/practiceExercises";
+import type { PracticeExerciseConfig } from "../../data/practiceExercises";
+import { Wand2, CheckCircle, SendHorizonal, Target, Lightbulb, Sparkles, ListChecks } from "lucide-react";
 
 interface PracticeExerciseProps {
-  lessonId: string;
+  courseSlug: string;
+  lectureId: string;
+  onComplete?: () => void;
 }
 
-export default function PracticeExercise({ lessonId }: PracticeExerciseProps) {
-  const [exercise, setExercise] = useState<Exercise | null>(null);
-  const [existingSubmission, setExistingSubmission] = useState<SubmissionResult["submission"] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [promptUsed, setPromptUsed] = useState("");
-  const [prompt2, setPrompt2] = useState("");
-  const [generatedOutput, setGeneratedOutput] = useState("");
-  const [generatedOutput2, setGeneratedOutput2] = useState("");
-  const [reflection, setReflection] = useState("");
-  const [step, setStep] = useState<"input" | "result">("input");
-  const [submitting, setSubmitting] = useState(false);
-  const [generating, setGenerating] = useState(false);
-  const [result, setResult] = useState<SubmissionResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
+interface SubmissionStatus {
+  completed: boolean;
+  submission: {
+    id: string;
+    prompt: string;
+    response: string;
+    createdAt: string;
+  } | null;
+}
 
-  const practiceType = exercise?.type ?? "generate";
+export default function PracticeExercise({ courseSlug, lectureId, onComplete }: PracticeExerciseProps) {
+  const config: PracticeExerciseConfig | null = getPracticeExercise(courseSlug, lectureId);
+
+  const [prompt, setPrompt] = useState("");
+  const [response, setResponse] = useState("");
+  const [generating, setGenerating] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [status, setStatus] = useState<SubmissionStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     async function load() {
       try {
-        const [exercisesData, submissionsData] = await Promise.all([
-          authFetch<Exercise[]>(`/practice-exercises/${lessonId}`),
-          authFetch<{ exercise: Exercise }[]>(`/practice-exercises/submissions/${lessonId}`),
-        ]);
-        if (exercisesData.length > 0) {
-          setExercise(exercisesData[0]);
-        }
-        if (submissionsData.length > 0) {
-          setExistingSubmission({
-            id: "",
-            promptUsed: "",
-            generatedOutput: "",
-            reflection: "",
-            submittedAt: "",
-          });
-        }
-      } catch (err) {
-        console.error("[practice-exercise] load failed", err);
+        const data = await authFetch<SubmissionStatus>(`/practice-exercises/${courseSlug}/${lectureId}/status`);
+        setStatus(data);
+      } catch {
       } finally {
         setLoading(false);
       }
     }
     load();
-  }, [lessonId]);
+  }, [courseSlug, lectureId]);
 
-  const handleGenerate = async (prompt: string) => {
-    if (!exercise || !prompt.trim()) return "";
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!config) {
+    return (
+      <section className="space-y-5">
+        <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-600/10 to-slate-800/40 p-8 text-center">
+          <p className="text-slate-400 text-sm">No practice exercise for this lecture.</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (status?.completed) {
+    return (
+      <div className="rounded-2xl border border-green-500/30 bg-gradient-to-br from-green-600/10 to-slate-800/40 backdrop-blur-sm p-5">
+        <div className="flex items-start gap-3">
+          <div className="w-9 h-9 rounded-xl bg-green-600/20 flex items-center justify-center flex-shrink-0">
+            <CheckCircle size={20} className="text-green-400" />
+          </div>
+          <div className="flex-1">
+            <p className="text-xs font-semibold text-green-300 uppercase tracking-wider mb-1">Practice Completed</p>
+            <p className="text-sm text-slate-300">Great work! You completed this practice exercise.</p>
+            {status.submission && (
+              <div className="mt-4 space-y-3">
+                <div>
+                  <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Your Prompt</p>
+                  <div className="bg-slate-900/60 border border-slate-700/40 rounded-xl px-4 py-3 text-sm text-slate-300 whitespace-pre-wrap">
+                    {status.submission.prompt}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">AI Response</p>
+                  <div className="bg-slate-900/60 border border-amber-500/20 rounded-xl px-4 py-3 text-sm text-slate-200 whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto">
+                    {status.submission.response}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!open) {
+    return (
+      <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-600/10 to-slate-800/40 backdrop-blur-sm p-5">
+        <div className="flex items-start gap-3">
+          <div className="w-9 h-9 rounded-xl bg-amber-600/20 flex items-center justify-center flex-shrink-0">
+            <svg className="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <p className="text-xs font-semibold text-amber-300 uppercase tracking-wider mb-1">Practice Exercise</p>
+            <p className="text-sm font-medium text-slate-200 mb-1">{config.title}</p>
+            <p className="text-sm text-slate-300 leading-relaxed">{config.challenge}</p>
+            <button
+              onClick={() => setOpen(true)}
+              className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-white px-4 py-2 rounded-lg bg-amber-600/80 hover:bg-amber-600 transition-all"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+              Start Practice
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const handleGenerate = async () => {
+    if (!prompt.trim()) return;
+    setGenerating(true);
+    setError(null);
     try {
       const data = await authFetch<{ generatedOutput: string }>("/practice-exercises/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          lessonId,
+          lessonId: `${courseSlug}_${lectureId}`,
           prompt: prompt.trim(),
-          exerciseType: exercise.type,
-          exerciseTitle: exercise.title,
-          exerciseDescription: exercise.description,
+          exerciseType: "ai-practice",
+          exerciseTitle: config.title,
+          exerciseDescription: config.challenge,
+          systemInstruction: config.systemInstruction,
         }),
       });
-      return data.generatedOutput;
+      setResponse(data.generatedOutput);
     } catch {
       setError("AI generation failed. Please try again.");
-      return "";
+    } finally {
+      setGenerating(false);
     }
-  };
-
-  const handleGenerateClick = async () => {
-    if (!exercise || !promptUsed.trim()) return;
-    setGenerating(true);
-    setError(null);
-    const output = await handleGenerate(promptUsed);
-    if (output) {
-      setGeneratedOutput(output);
-      if (practiceType === "prompt-compare") {
-        setStep("result");
-      } else {
-        setStep("result");
-      }
-    }
-    setGenerating(false);
-  };
-
-  const handleSecondGenerate = async () => {
-    if (!exercise || !prompt2.trim()) return;
-    setGenerating(true);
-    setError(null);
-    const output = await handleGenerate(prompt2);
-    if (output) {
-      setGeneratedOutput2(output);
-    }
-    setGenerating(false);
   };
 
   const handleSubmit = async () => {
-    if (!exercise) return;
-    const payload = practiceType === "prompt-compare"
-      ? `Weak prompt: "${promptUsed}"\n\nWeak output: ${generatedOutput}\n\nStrong prompt: "${prompt2}"\n\nStrong output: ${generatedOutput2}`
-      : generatedOutput;
-    if (!promptUsed.trim() || !payload.trim() || !reflection.trim()) return;
+    if (!prompt.trim() || !response.trim()) return;
     setSubmitting(true);
     setError(null);
     try {
-      const res = await authFetch<SubmissionResult>("/practice-exercises/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          exerciseId: exercise.id,
-          promptUsed: promptUsed.trim(),
-          generatedOutput: payload,
-          reflection: reflection.trim(),
-        }),
-      });
-      setResult(res);
+      const result = await authFetch<{ submission: any; xpAwarded: number }>(
+        `/practice-exercises/${courseSlug}/${lectureId}/submit`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            courseId: courseSlug,
+            lectureId,
+            prompt: prompt.trim(),
+            response: response.trim(),
+          }),
+        }
+      );
+      setStatus({ completed: true, submission: result.submission });
+      onComplete?.();
     } catch (err: any) {
-      setError(err.status === 409 ? "You already submitted this exercise." : "Failed to submit. Please try again.");
+      setError(err.status === 409 ? "Practice already completed." : "Failed to submit. Please try again.");
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (!exercise) return null;
-
-  if (result) {
-    return (
-      <section className="space-y-5">
-        <div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-600/10 to-slate-800/40 p-8 text-center space-y-4">
-          <div className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center mx-auto">
-            <CheckCircle size={32} className="text-emerald-400" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-white">Practice Submitted!</p>
-            <p className="text-slate-400 mt-2">Your practice exercise has been recorded.</p>
-          </div>
-          {result.xpAwarded > 0 && (
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20">
-              <Sparkles size={16} className="text-amber-400" />
-              <span className="text-sm font-semibold text-amber-400">+{result.xpAwarded} XP</span>
-            </div>
-          )}
-        </div>
-      </section>
-    );
-  }
-
-  if (existingSubmission) {
-    return (
-      <section className="space-y-5">
-        <div className="rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-600/10 to-slate-800/40 p-8 text-center space-y-4">
-          <CheckCircle size={40} className="text-blue-400 mx-auto" />
-          <p className="text-lg font-bold text-white">Practice Completed</p>
-          <p className="text-sm text-slate-400">You have already completed the practice for this lecture.</p>
-        </div>
-      </section>
-    );
-  }
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleGenerate();
+    }
+  };
 
   return (
-    <section className="space-y-5">
-      <div>
-        <h2 className="text-xl font-bold text-white flex items-center gap-3">
-          <span className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600/20 to-purple-600/20 flex items-center justify-center">
-            <Sparkles size={16} className="text-blue-400" />
-          </span>
-          Practice Exercise
-        </h2>
+    <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-600/10 to-slate-800/40 backdrop-blur-sm overflow-hidden">
+      <div className="px-5 py-3 bg-slate-800/40 border-b border-slate-700/20 flex items-center justify-between">
+        <div>
+          <p className="text-xs font-semibold text-amber-300 uppercase tracking-wider">Practice Exercise</p>
+          <p className="text-sm font-medium text-slate-200 mt-0.5">{config.title}</p>
+        </div>
+        <button
+          onClick={() => setOpen(false)}
+          className="text-slate-500 hover:text-slate-300 transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
-      <div className="rounded-2xl border border-slate-700/30 bg-gradient-to-br from-slate-800/40 to-slate-900/40 p-6 space-y-4">
-        <div>
-          <p className="text-base font-semibold text-white">{exercise.title}</p>
-          <p className="text-sm text-slate-400 mt-2 leading-relaxed whitespace-pre-wrap">{exercise.description}</p>
+      <div className="p-5 space-y-5">
+        <div className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-br from-blue-600/10 to-slate-800/40 border border-blue-500/20">
+          <div className="w-8 h-8 rounded-lg bg-blue-600/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <Target size={16} className="text-blue-400" />
+          </div>
+          <div>
+            <p className="text-[11px] font-semibold text-blue-400 uppercase tracking-wider mb-1">What You'll Learn</p>
+            <p className="text-sm text-slate-200 leading-relaxed">{config.learningGoal}</p>
+          </div>
         </div>
 
-        {practiceType === "generate" && (
-          <>
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Your Prompt</label>
-              <textarea value={promptUsed} onChange={e => setPromptUsed(e.target.value)} rows={3}
-                placeholder="Describe what you want the AI to generate..."
-                className="w-full bg-slate-900/60 border border-slate-700/40 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 resize-none" />
-            </div>
-            <GenerateButton onClick={handleGenerateClick} loading={generating} disabled={!promptUsed.trim()} />
-            {generatedOutput && <OutputBlock label="Generated Output" content={generatedOutput} />}
-            {generatedOutput && (
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">Reflection</label>
-                <textarea value={reflection} onChange={e => setReflection(e.target.value)} rows={3}
-                  placeholder="What did the AI produce? How could it be improved? What did you learn?"
-                  className="w-full bg-slate-900/60 border border-slate-700/40 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 resize-none" />
-              </div>
-            )}
-          </>
-        )}
+        <div className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-br from-amber-600/10 to-slate-800/40 border border-amber-500/20">
+          <div className="w-8 h-8 rounded-lg bg-amber-600/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <Lightbulb size={16} className="text-amber-400" />
+          </div>
+          <div>
+            <p className="text-[11px] font-semibold text-amber-400 uppercase tracking-wider mb-1">Your Challenge</p>
+            <p className="text-sm text-slate-200 leading-relaxed">{config.challenge}</p>
+          </div>
+        </div>
 
-        {practiceType === "compare" && (
-          <>
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">What would you like the AI to compare?</label>
-              <textarea value={promptUsed} onChange={e => setPromptUsed(e.target.value)} rows={3}
-                placeholder="Ask the AI to explain or compare the key concepts from this lesson..."
-                className="w-full bg-slate-900/60 border border-slate-700/40 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 resize-none" />
-            </div>
-            <GenerateButton onClick={handleGenerateClick} loading={generating} disabled={!promptUsed.trim()} />
-            {generatedOutput && <OutputBlock label="AI's Explanation" content={generatedOutput} />}
-            {generatedOutput && (
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">Your Own Understanding</label>
-                <textarea value={reflection} onChange={e => setReflection(e.target.value)} rows={4}
-                  placeholder="Based on the AI's explanation, write your own understanding in your own words. How would you explain these concepts to someone else?"
-                  className="w-full bg-slate-900/60 border border-slate-700/40 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 resize-none" />
-              </div>
-            )}
-          </>
-        )}
+        <div className="p-4 rounded-xl bg-gradient-to-br from-violet-600/10 to-slate-800/40 border border-violet-500/20">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles size={14} className="text-violet-400" />
+            <p className="text-[11px] font-semibold text-violet-400 uppercase tracking-wider">Prompt Hint</p>
+          </div>
+          <p className="text-sm text-violet-300/90 leading-relaxed">{config.promptHint}</p>
+        </div>
 
-        {practiceType === "reflect" && (
-          <>
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Ask the AI to describe a scenario</label>
-              <textarea value={promptUsed} onChange={e => setPromptUsed(e.target.value)} rows={3}
-                placeholder="Ask the AI to generate a real-world scenario related to this lesson's topic..."
-                className="w-full bg-slate-900/60 border border-slate-700/40 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 resize-none" />
-            </div>
-            <GenerateButton onClick={handleGenerateClick} loading={generating} disabled={!promptUsed.trim()} />
-            {generatedOutput && <OutputBlock label="AI Scenario" content={generatedOutput} />}
-            {generatedOutput && (
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">Your Reflection</label>
-                <textarea value={reflection} onChange={e => setReflection(e.target.value)} rows={4}
-                  placeholder="Reflect on this scenario. What are the key takeaways? How does it connect to what you learned? What would you do differently?"
-                  className="w-full bg-slate-900/60 border border-slate-700/40 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 resize-none" />
-              </div>
-            )}
-          </>
-        )}
+        <div>
+          <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Your Prompt</label>
+          <textarea
+            value={prompt}
+            onChange={e => setPrompt(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Type your question for the AI here..."
+            rows={3}
+            className="w-full bg-slate-900/60 border border-slate-700/40 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50 resize-none"
+          />
+          <p className="text-[11px] text-slate-500 mt-1">Enter to generate, Shift+Enter for new line</p>
+        </div>
 
-        {practiceType === "prompt-compare" && (
-          <>
-            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-sm text-amber-300">
-              Step 1: Write a weak/vague prompt first, then Step 2: write a specific, well-structured prompt on the same topic. Compare the results.
+        <button
+          onClick={handleGenerate}
+          disabled={generating || !prompt.trim()}
+          className="w-full inline-flex items-center justify-center gap-2 text-sm font-semibold text-white px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-amber-600/20"
+        >
+          {generating ? (
+            <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Generating...</>
+          ) : (
+            <><Wand2 size={16} /> Generate with AI</>
+          )}
+        </button>
+
+        {response && (
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">AI Response</label>
+            <div className="w-full bg-slate-900/60 border border-amber-500/20 rounded-xl px-4 py-3 text-sm text-slate-200 whitespace-pre-wrap leading-relaxed max-h-80 overflow-y-auto">
+              {response}
             </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Step 1: Weak / Vague Prompt</label>
-              <textarea value={promptUsed} onChange={e => setPromptUsed(e.target.value)} rows={2}
-                placeholder="Write a vague, poorly structured prompt..."
-                className="w-full bg-slate-900/60 border border-slate-700/40 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50 resize-none" />
-            </div>
-            <GenerateButton onClick={handleGenerateClick} loading={generating} disabled={!promptUsed.trim()} label="Generate with Weak Prompt" />
-            {generatedOutput && <OutputBlock label="Weak Prompt Output" content={generatedOutput} />}
-            {generatedOutput && (
-              <>
-                <div className="mt-4 pt-4 border-t border-slate-700/30">
-                  <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1.5">Step 2: Strong / Specific Prompt</label>
-                    <textarea value={prompt2} onChange={e => setPrompt2(e.target.value)} rows={2}
-                      placeholder="Write a specific, detailed, well-structured prompt on the SAME topic..."
-                      className="w-full bg-slate-900/60 border border-slate-700/40 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-green-500/50 resize-none" />
-                  </div>
-                  <div className="mt-3">
-                    <GenerateButton onClick={handleSecondGenerate} loading={generating} disabled={!prompt2.trim()} label="Generate with Strong Prompt" color="green" />
-                  </div>
-                  {generatedOutput2 && <OutputBlock label="Strong Prompt Output" content={generatedOutput2} />}
-                </div>
-                {generatedOutput2 && (
-                  <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1.5">Comparison & Reflection</label>
-                    <textarea value={reflection} onChange={e => setReflection(e.target.value)} rows={4}
-                      placeholder="Compare the two outputs. What differences do you notice? Why did the strong prompt produce better results? What did you learn about prompt design?"
-                      className="w-full bg-slate-900/60 border border-slate-700/40 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 resize-none" />
-                  </div>
-                )}
-              </>
-            )}
-          </>
+          </div>
         )}
 
         {error && (
           <div className="p-3 rounded-xl bg-red-900/20 border border-red-700/30 text-sm text-red-300">{error}</div>
         )}
 
-        {((practiceType === "generate" && generatedOutput && reflection) ||
-          (practiceType === "compare" && reflection) ||
-          (practiceType === "reflect" && reflection) ||
-          (practiceType === "prompt-compare" && generatedOutput2 && reflection)) && (
-          <button onClick={handleSubmit} disabled={submitting}
-            className="w-full inline-flex items-center justify-center gap-2 text-sm font-semibold text-white px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-blue-600/20">
-            {submitting ? (
-              <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Submitting...</>
-            ) : (
-              <><Sparkles size={16} /> Submit Practice</>
-            )}
-          </button>
+        {response && (
+          <div className="space-y-4">
+            <div className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-br from-emerald-600/10 to-slate-800/40 border border-emerald-500/20">
+              <div className="w-8 h-8 rounded-lg bg-emerald-600/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <ListChecks size={16} className="text-emerald-400" />
+              </div>
+              <div>
+                <p className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider mb-1">Success Criteria</p>
+                <ul className="space-y-1">
+                  {config.successCriteria.map((c, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-emerald-300/80">
+                      <span className="mt-0.5">•</span>
+                      <span>{c}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <button
+              onClick={handleSubmit}
+              disabled={submitting}
+              className="w-full inline-flex items-center justify-center gap-2 text-sm font-semibold text-white px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-emerald-600/20"
+            >
+              {submitting ? (
+                <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Submitting...</>
+              ) : (
+                <><SendHorizonal size={16} /> Mark Complete</>
+              )}
+            </button>
+          </div>
         )}
-      </div>
-    </section>
-  );
-}
-
-function GenerateButton({ onClick, loading, disabled, label = "Generate with AI", color = "violet" }: {
-  onClick: () => void;
-  loading: boolean;
-  disabled: boolean;
-  label?: string;
-  color?: string;
-}) {
-  const bg = color === "green" ? "from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 shadow-emerald-600/20" : "from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 shadow-violet-600/20";
-  return (
-    <button onClick={onClick} disabled={loading || disabled}
-      className={`w-full inline-flex items-center justify-center gap-2 text-sm font-semibold text-white px-5 py-2.5 rounded-xl bg-gradient-to-r ${bg} disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg`}>
-      {loading ? (
-        <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Generating...</>
-      ) : (
-        <><Wand2 size={16} /> {label}</>
-      )}
-    </button>
-  );
-}
-
-function OutputBlock({ label, content }: { label: string; content: string }) {
-  return (
-    <div>
-      <label className="block text-xs font-medium text-slate-300 mb-1.5">{label}</label>
-      <div className="w-full bg-slate-900/60 border border-violet-500/30 rounded-xl px-4 py-3 text-sm text-slate-200 whitespace-pre-wrap font-mono leading-relaxed max-h-72 overflow-y-auto">
-        {content}
       </div>
     </div>
   );

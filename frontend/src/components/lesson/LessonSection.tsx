@@ -80,7 +80,7 @@ function AnalogyBlock({ block }: { block: Extract<ContentBlock, { type: 'analogy
   );
 }
 
-function renderBlock(block: ContentBlock, _sectionId: string, onAttempt?: () => void, onComplete?: () => void) {
+function renderBlock(block: ContentBlock, _sectionId: string, courseSlug: string, lectureNumber: number, onAttempt?: () => void, onComplete?: () => void) {
   switch (block.type) {
     case 'text':
       return <TextBlock block={block} />;
@@ -102,6 +102,8 @@ function renderBlock(block: ContentBlock, _sectionId: string, onAttempt?: () => 
       return (
         <PracticeCard
           block={block}
+          courseSlug={courseSlug}
+          lectureNumber={lectureNumber}
           onAttempt={onAttempt}
           onComplete={onComplete}
         />
@@ -114,6 +116,8 @@ function renderBlock(block: ContentBlock, _sectionId: string, onAttempt?: () => 
 interface SectionProps {
   section: LessonSection;
   index: number;
+  courseSlug: string;
+  lectureNumber: number;
   innerRef?: (el: HTMLElement | null) => void;
   onPracticeAttempt?: (sectionId: string) => void;
   onPracticeComplete?: (sectionId: string) => void;
@@ -124,6 +128,8 @@ const SECTION_COLORS = ['blue', 'blue', 'purple', 'green', 'orange', 'amber'] as
 export default function LessonSection({
   section,
   index,
+  courseSlug,
+  lectureNumber,
   innerRef,
   onPracticeAttempt,
   onPracticeComplete,
@@ -150,16 +156,18 @@ export default function LessonSection({
           {section.label}
         </h2>
 
-        {section.blocks.map((block, bi) => (
-          <div key={bi}>
-            {renderBlock(
-              block,
-              section.id,
-              () => onPracticeAttempt?.(section.id),
-              () => onPracticeComplete?.(section.id),
-            )}
-          </div>
-        ))}
+            {section.blocks.map((block, bi) => (
+              <div key={bi}>
+                {renderBlock(
+                  block,
+                  section.id,
+                  courseSlug,
+                  lectureNumber,
+                  () => onPracticeAttempt?.(section.id),
+                  () => onPracticeComplete?.(section.id),
+                )}
+              </div>
+            ))}
       </div>
     </section>
   );

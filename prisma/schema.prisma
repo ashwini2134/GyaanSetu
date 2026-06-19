@@ -230,31 +230,18 @@ model DailyMission {
   @@unique([userId, date])
 }
 
-model PracticeExercise {
-  id          String   @id @default(uuid())
-  lessonId    String
-  title       String
-  description String
-  type        String
-  xpReward    Int      @default(30)
-  createdAt   DateTime @default(now())
-  submissions PracticeSubmission[]
-
-  @@unique([lessonId, type])
-}
-
 model PracticeSubmission {
-  id              String           @id @default(uuid())
-  exerciseId      String
-  userId          String
-  promptUsed      String
-  generatedOutput String
-  reflection      String
-  submittedAt     DateTime         @default(now())
-  exercise        PracticeExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
-  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String   @id @default(uuid())
+  userId    String
+  courseId  String
+  lectureId String
+  prompt    String
+  response  String
+  completed Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, exerciseId])
+  @@unique([userId, courseId, lectureId])
 }
 
 model AssessmentQuestion {

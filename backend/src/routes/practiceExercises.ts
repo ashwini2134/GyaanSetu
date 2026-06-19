@@ -8,50 +8,19 @@ import { generateContent } from "../services/gemini.js";
 
 const router = Router();
 
-function parseLessonId(lessonId: string): { courseSlug: string; lectureId: string } {
-  const parts = lessonId.split("_");
-  const courseSlug = parts[0];
-  const lectureId = parts[1] ?? "0";
-  return { courseSlug, lectureId };
-}
-
-router.get("/:lessonId", requireAuth, async (req: AuthenticatedRequest, res, next) => {
-  try {
-    const lessonId = String(req.params.lessonId);
-    const exercises = await prisma.practiceExercise.findMany({
-      where: { lessonId },
-    });
-    res.json(exercises);
-  } catch (error) {
-    next(error);
-  }
-});
-
 const generateSchema = z.object({
   lessonId: z.string(),
-  sectionIndex: z.number().optional(),
   prompt: z.string().min(1),
   exerciseType: z.string(),
   exerciseTitle: z.string(),
   exerciseDescription: z.string(),
+  systemInstruction: z.string(),
 });
 
 router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
-    const { lessonId, prompt, exerciseType, exerciseTitle, exerciseDescription } = generateSchema.parse(req.body);
-
-    const systemInstruction = `You are an AI tutor helping students practice what they learned. Generate creative, educational content based on the student's request. Be concise but thorough (2-4 paragraphs).`;
-
-    const userMessage = `I am working on an exercise titled "${exerciseTitle}".
-Description: ${exerciseDescription}
-Exercise type: ${exerciseType}
-
-My prompt to you: ${prompt}
-
-Please generate the requested output based on my prompt above. Format it cleanly without extra commentary.`;
-
-    const generatedOutput = await generateContent(systemInstruction, userMessage);
-
+    const { prompt, systemInstruction } = generateSchema.parse(req.body);
+    const generatedOutput = await generateContent(systemInstruction, prompt);
     res.json({ generatedOutput });
   } catch (error) {
     next(error);
@@ -59,82 +28,78 @@ Please generate the requested output based on my prompt above. Format it cleanly
 });
 
 const submitSchema = z.object({
-  exerciseId: z.string(),
-  promptUsed: z.string().min(1),
-  generatedOutput: z.string().min(1),
-  reflection: z.string().min(1),
+  courseId: z.string(),
+  lectureId: z.string(),
+  prompt: z.string().min(1),
+  response: z.string().min(1),
 });
 
-router.post("/submit", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+router.post("/:courseId/:lectureId/submit", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
     const userId = req.user!.id;
-    const { exerciseId, promptUsed, generatedOutput, reflection } = submitSchema.parse(req.body);
+    const courseId = String(req.params.courseId);
+    const lectureId = String(req.params.lectureId);
+    const { prompt, response } = submitSchema.parse(req.body);
 
     const existing = await prisma.practiceSubmission.findUnique({
       where: {
-        userId_exerciseId: { userId, exerciseId },
+        userId_courseId_lectureId: { userId, courseId, lectureId },
       },
     });
     if (existing) {
-      res.status(409).json({ error: "Already submitted this exercise" });
-      return;
-    }
-
-    const exercise = await prisma.practiceExercise.findUnique({
-      where: { id: exerciseId },
-    });
-    if (!exercise) {
-      res.status(404).json({ error: "Practice exercise not found" });
+      res.status(409).json({ error: "Practice already completed for this lecture" });
       return;
     }
 
     const submission = await prisma.practiceSubmission.create({
       data: {
-        exerciseId,
         userId,
-        promptUsed,
-        generatedOutput,
-        reflection,
+        courseId,
+        lectureId,
+        prompt,
+        response,
+        completed: true,
       },
     });
 
-    await awardXp(userId, exercise.xpReward, "AI Practice Completed", `practice_exercise_${exerciseId}`);
-
-    const { courseSlug, lectureId } = parseLessonId(exercise.lessonId);
+    await awardXp(userId, 30, "AI Practice Completed", `practice_${courseId}_${lectureId}`);
 
     await prisma.progress.upsert({
       where: {
-        userId_courseSlug_lectureId: { userId, courseSlug, lectureId },
+        userId_courseSlug_lectureId: { userId, courseSlug: courseId, lectureId },
       },
       update: { practiceCompleted: true },
       create: {
         userId,
-        courseSlug,
+        courseSlug: courseId,
         lectureId,
         status: "STARTED",
         practiceCompleted: true,
       },
     });
 
-    res.json({ submission, xpAwarded: exercise.xpReward });
+    res.json({ submission, xpAwarded: 30 });
   } catch (error) {
     next(error);
   }
 });
 
-router.get("/submissions/:lessonId", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+router.get("/:courseId/:lectureId/status", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
     const userId = req.user!.id;
-    const lessonId = String(req.params.lessonId);
-    const submissions = await prisma.practiceSubmission.findMany({
+    const courseId = String(req.params.courseId);
+    const lectureId = String(req.params.lectureId);
+
+    const submission = await prisma.practiceSubmission.findUnique({
       where: {
-        userId,
-        exercise: { lessonId },
+        userId_courseId_lectureId: { userId, courseId, lectureId },
       },
-      include: { exercise: true },
-      orderBy: { submittedAt: "desc" },
     });
-    res.json(submissions);
+
+    res.json({
+      completed: submission?.completed ?? false,
+      submission: submission ?? null,
+    });
   } catch (error) {
     next(error);
   }
