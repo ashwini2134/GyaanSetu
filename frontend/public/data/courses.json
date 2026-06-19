@@ -2,7 +2,7 @@
   {
     "slug": "python",
     "title": "Python Programming",
-    "description": "A beginner-friendly introduction to programming with Python — from your first Hello World through variables, conditionals, loops, functions, data structures, file handling, and a mini project.",
+    "description": "Learn the fundamentals of Python — variables, conditionals, loops, functions, data structures, file handling, and a mini project.",
     "level": "Beginner",
     "category": "Programming",
     "language": "Python"
@@ -10,7 +10,7 @@
   {
     "slug": "cs50ai",
     "title": "AI",
-    "description": "Harvard's Introduction to Artificial Intelligence with Python — search algorithms, knowledge representation, uncertainty, optimization, machine learning, and natural language processing.",
+    "description": "Harvard's introduction to artificial intelligence covering search algorithms, knowledge representation, optimization, machine learning, and natural language processing.",
     "level": "Advanced",
     "category": "Artificial Intelligence",
     "language": "Python"

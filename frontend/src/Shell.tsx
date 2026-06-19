@@ -3,6 +3,7 @@ import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "./auth";
 import { api, type Course } from "./api";
 import {
+  Award,
   BookOpen,
   ChevronDown,
   LayoutDashboard,
@@ -201,9 +202,10 @@ export default function Shell() {
             {/* Courses dropdown */}
             <div>
               <button
+                type="button"
                 onClick={() => expanded && setCoursesOpen((o) => !o)}
                 onMouseEnter={() => !expanded && setExpanded(true)}
-                className={`${navLinkBase} ${onCoursePage ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
+                className={`${navLinkBase} ${onCoursePage ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'} appearance-none`}
                 title="Courses"
               >
                 <span className="w-5 h-5 flex items-center justify-center flex-shrink-0">
@@ -260,42 +262,6 @@ export default function Shell() {
               </div>
             </div>
 
-            {/* QA Center (admin only) */}
-            {user?.role === "admin" || user?.role === "instructor" ? (
-              <NavLink
-                to="/qa"
-                onClick={() => setSidebarOpen(false)}
-                className={({ isActive }) =>
-                  `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`
-                }
-                title="QA Center"
-              >
-                <span className="w-5 h-5 flex items-center justify-center flex-shrink-0">
-                  <ShieldCheck size={18} />
-                </span>
-                <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>
-                  QA Center
-                </span>
-              </NavLink>
-            ) : null}
-
-            {/* Leaderboard */}
-            <NavLink
-              to="/leaderboard"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) =>
-                `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`
-              }
-              title="Leaderboard"
-            >
-              <span className="w-5 h-5 flex items-center justify-center flex-shrink-0">
-                <Trophy size={18} />
-              </span>
-              <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>
-                Leaderboard
-              </span>
-            </NavLink>
-
             {/* Projects */}
             <NavLink
               to="/projects"
@@ -330,6 +296,40 @@ export default function Shell() {
               </span>
             </NavLink>
 
+            {/* Certifications */}
+            <NavLink
+              to="/certifications"
+              onClick={() => setSidebarOpen(false)}
+              className={({ isActive }) =>
+                `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`
+              }
+              title="Certifications"
+            >
+              <span className="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                <Award size={18} />
+              </span>
+              <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>
+                Certifications
+              </span>
+            </NavLink>
+
+            {/* Leaderboard */}
+            <NavLink
+              to="/leaderboard"
+              onClick={() => setSidebarOpen(false)}
+              className={({ isActive }) =>
+                `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`
+              }
+              title="Leaderboard"
+            >
+              <span className="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                <Trophy size={18} />
+              </span>
+              <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>
+                Leaderboard
+              </span>
+            </NavLink>
+
             {/* Profile */}
             <NavLink
               to="/profile"
@@ -346,6 +346,25 @@ export default function Shell() {
                 Profile
               </span>
             </NavLink>
+
+            {/* QA Center (admin only) */}
+            {user?.role === "admin" || user?.role === "instructor" ? (
+              <NavLink
+                to="/qa"
+                onClick={() => setSidebarOpen(false)}
+                className={({ isActive }) =>
+                  `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`
+                }
+                title="QA Center"
+              >
+                <span className="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                  <ShieldCheck size={18} />
+                </span>
+                <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>
+                  QA Center
+                </span>
+              </NavLink>
+            ) : null}
           </nav>
         </aside>
 

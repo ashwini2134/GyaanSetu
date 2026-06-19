@@ -24,7 +24,7 @@ type TabView = 'profile' | 'settings';
 
 export default function ProfilePage() {
   const { user } = useAuth();
-  const { stats } = useGamification();
+  const { stats, overallProgress } = useGamification();
   const location = useLocation();
   const [view, setView] = useState<TabView>(location.pathname === '/settings' ? 'settings' : 'profile');
   const [settingsTab, setSettingsTab] = useState('profileInfo');
@@ -34,6 +34,39 @@ export default function ProfilePage() {
   const [projectsLoading, setProjectsLoading] = useState(true);
   const [timelineEvents, setTimelineEvents] = useState<any[]>([]);
   const [timelineLoading, setTimelineLoading] = useState(true);
+  const [courseProgress, setCourseProgress] = useState<any[]>([]);
+
+  const completedCourses = courseProgress.filter((c: any) => c.status === 'completed');
+  const derivedSkills = React.useMemo(() => {
+    const skills = new Set<string>();
+    const skillGroups: Record<string, string[]> = {};
+
+    completedCourses.forEach((c: any) => {
+      const group = c.courseId === 'python' ? 'Languages' : 'AI Tools';
+      if (!skillGroups[group]) skillGroups[group] = [];
+      skillGroups[group].push(c.courseId === 'python' ? 'Python' : 'AI Foundations');
+      skills.add(c.courseId === 'python' ? 'Python' : 'AI Foundations');
+    });
+
+    projects.forEach((p: any) => {
+      const techs = (p.techStack || '').split(',').map((t: string) => t.trim()).filter(Boolean);
+      techs.forEach((t: string) => {
+        if (!skills.has(t)) {
+          skills.add(t);
+          const group = ['Python', 'JavaScript', 'TypeScript', 'HTML', 'CSS'].includes(t) ? 'Languages' : 'Concepts';
+          if (!skillGroups[group]) skillGroups[group] = [];
+          if (!skillGroups[group].includes(t)) skillGroups[group].push(t);
+        }
+      });
+    });
+
+    if (completedCourses.length > 0 || projects.length > 0) {
+      if (!skillGroups['Concepts']) skillGroups['Concepts'] = [];
+      if (projects.length > 0 && !skillGroups['Concepts'].includes('Problem Solving')) skillGroups['Concepts'].push('Problem Solving');
+    }
+
+    return Object.entries(skillGroups).map(([group, skills]) => ({ group, skills }));
+  }, [courseProgress, projects]);
 
   React.useEffect(() => {
     setView(location.pathname === '/settings' ? 'settings' : 'profile');
@@ -42,9 +75,10 @@ export default function ProfilePage() {
   React.useEffect(() => {
     async function fetchData() {
       try {
-        const [projRes, timeRes] = await Promise.all([
+        const [projRes, timeRes, courseRes] = await Promise.all([
           authFetch<any[]>('/profile/projects').catch(() => []),
-          authFetch<any[]>('/profile/timeline').catch(() => [])
+          authFetch<any[]>('/profile/timeline').catch(() => []),
+          authFetch<any[]>('/courses/progress').catch(() => [])
         ]);
         
         const enrichedProjects = projRes.map(p => {
@@ -62,6 +96,7 @@ export default function ProfilePage() {
 
         setProjects(enrichedProjects);
         setTimelineEvents(timeRes);
+        setCourseProgress(courseRes);
       } catch (err) {
         console.error("Failed to fetch profile data", err);
       } finally {
@@ -371,51 +406,61 @@ export default function ProfilePage() {
           {/* Certificates */}
           <div className="bg-[#161B22] rounded-[12px] border border-[#2D3748] p-6">
             <h2 className="text-[18px] font-bold text-white mb-5">Certificates Earned</h2>
-            <div className="space-y-4">
-              {[
-                { name: 'Python Fundamentals', date: 'Jun 20 2026' },
-                { name: 'AI Foundations', date: 'Jun 09 2026' },
-              ].map((cert, i) => (
-                <div key={i} className="relative bg-[#0D1117] rounded-[8px] border border-[#2D3748] p-4 flex items-center justify-between group overflow-hidden">
-                  <div className="absolute top-0 left-0 w-8 h-8 bg-amber-500/20 rounded-br-full" />
-                  <div className="flex items-center gap-4 relative z-10">
-                    <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
-                      <Award size={20} className="text-amber-400" />
+            {completedCourses.length === 0 ? (
+              <div className="text-center py-8">
+                <Award size={32} className="text-slate-600 mx-auto mb-3" />
+                <p className="text-slate-400 text-sm">Complete a course to earn your first certificate!</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {completedCourses.map((c: any, i: number) => {
+                  const certName = c.courseId === 'python' ? 'Python Fundamentals' : c.courseId === 'cs50ai' ? 'AI Foundations' : c.courseId;
+                  return (
+                    <div key={i} className="relative bg-[#0D1117] rounded-[8px] border border-[#2D3748] p-4 flex items-center justify-between group overflow-hidden">
+                      <div className="absolute top-0 left-0 w-8 h-8 bg-amber-500/20 rounded-br-full" />
+                      <div className="flex items-center gap-4 relative z-10">
+                        <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+                          <Award size={20} className="text-amber-400" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-[14px] text-white">{certName}</h4>
+                          <p className="text-[12px] text-slate-400">Earned</p>
+                        </div>
+                      </div>
+                      <button className="p-2 border border-[#2D3748] rounded-[8px] text-slate-400 hover:text-white hover:border-slate-500 transition-colors" title="Download">
+                        <Download size={16} />
+                      </button>
                     </div>
-                    <div>
-                      <h4 className="font-bold text-[14px] text-white">{cert.name}</h4>
-                      <p className="text-[12px] text-slate-400">Earned {cert.date}</p>
-                    </div>
-                  </div>
-                  <button className="p-2 border border-[#2D3748] rounded-[8px] text-slate-400 hover:text-white hover:border-slate-500 transition-colors" title="Download">
-                    <Download size={16} />
-                  </button>
-                </div>
-              ))}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Skills */}
           <div className="bg-[#161B22] rounded-[12px] border border-[#2D3748] p-6">
             <h2 className="text-[18px] font-bold text-white mb-5">Skills</h2>
-            <div className="space-y-5">
-              {[
-                { group: 'Languages', skills: ['Python Fundamentals', 'Prompt Engineering'] },
-                { group: 'Concepts', skills: ['Problem Solving', 'OOP Concepts'] },
-                { group: 'AI Tools', skills: ['AI Foundations'] },
-              ].map((cat, i) => (
-                <div key={i}>
-                  <h4 className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-3">{cat.group}</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {cat.skills.map((skill, j) => (
-                      <span key={j} className="bg-[#1F2937] border border-[#2D3748] rounded-[20px] text-white text-[13px] font-medium px-4 py-1.5">
-                        {skill}
-                      </span>
-                    ))}
+            {derivedSkills.length === 0 ? (
+              <div className="text-center py-8">
+                <Code size={32} className="text-slate-600 mx-auto mb-3" />
+                <p className="text-slate-400 text-sm">Complete courses and projects to build your skills!</p>
+              </div>
+            ) : (
+              <div className="space-y-5">
+                {derivedSkills.map((cat, i) => (
+                  <div key={i}>
+                    <h4 className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-3">{cat.group}</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {cat.skills.map((skill, j) => (
+                        <span key={j} className="bg-[#1F2937] border border-[#2D3748] rounded-[20px] text-white text-[13px] font-medium px-4 py-1.5">
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
         </div>
@@ -470,9 +515,9 @@ export default function ProfilePage() {
             <div className="relative w-[80px] h-[80px] mb-6">
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="8" />
-                <circle cx="50" cy="50" r="40" fill="none" stroke="#3B82F6" strokeWidth="8" strokeDasharray="251.2" strokeDashoffset={251.2 * 0.25} strokeLinecap="round" />
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#3B82F6" strokeWidth="8" strokeDasharray="251.2" strokeDashoffset={251.2 * (1 - overallProgress / 100)} strokeLinecap="round" />
               </svg>
-              <div className="absolute inset-0 flex items-center justify-center text-xl font-bold text-white">75%</div>
+              <div className="absolute inset-0 flex items-center justify-center text-xl font-bold text-white">{overallProgress}%</div>
             </div>
             <h3 className="text-[20px] font-bold text-white mb-2">Take the next step in your learning journey</h3>
             <p className="text-[14px] text-slate-300 mb-8 max-w-sm">

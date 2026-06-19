@@ -53,6 +53,9 @@ const Shell = lazy(
 const LeaderboardPage = lazy(
   () => import("./pages/LeaderboardPage")
 );
+const CertificationsPage = lazy(
+  () => import("./pages/CertificationsPage")
+);
 
 const CapstonePage = lazy(
   () => import("./pages/CapstonePage")
@@ -258,8 +261,13 @@ export default function App() {
             element={<CapstonePage />}
           />
 
-          {/* Leaderboard */}
+          {/* Certifications */}
+          <Route
+            path="certifications"
+            element={<CertificationsPage />}
+          />
 
+          {/* Leaderboard */}
           <Route
             path="leaderboard"
             element={<LeaderboardPage />}
