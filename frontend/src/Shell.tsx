@@ -4,6 +4,7 @@ import { useAuth } from "./auth";
 import { api, type Course } from "./api";
 import {
   Award,
+  Bell,
   BookOpen,
   ChevronDown,
   LayoutDashboard,
@@ -16,6 +17,7 @@ import {
   FolderKanban,
   ClipboardList,
 } from "lucide-react";
+import { authApi } from "./authClient";
 
 function Logo({ expanded }: { expanded: boolean }) {
   return (
@@ -58,6 +60,49 @@ export default function Shell() {
   const [expanded, setExpanded] = useState(false);
   const location = useLocation();
   const leaveTimer = useRef<number | null>(null);
+
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifList, setNotifList] = useState<any[]>([]);
+  const [notifUnread, setNotifUnread] = useState(0);
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  const fetchNotifs = async () => {
+    try {
+      const data = await authApi.getInAppNotifications();
+      setNotifList(data.notifications);
+      setNotifUnread(data.unread);
+    } catch {}
+  };
+
+  useEffect(() => {
+    fetchNotifs();
+    const interval = setInterval(fetchNotifs, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false);
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const handleMarkRead = async (id: string) => {
+    try {
+      await authApi.markNotificationRead(id);
+      setNotifList((prev) => prev.map((n) => (n.id === id ? { ...n, readAt: new Date().toISOString() } : n)));
+      setNotifUnread((u) => Math.max(0, u - 1));
+    } catch {}
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      await authApi.markAllNotificationsRead();
+      setNotifList((prev) => prev.map((n) => ({ ...n, readAt: new Date().toISOString() })));
+      setNotifUnread(0);
+    } catch {}
+  };
 
   const onCoursePage = location.pathname.startsWith("/course/");
   const courseSlug = onCoursePage ? location.pathname.split("/")[2] : null;
@@ -147,6 +192,54 @@ export default function Shell() {
               Portfolio
             </NavLink>
             
+            <div className="relative" ref={notifRef}>
+              <button
+                type="button"
+                onClick={() => { setNotifOpen(!notifOpen); if (!notifOpen) fetchNotifs(); }}
+                className="relative rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all duration-200 border border-transparent hover:border-slate-700/50"
+              >
+                <Bell size={20} />
+                {notifUnread > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
+                    {notifUnread > 9 ? '9+' : notifUnread}
+                  </span>
+                )}
+              </button>
+              {notifOpen && (
+                <div className="absolute right-0 mt-2 w-80 bg-[#161B22] border border-[#2D3748] rounded-[12px] shadow-2xl z-50 overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-[#2D3748]">
+                    <h3 className="text-sm font-bold text-white">Notifications</h3>
+                    {notifUnread > 0 && (
+                      <button onClick={handleMarkAllRead} className="text-xs text-blue-400 hover:text-blue-300">
+                        Mark all read
+                      </button>
+                    )}
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {notifList.length === 0 ? (
+                      <div className="px-4 py-8 text-center text-sm text-slate-500">No notifications yet.</div>
+                    ) : (
+                      notifList.slice(0, 20).map((n) => (
+                        <button
+                          key={n.id}
+                          onClick={() => handleMarkRead(n.id)}
+                          className={`w-full text-left px-4 py-3 border-b border-[#2D3748]/50 hover:bg-[#1F2937]/50 transition-colors ${
+                            n.readAt ? 'opacity-60' : ''
+                          }`}
+                        >
+                          <div className="text-sm font-medium text-white">{n.title}</div>
+                          <div className="text-xs text-slate-400 mt-0.5 line-clamp-2">{n.body}</div>
+                          <div className="text-[10px] text-slate-500 mt-1">
+                            {new Date(n.createdAt).toLocaleDateString()}
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <NavLink to="/settings" className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all duration-200 border border-transparent hover:border-slate-700/50">
               <Settings size={20} />
             </NavLink>

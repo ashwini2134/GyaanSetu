@@ -7,11 +7,12 @@ export type User = {
   role: UserRole;
   emailVerified: boolean;
   bio: string;
+  avatarUrl: string;
   createdAt: string;
   updatedAt: string;
 };
 
-export type SafeUser = Pick<User, "id" | "email" | "name" | "role" | "emailVerified" | "bio" | "createdAt">;
+export type SafeUser = Pick<User, "id" | "email" | "name" | "role" | "emailVerified" | "bio" | "avatarUrl" | "createdAt">;
 
 export type OAuthProvider = "github" | "linkedin" | "google";
 

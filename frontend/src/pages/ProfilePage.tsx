@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../auth';
-import { authFetch } from '../authClient';
+import { authApi, authFetch } from '../authClient';
 import { useGamification } from '../progress';
 import { projectsData } from '../data/projectsData';
 import { 
@@ -17,17 +17,201 @@ import {
   Bell, 
   Settings as SettingsIcon, 
   Link as LinkIcon, 
-  Shield 
+  Shield,
+  CheckCircle,
+  AlertCircle,
+  Loader2,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 
 type TabView = 'profile' | 'settings';
 
+const LOCATIONS = [
+  { group: 'India', options: [
+    'Bengaluru, India', 'Mumbai, India', 'Delhi, India', 'Chennai, India',
+    'Hyderabad, India', 'Pune, India', 'Kolkata, India', 'Ahmedabad, India',
+    'Jaipur, India', 'Lucknow, India', 'Chandigarh, India', 'Indore, India',
+    'Bhopal, India', 'Surat, India', 'Kochi, India', 'Nagpur, India',
+    'Thiruvananthapuram, India', 'Coimbatore, India', 'Visakhapatnam, India',
+    'Patna, India',
+  ]},
+  { group: 'Global', options: [
+    'New York, USA', 'San Francisco, USA', 'Seattle, USA', 'Austin, USA',
+    'London, UK', 'Berlin, Germany', 'Toronto, Canada', 'Vancouver, Canada',
+    'Singapore', 'Dubai, UAE', 'Sydney, Australia', 'Amsterdam, Netherlands',
+    'Tokyo, Japan', 'Paris, France', 'Stockholm, Sweden', 'Zurich, Switzerland',
+  ]},
+];
+
+function LocationPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const ref = useRef<HTMLDivElement>(null);
+
+  const allOptions = LOCATIONS.flatMap(g => g.options);
+  const filtered = query
+    ? allOptions.filter(o => o.toLowerCase().includes(query.toLowerCase()))
+    : allOptions;
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) { setOpen(false); setQuery(''); }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  return (
+    <div className="relative" ref={ref}>
+      <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 z-10" />
+      <input
+        type="text"
+        value={open ? query : value}
+        onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
+        onFocus={() => { setOpen(true); setQuery(''); }}
+        placeholder="Search or enter your location"
+        className="w-full h-[44px] bg-[#0D1117] border border-[#2D3748] rounded-[8px] pl-9 pr-3 text-white text-sm focus:outline-none focus:border-blue-500 focus:shadow-[0_0_12px_rgba(59,130,246,0.2)] transition-shadow"
+      />
+      {open && (
+        <div className="absolute top-full mt-1 left-0 right-0 bg-[#161B22] border border-[#2D3748] rounded-[8px] max-h-48 overflow-y-auto z-50 shadow-xl">
+          {filtered.length === 0 ? (
+            <div className="px-3 py-2 text-sm text-slate-500">No matches</div>
+          ) : (
+            filtered.map((loc) => (
+              <button
+                key={loc}
+                type="button"
+                onClick={() => { onChange(loc); setQuery(''); setOpen(false); }}
+                className={`w-full text-left px-3 py-2 text-sm transition-colors hover:bg-[#1F2937] ${
+                  loc === value ? 'text-blue-400 bg-[#1F2937]/50' : 'text-white'
+                }`}
+              >
+                {loc}
+              </button>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, checkAuth } = useAuth();
   const { stats, overallProgress } = useGamification();
   const location = useLocation();
   const [view, setView] = useState<TabView>(location.pathname === '/settings' ? 'settings' : 'profile');
   const [settingsTab, setSettingsTab] = useState('profileInfo');
+
+  const [formName, setFormName] = useState(user?.name || '');
+  const [formBio, setFormBio] = useState(user?.bio || '');
+  const [formLocation, setFormLocation] = useState('Bengaluru, India');
+  const [formDateJoined, setFormDateJoined] = useState(
+    user?.createdAt ? new Date(user.createdAt).toISOString().split('T')[0] : ''
+  );
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [passwordForm, setPasswordForm] = useState({ current: '', newPass: '', confirm: '' });
+  const [passwordError, setPasswordError] = useState('');
+  const defaultNotifPrefs = {
+    emailCourseUpdates: true,
+    emailDeadlines: true,
+    emailQuizResults: true,
+    emailAchievements: true,
+    emailStreakReminders: true,
+    inAppMessages: true,
+    inAppProjectReviews: true,
+    inAppDailyMissions: true,
+  };
+  const [notifPrefs, setNotifPrefs] = useState<Record<string, boolean>>(defaultNotifPrefs);
+  const [notifSaving, setNotifSaving] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+
+  const showNotification = (type: 'success' | 'error', message: string) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 4000);
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      showNotification('error', 'Image must be under 2MB.');
+      return;
+    }
+    setAvatarFile(file);
+    const reader = new FileReader();
+    reader.onload = () => setAvatarPreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const handleSaveProfile = async () => {
+    setSaving(true);
+    try {
+      const payload: { name?: string; bio?: string; avatarUrl?: string } = {};
+      if (formName !== user?.name) payload.name = formName;
+      if (formBio !== user?.bio) payload.bio = formBio;
+      if (avatarPreview && avatarFile) payload.avatarUrl = avatarPreview;
+
+      await authApi.updateProfile(payload);
+      await checkAuth();
+      showNotification('success', 'Profile updated successfully!');
+      setAvatarFile(null);
+    } catch (err: any) {
+      showNotification('error', err?.message || 'Failed to save profile.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveNotificationPrefs = async () => {
+    if (!notifPrefs) return;
+    setNotifSaving(true);
+    try {
+      await authApi.updateProfile({ notificationPrefs: notifPrefs });
+      showNotification('success', 'Notification preferences saved.');
+    } catch (err: any) {
+      showNotification('error', err?.message || 'Failed to save preferences.');
+    } finally {
+      setNotifSaving(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    setPasswordError('');
+    if (!passwordForm.current) {
+      setPasswordError('Current password is required.');
+      return;
+    }
+    if (!passwordForm.newPass) {
+      setPasswordError('New password is required.');
+      return;
+    }
+    if (passwordForm.newPass.length < 8) {
+      setPasswordError('Password must be at least 8 characters.');
+      return;
+    }
+    if (passwordForm.newPass !== passwordForm.confirm) {
+      setPasswordError('Passwords do not match.');
+      return;
+    }
+    setChangingPassword(true);
+    try {
+      await authApi.changePassword(passwordForm.current, passwordForm.newPass);
+      showNotification('success', 'Password changed successfully!');
+      setPasswordForm({ current: '', newPass: '', confirm: '' });
+    } catch (err: any) {
+      setPasswordError(err?.message || 'Failed to change password.');
+    } finally {
+      setChangingPassword(false);
+    }
+  };
   
   // Real-time dynamic data states
   const [projects, setProjects] = useState<any[]>([]);
@@ -73,6 +257,12 @@ export default function ProfilePage() {
   }, [location.pathname]);
 
   React.useEffect(() => {
+    if (view === 'settings' && settingsTab === 'notifications') {
+      authApi.getNotificationPrefs().then((data) => setNotifPrefs(data.prefs)).catch(() => {});
+    }
+  }, [view, settingsTab]);
+
+  React.useEffect(() => {
     async function fetchData() {
       try {
         const [projRes, timeRes, courseRes] = await Promise.all([
@@ -113,7 +303,9 @@ export default function ProfilePage() {
   };
 
   const initials = user ? getInitials(user.name) : "U";
-  const joinedDate = user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'June 2026';
+  const joinedDate = user?.createdAt
+    ? new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    : '';
   const displayLocation = 'Bengaluru, India'; // Fallback since not in AuthUser
   const displayTagline = user?.bio || 'Learning today, building tomorrow.';
 
@@ -162,6 +354,18 @@ export default function ProfilePage() {
 
           {/* RIGHT CONTENT */}
           <div className="flex-1">
+            {/* Notification Toast */}
+            {notification && (
+              <div className={`mb-4 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium ${
+                notification.type === 'success' 
+                  ? 'bg-green-500/10 text-green-400 border border-green-500/20' 
+                  : 'bg-red-500/10 text-red-400 border border-red-500/20'
+              }`}>
+                {notification.type === 'success' ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
+                {notification.message}
+              </div>
+            )}
+
             {settingsTab === 'profileInfo' && (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <div>
@@ -175,14 +379,36 @@ export default function ProfilePage() {
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-3">Profile Picture</label>
                     <div className="flex items-center gap-4">
-                      <div className="w-[72px] h-[72px] rounded-full bg-[#1F2937] flex items-center justify-center border-[3px] border-transparent"
+                      <div className="w-[72px] h-[72px] rounded-full bg-[#1F2937] flex items-center justify-center border-[3px] border-transparent overflow-hidden"
                            style={{ background: 'linear-gradient(#1F2937, #1F2937) padding-box, linear-gradient(135deg, #3B82F6, #A855F7) border-box' }}>
-                        <span className="text-xl font-bold text-white tracking-widest">{initials}</span>
+                        {avatarPreview || user?.avatarUrl ? (
+                          <img src={avatarPreview || user?.avatarUrl} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-xl font-bold text-white tracking-widest">{initials}</span>
+                        )}
                       </div>
                       <div className="flex flex-col gap-2">
-                        <button className="px-4 py-2 bg-transparent border border-blue-500 text-blue-400 rounded-[8px] text-sm font-medium hover:bg-blue-500/10 transition-colors w-fit">
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleAvatarChange}
+                          className="hidden"
+                        />
+                        <button
+                          onClick={() => fileInputRef.current?.click()}
+                          className="px-4 py-2 bg-transparent border border-blue-500 text-blue-400 rounded-[8px] text-sm font-medium hover:bg-blue-500/10 transition-colors w-fit"
+                        >
                           Upload New
                         </button>
+                        {avatarPreview && (
+                          <button
+                            onClick={() => { setAvatarPreview(null); setAvatarFile(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+                            className="text-[11px] text-red-400 hover:text-red-300 text-left"
+                          >
+                            Remove
+                          </button>
+                        )}
                         <span className="text-[11px] text-slate-500">JPG, PNG or GIF. Max size 2MB.</span>
                       </div>
                     </div>
@@ -192,17 +418,18 @@ export default function ProfilePage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-2">Full Name</label>
-                      <input 
-                        type="text" 
-                        defaultValue={user?.name || "User"}
+                      <input
+                        type="text"
+                        value={formName}
+                        onChange={(e) => setFormName(e.target.value)}
                         className="w-full h-[44px] bg-[#0D1117] border border-[#2D3748] rounded-[8px] px-3 text-white text-sm focus:outline-none focus:border-blue-500 focus:shadow-[0_0_12px_rgba(59,130,246,0.2)] transition-shadow"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
-                      <input 
-                        type="email" 
-                        defaultValue={user?.email || "email@example.com"}
+                      <input
+                        type="email"
+                        defaultValue={user?.email || ""}
                         readOnly
                         className="w-full h-[44px] bg-[#0D1117] border border-[#2D3748] rounded-[8px] px-3 text-slate-300 text-sm focus:outline-none opacity-70 cursor-not-allowed"
                       />
@@ -213,13 +440,15 @@ export default function ProfilePage() {
                   {/* Row 3: Bio */}
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">Portfolio Tagline</label>
-                    <textarea 
-                      defaultValue={displayTagline}
+                    <textarea
+                      value={formBio}
+                      onChange={(e) => setFormBio(e.target.value)}
                       rows={3}
+                      maxLength={140}
                       className="w-full bg-[#0D1117] border border-[#2D3748] rounded-[8px] p-3 text-white text-sm focus:outline-none focus:border-blue-500 focus:shadow-[0_0_12px_rgba(59,130,246,0.2)] transition-shadow resize-none"
                     />
                     <div className="text-right mt-1">
-                      <span className="text-[11px] text-slate-500">35/140 characters</span>
+                      <span className="text-[11px] text-slate-500">{formBio.length}/140 characters</span>
                     </div>
                   </div>
 
@@ -227,39 +456,181 @@ export default function ProfilePage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-2">Location</label>
-                      <div className="relative">
-                        <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                        <select className="w-full h-[44px] bg-[#0D1117] border border-[#2D3748] rounded-[8px] pl-9 pr-3 text-white text-sm focus:outline-none focus:border-blue-500 focus:shadow-[0_0_12px_rgba(59,130,246,0.2)] transition-shadow appearance-none">
-                          <option>Bengaluru, India</option>
-                          <option>Mumbai, India</option>
-                          <option>Delhi, India</option>
-                          <option>Other</option>
-                        </select>
-                      </div>
+                      <LocationPicker
+                        value={formLocation}
+                        onChange={setFormLocation}
+                      />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-2">Date Joined</label>
-                      <div className="relative opacity-70">
+                      <div className="relative">
                         <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                        <input 
-                          type="text" 
-                          defaultValue={joinedDate}
-                          readOnly
-                          className="w-full h-[44px] bg-[#0D1117] border border-[#2D3748] rounded-[8px] pl-9 pr-3 text-slate-300 text-sm focus:outline-none cursor-not-allowed"
+                        <input
+                          type="date"
+                          value={formDateJoined}
+                          onChange={(e) => setFormDateJoined(e.target.value)}
+                          className="w-full h-[44px] bg-[#0D1117] border border-[#2D3748] rounded-[8px] pl-9 pr-3 text-white text-sm focus:outline-none focus:border-blue-500 focus:shadow-[0_0_12px_rgba(59,130,246,0.2)] transition-shadow"
                         />
                       </div>
                     </div>
                   </div>
 
                   <div className="flex justify-end pt-4 border-t border-[#2D3748]">
-                    <button className="h-[44px] px-6 bg-blue-500 text-white rounded-[8px] font-medium text-sm hover:bg-blue-600 active:scale-95 transition-all">
-                      Save Changes
+                    <button
+                      onClick={handleSaveProfile}
+                      disabled={saving}
+                      className="h-[44px] px-6 bg-blue-500 text-white rounded-[8px] font-medium text-sm hover:bg-blue-600 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      {saving && <Loader2 size={16} className="animate-spin" />}
+                      {saving ? 'Saving...' : 'Save Changes'}
                     </button>
                   </div>
                 </div>
               </div>
             )}
-            {settingsTab !== 'profileInfo' && (
+
+            {settingsTab === 'password' && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div>
+                  <h3 className="text-[18px] font-bold text-white">Change Password</h3>
+                  <p className="text-[13px] text-slate-400 mt-1">Update your account password.</p>
+                </div>
+                <div className="bg-[#161B22] p-6 rounded-[12px] border border-[#2D3748] space-y-6">
+                  {passwordError && (
+                    <div className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium bg-red-500/10 text-red-400 border border-red-500/20">
+                      <AlertCircle size={16} />
+                      {passwordError}
+                    </div>
+                  )}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Current Password</label>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={passwordForm.current}
+                      onChange={(e) => setPasswordForm(p => ({ ...p, current: e.target.value }))}
+                      placeholder="Enter current password"
+                      className="w-full h-[44px] bg-[#0D1117] border border-[#2D3748] rounded-[8px] px-3 text-white text-sm focus:outline-none focus:border-blue-500 focus:shadow-[0_0_12px_rgba(59,130,246,0.2)] transition-shadow"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">New Password</label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        value={passwordForm.newPass}
+                        onChange={(e) => setPasswordForm(p => ({ ...p, newPass: e.target.value }))}
+                        placeholder="Enter new password"
+                        className="w-full h-[44px] bg-[#0D1117] border border-[#2D3748] rounded-[8px] px-3 pr-10 text-white text-sm focus:outline-none focus:border-blue-500 focus:shadow-[0_0_12px_rgba(59,130,246,0.2)] transition-shadow"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300"
+                      >
+                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Confirm New Password</label>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={passwordForm.confirm}
+                      onChange={(e) => setPasswordForm(p => ({ ...p, confirm: e.target.value }))}
+                      placeholder="Confirm new password"
+                      className="w-full h-[44px] bg-[#0D1117] border border-[#2D3748] rounded-[8px] px-3 text-white text-sm focus:outline-none focus:border-blue-500 focus:shadow-[0_0_12px_rgba(59,130,246,0.2)] transition-shadow"
+                    />
+                  </div>
+                  <div className="flex justify-end pt-4 border-t border-[#2D3748]">
+                    <button
+                      onClick={handleChangePassword}
+                      disabled={changingPassword}
+                      className="h-[44px] px-6 bg-blue-500 text-white rounded-[8px] font-medium text-sm hover:bg-blue-600 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      {changingPassword && <Loader2 size={16} className="animate-spin" />}
+                      {changingPassword ? 'Updating...' : 'Update Password'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {settingsTab === 'notifications' && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div>
+                  <h3 className="text-[18px] font-bold text-white">Notifications</h3>
+                  <p className="text-[13px] text-slate-400 mt-1">Manage how and when you receive notifications.</p>
+                </div>
+                <div className="bg-[#161B22] p-6 rounded-[12px] border border-[#2D3748] space-y-6">
+                  <>
+                      <div>
+                        <h4 className="text-sm font-semibold text-white mb-3">Email Notifications</h4>
+                        <div className="space-y-3">
+                          {[
+                            { key: 'emailCourseUpdates', label: 'Course updates & new content' },
+                            { key: 'emailDeadlines', label: 'Assignment deadlines & reminders' },
+                            { key: 'emailQuizResults', label: 'Quiz results & feedback' },
+                            { key: 'emailAchievements', label: 'Achievements & milestones' },
+                            { key: 'emailStreakReminders', label: 'Streak reminders' },
+                          ].map((item) => (
+                            <label key={item.key} className="flex items-center justify-between py-2 cursor-pointer group">
+                              <span className="text-sm text-slate-300 group-hover:text-white transition-colors">{item.label}</span>
+                              <button
+                                type="button"
+                                onClick={() => setNotifPrefs(p => ({ ...p!, [item.key]: !p![item.key] }))}
+                                className={`relative w-10 h-5 rounded-full transition-colors ${
+                                  notifPrefs[item.key] ? 'bg-blue-500' : 'bg-[#2D3748]'
+                                }`}
+                              >
+                                <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
+                                  notifPrefs[item.key] ? 'translate-x-5' : ''
+                                }`} />
+                              </button>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="pt-4 border-t border-[#2D3748]">
+                        <h4 className="text-sm font-semibold text-white mb-3">In-App Notifications</h4>
+                        <div className="space-y-3">
+                          {[
+                            { key: 'inAppMessages', label: 'Messages & announcements' },
+                            { key: 'inAppProjectReviews', label: 'Project reviews & feedback' },
+                            { key: 'inAppDailyMissions', label: 'Daily missions & challenges' },
+                          ].map((item) => (
+                            <label key={item.key} className="flex items-center justify-between py-2 cursor-pointer group">
+                              <span className="text-sm text-slate-300 group-hover:text-white transition-colors">{item.label}</span>
+                              <button
+                                type="button"
+                                onClick={() => setNotifPrefs(p => ({ ...p!, [item.key]: !p![item.key] }))}
+                                className={`relative w-10 h-5 rounded-full transition-colors ${
+                                  notifPrefs[item.key] ? 'bg-blue-500' : 'bg-[#2D3748]'
+                                }`}
+                              >
+                                <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
+                                  notifPrefs[item.key] ? 'translate-x-5' : ''
+                                }`} />
+                              </button>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex justify-end pt-4 border-t border-[#2D3748]">
+                        <button
+                          onClick={handleSaveNotificationPrefs}
+                          disabled={notifSaving}
+                          className="h-[44px] px-6 bg-blue-500 text-white rounded-[8px] font-medium text-sm hover:bg-blue-600 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        >
+                          {notifSaving && <Loader2 size={16} className="animate-spin" />}
+                          {notifSaving ? 'Saving...' : 'Save Preferences'}
+                        </button>
+                      </div>
+                  </>
+                </div>
+              </div>
+            )}
+
+            {settingsTab !== 'profileInfo' && settingsTab !== 'password' && settingsTab !== 'notifications' && (
               <div className="flex items-center justify-center h-64 text-slate-500">
                 This section is under construction.
               </div>
@@ -283,9 +654,13 @@ export default function ProfilePage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end -mt-10 mb-8 gap-4">
           <div className="flex flex-col md:flex-row items-start md:items-end gap-5">
             {/* Avatar */}
-            <div className="w-[72px] h-[72px] rounded-full bg-[#1F2937] flex items-center justify-center border-[3px] border-transparent shadow-lg z-10"
+            <div className="w-[72px] h-[72px] rounded-full bg-[#1F2937] flex items-center justify-center border-[3px] border-transparent shadow-lg z-10 overflow-hidden"
                  style={{ background: 'linear-gradient(#1F2937, #1F2937) padding-box, linear-gradient(135deg, #3B82F6, #A855F7) border-box' }}>
-              <span className="text-xl font-bold text-white tracking-widest">{initials}</span>
+              {user?.avatarUrl ? (
+                <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-xl font-bold text-white tracking-widest">{initials}</span>
+              )}
             </div>
             <div className="mb-1">
               <div className="flex items-center gap-3 mb-1">

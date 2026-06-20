@@ -7,6 +7,7 @@ export type AuthUser = {
   role: UserRole;
   emailVerified: boolean;
   bio?: string;
+  avatarUrl?: string;
   createdAt?: string;
 };
 
@@ -115,6 +116,38 @@ export const authApi = {
     }),
 
   oauthUrl: (provider: OAuthProvider) => `${BACKEND_BASE}/api/auth/oauth/${provider}`,
+
+  getNotificationPrefs: () =>
+    authFetch<{ prefs: Record<string, boolean> }>("/notifications"),
+
+  updateNotificationPrefs: (prefs: Record<string, boolean>) =>
+    authFetch<{ prefs: Record<string, boolean> }>("/notifications", {
+      method: "PUT",
+      body: JSON.stringify({ prefs }),
+    }),
+
+  getInAppNotifications: (limit?: number) =>
+    authFetch<{ notifications: any[]; unread: number }>(
+      `/notifications/in-app${limit ? `?limit=${limit}` : ''}`
+    ),
+
+  markNotificationRead: (id: string) =>
+    authFetch<{ ok: boolean }>(`/notifications/in-app/${id}/read`, { method: 'PATCH' }),
+
+  markAllNotificationsRead: () =>
+    authFetch<{ ok: boolean }>('/notifications/in-app/read-all', { method: 'POST' }),
+
+  updateProfile: (data: { name?: string; bio?: string; avatarUrl?: string; notificationPrefs?: Record<string, boolean> }) =>
+    authFetch<{ user: AuthUser }>("/auth/profile", {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+
+  changePassword: (currentPassword: string, newPassword: string) =>
+    authFetch<{ user: AuthUser }>("/auth/profile", {
+      method: "PATCH",
+      body: JSON.stringify({ currentPassword, password: newPassword }),
+    }),
 };
 
 export function hasRole(user: AuthUser | null, ...roles: UserRole[]): boolean {

@@ -11,6 +11,7 @@ function toSafeUser(user: any): SafeUser {
     role: user.role as UserRole,
     emailVerified: user.emailVerified,
     bio: user.bio,
+    avatarUrl: user.avatarUrl ?? '',
     createdAt: user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt,
   };
 }
@@ -188,12 +189,13 @@ export async function consumeOAuthExchangeCode(code: string): Promise<string | n
   return record.userId;
 }
 
-export async function updateProfile(userId: string, input: { name?: string; bio?: string }): Promise<SafeUser> {
+export async function updateProfile(userId: string, input: { name?: string; bio?: string; avatarUrl?: string }): Promise<SafeUser> {
   const updatedUser = await prisma.user.update({
     where: { id: userId },
     data: {
       ...(input.name !== undefined && { name: input.name }),
       ...(input.bio !== undefined && { bio: input.bio }),
+      ...(input.avatarUrl !== undefined && { avatarUrl: input.avatarUrl }),
     },
   });
   return toSafeUser(updatedUser);

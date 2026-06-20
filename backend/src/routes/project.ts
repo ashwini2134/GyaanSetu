@@ -4,6 +4,7 @@ import { prisma } from "../prisma.js";
 import type { AuthenticatedRequest } from "../middleware/auth.js";
 import { z } from "zod";
 import { awardXp } from "../services/gamificationService.js";
+import { sendNotification } from "../services/notificationService.js";
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const archiver: (...args: any[]) => any = require("archiver");
@@ -47,6 +48,14 @@ router.post("/complete", requireAuth, async (req: AuthenticatedRequest, res, nex
     });
 
     await awardXp(userId, 100, "Completed Project", `project_complete_${courseSlug}_${projectId}`);
+
+    await sendNotification(
+      userId,
+      "project_review",
+      "Project Completed!",
+      `You completed the project "${projectId}" in ${courseSlug}.`,
+      `/course/${courseSlug}`
+    );
 
     res.json(progress);
   } catch (error) {
@@ -272,6 +281,14 @@ router.patch("/:projectId/complete", requireAuth, async (req: AuthenticatedReque
     });
 
     await awardXp(userId, 150, "Completed Project", `general_project_complete_${projectId}`);
+
+    await sendNotification(
+      userId,
+      "project_review",
+      "Project Completed!",
+      `You completed the project "${projectId}". Great work!`,
+      "/projects"
+    );
 
     res.json(project);
   } catch (err) {

@@ -14,6 +14,8 @@ import quizAttemptsRoutes from "./routes/quizAttempts.js";
 import codeDraftsRoutes from "./routes/codeDrafts.js";
 import chatRoutes from "./routes/chat.js";
 import dailyMissionsRoutes from "./routes/dailyMissions.js";
+import notificationsRoutes from "./routes/notifications.js";
+import inAppNotificationsRoutes from "./routes/inAppNotifications.js";
 import profileRoutes from "./routes/profile.js";
 import coursesRoutes from "./routes/courses.js";
 import qaRoutes from "./routes/qa.js";
@@ -66,6 +68,8 @@ export function createApp() {
   app.use("/api/drafts", codeDraftsRoutes);
   app.use("/api/chat", chatRoutes);
   app.use("/api/daily-missions", dailyMissionsRoutes);
+  app.use("/api/notifications", notificationsRoutes);
+  app.use("/api/notifications/in-app", inAppNotificationsRoutes);
   app.use("/api/profile", profileRoutes);
   app.use("/api/courses", coursesRoutes);
   app.use("/api/qa", qaRoutes);

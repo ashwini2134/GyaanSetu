@@ -24,6 +24,7 @@ import {
   updatePassword,
   updateProfile,
 } from "../services/userService.js";
+import { verifyPassword } from "../utils/password.js";
 import type { OAuthProvider } from "../types.js";
 import { OAUTH_PROVIDERS } from "../types.js";
 import {
@@ -159,6 +160,9 @@ router.get("/me", requireAuth, (req: AuthenticatedRequest, res) => {
 const profileSchema = z.object({
   name: z.string().min(1).max(100).trim().optional(),
   bio: z.string().max(500).trim().optional(),
+  avatarUrl: z.string().max(500000).optional(),
+  notificationPrefs: z.record(z.boolean()).optional(),
+  currentPassword: z.string().min(1).optional(),
   password: z.string().min(8).max(128).optional(),
 });
 
@@ -172,9 +176,28 @@ router.patch("/profile", requireAuth, async (req: AuthenticatedRequest, res, nex
     const user = await updateProfile(req.user.id, {
       name: body.name,
       bio: body.bio,
+      avatarUrl: body.avatarUrl,
     });
+
+    if (body.notificationPrefs) {
+      await prisma.user.update({
+        where: { id: req.user.id },
+        data: { notificationPrefs: body.notificationPrefs },
+      });
+    }
     
     if (body.password) {
+      if (!body.currentPassword) {
+        throw new AppError("Current password is required to set a new password.", 400);
+      }
+      const fullUser = await findUserByEmail(req.user.email);
+      if (!fullUser?.passwordHash) {
+        throw new AppError("Cannot change password for OAuth-only accounts.", 400);
+      }
+      const valid = await verifyPassword(body.currentPassword, fullUser.passwordHash);
+      if (!valid) {
+        throw new AppError("Current password is incorrect.", 401);
+      }
       await updatePassword(req.user.id, body.password);
       await revokeAllRefreshTokens(req.user.id);
     }

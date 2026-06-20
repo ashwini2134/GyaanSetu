@@ -1,5 +1,6 @@
 import { prisma } from "../prisma.js";
 import { awardXp } from "./gamificationService.js";
+import { sendInAppNotification, sendNotification } from "./notificationService.js";
 
 export async function recordQuizAttempt(
   userId: string,
@@ -26,6 +27,16 @@ export async function recordQuizAttempt(
   if (!passed) {
     await awardXp(userId, 0, "Attempted Quiz", undefined);
   }
+
+  await sendNotification(
+    userId,
+    "quiz_result",
+    passed ? "✅ Quiz Passed!" : "📝 Quiz Attempted",
+    passed
+      ? `You passed with ${score}/${total}!`
+      : `You scored ${score}/${total}. Keep trying!`,
+    `/course/${courseSlug}/lecture/${lectureId}`
+  );
 
   return { attempt, passed };
 }

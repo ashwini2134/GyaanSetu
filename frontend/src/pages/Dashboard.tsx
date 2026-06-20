@@ -417,14 +417,6 @@ export default function Dashboard() {
                       </div>
                       <h2 className="text-xl font-bold text-white tracking-tight">Your Courses</h2>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <Link
-                        to="/courses"
-                        className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
-                      >
-                        View Catalog →
-                      </Link>
-                    </div>
                   </div>
 
                   {courses.length === 0 ? (

@@ -1,7 +1,11 @@
 import { prisma } from "../prisma.js";
+import { sendInAppNotification } from "./notificationService.js";
+
+const STREAK_MILESTONES = [3, 7, 14, 30, 60, 100, 365];
 
 export async function awardXp(userId: string, amount: number, reason: string, actionId?: string) {
-  return prisma.$transaction(async (tx) => {
+  let newStreak = 0;
+  await prisma.$transaction(async (tx) => {
     // 1. If actionId is provided, check if transaction already exists
     if (actionId) {
       const existing = await tx.xpTransaction.findUnique({
@@ -36,7 +40,6 @@ export async function awardXp(userId: string, amount: number, reason: string, ac
     let newLongestStreak = user.longestStreak;
 
     if (lastActiveStr !== todayStr) {
-      // Check if lastActive was exactly yesterday
       const yesterday = new Date(now);
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayStr = yesterday.toISOString().split("T")[0];
@@ -57,6 +60,8 @@ export async function awardXp(userId: string, amount: number, reason: string, ac
       }
     }
 
+    newStreak = newCurrentStreak;
+
     await tx.user.update({
       where: { id: userId },
       data: {
@@ -67,6 +72,16 @@ export async function awardXp(userId: string, amount: number, reason: string, ac
       },
     });
   });
+
+  // Notify on streak milestones (outside transaction)
+  if (STREAK_MILESTONES.includes(newStreak)) {
+    await sendInAppNotification(
+      userId,
+      "streak",
+      `🔥 ${newStreak}-Day Streak!`,
+      `You've reached a ${newStreak}-day streak! Keep it going!`
+    );
+  }
 }
 
 export async function getLeaderboard(currentUserId?: string) {
