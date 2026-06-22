@@ -81,6 +81,7 @@ export default function Dashboard() {
   const [err, setErr] = useState<string | null>(null);
   
   // Use our centralized Gamification hook
+  // ✅ Wired to real API — GET /gamification/stats (via useGamification hook)
   const { xp, achievements: unlockedAchievements, streak, stats, overallProgress } = useGamification();
 
   const [activeCourseId] = useState<string | null>(null);
@@ -108,6 +109,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (!courses) return;
 
+      // ✅ Wired to real API — GET /courses/progress
       authFetch<any[]>('/courses/progress')
       .then(data => {
         const map: Record<string, any> = {};

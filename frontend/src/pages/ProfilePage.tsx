@@ -152,6 +152,7 @@ export default function ProfilePage() {
   };
 
   const handleSaveProfile = async () => {
+    // ✅ Wired to real API — PATCH /api/auth/profile
     setSaving(true);
     try {
       const payload: { name?: string; bio?: string; avatarUrl?: string } = {};
@@ -171,6 +172,7 @@ export default function ProfilePage() {
   };
 
   const handleSaveNotificationPrefs = async () => {
+    // ✅ Wired to real API — PATCH /api/auth/profile
     if (!notifPrefs) return;
     setNotifSaving(true);
     try {
@@ -184,6 +186,7 @@ export default function ProfilePage() {
   };
 
   const handleChangePassword = async () => {
+    // ✅ Wired to real API — PATCH /api/auth/profile
     setPasswordError('');
     if (!passwordForm.current) {
       setPasswordError('Current password is required.');
@@ -328,6 +331,12 @@ export default function ProfilePage() {
                 { id: 'profileInfo', icon: User, label: 'Profile Information' },
                 { id: 'password', icon: Lock, label: 'Change Password' },
                 { id: 'notifications', icon: Bell, label: 'Notifications' },
+                // 🚫 Hidden until [Preferences] backend is ready
+                // { id: 'preferences', icon: SettingsIcon, label: 'Account Preferences' },
+                // 🚫 Hidden until [Connections] backend is ready
+                // { id: 'connections', icon: LinkIcon, label: 'Connected Accounts' },
+                // 🚫 Hidden until [Privacy] backend is ready
+                // { id: 'privacy', icon: Shield, label: 'Privacy' },
               ].map((item) => {
                 const active = settingsTab === item.id;
                 const Icon = item.icon;

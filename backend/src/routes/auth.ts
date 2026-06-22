@@ -160,7 +160,7 @@ router.get("/me", requireAuth, (req: AuthenticatedRequest, res) => {
 const profileSchema = z.object({
   name: z.string().min(1).max(100).trim().optional(),
   bio: z.string().max(500).trim().optional(),
-  avatarUrl: z.string().max(500000).optional(),
+  avatarUrl: z.string().max(5000000).optional(),
   notificationPrefs: z.record(z.boolean()).optional(),
   currentPassword: z.string().min(1).optional(),
   password: z.string().min(8).max(128).optional(),
