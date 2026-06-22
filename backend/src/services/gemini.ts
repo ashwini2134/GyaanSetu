@@ -33,7 +33,7 @@ export async function generateContent(
     body: JSON.stringify({
       model: "llama-3.3-70b-versatile",
       messages: [
-        { role: "system", content: systemInstruction },
+        { role: "system", content: `${systemInstruction}\n\nYou are a helpful AI tutor for beginner students. Answer in maximum 2 sentences only. Be direct, simple, and beginner friendly. Never use bullet points or long paragraphs.` },
         { role: "user", content: userMessage },
       ],
     }),
