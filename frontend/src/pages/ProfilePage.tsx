@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../auth';
 import { authApi, authFetch } from '../authClient';
 import { useGamification } from '../progress';
@@ -328,9 +328,6 @@ export default function ProfilePage() {
                 { id: 'profileInfo', icon: User, label: 'Profile Information' },
                 { id: 'password', icon: Lock, label: 'Change Password' },
                 { id: 'notifications', icon: Bell, label: 'Notifications' },
-                { id: 'preferences', icon: SettingsIcon, label: 'Account Preferences' },
-                { id: 'connections', icon: LinkIcon, label: 'Connected Accounts' },
-                { id: 'privacy', icon: Shield, label: 'Privacy' },
               ].map((item) => {
                 const active = settingsTab === item.id;
                 const Icon = item.icon;
@@ -615,7 +612,13 @@ export default function ProfilePage() {
                           ))}
                         </div>
                       </div>
-                      <div className="flex justify-end pt-4 border-t border-[#2D3748]">
+                      <div className="flex justify-end gap-3 pt-4 border-t border-[#2D3748]">
+                        <button
+                          onClick={() => setNotifPrefs(defaultNotifPrefs)}
+                          className="h-[44px] px-6 bg-transparent text-slate-300 border border-slate-700 rounded-[8px] font-medium text-sm hover:bg-slate-800 transition-all"
+                        >
+                          Reset to Defaults
+                        </button>
                         <button
                           onClick={handleSaveNotificationPrefs}
                           disabled={notifSaving}
@@ -708,7 +711,7 @@ export default function ProfilePage() {
         <div className="mb-10">
           <div className="flex justify-between items-end mb-4">
             <h2 className="text-xl font-bold text-white">My Projects</h2>
-            <button className="text-sm text-blue-400 hover:text-blue-300">View all projects →</button>
+            <Link to="/projects" className="text-sm text-blue-400 hover:text-blue-300">View all projects →</Link>
           </div>
           
           {projectsLoading ? (
