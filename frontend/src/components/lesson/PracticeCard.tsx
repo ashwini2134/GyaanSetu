@@ -4,7 +4,7 @@ import CodeEditor from './CodeEditor';
 import { renderMarkdown } from '../../utils/renderContent';
 import { authFetch } from '../../authClient';
 import { getPracticeExercise } from '../../data/practiceExercises';
-import { Target, Lightbulb, HelpCircle, ListChecks, Wand2, SendHorizonal, CheckCircle } from 'lucide-react';
+import { Target, Lightbulb, HelpCircle, ListChecks, Wand2, SendHorizonal } from 'lucide-react';
 
 interface PracticeCardProps {
   block: PracticeBlock;
@@ -66,21 +66,7 @@ function AIPracticeCard({ block, courseSlug, lectureNumber, sectionId, onAttempt
     }
   };
 
-  if (done) {
-    return (
-      <div className="rounded-2xl border border-green-500/30 bg-gradient-to-br from-green-600/10 to-slate-800/40 p-5">
-        <div className="flex items-start gap-3">
-          <div className="w-9 h-9 rounded-xl bg-green-600/20 flex items-center justify-center flex-shrink-0">
-            <CheckCircle size={20} className="text-green-400" />
-          </div>
-          <div className="flex-1">
-            <p className="text-xs font-semibold text-green-300 uppercase tracking-wider mb-1">Practice Completed</p>
-            <p className="text-sm text-slate-300">Good work! You completed this practice exercise.</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+
 
   if (!open) {
     return (
@@ -93,7 +79,7 @@ function AIPracticeCard({ block, courseSlug, lectureNumber, sectionId, onAttempt
           </div>
           <div className="flex-1">
             <p className="text-xs font-semibold text-amber-300 uppercase tracking-wider mb-1">Practice Exercise</p>
-            <p className="text-sm font-medium text-slate-200 mb-1">Introduction to AI</p>
+            <p className="text-sm font-medium text-slate-200 mb-1">{config?.title || block.title}</p>
             <button
               onClick={() => setOpen(true)}
               className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-white px-4 py-2 rounded-lg bg-amber-600/80 hover:bg-amber-600 transition-all"
@@ -108,10 +94,14 @@ function AIPracticeCard({ block, courseSlug, lectureNumber, sectionId, onAttempt
   }
 
   return (
-    <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-600/10 to-slate-800/40 backdrop-blur-sm overflow-hidden">
+    <div className={`rounded-2xl border backdrop-blur-sm overflow-hidden ${
+      done ? 'border-green-500/30 bg-gradient-to-br from-green-600/10 to-slate-800/40' : 'border-amber-500/20 bg-gradient-to-br from-amber-600/10 to-slate-800/40'
+    }`}>
       <div className="px-5 py-3 bg-slate-800/40 border-b border-slate-700/20 flex items-center justify-between">
         <div>
-          <p className="text-xs font-semibold text-amber-300 uppercase tracking-wider">Practice Exercise</p>
+          <p className={`text-xs font-semibold uppercase tracking-wider ${done ? 'text-green-300' : 'text-amber-300'}`}>
+            Practice Exercise {done && '— Completed'}
+          </p>
           <p className="text-sm font-medium text-slate-200 mt-0.5">{config?.title || block.title}</p>
         </div>
         <button
@@ -164,21 +154,24 @@ function AIPracticeCard({ block, courseSlug, lectureNumber, sectionId, onAttempt
             onKeyDown={handleKeyDown}
             placeholder="Type your question for the AI here..."
             rows={2}
-            className="w-full bg-slate-900/60 border border-slate-700/40 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50 resize-none"
+            disabled={done}
+            className="w-full bg-slate-900/60 border border-slate-700/40 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
 
-        <button
-          onClick={handleGenerate}
-          disabled={generating || !prompt.trim()}
-          className="w-full inline-flex items-center justify-center gap-2 text-sm font-semibold text-white px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-amber-600/20"
-        >
-          {generating ? (
-            <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Generating...</>
-          ) : (
-            <><Wand2 size={16} /> Generate with AI</>
-          )}
-        </button>
+        {!done && (
+          <button
+            onClick={handleGenerate}
+            disabled={generating || !prompt.trim()}
+            className="w-full inline-flex items-center justify-center gap-2 text-sm font-semibold text-white px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-amber-600/20"
+          >
+            {generating ? (
+              <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Generating...</>
+            ) : (
+              <><Wand2 size={16} /> Generate with AI</>
+            )}
+          </button>
+        )}
 
         {response && (
           <div>
@@ -214,12 +207,14 @@ function AIPracticeCard({ block, courseSlug, lectureNumber, sectionId, onAttempt
               </div>
             )}
 
-            <button
-              onClick={handleComplete}
-              className="w-full inline-flex items-center justify-center gap-2 text-sm font-semibold text-white px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 transition-all shadow-lg shadow-emerald-600/20"
-            >
-              <SendHorizonal size={16} /> Mark Complete
-            </button>
+            {!done && (
+              <button
+                onClick={handleComplete}
+                className="w-full inline-flex items-center justify-center gap-2 text-sm font-semibold text-white px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 transition-all shadow-lg shadow-emerald-600/20"
+              >
+                <SendHorizonal size={16} /> Mark Complete
+              </button>
+            )}
           </div>
         )}
       </div>
