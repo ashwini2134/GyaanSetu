@@ -75,7 +75,8 @@
           "instructions": "Write a menu program showing 4 project options. Let the user pick one (1-4) and print a confirmation.",
           "starterCode": "print(\"1. Student Management System\")\nprint(\"2. Expense Tracker\")\nprint(\"3. Quiz Application\")\nprint(\"4. To-Do List\")\nchoice = int(input(\"Choose (1-4): \"))\nprojects = [\"\", \"Student Management System\", \"Expense Tracker\", \"Quiz Application\", \"To-Do List\"]",
           "solution": "print(\"1. Student Management System\")\nprint(\"2. Expense Tracker\")\nprint(\"3. Quiz Application\")\nprint(\"4. To-Do List\")\nchoice = int(input(\"Choose (1-4): \"))\nprojects = [\"\", \"Student Management System\", \"Expense Tracker\", \"Quiz Application\", \"To-Do List\"]\nprint(f\"You selected: {projects[choice]}\")",
-          "hint": "Use a list to map choice numbers to project names."
+          "hint": "Use a list to map choice numbers to project names.",
+          "expectedOutput": "1. Student Management System\n2. Expense Tracker\n3. Quiz Application\n4. To-Do List\nYou selected: Expense Tracker"
         }
       ]
     }

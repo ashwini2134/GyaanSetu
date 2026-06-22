@@ -135,17 +135,18 @@ export default function ProblemCard({ problem, index, completed, onComplete, onA
   };
 
   // Run — just execute, show output, no test cases
-  const handleRun = (_code: string, output: string, error: string | null) => {
+  const handleRun = (code: string, output: string, error: string | null) => {
     onAttempt?.();
     setRunOutput(output);
     setRunError(error);
-    // Clear any previous submission results when running new code
     setTestResults(null);
+    handleSave(code);
   };
 
   // Submit — run test cases, show submission results, update progress
   const handleSubmit = (code: string, _output: string, _error: string | null) => {
     onAttempt?.();
+    handleSave(code);
     if (allPassed) return;
     if (problem.testCases.length === 0) {
       completeProblem();

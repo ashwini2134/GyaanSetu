@@ -141,6 +141,7 @@ export interface PracticeBlock {
   solution: string;
   hint: string;
   expectedOutput?: string;
+  requiredPatterns?: string[];
 }
 
 export type ContentBlock =

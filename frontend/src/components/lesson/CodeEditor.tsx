@@ -1,6 +1,7 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import MonacoEditor from '@monaco-editor/react';
 import { runPython } from '../../utils/pythonRunner';
+import { scanForInput, injectInputs, type InputField } from '../../utils/prescanner';
 
 interface CodeEditorProps {
   initialCode: string;
@@ -12,9 +13,10 @@ interface CodeEditorProps {
   showSaveButton?: boolean;
   showSubmitButton?: boolean;
   expectedOutput?: string;
+  solution?: string;
   onChange?: (code: string) => void;
   onRun?: (code: string, output: string, error: string | null) => void;
-  onSubmit?: (code: string, output: string, error: string | null) => void;
+  onSubmit?: (code: string, output: string, error: string | null, expectedOutput?: string) => void;
   onSave?: (code: string) => void;
   onReset?: () => void;
 }
@@ -69,6 +71,7 @@ export default function CodeEditor({
   showSaveButton = false,
   showSubmitButton = false,
   expectedOutput,
+  solution,
   onChange,
   onRun,
   onSubmit,
@@ -80,36 +83,114 @@ export default function CodeEditor({
   const [runError, setRunError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [running, setRunning] = useState(false);
+  const [inputFields, setInputFields] = useState<InputField[]>([]);
+  const [showInputPanel, setShowInputPanel] = useState(false);
+  const pendingAction = useRef<'run' | 'submit' | null>(null);
+  const pendingCodeRef = useRef<string>('');
+  const lastInjectedRef = useRef<string>('');
+  const lastRawCodeRef = useRef<string>('');
   const editorRef = useRef<any>(null);
+  const userEditedRef = useRef(false);
+
+  useEffect(() => {
+    if (!userEditedRef.current) {
+      setCode(initialCode);
+      if (editorRef.current) {
+        editorRef.current.setValue(initialCode);
+      }
+    }
+  }, [initialCode]);
 
   const handleChange = (val: string | undefined) => {
     const v = val ?? '';
+    userEditedRef.current = true;
     setCode(v);
     onChange?.(v);
   };
 
-  const doRun = useCallback((notify: 'run' | 'submit') => {
-    if (running) return;
+  const executeCode = useCallback((finalCode: string, notify: 'run' | 'submit', dynamicExpected?: string) => {
     setRunning(true);
     setOutput(null);
     setRunError(null);
     setTimeout(() => {
       try {
-        const result = runPython(code);
+        const result = runPython(finalCode);
         setOutput(result.output);
         if (result.error) {
           setRunError(friendlyError(result.error));
         }
-        if (notify === 'run') onRun?.(code, result.output, result.error ? friendlyError(result.error) : null);
-        if (notify === 'submit') onSubmit?.(code, result.output, result.error ? friendlyError(result.error) : null);
+        if (notify === 'run') onRun?.(finalCode, result.output, result.error ? friendlyError(result.error) : null);
+        if (notify === 'submit') onSubmit?.(finalCode, result.output, result.error ? friendlyError(result.error) : null, dynamicExpected);
       } finally {
         setRunning(false);
       }
     }, 50);
-  }, [code, running, onRun, onSubmit]);
+  }, [onRun, onSubmit]);
+
+  const doRun = useCallback((notify: 'run' | 'submit') => {
+    if (running) return;
+
+    // If we already have injected code AND the raw code hasn't changed, reuse it
+    if (lastInjectedRef.current && lastRawCodeRef.current === code) {
+      executeCode(lastInjectedRef.current, notify);
+      return;
+    }
+    // Code changed, clear cached injection
+    lastInjectedRef.current = '';
+    lastRawCodeRef.current = '';
+
+    const scanned = scanForInput(code);
+    if (scanned.hasInput && !showInputPanel) {
+      setInputFields(scanned.fields);
+      pendingAction.current = notify;
+      pendingCodeRef.current = scanned.replacedCode;
+      setShowInputPanel(true);
+      return;
+    }
+    if (showInputPanel && pendingAction.current) {
+      const values = inputFields.map(f => f.value);
+      const injected = injectInputs(pendingCodeRef.current, values);
+      lastInjectedRef.current = injected;
+      lastRawCodeRef.current = code;
+      setShowInputPanel(false);
+      pendingAction.current = null;
+      pendingCodeRef.current = '';
+
+      // If solution is provided, compute dynamic expected output with same values
+      let dynamicExpected: string | undefined;
+      if (solution && notify === 'submit') {
+        const scannedSol = scanForInput(solution);
+        if (scannedSol.hasInput) {
+          const solInjected = injectInputs(scannedSol.replacedCode, values);
+          const solResult = runPython(solInjected);
+          if (!solResult.error) dynamicExpected = solResult.output;
+        }
+      }
+      executeCode(injected, notify, dynamicExpected);
+      return;
+    }
+    executeCode(code, notify);
+  }, [code, running, showInputPanel, inputFields, executeCode, solution]);
+
+  const handleInputChange = (id: number, value: string) => {
+    setInputFields(prev => prev.map(f => f.id === id ? { ...f, value } : f));
+  };
+
+  const handleInputSubmit = () => {
+    if (pendingAction.current) {
+      doRun(pendingAction.current);
+    }
+  };
 
   const handleRun = () => doRun('run');
   const handleSubmit = () => doRun('submit');
+
+  const dismissInputPanel = () => {
+    setShowInputPanel(false);
+    setInputFields([]);
+    pendingAction.current = null;
+    pendingCodeRef.current = '';
+  };
 
   const handleSave = () => {
     onSave?.(code);
@@ -122,6 +203,8 @@ export default function CodeEditor({
     setOutput(null);
     setRunError(null);
     setSaved(false);
+    lastInjectedRef.current = '';
+    lastRawCodeRef.current = '';
     if (editorRef.current) {
       editorRef.current.setValue(initialCode);
     }
@@ -198,8 +281,53 @@ export default function CodeEditor({
         }}
       />
 
+      {/* Input Panel */}
+      {showInputPanel && (
+        <div className="border-t border-blue-700/40 bg-slate-900/80 px-4 py-3">
+          <div className="flex items-center gap-2 mb-3">
+            <svg className="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+            </svg>
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-blue-400">Input Required</span>
+          </div>
+          <div className="space-y-2">
+            {inputFields.map((field, i) => (
+              <div key={field.id}>
+                {field.prompt && (
+                  <label className="text-[11px] text-slate-400 mb-1 block">{field.prompt}</label>
+                )}
+                <input
+                  type="text"
+                  value={field.value}
+                  onChange={e => handleInputChange(field.id, e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter' && field.value) handleInputSubmit(); }}
+                  placeholder={field.prompt || `Input #${i + 1}`}
+                  className="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50"
+                  autoFocus={i === 0}
+                />
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center gap-2 mt-3">
+            <button
+              onClick={handleInputSubmit}
+              disabled={running}
+              className="px-4 py-1.5 text-xs font-semibold text-white rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 transition-all"
+            >
+              {running ? 'Running...' : `Run with Inputs`}
+            </button>
+            <button
+              onClick={dismissInputPanel}
+              className="px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-slate-200 rounded-lg bg-slate-700/40 hover:bg-slate-700/70 transition-all"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Action Bar (Run/Submit) */}
-      {(!readOnly && (showRunButton || showSubmitButton)) && (
+      {(!readOnly && (showRunButton || showSubmitButton)) && !showInputPanel && (
         <div className="flex items-center justify-between px-4 py-3 bg-slate-800/30 border-t border-slate-700/40">
           <div>
             {showRunButton && (

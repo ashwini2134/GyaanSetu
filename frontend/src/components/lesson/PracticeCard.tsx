@@ -4,7 +4,9 @@ import CodeEditor from './CodeEditor';
 import { renderMarkdown } from '../../utils/renderContent';
 import { authFetch } from '../../authClient';
 import { getPracticeExercise } from '../../data/practiceExercises';
-import { Target, Lightbulb, HelpCircle, ListChecks, Wand2, SendHorizonal } from 'lucide-react';
+import { Target, Lightbulb, HelpCircle, ListChecks, Wand2, SendHorizonal, CheckCircle } from 'lucide-react';
+import { generateProgressiveHint } from '../../utils/logicValidation';
+import { scanForInput } from '../../utils/prescanner';
 
 interface PracticeCardProps {
   block: PracticeBlock;
@@ -233,9 +235,12 @@ export default function PracticeCard({ block, courseSlug, lectureNumber, section
   const [passed, setPassed] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [toast, setToast] = useState(false);
+  const [hintLevel, setHintLevel] = useState(0);
+  const [showSolution, setShowSolution] = useState(false);
+  const [lastCode, setLastCode] = useState('');
 
-  const [runOutput, setRunOutput] = useState<string | null>(null);
-  const [runError, setRunError] = useState<string | null>(null);
+  const [submissionResult, setSubmissionResult] = useState<{ passed: boolean; expected: string; actual: string } | null>(null);
+
   const [savedCode, setSavedCode] = useState<string | null>(null);
   useEffect(() => {
     async function loadDraft() {
@@ -264,21 +269,25 @@ export default function PracticeCard({ block, courseSlug, lectureNumber, section
     .catch(err => console.error('Failed to save practice draft', err));
   }, [block.title, saveKey]);
 
-  const handleRun = (code: string, output: string, error: string | null) => {
+  const handleRun = (code: string, _output: string, _error: string | null) => {
     onAttempt?.();
     setAttempts(a => a + 1);
     setShowHint(true);
-    setRunOutput(output);
-    setRunError(error);
+    setHintLevel(a => Math.min(a + 1, 3));
+    setLastCode(code);
     saveCode(code);
   };
 
-  const handleSubmit = (_code: string, output: string, error: string | null) => {
+  const handleSubmit = (_code: string, output: string, error: string | null, dynamicExpected?: string) => {
     onAttempt?.();
     setAttempts(a => a + 1);
-    setRunOutput(output);
-    setRunError(error);
-    if (!error && block.expectedOutput && output.trim() === block.expectedOutput.trim()) {
+    const expected = dynamicExpected ?? block.expectedOutput;
+    let passed = false;
+    if (!error && expected && output !== null) {
+      passed = output.trim() === expected.trim();
+      setSubmissionResult({ passed, expected, actual: output });
+    }
+    if (passed) {
       setPassed(true);
       onComplete?.();
     }
@@ -299,8 +308,10 @@ export default function PracticeCard({ block, courseSlug, lectureNumber, section
     setAttempts(0);
     setPassed(false);
     setShowHint(false);
-    setRunOutput(null);
-    setRunError(null);
+    setSubmissionResult(null);
+    setHintLevel(0);
+    setShowSolution(false);
+    setLastCode('');
   };
 
   if (!open) {
@@ -372,7 +383,7 @@ export default function PracticeCard({ block, courseSlug, lectureNumber, section
           <p className="text-sm text-slate-200 leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(block.instructions) }} />
         </div>
 
-        {block.expectedOutput && (
+        {block.expectedOutput && !scanForInput(block.solution).hasInput && (
           <div className="p-3 rounded-xl bg-slate-900/50 border border-slate-700/30">
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Expected Output</p>
             <pre className="text-sm text-emerald-400 font-mono" style={{ userSelect: 'none', WebkitUserSelect: 'none' }}>{block.expectedOutput}</pre>
@@ -386,6 +397,7 @@ export default function PracticeCard({ block, courseSlug, lectureNumber, section
           showSaveButton
           showSubmitButton
           expectedOutput={block.expectedOutput}
+          solution={block.solution}
           onRun={handleRun}
           onSubmit={handleSubmit}
           onSave={saveCode}
@@ -393,24 +405,141 @@ export default function PracticeCard({ block, courseSlug, lectureNumber, section
           onReset={handleReset}
         />
 
-        {runOutput !== null && (
-          <div className="p-3 rounded-xl border border-slate-700/30 bg-slate-900/50">
-            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Console Output</p>
-            {runError ? (
-              <pre className="text-sm text-red-300 font-mono whitespace-pre-wrap">{runError}</pre>
+        {submissionResult && (
+          <div className={`rounded-xl border p-4 ${
+            submissionResult.passed
+              ? 'border-green-500/30 bg-green-900/10'
+              : 'border-red-500/30 bg-red-900/10'
+          }`}>
+            {submissionResult.passed ? (
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-sm font-semibold text-green-300">✓ Correct Output</span>
+              </div>
             ) : (
-              <pre className="text-sm text-green-300 font-mono whitespace-pre-wrap">{runOutput || '(no output)'}</pre>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  <span className="text-sm font-semibold text-red-300">Output Mismatch</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="p-3 rounded-lg bg-slate-900/50 border border-slate-700/30">
+                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Expected</p>
+                    <pre className="text-sm font-mono text-emerald-400 whitespace-pre-wrap">{submissionResult.expected}</pre>
+                  </div>
+                  <div className="p-3 rounded-lg bg-slate-900/50 border border-slate-700/30">
+                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Your Output</p>
+                    <pre className="text-sm font-mono text-red-300 whitespace-pre-wrap">{submissionResult.actual}</pre>
+                  </div>
+                </div>
+                {generateHint(submissionResult.expected, submissionResult.actual) && (
+                  <div className="p-3 rounded-lg bg-blue-900/20 border border-blue-700/30">
+                    <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-wider mb-1">Hint</p>
+                    <p className="text-sm text-blue-300/90">{generateHint(submissionResult.expected, submissionResult.actual)}</p>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         )}
 
-        {showHint && block.hint && (
-          <div className="p-3 rounded-xl bg-blue-900/20 border border-blue-700/30">
-            <p className="text-xs font-semibold text-blue-400 mb-1">Hint</p>
-            <p className="text-sm text-slate-300">{block.hint}</p>
+        {showHint && hintLevel > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Lightbulb size={14} className="text-amber-400" />
+              <p className="text-xs font-semibold text-amber-400 uppercase tracking-wider">
+                Hint {hintLevel}/{3}
+              </p>
+            </div>
+            {hintLevel >= 1 && (
+              <div className="p-3 rounded-xl bg-blue-900/20 border border-blue-700/30">
+                <p className="text-sm text-slate-300">
+                  {hintLevel === 1
+                    ? (() => {
+                        const progHint = generateProgressiveHint(lastCode, block.solution, block.hint, 0);
+                        if (!progHint && block.hint) {
+                          const sentences = block.hint.split(/(?<=[.!])\s+/);
+                          return sentences[0] || block.hint;
+                        }
+                        return progHint || block.hint;
+                      })()
+                    : hintLevel === 2
+                    ? block.hint
+                    : generateProgressiveHint(lastCode, block.solution, block.hint, 2) || block.hint}
+                </p>
+              </div>
+            )}
+            {hintLevel >= 3 && !showSolution && (
+              <button
+                onClick={() => setShowSolution(true)}
+                className="mt-2 inline-flex items-center gap-2 text-xs font-semibold text-emerald-400 px-4 py-2 rounded-lg bg-emerald-900/30 border border-emerald-700/40 hover:bg-emerald-900/50 transition-all"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Show Solution
+              </button>
+            )}
+            {showSolution && (
+              <div className="p-3 rounded-xl bg-emerald-900/20 border border-emerald-700/30">
+                <p className="text-xs font-semibold text-emerald-400 mb-1">Solution</p>
+                <pre className="text-sm text-emerald-300 font-mono whitespace-pre-wrap">{block.solution}</pre>
+              </div>
+            )}
           </div>
         )}
       </div>
     </div>
   );
+}
+
+function generateHint(expected: string, actual: string): string {
+  const exp = expected.trimEnd();
+  const act = actual.trimEnd();
+
+  if (exp === act) return '';
+
+  // Check for whitespace differences
+  const expNorm = exp.replace(/\s+/g, ' ').trim();
+  const actNorm = act.replace(/\s+/g, ' ').trim();
+  if (expNorm === actNorm && exp !== act) {
+    return 'Check your spacing and line breaks — the text matches but whitespace differs.';
+  }
+
+  // Check for line count difference
+  const expLines = exp.split('\n');
+  const actLines = act.split('\n');
+  if (expLines.length !== actLines.length) {
+    const diff = Math.abs(expLines.length - actLines.length);
+    const more = actLines.length > expLines.length;
+    return `Expected ${expLines.length} line${expLines.length === 1 ? '' : 's'} but got ${actLines.length}. You have ${more ? `${diff} extra line${diff === 1 ? '' : 's'}` : `${diff} fewer line${diff === 1 ? '' : 's'}`}.`;
+  }
+
+  // Find first differing character
+  const maxLen = Math.max(exp.length, act.length);
+  for (let i = 0; i < maxLen; i++) {
+    if (exp[i] !== act[i]) {
+      const expChar = exp[i] ?? '(end)';
+      const actChar = act[i] ?? '(end)';
+      const desc: Record<string, string> = {
+        ' ': 'space',
+        '\n': 'newline',
+        ',': 'comma',
+        '.': 'period',
+        '!': 'exclamation mark',
+        "'": 'single quote',
+        '"': 'double quote',
+        '\t': 'tab',
+      };
+      const expDesc = desc[expChar] ?? `"${expChar}"`;
+      const actDesc = desc[actChar] ?? `"${actChar}"`;
+      return `Character ${i + 1} differs: expected ${expDesc} but found ${actDesc}.`;
+    }
+  }
+
+  return '';
 }

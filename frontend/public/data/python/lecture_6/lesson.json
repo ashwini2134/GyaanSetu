@@ -75,7 +75,8 @@
           "instructions": "Ask for a number N. Use a while loop to calculate sum of 1 to N.",
           "starterCode": "n = int(input(\"Enter N: \"))\ncount = 1\ntotal = 0\nwhile count <= n:\n    total = \n    count = \nprint(f\"Sum: {total}\")",
           "solution": "n = int(input(\"Enter N: \"))\ncount = 1\ntotal = 0\nwhile count <= n:\n    total = total + count\n    count = count + 1\nprint(f\"Sum of 1 to {n} = {total}\")",
-          "hint": "Add count to total each iteration, then increment count."
+          "hint": "Add count to total each iteration, then increment count.",
+          "expectedOutput": "Sum of 1 to 42 = 903"
         }
       ]
     },
@@ -119,7 +120,8 @@
           "instructions": "Ask for a number N. Use a while loop to count down from N to 1, then print 'Blast off!'",
           "starterCode": "n = int(input(\"Enter a number: \"))\nwhile n > 0:\n    print(n)\n    n = \nprint(\"Blast off!\")",
           "solution": "n = int(input(\"Enter a number: \"))\nwhile n > 0:\n    print(n)\n    n -= 1\nprint(\"Blast off!\")",
-          "hint": "Decrease n by 1 inside the loop using n -= 1. The loop stops when n reaches 0."
+          "hint": "Decrease n by 1 inside the loop using n -= 1. The loop stops when n reaches 0.",
+          "expectedOutput": "42\n41\n40\n39\n38\n37\n36\n35\n34\n33\n32\n31\n30\n29\n28\n27\n26\n25\n24\n23\n22\n21\n20\n19\n18\n17\n16\n15\n14\n13\n12\n11\n10\n9\n8\n7\n6\n5\n4\n3\n2\n1\nBlast off!"
         },
         {
           "type": "reflection",

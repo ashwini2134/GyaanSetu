@@ -57,7 +57,8 @@
           "instructions": "Create a string with your name. Print first char, last char, length, and first 3 chars.",
           "starterCode": "name = \"Lakshanya\"\nprint(f\"First: {name[0]}\")\nprint(f\"Last: {name[]}\")\nprint(f\"Length: {len()}\")\nprint(f\"First 3: {name[:]}\")",
           "solution": "name = \"Lakshanya\"\nprint(f\"First: {name[0]}\")\nprint(f\"Last: {name[-1]}\")\nprint(f\"Length: {len(name)}\")\nprint(f\"First 3: {name[:3]}\")",
-          "hint": "Use index 0 for first, -1 for last, len() for length, [:3] for slice."
+          "hint": "Use index 0 for first, -1 for last, len() for length, [:3] for slice.",
+          "expectedOutput": "First: L\nLast: a\nLength: 9\nFirst 3: Lak"
         },
         {
           "type": "visual_aid",
@@ -147,7 +148,8 @@
           "instructions": "Ask for first name and last name. Print the initials in uppercase with a dot between them.",
           "starterCode": "first = input(\"First name: \")\nlast = input(\"Last name: \")\ninitial = first[0].upper() + \".\" + last[0].upper()\nprint(initial)",
           "solution": "first = input(\"First name: \")\nlast = input(\"Last name: \")\ninitial = first[0].upper() + \".\" + last[0].upper()\nprint(initial)",
-          "hint": "Use [0] to get the first character of each name. Use .upper() to make them uppercase."
+          "hint": "Use [0] to get the first character of each name. Use .upper() to make them uppercase.",
+          "expectedOutput": "T.T"
         },
         {
           "type": "visual_aid",

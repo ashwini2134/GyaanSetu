@@ -64,7 +64,8 @@
           "instructions": "Create a dictionary with keys: name, age, city, hobby. Print each value.",
           "starterCode": "profile = {\n    \"name\": \"\",\n    \"age\": ,\n    \"city\": \"\",\n    \"hobby\": \"\"\n}\nprint(f\"Name: {profile['name']}\")",
           "solution": "profile = {\"name\": \"Lakshanya\", \"age\": 20, \"city\": \"Chennai\", \"hobby\": \"coding\"}\nprint(f\"Name: {profile['name']}\")\nprint(f\"Age: {profile['age']}\")\nprint(f\"City: {profile['city']}\")\nprint(f\"Hobby: {profile['hobby']}\")",
-          "hint": "Use profile[\"key_name\"] to access each value."
+          "hint": "Use profile[\"key_name\"] to access each value.",
+          "expectedOutput": "Name: Lakshanya\nAge: 20\nCity: Chennai\nHobby: coding"
         },
         {
           "type": "visual_aid",
@@ -129,7 +130,8 @@
           "instructions": "Create a student dict with name and 3 subject marks. Calculate average and add as new key. Print all items.",
           "starterCode": "student = {\"name\": \"Lakshanya\", \"math\": 85, \"science\": 92, \"english\": 78}\nstudent[\"average\"] = \nfor key, value in student.items():\n    print(f\"{key}: {value}\")",
           "solution": "student = {\"name\": \"Lakshanya\", \"math\": 85, \"science\": 92, \"english\": 78}\nstudent[\"average\"] = (student[\"math\"] + student[\"science\"] + student[\"english\"]) // 3\nfor key, value in student.items():\n    print(f\"{key}: {value}\")",
-          "hint": "Calculate (math + science + english) // 3. Add with student['average'] = avg."
+          "hint": "Calculate (math + science + english) // 3. Add with student['average'] = avg.",
+          "expectedOutput": "name: Lakshanya\nmath: 85\nscience: 92\nenglish: 78\naverage: 85"
         },
         {
           "type": "visual_aid",

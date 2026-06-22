@@ -74,7 +74,8 @@
           "instructions": "Write a program that prints your name on the first line and your college name on the second line.",
           "starterCode": "# Print your name\nprint(\"\")\n# Print your college",
           "solution": "print(\"Lakshanya\")\nprint(\"SRM University\")",
-          "hint": "Use print(\"YourName\") for the first line and print(\"YourCollege\") for the second. Put quotes around text."
+          "hint": "Use print(\"YourName\") for the first line and print(\"YourCollege\") for the second. Put quotes around text.",
+          "expectedOutput": "Lakshanya\nSRM University"
         }
       ]
     },
@@ -225,7 +226,8 @@
           "instructions": "Write a program that prints your name and your college on separate lines, then prints 'I am learning Python!' on a third line.",
           "starterCode": "# My first Python program\nprint(\"\")",
           "solution": "print(\"Lakshanya\")\nprint(\"SRM University\")\nprint(\"I am learning Python!\")",
-          "hint": "Use print() three times, once for each line. Each print() outputs text on a new line."
+          "hint": "Use print() three times, once for each line. Each print() outputs text on a new line.",
+          "expectedOutput": "Lakshanya\nSRM University\nI am learning Python!"
         }
       ]
     }

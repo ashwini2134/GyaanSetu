@@ -63,7 +63,8 @@
           "instructions": "Create a list with 3 items. Use a for loop to print each with a number.",
           "starterCode": "groceries = [\"milk\", \"bread\", \"eggs\"]\nfor i in range(len(groceries)):",
           "solution": "groceries = [\"milk\", \"bread\", \"eggs\"]\nfor i in range(len(groceries)):\n    print(f\"{i+1}. {groceries[i]}\")",
-          "hint": "Use range(len(groceries)) to get indices. Add 1 to display starting from 1."
+          "hint": "Use range(len(groceries)) to get indices. Add 1 to display starting from 1.",
+          "expectedOutput": "1. milk\n2. bread\n3. eggs"
         }
       ]
     },
@@ -96,7 +97,8 @@
           "instructions": "Create a list of 5 numbers. Print the first, last, and middle elements.",
           "starterCode": "nums = [10, 20, 30, 40, 50]\nprint(f\"First: {nums[0]}\")\nprint(f\"Last: {nums[]}\")\nprint(f\"Middle: {nums[]}\")",
           "solution": "nums = [10, 20, 30, 40, 50]\nprint(f\"First: {nums[0]}\")\nprint(f\"Last: {nums[-1]}\")\nprint(f\"Middle: {nums[2]}\")",
-          "hint": "Use index 0 for first, -1 for last, and len(nums)//2 for middle."
+          "hint": "Use index 0 for first, -1 for last, and len(nums)//2 for middle.",
+          "expectedOutput": "First: 10\nLast: 50\nMiddle: 30"
         },
         {
           "type": "reflection",
@@ -134,7 +136,8 @@
           "instructions": "Start with [78, 92, 85, 63, 88]. Add 95, remove the lowest, sort, and print the average.",
           "starterCode": "marks = [78, 92, 85, 63, 88]\nmarks.append()\nmarks.remove()\nmarks.sort()\nprint(f\"Marks: {marks}\")\nprint(f\"Average: {sum(marks)//len(marks)}\")",
           "solution": "marks = [78, 92, 85, 63, 88]\nmarks.append(95)\nmarks.remove(min(marks))\nmarks.sort()\nprint(f\"Marks: {marks}\")\nprint(f\"Average: {sum(marks)//len(marks)}\")",
-          "hint": "Use append() to add, min(marks) with remove() for lowest, sort() to sort."
+          "hint": "Use append() to add, min(marks) with remove() for lowest, sort() to sort.",
+          "expectedOutput": "Marks: [78, 85, 88, 92, 95]\nAverage: 87"
         },
         {
           "type": "reflection",

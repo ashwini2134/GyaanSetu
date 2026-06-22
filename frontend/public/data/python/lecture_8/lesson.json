@@ -75,7 +75,8 @@
           "instructions": "Create a tuple with your name, age, and city. Unpack it and print each value.",
           "starterCode": "my_info = (\"\", , \"\")\nname, age, city = my_info",
           "solution": "my_info = (\"Lakshanya\", 20, \"Chennai\")\nname, age, city = my_info\nprint(f\"Name: {name}\")\nprint(f\"Age: {age}\")\nprint(f\"City: {city}\")",
-          "hint": "Unpack by putting variable names separated by commas on the left."
+          "hint": "Unpack by putting variable names separated by commas on the left.",
+          "expectedOutput": "Name: {name}\nAge: {age}\nCity: {city}"
         }
       ]
     },
@@ -139,7 +140,8 @@
           "instructions": "Remove duplicates from [3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5] using a set, then sort.",
           "starterCode": "numbers = [3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5]\nunique = sorted()\nprint(f\"Unique sorted: {unique}\")",
           "solution": "numbers = [3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5]\nunique = sorted(set(numbers))\nprint(f\"Unique sorted: {unique}\")",
-          "hint": "Use set(numbers) to remove duplicates, then sorted() to sort."
+          "hint": "Use set(numbers) to remove duplicates, then sorted() to sort.",
+          "expectedOutput": "Unique sorted: [1, 2, 3, 4, 5, 6, 9]"
         }
       ]
     }

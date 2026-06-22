@@ -61,7 +61,8 @@
           "instructions": "Ask for age. If 18+, print \"You are eligible to vote!\"",
           "starterCode": "age = int(input(\"Enter your age: \"))\nif age >= 18:",
           "solution": "age = int(input(\"Enter your age: \"))\nif age >= 18:\n    print(\"You are eligible to vote!\")",
-          "hint": "Use if age >= 18: followed by an indented print() statement."
+          "hint": "Use if age >= 18: followed by an indented print() statement.",
+          "expectedOutput": "You are eligible to vote!"
         }
       ]
     },
@@ -115,7 +116,8 @@
           "instructions": "Ask for marks. Print grade: 90+ = A, 80-89 = B, 70-79 = C, 60-69 = D, below 60 = F.",
           "starterCode": "marks = int(input(\"Enter marks: \"))\nif marks >= 90:\n    \nelif \nelif \nelif \nelse:",
           "solution": "marks = int(input(\"Enter marks: \"))\nif marks >= 90:\n    print(\"Grade: A\")\nelif marks >= 80:\n    print(\"Grade: B\")\nelif marks >= 70:\n    print(\"Grade: C\")\nelif marks >= 60:\n    print(\"Grade: D\")\nelse:\n    print(\"Grade: F\")",
-          "hint": "Check the highest grade first (>= 90), then work down."
+          "hint": "Check the highest grade first (>= 90), then work down.",
+          "expectedOutput": "Grade: F"
         },
         {
           "type": "reflection",

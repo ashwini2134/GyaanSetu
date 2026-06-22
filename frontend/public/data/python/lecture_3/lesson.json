@@ -69,7 +69,8 @@
           "instructions": "Ask the user for marks obtained and total marks. Calculate percentage = (obtained / total) * 100. Print with 2 decimal places.",
           "starterCode": "obtained = int(input(\"Marks obtained: \"))\ntotal = int(input(\"Total marks: \"))\n\npercentage = \nprint(f\"Percentage: {percentage:.2f}%\")",
           "solution": "obtained = int(input(\"Marks obtained: \"))\ntotal = int(input(\"Total marks: \"))\npercentage = (obtained / total) * 100\nprint(f\"Percentage: {percentage:.2f}%\")",
-          "hint": "Use (obtained / total) * 100. The :.2f in f-string rounds to 2 decimal places."
+          "hint": "Use (obtained / total) * 100. The :.2f in f-string rounds to 2 decimal places.",
+          "expectedOutput": "Percentage: 100.00%"
         }
       ]
     },
@@ -107,7 +108,8 @@
           "instructions": "Ask the user for their age. Check if they are eligible to vote (age >= 18). Print the result.",
           "starterCode": "age = int(input(\"Enter your age: \"))\neligible = \nprint(f\"Eligible to vote: {eligible}\")",
           "solution": "age = int(input(\"Enter your age: \"))\neligible = age >= 18\nprint(f\"Eligible to vote: {eligible}\")",
-          "hint": "Use age >= 18 as the comparison. This gives a boolean True or False."
+          "hint": "Use age >= 18 as the comparison. This gives a boolean True or False.",
+          "expectedOutput": "Eligible to vote: true"
         }
       ]
     },
@@ -165,7 +167,8 @@
           "instructions": "Ask for marks and family income. Qualifies if marks >= 85 AND income < 50000.",
           "starterCode": "marks = int(input(\"Marks: \"))\nincome = int(input(\"Income: \"))\nqualifies = \nprint(f\"Qualifies: {qualifies}\")",
           "solution": "marks = int(input(\"Marks: \"))\nincome = int(input(\"Income: \"))\nqualifies = marks >= 85 and income < 50000\nprint(f\"Qualifies: {qualifies}\")",
-          "hint": "Use marks >= 85 and income < 50000 with the and operator."
+          "hint": "Use marks >= 85 and income < 50000 with the and operator.",
+          "expectedOutput": "Qualifies: true"
         }
       ]
     }

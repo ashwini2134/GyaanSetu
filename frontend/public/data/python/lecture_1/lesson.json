@@ -75,7 +75,8 @@
           "instructions": "Create three variables: your name, your age, and your college. Print each on a separate line.",
           "starterCode": "# Store your information\nname = \"\"\nage = \ncollege = \"\"\n\n# Print each variable",
           "solution": "name = \"Lakshanya\"\nage = 20\ncollege = \"SRM University\"\n\nprint(name)\nprint(age)\nprint(college)",
-          "hint": "Text values need quotes (\" \"), numbers don't. Use = to assign."
+          "hint": "Text values need quotes (\" \"), numbers don't. Use = to assign.",
+          "expectedOutput": "Lakshanya\n20\nSRM University"
         }
       ]
     },
@@ -143,7 +144,8 @@
           "instructions": "Store your current age in a variable. Add 5 to it. Print the result using an f-string.",
           "starterCode": "# Store current age\nage = \n\n# Calculate age after 5 years\nfuture_age = \n\n# Print the result",
           "solution": "age = 20\nfuture_age = age + 5\nprint(f\"After 5 years, I will be {future_age} years old.\")",
-          "hint": "Use + to add numbers. Use f-strings with {} to insert variables into text."
+          "hint": "Use + to add numbers. Use f-strings with {} to insert variables into text.",
+          "expectedOutput": "After 5 years, I will be 25 years old."
         }
       ]
     },
@@ -176,7 +178,8 @@
           "instructions": "Create variables for name, age, and college. Print them in this format: \"Name: [name], Age: [age], College: [college]\"",
           "starterCode": "name = \"\"\nage = \ncollege = \"\"\n\n# Print profile card",
           "solution": "name = \"Lakshanya\"\nage = 20\ncollege = \"SRM University\"\n\nprint(\"Name: \" + name + \", Age: \" + str(age) + \", College: \" + college)",
-          "hint": "Use + to join strings. Convert numbers to strings with str() before concatenating."
+          "hint": "Use + to join strings. Convert numbers to strings with str() before concatenating.",
+          "expectedOutput": "Name: Lakshanya, Age: 20, College: SRM University"
         },
         {
           "type": "reflection",
