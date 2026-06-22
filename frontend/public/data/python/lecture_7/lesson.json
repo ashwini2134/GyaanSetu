@@ -33,7 +33,6 @@
           "analogy": {
             "title": "Shopping List",
             "description": "Items in order. Add, remove, or access by position.",
-            "emoji": "🛒",
             "image": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&q=80"
           },
           "visualization": {
@@ -148,23 +147,18 @@
   "summary": {
     "keyTakeaways": [
       {
-        "emoji": "",
         "text": "Lists are ordered collections in square brackets []"
       },
       {
-        "emoji": "",
         "text": "Index starts at 0; negative indices count from end"
       },
       {
-        "emoji": "",
         "text": "Slicing [start:stop:step] extracts portions"
       },
       {
-        "emoji": "",
         "text": "append() adds items, remove() deletes items"
       },
       {
-        "emoji": "",
         "text": "sort() orders lists, len() counts items"
       }
     ],

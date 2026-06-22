@@ -29,8 +29,7 @@
           "analogy": {
             "title": "Think of Logic as a Detective",
             "description": "Use facts and rules to deduce conclusions",
-            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "image": "https://images.unsplash.com/photo-1589578228447-e1a4e481c6c8?w=800&q=80"
           },
           "visualization": {
             "type": "flow",
@@ -79,8 +78,7 @@
           "analogy": {
             "title": "Think of Inference as a Puzzle Solver",
             "description": "Apply rules to known facts to derive new facts",
-            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "image": "https://images.unsplash.com/photo-1611996575749-79a3a250f5f0?w=800&q=80"
           },
           "visualization": {
             "type": "flow",
@@ -129,8 +127,7 @@
           "analogy": {
             "title": "Think of Knowledge as a Family Tree",
             "description": "Organized facts connected by relationships",
-            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "image": "https://images.unsplash.com/photo-1556228453-efd6c1ff04f4?w=800&q=80"
           },
           "visualization": {
             "type": "categories",
@@ -169,27 +166,21 @@
   "summary": {
     "keyTakeaways": [
       {
-        "emoji": "",
         "text": "Logic uses True/False statements called propositions"
       },
       {
-        "emoji": "",
         "text": "AND needs both sides True; OR needs at least one True; NOT reverses"
       },
       {
-        "emoji": "",
         "text": "IF-THEN rules connect facts to conclusions"
       },
       {
-        "emoji": "",
         "text": "A Knowledge Base stores all facts and rules AI uses"
       },
       {
-        "emoji": "",
         "text": "Inference derives new facts from existing ones — like solving a puzzle"
       },
       {
-        "emoji": "",
         "text": "Real uses: medical diagnosis, chatbots, Google Knowledge Panel"
       }
     ],

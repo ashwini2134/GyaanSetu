@@ -29,8 +29,7 @@
           "analogy": {
             "title": "Think of Tokenization as Slicing a Pizza",
             "description": "Split text into smaller pieces for processing",
-            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "image": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80"
           },
           "visualization": {
             "type": "flow",
@@ -80,8 +79,7 @@
           "analogy": {
             "title": "Think of Word Embeddings as a Map of Meanings",
             "description": "Similar words are close together in vector space",
-            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "image": "https://images.unsplash.com/photo-1589519160732-57fc6ea83bc8?w=800&q=80"
           },
           "visualization": {
             "type": "categories",
@@ -132,8 +130,7 @@
           "analogy": {
             "title": "Think of an LLM as a Very Well-Read Librarian",
             "description": "Predicts the next word based on billions of examples",
-            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "image": "https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=800&q=80"
           },
           "visualization": {
             "type": "flow",
@@ -171,27 +168,21 @@
   "summary": {
     "keyTakeaways": [
       {
-        "emoji": "",
         "text": "NLP lets AI understand and generate human language"
       },
       {
-        "emoji": "",
         "text": "Tokenization splits text into pieces AI can process"
       },
       {
-        "emoji": "",
         "text": "Bag of Words counts word frequency to represent text"
       },
       {
-        "emoji": "",
         "text": "Word embeddings place words in number space — similar words are close together"
       },
       {
-        "emoji": "",
         "text": "LLMs are trained on massive text and predict the next word"
       },
       {
-        "emoji": "",
         "text": "Transformers process all words at once — powering GPT, Gemini, Claude"
       }
     ],

@@ -71,7 +71,6 @@
           "analogy": {
             "title": "Receptionist",
             "description": "Receptionist asks a question, waits for your answer, then tells the program",
-            "emoji": "🧑‍💼",
             "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&q=80"
           },
           "visualization": {
@@ -127,7 +126,6 @@
           "analogy": {
             "title": "Fill-In-The-Blank",
             "description": "Write the sentence with blanks { }, then fill them with variable values",
-            "emoji": "📝",
             "image": "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&q=80"
           },
           "visualization": {
@@ -167,27 +165,21 @@
   "summary": {
     "keyTakeaways": [
       {
-        "emoji": "",
         "text": "print() can take multiple items, sep changes separator, end changes line ending"
       },
       {
-        "emoji": "⌨",
         "text": "input() gets text from the user, always returns a string"
       },
       {
-        "emoji": "",
         "text": "Use int(input()) to get numbers from user input"
       },
       {
-        "emoji": "",
         "text": "f-strings embed variables with {} and are cleaner than concatenation"
       },
       {
-        "emoji": "",
         "text": "int() fails with ValueError if the input is not a valid number"
       },
       {
-        "emoji": "",
         "text": "Combine input, conversion, and f-strings for interactive programs"
       }
     ],

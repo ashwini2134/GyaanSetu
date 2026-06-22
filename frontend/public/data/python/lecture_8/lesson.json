@@ -33,7 +33,6 @@
           "analogy": {
             "title": "Sealed Envelope",
             "description": "Once sealed, contents cannot change. Safe and tamper-proof.",
-            "emoji": "✉️",
             "image": "https://images.unsplash.com/photo-1649019489428-70f505daacd6?w=800&q=80"
           },
           "visualization": {
@@ -100,7 +99,6 @@
           "analogy": {
             "title": "Bag Of Unique Items",
             "description": "Every marble appears only once. No duplicates allowed.",
-            "emoji": "🎒",
             "image": "https://images.unsplash.com/photo-1544457070-4cd773b4d71e?w=800&q=80"
           },
           "visualization": {
@@ -149,23 +147,18 @@
   "summary": {
     "keyTakeaways": [
       {
-        "emoji": "",
         "text": "Tuples are immutable ordered collections with ()"
       },
       {
-        "emoji": "",
         "text": "Tuple packing groups values; unpacking extracts them"
       },
       {
-        "emoji": "",
         "text": "Use tuples for swapping: a, b = b, a"
       },
       {
-        "emoji": "",
         "text": "Sets store unique items only"
       },
       {
-        "emoji": "",
         "text": "Set operations: | union, & intersection, - difference"
       }
     ],

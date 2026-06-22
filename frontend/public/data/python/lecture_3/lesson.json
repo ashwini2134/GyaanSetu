@@ -46,7 +46,6 @@
           "analogy": {
             "title": "The Order Rulebook",
             "description": "PEMDAS tells Python which math operation to perform first",
-            "emoji": "📏",
             "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&q=80"
           },
           "visualization": {
@@ -138,7 +137,6 @@
           "analogy": {
             "title": "Gatekeepers",
             "description": "and = BOTH must pass. or = AT LEAST ONE must pass.",
-            "emoji": "🚧",
             "image": "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80"
           },
           "visualization": {
@@ -175,23 +173,18 @@
   "summary": {
     "keyTakeaways": [
       {
-        "emoji": "",
         "text": "Arithmetic operators: +, -, *, /, //, %, **"
       },
       {
-        "emoji": "",
         "text": "PEMDAS rules apply — parentheses first, then exponents, etc."
       },
       {
-        "emoji": "",
         "text": "Comparison operators: ==, !=, <, >, <=, >="
       },
       {
-        "emoji": "",
         "text": "Logical operators: and, or, not combine conditions"
       },
       {
-        "emoji": "",
         "text": "= is assignment, == is comparison — don't mix them up"
       }
     ],

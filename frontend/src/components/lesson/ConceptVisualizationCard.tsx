@@ -1,4 +1,19 @@
+import { useMemo } from 'react';
 import type { ConceptVisualizationBlock } from '../../types/lesson';
+
+const FALLBACK_IMAGES: Array<[RegExp, string]> = [
+  [/storage box|container|labeled box|bag|variable/i, 'https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=800&q=80'],
+  [/recipe|kitchen|cook|baking|function/i, 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=800&q=80'],
+  [/flow|diagram|pipeline/i, 'https://images.unsplash.com/photo-1513133114112-6bee4b3e14f6?w=800&q=80'],
+  [/data type|container|different type/i, 'https://images.unsplash.com/photo-1544457070-4cd773b4d71e?w=800&q=80'],
+];
+
+function fallbackImageForTitle(title: string): string | null {
+  for (const [pattern, url] of FALLBACK_IMAGES) {
+    if (pattern.test(title.toLowerCase())) return url;
+  }
+  return null;
+}
 
 const ACCENT = {
   blue:   { bg: 'from-blue-600/15 to-blue-900/10', border: 'border-blue-500/25', label: 'text-blue-300', shadow: 'shadow-[0_8px_32px_rgba(59,130,246,0.35)]', gradFrom: 'from-blue-500', gradTo: 'to-blue-700', border2: 'border-blue-400/30' },
@@ -91,9 +106,7 @@ export default function ConceptVisualizationCard({ block }: { block: ConceptVisu
 
   const panelVarName = visualData?.varName as string | undefined;
   const panelVarValue = visualData?.varValue as string | undefined;
-  const panelEmoji = (panel as Record<string, unknown>).leftPanel
-    ? ((panel as Record<string, unknown>).leftPanel as Record<string, unknown>)?.emoji as string | undefined
-    : undefined;
+  const fallbackImg = useMemo(() => fallbackImageForTitle(analogyTitle), [analogyTitle]);
 
   const renderCenter = () => {
     if (visualType === 'storage_box') {
@@ -127,10 +140,17 @@ export default function ConceptVisualizationCard({ block }: { block: ConceptVisu
                 <img src={analogyImage} alt={analogyTitle} className="absolute inset-0 w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent" />
               </>
+            ) : fallbackImg ? (
+              <>
+                <img src={fallbackImg} alt={analogyTitle} className="absolute inset-0 w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent" />
+              </>
             ) : (
               <div className="absolute inset-0 bg-gradient-to-br from-slate-800/50 to-slate-900/50 flex items-center justify-center">
                 <div className="text-center p-4">
-                  <span className="text-3xl block mb-2">{panelEmoji ?? '💡'}</span>
+                  <svg className="w-8 h-8 text-slate-600 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+                  </svg>
                 </div>
               </div>
             )}

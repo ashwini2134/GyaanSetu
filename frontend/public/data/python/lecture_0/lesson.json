@@ -33,7 +33,6 @@
           "analogy": {
             "title": "Recipe",
             "description": "Ingredients + Steps → Dish",
-            "emoji": "📖",
             "image": "https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=800&q=80"
           },
           "visualization": {
@@ -118,7 +117,6 @@
           "analogy": {
             "title": "Swiss Army Knife",
             "description": "One tool, many uses",
-            "emoji": "🔧",
             "image": "https://images.unsplash.com/photo-1615127717889-8945dba1f05a?w=800&q=80"
           },
           "visualization": {
@@ -161,7 +159,6 @@
           "analogy": {
             "title": "Setting Up Your Kitchen",
             "description": "Gather tools before you cook",
-            "emoji": "🔨",
             "image": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80"
           },
           "visualization": {
@@ -236,27 +233,21 @@
   "summary": {
     "keyTakeaways": [
       {
-        "emoji": "",
         "text": "A program is a sequence of instructions for a computer"
       },
       {
-        "emoji": "",
         "text": "Python is beginner-friendly, readable, and used worldwide"
       },
       {
-        "emoji": "",
         "text": "print() displays text on the screen"
       },
       {
-        "emoji": "",
         "text": "Python is interpreted — runs line by line, no compile step"
       },
       {
-        "emoji": "",
         "text": ".py files store Python programs; run them with python filename.py"
       },
       {
-        "emoji": "",
         "text": "The Python shell lets you test code interactively"
       }
     ],

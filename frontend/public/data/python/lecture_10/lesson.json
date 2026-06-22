@@ -33,7 +33,6 @@
           "analogy": {
             "title": "Vending Machine",
             "description": "Insert coins (input) → Press button (call) → Get item (output)",
-            "emoji": "🏪",
             "image": "https://images.unsplash.com/photo-1618506557292-ec1862b3c506?w=800&q=80"
           },
           "visualization": {
@@ -113,23 +112,18 @@
   "summary": {
     "keyTakeaways": [
       {
-        "emoji": "",
         "text": "Functions let you write code once and reuse it"
       },
       {
-        "emoji": "",
         "text": "Use def to define, return to send back a value"
       },
       {
-        "emoji": "",
         "text": "Parameters are inputs; return values are outputs"
       },
       {
-        "emoji": "",
         "text": "Default parameters make functions flexible"
       },
       {
-        "emoji": "",
         "text": "Break complex programs into small, reusable functions"
       }
     ],

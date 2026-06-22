@@ -27,7 +27,6 @@
           "analogy": {
             "title": "Chain of Characters",
             "description": "Each character has a position. You can access individual links.",
-            "emoji": "⛓️",
             "image": "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=800&q=80"
           },
           "visualization": {
@@ -107,7 +106,6 @@
           "analogy": {
             "title": "Editing Tools",
             "description": "Each method transforms the string in a specific way",
-            "emoji": "🛠️",
             "image": "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=800&q=80"
           },
           "visualization": {
@@ -177,23 +175,18 @@
   "summary": {
     "keyTakeaways": [
       {
-        "emoji": "",
         "text": "Strings are sequences — index, slice, and measure with len()"
       },
       {
-        "emoji": "",
         "text": "upper(), lower(), strip() change and clean strings"
       },
       {
-        "emoji": "",
         "text": "find(), startswith(), endswith(), count() search strings"
       },
       {
-        "emoji": "",
         "text": "split() breaks strings into lists; join() combines them"
       },
       {
-        "emoji": "",
         "text": "String reversal with [::-1] is useful for palindrome checks"
       }
     ],

@@ -83,23 +83,18 @@
   "summary": {
     "keyTakeaways": [
       {
-        "emoji": "",
         "text": "You've learned all Python fundamentals — now apply them!"
       },
       {
-        "emoji": "",
         "text": "Plan your project before coding"
       },
       {
-        "emoji": "",
         "text": "Use functions to organize code into clear sections"
       },
       {
-        "emoji": "",
         "text": "Bonus: add file saving/loading for data persistence"
       },
       {
-        "emoji": "",
         "text": "Build something YOU want to use — that's the best motivation"
       }
     ],

@@ -56,7 +56,6 @@
           "analogy": {
             "title": "A Labeled Storage Box",
             "description": "You put something inside and give it a name so you can find it later.",
-            "emoji": "💡",
             "image": "https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=800&q=80"
           },
           "visualization": {
@@ -125,7 +124,6 @@
           "analogy": {
             "title": "A Recipe Book",
             "description": "A recipe is a set of steps you write once and follow many times — just like a function.",
-            "emoji": "💡",
             "image": "https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=800&q=80"
           },
           "visualization": {
@@ -217,27 +215,21 @@
   "summary": {
     "keyTakeaways": [
       {
-        "emoji": "",
         "text": "Variables store values using the = operator"
       },
       {
-        "emoji": "",
         "text": "Use = for assignment (not == which checks equality)"
       },
       {
-        "emoji": "",
         "text": "Functions package code for reuse with def"
       },
       {
-        "emoji": "",
         "text": "Functions can be called as many times as needed"
       },
       {
-        "emoji": "",
         "text": "f-strings embed variable values in text with {}"
       },
       {
-        "emoji": "",
         "text": "Variables must be defined before you use them"
       }
     ],

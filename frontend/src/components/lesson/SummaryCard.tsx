@@ -22,7 +22,9 @@ export default function SummaryCard({ summary, lectureTitle, nextLectureTitle, o
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {summary.keyTakeaways.map((item, i) => (
             <div key={i} className="flex items-start gap-2.5 p-3 rounded-xl bg-slate-800/30 border border-slate-700/20">
-              <span className="text-lg flex-shrink-0">{item.emoji}</span>
+              <svg className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
               <p className="text-sm text-slate-200 leading-snug">{item.text}</p>
             </div>
           ))}

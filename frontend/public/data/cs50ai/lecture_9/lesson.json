@@ -31,8 +31,7 @@
           "analogy": {
             "title": "Think of the AI Journey as Learning to Ride a Bike",
             "description": "Start simple, practice, then handle complex tasks",
-            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "image": "https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=800&q=80"
           },
           "visualization": {
             "type": "categories",
@@ -83,8 +82,7 @@
           "analogy": {
             "title": "Think of Project Planning as a Blueprint",
             "description": "Define the problem, gather data, choose a model",
-            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80"
           },
           "visualization": {
             "type": "flow",
@@ -136,8 +134,7 @@
           "analogy": {
             "title": "Think of Project Workflow as a Recipe",
             "description": "Follow a sequence of steps to build and deploy AI",
-            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "image": "https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=800&q=80"
           },
           "visualization": {
             "type": "flow",
@@ -175,27 +172,21 @@
   "summary": {
     "keyTakeaways": [
       {
-        "emoji": "",
         "text": "You have completed 8 weeks of AI concepts — Search, Logic, Probability, Optimization, ML, Neural Networks, NLP, Ethics"
       },
       {
-        "emoji": "",
         "text": "The final project applies your learning to a real AI-powered application"
       },
       {
-        "emoji": "",
         "text": "Every project must show which AI concept it uses"
       },
       {
-        "emoji": "",
         "text": "Define clear input and output for your project"
       },
       {
-        "emoji": "",
         "text": "Every project must include one ethical consideration"
       },
       {
-        "emoji": "",
         "text": "Reflection is as important as the code — think about what surprised you"
       }
     ],

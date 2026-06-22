@@ -33,7 +33,6 @@
           "analogy": {
             "title": "Traffic Light",
             "description": "Green → GO, Red → STOP. The condition decides which path to take.",
-            "emoji": "🚦",
             "image": "https://images.unsplash.com/photo-1557404763-69708cd8b9ce?w=800&q=80"
           },
           "visualization": {
@@ -129,23 +128,18 @@
   "summary": {
     "keyTakeaways": [
       {
-        "emoji": "",
         "text": "if runs code only when a condition is True"
       },
       {
-        "emoji": "",
         "text": "if-else provides two paths: one for True, one for False"
       },
       {
-        "emoji": "",
         "text": "elif chains multiple conditions in sequence"
       },
       {
-        "emoji": "",
         "text": "Truthy values: non-zero numbers, non-empty strings"
       },
       {
-        "emoji": "",
         "text": "Falsy values: 0, None, empty strings, empty lists"
       }
     ],

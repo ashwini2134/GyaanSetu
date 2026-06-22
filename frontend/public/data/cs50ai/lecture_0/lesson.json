@@ -27,8 +27,7 @@
           "analogy": {
             "title": "Think of AI as a Very Fast, Tireless Assistant",
             "description": "Processes millions of examples instantly",
-            "image": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80",
-            "emoji": "💡"
+            "image": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80"
           },
           "visualization": {
             "type": "flow",
@@ -88,8 +87,7 @@
           "analogy": {
             "title": "Think of ML as Teaching a Dog Tricks",
             "description": "Show examples, reward correct predictions",
-            "image": "https://images.unsplash.com/photo-1504826260979-242151ee45b7?w=800&q=80",
-            "emoji": "💡"
+            "image": "https://images.unsplash.com/photo-1504826260979-242151ee45b7?w=800&q=80"
           },
           "visualization": {
             "type": "repetition",
@@ -154,8 +152,7 @@
           "analogy": {
             "title": "Think of AI as a GPS Navigator",
             "description": "Uses data and heuristics to find the best route",
-            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "image": "https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=80"
           },
           "visualization": {
             "type": "flow",
@@ -201,27 +198,21 @@
   "summary": {
     "keyTakeaways": [
       {
-        "emoji": "",
         "text": "AI = computers doing tasks that need human thinking"
       },
       {
-        "emoji": "",
         "text": "ML is a subset of AI that learns from data"
       },
       {
-        "emoji": "",
         "text": "Deep Learning uses neural networks inspired by the brain"
       },
       {
-        "emoji": "",
         "text": "All AI today is Narrow AI — it does one specific task"
       },
       {
-        "emoji": "",
         "text": "AI is already in your daily life: maps, music, email filters"
       },
       {
-        "emoji": "",
         "text": "The AI path covers: Search, Knowledge, Uncertainty, Optimization, Learning, Neural Nets, Language"
       }
     ],

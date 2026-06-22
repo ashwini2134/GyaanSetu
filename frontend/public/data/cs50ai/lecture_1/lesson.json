@@ -27,8 +27,7 @@
           "analogy": {
             "title": "Think of Navigating a Maze",
             "description": "Explore paths until you find the exit",
-            "image": "https://images.unsplash.com/photo-1590278458425-6aa3912a48a5?w=800&q=80",
-            "emoji": "💡"
+            "image": "https://images.unsplash.com/photo-1590278458425-6aa3912a48a5?w=800&q=80"
           },
           "visualization": {
             "type": "decision",
@@ -87,8 +86,7 @@
           "analogy": {
             "title": "BFS = Checking Every Shelf on Floor 1 First",
             "description": "Explore all paths level by level",
-            "image": "https://images.unsplash.com/photo-1603058817990-2b9a9abbce86?w=800&q=80",
-            "emoji": "💡"
+            "image": "https://images.unsplash.com/photo-1603058817990-2b9a9abbce86?w=800&q=80"
           },
           "visualization": {
             "type": "flow",
@@ -137,8 +135,7 @@
           "analogy": {
             "title": "A* = GPS That Considers Distance Traveled AND Estimated Distance",
             "description": "Chooses the most promising path using heuristics",
-            "image": "https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=80",
-            "emoji": "💡"
+            "image": "https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=80"
           },
           "visualization": {
             "type": "flow",
@@ -177,27 +174,21 @@
   "summary": {
     "keyTakeaways": [
       {
-        "emoji": "",
         "text": "A search problem has a start state, actions, and a goal state"
       },
       {
-        "emoji": "",
         "text": "BFS finds the shortest path by exploring level by level"
       },
       {
-        "emoji": "",
         "text": "DFS goes deep first — uses less memory but may not find shortest path"
       },
       {
-        "emoji": "",
         "text": "Greedy search uses a heuristic to pick the best next step"
       },
       {
-        "emoji": "",
         "text": "A combines cost so far + estimated cost = most efficient search"
       },
       {
-        "emoji": "",
         "text": "Search is used in maps, games, puzzles, and route planning"
       }
     ],

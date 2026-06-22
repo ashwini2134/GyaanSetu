@@ -33,8 +33,7 @@
           "analogy": {
             "title": "Labeled Storage Box",
             "description": "Each box has a label and holds one item",
-            "emoji": "🏷️",
-            "image": "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=80"
+            "image": "https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=800&q=80"
           },
           "visualization": {
             "type": "categories",
@@ -102,7 +101,6 @@
           "analogy": {
             "title": "Different Containers",
             "description": "Each container type holds specific kinds of items",
-            "emoji": "📦",
             "image": "https://images.unsplash.com/photo-1544457070-4cd773b4d71e?w=800&q=80"
           },
           "visualization": {
@@ -191,27 +189,21 @@
   "summary": {
     "keyTakeaways": [
       {
-        "emoji": "",
         "text": "Variables store values using the = operator"
       },
       {
-        "emoji": "",
         "text": "int is for whole numbers, float is for decimals"
       },
       {
-        "emoji": "",
         "text": "str is for text, always in quotes"
       },
       {
-        "emoji": "",
         "text": "bool is for True/False values"
       },
       {
-        "emoji": "",
         "text": "type() tells you the type of any value"
       },
       {
-        "emoji": "",
         "text": "Use int(), str(), float() to convert between types"
       }
     ],

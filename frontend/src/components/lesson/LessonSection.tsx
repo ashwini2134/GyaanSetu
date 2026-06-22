@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react';
 import type { LessonSection, ContentBlock } from '../../types/lesson';
 import ConceptVisualizationCard from './ConceptVisualizationCard';
 import ThinkOfSection from './ThinkOfSection';
@@ -6,7 +7,6 @@ import InteractiveTryIt from './InteractiveTryIt';
 import ReflectionCard from './ReflectionCard';
 import PracticeCard from './PracticeCard';
 import { renderMarkdown } from '../../utils/renderContent';
-import * as LucideIcons from 'lucide-react';
 
 function TextBlock({ block }: { block: Extract<ContentBlock, { type: 'text' }> }) {
   return (
@@ -59,19 +59,40 @@ function ExplanationBlock({ block }: { block: Extract<ContentBlock, { type: 'exp
   );
 }
 
+const ANALOGY_IMAGES: Array<[RegExp, string]> = [
+  [/jar|labeled|storage|container|box|variable/i, 'https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=800&q=80'],
+  [/recipe|kitchen|cook|baking/i, 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=800&q=80'],
+  [/chain|string|beads|character/i, 'https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=800&q=80'],
+  [/tool|multi.?tool|swiss/i, 'https://images.unsplash.com/photo-1615127717889-8945dba1f05a?w=800&q=80'],
+];
+
+function analogyImage(title: string): string | null {
+  for (const [pattern, url] of ANALOGY_IMAGES) {
+    if (pattern.test(title.toLowerCase())) return url;
+  }
+  return null;
+}
+
 function AnalogyBlock({ block }: { block: Extract<ContentBlock, { type: 'analogy' }> }) {
-  // Try to find the icon from LucideIcons, fallback to Zap if not found
-  const IconComponent = (LucideIcons as any)[block.icon ?? ''] || LucideIcons.Zap;
-  
+  const imgSrc = useMemo(() => analogyImage(block.title), [block.title]);
+  const [imgError, setImgError] = useState(false);
+  const showImg = !!imgSrc && !imgError;
+
   return (
-    <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-600/8 to-slate-800/40 p-5">
-      <div className="flex items-start gap-3">
-        {block.icon && (
-          <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-xl flex-shrink-0">
-            <IconComponent className="w-5 h-5 text-amber-400" />
+    <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-600/8 to-slate-800/40 overflow-hidden">
+      <div className="flex items-stretch">
+        {showImg && (
+          <div className="relative w-28 min-h-[100px] flex-shrink-0 overflow-hidden">
+            <img
+              src={imgSrc!}
+              alt={block.title}
+              className="absolute inset-0 w-full h-full object-cover"
+              onError={() => setImgError(true)}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-900/60 to-transparent" />
           </div>
         )}
-        <div>
+        <div className="p-5 flex-1">
           <p className="text-xs font-semibold text-amber-300 uppercase tracking-wider mb-1">{block.title}</p>
           <p className="text-sm text-slate-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(block.text) }} />
         </div>

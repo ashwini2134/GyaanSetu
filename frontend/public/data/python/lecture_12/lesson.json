@@ -33,7 +33,6 @@
           "analogy": {
             "title": "Notebook",
             "description": "Open it, read/write pages, close it when done.",
-            "emoji": "📓",
             "image": "https://images.unsplash.com/photo-1517842645767-c639042777db?w=800&q=80"
           },
           "visualization": {
@@ -144,23 +143,18 @@
   "summary": {
     "keyTakeaways": [
       {
-        "emoji": "",
         "text": "Files persist data beyond program execution"
       },
       {
-        "emoji": "",
         "text": "Use open(\"file\", \"r\") to read, \"w\" to write, \"a\" to append"
       },
       {
-        "emoji": "",
         "text": "Always close files — use with open() for automatic closing"
       },
       {
-        "emoji": "",
         "text": "\"w\" mode overwrites existing files — use carefully!"
       },
       {
-        "emoji": "",
         "text": "Append mode (\"a\") adds to the end without deleting"
       }
     ],

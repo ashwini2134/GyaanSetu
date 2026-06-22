@@ -29,8 +29,7 @@
           "analogy": {
             "title": "Think of Probability as a Weather Forecast",
             "description": "Quantify uncertainty with numbers between 0 and 1",
-            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "image": "https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?w=800&q=80"
           },
           "visualization": {
             "type": "flow",
@@ -79,8 +78,7 @@
           "analogy": {
             "title": "Think of Bayes' Rule as Updating Your Belief",
             "description": "Update probabilities when new evidence arrives",
-            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80"
           },
           "visualization": {
             "type": "flow",
@@ -129,8 +127,7 @@
           "analogy": {
             "title": "Think of Probability Flow as a Branching Path",
             "description": "Each decision leads to different possible outcomes",
-            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "image": "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=800&q=80"
           },
           "visualization": {
             "type": "decision",
@@ -166,27 +163,21 @@
   "summary": {
     "keyTakeaways": [
       {
-        "emoji": "",
         "text": "Probability is a number between 0 (impossible) and 1 (certain)"
       },
       {
-        "emoji": "",
         "text": "Real world decisions are rarely 100% certain — AI uses probability"
       },
       {
-        "emoji": "",
         "text": "Conditional probability: chance of X given Y already happened"
       },
       {
-        "emoji": "",
         "text": "Bayes Theorem updates probability when new evidence arrives"
       },
       {
-        "emoji": "",
         "text": "Spam filters use probability to decide if an email is spam"
       },
       {
-        "emoji": "",
         "text": "Weather forecasts, medical tests, and recommendations all use probability"
       }
     ],

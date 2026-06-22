@@ -32,7 +32,6 @@
           "analogy": {
             "title": "Checking Your Phone",
             "description": "Keep checking until there are no more notifications",
-            "emoji": "📱",
             "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=800&q=80"
           },
           "visualization": {
@@ -133,23 +132,18 @@
   "summary": {
     "keyTakeaways": [
       {
-        "emoji": "",
         "text": "while loops run as long as the condition is True"
       },
       {
-        "emoji": "",
         "text": "Always update the condition variable to avoid infinite loops"
       },
       {
-        "emoji": "⏹",
         "text": "break exits the loop immediately"
       },
       {
-        "emoji": "⏭",
         "text": "continue skips to the next iteration"
       },
       {
-        "emoji": "",
         "text": "Use for when you know the count, while when you don't"
       }
     ],

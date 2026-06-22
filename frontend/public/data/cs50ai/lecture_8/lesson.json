@@ -29,8 +29,7 @@
           "analogy": {
             "title": "Think of AI Bias as a One-Sided Story",
             "description": "Biased training data leads to unfair outcomes",
-            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "image": "https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?w=800&q=80"
           },
           "visualization": {
             "type": "decision",
@@ -78,8 +77,7 @@
           "analogy": {
             "title": "Think of Hallucination as an Over-Confident Friend",
             "description": "AI confidently generates false information",
-            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "image": "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=800&q=80"
           },
           "visualization": {
             "type": "flow",
@@ -128,8 +126,7 @@
           "analogy": {
             "title": "Think of Responsible AI as a Safety Checklist",
             "description": "Ensure AI is transparent, fair, and private",
-            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "image": "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=800&q=80"
           },
           "visualization": {
             "type": "flow",
@@ -169,27 +166,21 @@
   "summary": {
     "keyTakeaways": [
       {
-        "emoji": "",
         "text": "AI bias comes from unfair or unrepresentative training data"
       },
       {
-        "emoji": "",
         "text": "Privacy is at risk when AI collects and processes personal data"
       },
       {
-        "emoji": "",
         "text": "AI hallucinations are confident but factually wrong statements"
       },
       {
-        "emoji": "",
         "text": "Deepfakes use AI to generate convincing fake videos and audio"
       },
       {
-        "emoji": "",
         "text": "Transparency means people should know when AI is involved"
       },
       {
-        "emoji": "",
         "text": "Accountability asks who is responsible when AI causes harm"
       }
     ],

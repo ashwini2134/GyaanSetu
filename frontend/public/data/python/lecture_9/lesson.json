@@ -33,7 +33,6 @@
           "analogy": {
             "title": "Phone Book",
             "description": "Look up a name (key) to find the number (value).",
-            "emoji": "📞",
             "image": "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=800&q=80"
           },
           "visualization": {
@@ -163,23 +162,18 @@
   "summary": {
     "keyTakeaways": [
       {
-        "emoji": "",
         "text": "Dictionaries store key-value pairs with {key: value}"
       },
       {
-        "emoji": "",
         "text": "Keys must be unique and immutable"
       },
       {
-        "emoji": "",
         "text": "Add/update with dict[key] = value; delete with del"
       },
       {
-        "emoji": "",
         "text": ".get(key, default) safely accesses values"
       },
       {
-        "emoji": "",
         "text": ".keys(), .values(), .items() iterate dictionary data"
       }
     ],

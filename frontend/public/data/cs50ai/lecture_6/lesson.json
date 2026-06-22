@@ -29,8 +29,7 @@
           "analogy": {
             "title": "Think of Neural Networks as a Team of Detectives",
             "description": "Each neuron detects a specific pattern",
-            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "image": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80"
           },
           "visualization": {
             "type": "categories",
@@ -81,8 +80,7 @@
           "analogy": {
             "title": "Think of CNN as a Magnifying Glass Scanning a Photo",
             "description": "A filter slides across the image to detect features",
-            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "image": "https://images.unsplash.com/photo-1588616319944-81976676762d?w=800&q=80"
           },
           "visualization": {
             "type": "flow",
@@ -133,8 +131,7 @@
           "analogy": {
             "title": "Think of Neural Network Layers as a Factory Assembly Line",
             "description": "Each layer transforms data before passing it forward",
-            "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&q=80",
-            "emoji": "💡"
+            "image": "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=80"
           },
           "visualization": {
             "type": "flow",
@@ -173,27 +170,21 @@
   "summary": {
     "keyTakeaways": [
       {
-        "emoji": "",
         "text": "Neural networks are inspired by how the human brain processes information"
       },
       {
-        "emoji": "",
         "text": "Each node takes inputs, multiplies by weights, and produces an output"
       },
       {
-        "emoji": "",
         "text": "Layers: Input → Hidden → Output"
       },
       {
-        "emoji": "",
         "text": "Training adjusts weights until the network makes correct predictions"
       },
       {
-        "emoji": "",
         "text": "Deep Learning uses many hidden layers for complex tasks"
       },
       {
-        "emoji": "",
         "text": "CNNs specialize in image recognition — used in face unlock, medical scans"
       }
     ],

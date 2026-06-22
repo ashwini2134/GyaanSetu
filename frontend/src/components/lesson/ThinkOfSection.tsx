@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import type { ThinkOfBlock } from '../../types/lesson';
 
 const BLUE = {
@@ -118,45 +118,69 @@ function renderVisualization(block: ThinkOfBlock) {
   }
 }
 
-const EMOJI_MAP: Array<[RegExp, string]> = [
-  [/recipe|kitchen|cook|baking/i, '\ud83e\uddd1\u200d\ud83c\udf73'],
-  [/swiss army|multi.?tool|toolbox|tool/i, '\ud83e\uddf0'],
-  [/storage box|container|labeled box|bag/i, '\ud83d\udce6'],
-  [/shopping/i, '\ud83d\uded2'],
-  [/receptionist|gatekeeper/i, '\ud83d\udc81'],
-  [/fill.?in.?the.?blank|form|template/i, '\ud83d\udcdd'],
-  [/rulebook|rule/i, '\ud83d\udcdc'],
-  [/traffic light|signal/i, '\ud83d\udea6'],
-  [/washing|machine cycle|laundry/i, '\ud83e\udd7a'],
-  [/phone/i, '\ud83d\udcf1'],
-  [/envelope|sealed|letter|mail/i, '\u2709\ufe0f'],
-  [/book|phone book|library|shelf|catalog/i, '\ud83d\udcda'],
-  [/vending/i, '\ud83e\udd16'],
-  [/chain|string|beads/i, '\u26d3\ufe0f'],
-  [/notebook|journal/i, '\ud83d\udcd3'],
-  [/dog|puppy|tricks|training/i, '\ud83d\udc15'],
-  [/maze|labyrinth|navigate/i, '\ud83c\udf00'],
-  [/gps|map|direction|navigate|route/i, '\ud83d\uddfa\ufe0f'],
-  [/ai|artificial|intelligence|machine learning|fast reader/i, '\ud83e\udd16'],
-  [/real life|analogy/i, '\ud83d\udca1'],
+const IMAGE_MAP: Array<[RegExp, string]> = [
+  [/recipe|kitchen|cook|baking/i, 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=800&q=80'],
+  [/swiss army|multi.?tool|toolbox|tool/i, 'https://images.unsplash.com/photo-1615127717889-8945dba1f05a?w=800&q=80'],
+  [/storage box|container|labeled box|bag/i, 'https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=800&q=80'],
+  [/shopping/i, 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&q=80'],
+  [/receptionist|gatekeeper/i, 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&q=80'],
+  [/fill.?in.?the.?blank|form|template/i, 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&q=80'],
+  [/rulebook|rule/i, 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&q=80'],
+  [/traffic light|signal/i, 'https://images.unsplash.com/photo-1557404763-69708cd8b9ce?w=800&q=80'],
+  [/washing|laundry/i, 'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=800&q=80'],
+  [/phone/i, 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=800&q=80'],
+  [/envelope|sealed|letter|mail/i, 'https://images.unsplash.com/photo-1649019489428-70f505daacd6?w=800&q=80'],
+  [/book|phone book|library|shelf|catalog/i, 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=800&q=80'],
+  [/vending/i, 'https://images.unsplash.com/photo-1618506557292-ec1862b3c506?w=800&q=80'],
+  [/chain|string|beads|characters/i, 'https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=800&q=80'],
+  [/notebook|journal/i, 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=800&q=80'],
+  [/dog|puppy|tricks|training/i, 'https://images.unsplash.com/photo-1504826260979-242151ee45b7?w=800&q=80'],
+  [/maze|labyrinth/i, 'https://images.unsplash.com/photo-1590278458425-6aa3912a48a5?w=800&q=80'],
+  [/gps|map|direction|navigate|route/i, 'https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=80'],
+  [/ai|artificial|intelligence|machine learning|fast reader/i, 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80'],
+  [/detective/i, 'https://images.unsplash.com/photo-1589578228447-e1a4e481c6c8?w=800&q=80'],
+  [/puzzle/i, 'https://images.unsplash.com/photo-1611996575749-79a3a250f5f0?w=800&q=80'],
+  [/family tree/i, 'https://images.unsplash.com/photo-1556228453-efd6c1ff04f4?w=800&q=80'],
+  [/weather forecast|probability/i, 'https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?w=800&q=80'],
+  [/bayes|updating belief/i, 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80'],
+  [/branching path|probability flow/i, 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=800&q=80'],
+  [/packing a suitcase|optimization/i, 'https://images.unsplash.com/photo-1561023680-2a8b83ccc4a8?w=800&q=80'],
+  [/classroom seating|csp/i, 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&q=80'],
+  [/delivery route|optimization flow/i, 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=800&q=80'],
+  [/sort laundry|sorting laundry/i, 'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=800&q=80'],
+  [/reinforcement learning|puppy training/i, 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=800&q=80'],
+  [/factory|assembly line|ml pipeline/i, 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=80'],
+  [/team of detectives|neural networks as a team/i, 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80'],
+  [/magnifying glass|cnn/i, 'https://images.unsplash.com/photo-1588616319944-81976676762d?w=800&q=80'],
+  [/slicing a pizza|tokenization/i, 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80'],
+  [/word embeddings|map of meanings/i, 'https://images.unsplash.com/photo-1589519160732-57fc6ea83bc8?w=800&q=80'],
+  [/well-read librarian|llm/i, 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=800&q=80'],
+  [/ai bias|one-sided story/i, 'https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?w=800&q=80'],
+  [/hallucination|over-confident/i, 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=800&q=80'],
+  [/responsible ai|safety checklist/i, 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=800&q=80'],
+  [/learning to ride|ai journey|ride a bike/i, 'https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=800&q=80'],
+  [/blueprint|project planning/i, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80'],
+  [/project workflow|workflow as a recipe/i, 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=800&q=80'],
 ];
 
-function emojiForTitle(title: string): string {
-  for (const [pattern, emoji] of EMOJI_MAP) {
-    if (pattern.test(title)) return emoji;
+function imageForTitle(title: string): string | null {
+  for (const [pattern, url] of IMAGE_MAP) {
+    if (pattern.test(title)) return url;
   }
-  return '\ud83d\udca1';
+  return null;
 }
 
 function AnalogyCard({ block }: { block: ThinkOfBlock }) {
   const [imgError, setImgError] = useState(false);
-  const showImage = !!block.analogy.image && !imgError;
+  const fallbackImage = useMemo(() => imageForTitle(block.analogy.title), [block.analogy.title]);
+  const src = block.analogy.image || fallbackImage;
+  const showImage = !!src && !imgError;
   return (
     <div className="rounded-lg border border-slate-700/30 bg-slate-800/50 overflow-hidden h-full">
       {showImage ? (
         <div className="relative w-full h-full">
           <img
-            src={block.analogy.image!}
+            src={src!}
             alt={block.analogy.title}
             className="absolute inset-0 w-full h-full object-cover object-center"
             onError={() => setImgError(true)}
@@ -168,8 +192,7 @@ function AnalogyCard({ block }: { block: ThinkOfBlock }) {
           </div>
         </div>
       ) : (
-        <div className="w-full h-full p-4 flex flex-col items-center justify-center gap-2 text-center">
-          <span className="text-4xl">{emojiForTitle(block.analogy.title)}</span>
+        <div className="w-full h-full p-4 flex flex-col items-center justify-center text-center bg-gradient-to-br from-slate-700/30 to-slate-800/50">
           <p className="text-sm font-bold text-white leading-snug">{block.analogy.title}</p>
           <p className="text-xs text-slate-300 mt-0.5 font-light">{block.analogy.description}</p>
         </div>

@@ -22,14 +22,11 @@ export interface AnalogyBlock {
   type: 'analogy';
   title: string;
   text: string;
-  emoji?: string;
-  icon?: string;
   accentColor?: 'blue' | 'purple' | 'green' | 'orange' | 'amber';
 }
 
 export interface VisualizationPanel {
   label: string;
-  emoji?: string;
   title?: string;
   description?: string;
   // For center panels
@@ -77,7 +74,6 @@ export interface ThinkOfBlock {
     title: string;
     description: string;
     image?: string;
-    emoji?: string;
   };
   visualization: {
     type: ThinkOfVisualType;
@@ -114,7 +110,7 @@ export interface VisualAidBlock {
   kind: VisualAidKind;
   title: string;
   accentColor?: 'blue' | 'purple' | 'green' | 'orange' | 'amber';
-  items?: Array<{ label: string; value?: string; emoji?: string; desc?: string }>;
+  items?: Array<{ label: string; value?: string; desc?: string }>;
   code?: string;
   language?: string;
   output?: string;
@@ -199,7 +195,7 @@ export interface CodingProblem {
 // ── Summary ───────────────────────────────────────────────────────────────────
 
 export interface SummaryData {
-  keyTakeaways: Array<{ text: string; emoji: string }>;
+  keyTakeaways: Array<{ text: string }>;
   whatYouLearned: string[];
   nextUp?: string;
 }

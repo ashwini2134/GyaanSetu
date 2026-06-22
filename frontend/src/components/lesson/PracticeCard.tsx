@@ -239,6 +239,8 @@ export default function PracticeCard({ block, courseSlug, lectureNumber, section
   const [attempts, setAttempts] = useState(0);
   const [toast, setToast] = useState(false);
 
+  const [runOutput, setRunOutput] = useState<string | null>(null);
+  const [runError, setRunError] = useState<string | null>(null);
   const [savedCode, setSavedCode] = useState<string | null>(null);
   useEffect(() => {
     async function loadDraft() {
@@ -267,22 +269,26 @@ export default function PracticeCard({ block, courseSlug, lectureNumber, section
     .catch(err => console.error('Failed to save practice draft', err));
   }, [block.title, saveKey]);
 
-  const handleRun = () => {
+  const handleRun = (code: string, output: string, error: string | null) => {
     onAttempt?.();
     setAttempts(a => a + 1);
     setShowHint(true);
+    setRunOutput(output);
+    setRunError(error);
+    saveCode(code);
   };
 
   const handleSubmit = (_code: string, output: string, error: string | null) => {
     onAttempt?.();
     setAttempts(a => a + 1);
+    setRunOutput(output);
+    setRunError(error);
     if (!error && block.expectedOutput && output.trim() === block.expectedOutput.trim()) {
       setPassed(true);
       onComplete?.();
     }
     saveCode(_code);
     setToast(true);
-    setOpen(false);
   };
 
   useEffect(() => {
@@ -298,6 +304,8 @@ export default function PracticeCard({ block, courseSlug, lectureNumber, section
     setAttempts(0);
     setPassed(false);
     setShowHint(false);
+    setRunOutput(null);
+    setRunError(null);
   };
 
   if (!open) {
@@ -389,6 +397,17 @@ export default function PracticeCard({ block, courseSlug, lectureNumber, section
           showResetButton
           onReset={handleReset}
         />
+
+        {runOutput !== null && (
+          <div className="p-3 rounded-xl border border-slate-700/30 bg-slate-900/50">
+            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Console Output</p>
+            {runError ? (
+              <pre className="text-sm text-red-300 font-mono whitespace-pre-wrap">{runError}</pre>
+            ) : (
+              <pre className="text-sm text-green-300 font-mono whitespace-pre-wrap">{runOutput || '(no output)'}</pre>
+            )}
+          </div>
+        )}
 
         {showHint && block.hint && (
           <div className="p-3 rounded-xl bg-blue-900/20 border border-blue-700/30">
