@@ -116,7 +116,7 @@ function renderBlock(block: ContentBlock, _sectionId: string, courseSlug: string
     case 'visual_aid':
       return <VisualAidCard block={block} />;
     case 'code_example':
-      if (courseSlug === 'cs50ai') return null;
+      if (['cs50ai', 'ai', 'cs50-ai'].includes(courseSlug)) return null;
       return <InteractiveTryIt block={block} />;
     case 'reflection':
       return <ReflectionCard block={block} />;
