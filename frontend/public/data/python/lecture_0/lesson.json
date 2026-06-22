@@ -222,12 +222,12 @@
         },
         {
           "type": "practice",
-          "title": "Run Your First Python Program",
-          "instructions": "Write a program that prints your name and your college on separate lines, then prints 'I am learning Python!' on a third line.",
-          "starterCode": "# My first Python program\nprint(\"\")",
-          "solution": "print(\"Lakshanya\")\nprint(\"SRM University\")\nprint(\"I am learning Python!\")",
-          "hint": "Use print() three times, once for each line. Each print() outputs text on a new line.",
-          "expectedOutput": "Lakshanya\nSRM University\nI am learning Python!"
+          "title": "Python Facts Poster",
+          "instructions": "Print 3 things Python can do, each on a separate line: 'Python builds websites', 'Python analyzes data', and 'Python automates tasks'.",
+          "starterCode": "# Python can do many things!\nprint(\"Python builds websites\")",
+          "solution": "print(\"Python builds websites\")\nprint(\"Python analyzes data\")\nprint(\"Python automates tasks\")",
+          "hint": "Use one print() statement per line. Each print() starts on a new line automatically.",
+          "expectedOutput": "Python builds websites\nPython analyzes data\nPython automates tasks"
         }
       ]
     }
