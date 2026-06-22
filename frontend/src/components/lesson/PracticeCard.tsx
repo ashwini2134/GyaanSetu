@@ -10,14 +10,15 @@ interface PracticeCardProps {
   block: PracticeBlock;
   courseSlug: string;
   lectureNumber: number;
+  sectionId: string;
   onAttempt?: () => void;
   onComplete?: () => void;
 }
 
 const SAVE_PREFIX = 'lms:practice:';
 
-function AIPracticeCard({ block, courseSlug, lectureNumber, onAttempt, onComplete }: PracticeCardProps) {
-  const config = getPracticeExercise(courseSlug, String(lectureNumber));
+function AIPracticeCard({ block, courseSlug, lectureNumber, sectionId, onAttempt, onComplete }: PracticeCardProps) {
+  const config = getPracticeExercise(courseSlug, String(lectureNumber), sectionId);
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState('');
   const [generating, setGenerating] = useState(false);
@@ -226,9 +227,9 @@ function AIPracticeCard({ block, courseSlug, lectureNumber, onAttempt, onComplet
   );
 }
 
-export default function PracticeCard({ block, courseSlug, lectureNumber, onAttempt, onComplete }: PracticeCardProps) {
+export default function PracticeCard({ block, courseSlug, lectureNumber, sectionId, onAttempt, onComplete }: PracticeCardProps) {
   if (courseSlug === 'cs50ai') {
-    return <AIPracticeCard block={block} courseSlug={courseSlug} lectureNumber={lectureNumber} onAttempt={onAttempt} onComplete={onComplete} />;
+    return <AIPracticeCard block={block} courseSlug={courseSlug} lectureNumber={lectureNumber} sectionId={sectionId} onAttempt={onAttempt} onComplete={onComplete} />;
   }
 
   const saveKey = `${SAVE_PREFIX}${block.title}`;

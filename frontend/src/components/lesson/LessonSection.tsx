@@ -104,6 +104,7 @@ function renderBlock(block: ContentBlock, _sectionId: string, courseSlug: string
           block={block}
           courseSlug={courseSlug}
           lectureNumber={lectureNumber}
+          sectionId={_sectionId}
           onAttempt={onAttempt}
           onComplete={onComplete}
         />
