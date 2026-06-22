@@ -32,7 +32,8 @@ class MiniPython {
   run(code: string): RunResult {
     try {
       this.validateSyntax(code);
-      this.execLines(code.split('\n'), 0, this.globals);
+      const logicalLines = this.reconstructLogicalLines(code);
+      this.execLines(logicalLines, 0, this.globals);
       return { output: this.out.join('\n'), error: null, exitCode: 0 };
     } catch (e) {
       if (e instanceof LoopControl) {
@@ -149,6 +150,37 @@ class MiniPython {
         }
         this.traceback.push(String(i + 1));
         this.fns.set(name, { params, bodyLines: body });
+        continue;
+      }
+
+      // with open(...) as f:
+      const withM = t.match(/^with\s+open\s*\(([^)]+)\)\s+as\s+([a-zA-Z_]\w*)\s*:/);
+      if (withM) {
+        const argsStr = withM[1].trim();
+        const varName = withM[2].trim();
+        const body: string[] = [];
+        i++;
+        while (i < lines.length) {
+          const bl = lines[i];
+          const bt = bl.trim();
+          if (bt && this.indent(bl) <= ind) break;
+          body.push(bl);
+          i++;
+        }
+        const args = this.parseArgs(argsStr, env);
+        const filename = String(args[0]);
+        const mode = args[1] ? String(args[1]) : 'r';
+        const fileObj = {
+          __type__: 'file',
+          filename,
+          mode
+        };
+        env.set(varName, fileObj);
+        try {
+          this.execLines(body, ind + 1, env);
+        } finally {
+          env.delete(varName);
+        }
         continue;
       }
 
@@ -298,8 +330,16 @@ class MiniPython {
         } else {
           // Try to evaluate as a list/tuple
           const iterable = this.eval(iterExpr, env);
+          let iterableList: PyVal[] = [];
           if (Array.isArray(iterable)) {
-            for (const val of iterable) {
+            iterableList = iterable;
+          } else if (this.isFile(iterable)) {
+            const fileObj = iterable as any;
+            const content = this.readFile(fileObj.filename, fileObj.mode);
+            iterableList = content.split(/(?<=\n)/);
+          }
+          if (iterableList.length > 0 || Array.isArray(iterable)) {
+            for (const val of iterableList) {
               setVars(val);
               try {
                 this.execLines(body, ind + 1, env);
@@ -396,7 +436,7 @@ class MiniPython {
       }
 
       // Method call: obj.method(args)
-      const methodCallM = t.match(/^([a-zA-Z_]\w+(?:\[[^\]]*\])*)\.([a-zA-Z_]\w*)\s*\((.*)?\)\s*$/);
+      const methodCallM = t.match(/^([a-zA-Z_]\w*(?:\[[^\]]*\])*)\.([a-zA-Z_]\w*)\s*\((.*)?\)\s*$/);
       if (methodCallM) {
         const target = this.eval(methodCallM[1], env);
         const method = methodCallM[2];
@@ -410,6 +450,12 @@ class MiniPython {
           }
           else if (method === 'sort') target.sort((a, b) => Number(a) - Number(b));
           else if (method === 'pop') target.pop();
+        } else if (this.isFile(target)) {
+          const fileObj = target as any;
+          if (method === 'write') {
+            const text = String(args[0]);
+            this.writeFile(fileObj.filename, fileObj.mode, text);
+          }
         }
         i++; continue;
       }
@@ -497,6 +543,16 @@ class MiniPython {
   // ── Function call ───────────────────────────────────────────────────────
 
   private call(name: string, argsStr: string, env: Env): PyVal {
+    if (name === 'open') {
+      const args = argsStr.trim() ? this.parseArgs(argsStr, env) : [];
+      const filename = String(args[0]);
+      const mode = args[1] ? String(args[1]) : 'r';
+      return {
+        __type__: 'file',
+        filename,
+        mode
+      };
+    }
     if (name === 'str') return this.repr(this.eval(argsStr, env));
     if (name === 'int') {
       const v = this.eval(argsStr, env);
@@ -999,6 +1055,20 @@ class MiniPython {
           }
         }
       }
+      if (this.isFile(target)) {
+        const fileObj = target as any;
+        if (methodName === 'write') {
+          const text = String(args[0]);
+          this.writeFile(fileObj.filename, fileObj.mode, text);
+          return text.length;
+        }
+        if (methodName === 'read') {
+          return this.readFile(fileObj.filename, fileObj.mode);
+        }
+        if (methodName === 'close') {
+          return null;
+        }
+      }
       throw new Error(`  AttributeError: '${typeof target}' object has no attribute '${methodName}'`);
     }
 
@@ -1145,6 +1215,144 @@ class MiniPython {
     return null;
   }
 
+  private static inMemoryFs = new Map<string, string>();
+
+  private isFile(v: PyVal): boolean {
+    return typeof v === 'object' && v !== null && '__type__' in v && (v as any).__type__ === 'file';
+  }
+
+  private getFileContent(filename: string): string | null {
+    const storageKey = `fa_file_${filename}`;
+    if (typeof localStorage !== 'undefined') {
+      return localStorage.getItem(storageKey);
+    }
+    return MiniPython.inMemoryFs.get(storageKey) ?? null;
+  }
+
+  private setFileContent(filename: string, content: string): void {
+    const storageKey = `fa_file_${filename}`;
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(storageKey, content);
+    } else {
+      MiniPython.inMemoryFs.set(storageKey, content);
+    }
+  }
+
+  private readFile(filename: string, mode: string): string {
+    const cleanFilename = filename.replace(/['"]/g, '').trim();
+    const cleanMode = mode.replace(/['"]/g, '').trim();
+    if (cleanMode === 'w' || cleanMode === 'a') {
+      throw new Error(`  UnsupportedOperation: not readable`);
+    }
+    const content = this.getFileContent(cleanFilename);
+    if (content === null) {
+      throw new Error(`  FileNotFoundError: [Errno 2] No such file or directory: '${cleanFilename}'`);
+    }
+    return content;
+  }
+
+  private writeFile(filename: string, mode: string, text: string): void {
+    const cleanFilename = filename.replace(/['"]/g, '').trim();
+    const cleanMode = mode.replace(/['"]/g, '').trim();
+    if (cleanMode === 'r') {
+      throw new Error(`  UnsupportedOperation: not writable`);
+    }
+    let content = this.getFileContent(cleanFilename) || '';
+    if (cleanMode === 'w') {
+      content = text;
+    } else if (cleanMode === 'a') {
+      content += text;
+    }
+    this.setFileContent(cleanFilename, content);
+  }
+
+  private reconstructLogicalLines(code: string): string[] {
+    const physicalLines = code.split('\n');
+    const logicalLines: string[] = [];
+    
+    let currentLogicalLine = '';
+    let openParentheses = 0;
+    let openBrackets = 0;
+    let openBraces = 0;
+    
+    for (let i = 0; i < physicalLines.length; i++) {
+      const line = physicalLines[i];
+      
+      let inSingleQuote = false;
+      let inDoubleQuote = false;
+      let escape = false;
+      let nonCommentLength = line.length;
+      
+      for (let j = 0; j < line.length; j++) {
+        const char = line[j];
+        
+        if (escape) {
+          escape = false;
+          continue;
+        }
+        if (char === '\\') {
+          escape = true;
+          continue;
+        }
+        
+        if (char === "'" && !inDoubleQuote) {
+          inSingleQuote = !inSingleQuote;
+          continue;
+        }
+        if (char === '"' && !inSingleQuote) {
+          inDoubleQuote = !inDoubleQuote;
+          continue;
+        }
+        
+        if (inSingleQuote || inDoubleQuote) {
+          continue;
+        }
+        
+        if (char === '#') {
+          nonCommentLength = j;
+          break;
+        }
+        
+        if (char === '(') openParentheses++;
+        else if (char === ')') openParentheses--;
+        else if (char === '[') openBrackets++;
+        else if (char === ']') openBrackets--;
+        else if (char === '{') openBraces++;
+        else if (char === '}') openBraces--;
+      }
+      
+      const commentPart = line.slice(nonCommentLength);
+      let codePart = line.slice(0, nonCommentLength);
+      
+      let endsWithBackslash = false;
+      if (codePart.trim().endsWith('\\')) {
+        endsWithBackslash = true;
+        codePart = codePart.slice(0, codePart.lastIndexOf('\\'));
+      }
+      
+      if (currentLogicalLine === '') {
+        currentLogicalLine = codePart;
+      } else {
+        currentLogicalLine += ' ' + codePart.trim();
+      }
+      
+      const totalOpen = openParentheses + openBrackets + openBraces;
+      if (totalOpen <= 0 && !endsWithBackslash) {
+        logicalLines.push(currentLogicalLine + commentPart);
+        currentLogicalLine = '';
+        openParentheses = 0;
+        openBrackets = 0;
+        openBraces = 0;
+      }
+    }
+    
+    if (currentLogicalLine !== '') {
+      logicalLines.push(currentLogicalLine);
+    }
+    
+    return logicalLines;
+  }
+
   private repr(v: PyVal): string {
     if (v === null) return 'None';
     if (typeof v === 'boolean') return v ? 'True' : 'False';
@@ -1152,6 +1360,10 @@ class MiniPython {
     if (this.isDict(v)) {
       const entries = Object.entries(v).map(([k, val]) => `${this.repr(k)}: ${this.repr(val)}`);
       return '{' + entries.join(', ') + '}';
+    }
+    if (this.isFile(v)) {
+      const fileObj = v as any;
+      return `<_io.TextIOWrapper name='${fileObj.filename}' mode='${fileObj.mode}' encoding='UTF-8'>`;
     }
     return String(v);
   }
