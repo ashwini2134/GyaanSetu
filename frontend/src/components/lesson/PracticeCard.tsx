@@ -112,7 +112,7 @@ function AIPracticeCard({ block, courseSlug, lectureNumber, sectionId, onAttempt
       <div className="px-5 py-3 bg-slate-800/40 border-b border-slate-700/20 flex items-center justify-between">
         <div>
           <p className="text-xs font-semibold text-amber-300 uppercase tracking-wider">Practice Exercise</p>
-          <p className="text-sm font-medium text-slate-200 mt-0.5">Introduction to AI</p>
+          <p className="text-sm font-medium text-slate-200 mt-0.5">{config?.title || block.title}</p>
         </div>
         <button
           onClick={() => setOpen(false)}
