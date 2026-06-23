@@ -47,6 +47,16 @@ export function createApp() {
     res.json({ status: "ok" });
   });
 
+  app.get("/api/admin/push-db", async (req, res) => {
+    try {
+      const { execSync } = await import("child_process");
+      const output = execSync("npx prisma db push --accept-data-loss", { encoding: "utf-8" });
+      res.json({ status: "success", output });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed", stdout: err.stdout?.toString(), stderr: err.stderr?.toString(), message: err.message });
+    }
+  });
+
   app.use("/api/auth", authRoutes);
   app.use("/api/progress", progressRoutes);
   app.use("/api/projects", projectRoutes);
