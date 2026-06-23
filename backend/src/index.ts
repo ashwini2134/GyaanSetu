@@ -15,6 +15,6 @@ process.on('unhandledRejection', (error) => {
 
 const app = createApp();
 
-app.listen(config.port, () => {
-  console.log(`Auth API running on http://localhost:${config.port}`);
+app.listen(config.port, '0.0.0.0', () => {
+  console.log(`Auth API running on http://0.0.0.0:${config.port}`);
 });
