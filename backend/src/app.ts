@@ -22,6 +22,7 @@ import qaRoutes from "./routes/qa.js";
 import practiceExercisesRoutes from "./routes/practiceExercises.js";
 import assessmentsRoutes from "./routes/assessments.js";
 import projectTasksRoutes from "./routes/projectTasks.js";
+import certificationsRoutes from "./routes/certifications.js";
 
 export function createApp() {
   const app = express();
@@ -75,6 +76,7 @@ export function createApp() {
   app.use("/api/qa", qaRoutes);
   app.use("/api/practice-exercises", practiceExercisesRoutes);
   app.use("/api/assessments", assessmentsRoutes);
+  app.use("/api/certifications", certificationsRoutes);
 
   app.use(errorHandler);
   return app;

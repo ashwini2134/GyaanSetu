@@ -7,11 +7,13 @@ import { sendNotification } from "../services/notificationService.js";
 const router = Router();
 
 const ACHIEVEMENT_NAMES: Record<string, string> = {
-  first_step: "First Steps",
-  pythonista: "Pythonista",
-  streak_star: "Streak Star",
-  master: "Master Hacker",
-  speed_runner: "Speed Runner",
+  first_lecture: "First Steps",
+  first_quiz: "Quiz Master",
+  first_problem: "Project Solver",
+  five_lectures: "Halfway There",
+  ten_lectures: "10 Lectures Done",
+  first_project: "First Project Submitted",
+  course_completed: "Course Completed",
 };
 
 router.get("/", requireAuth, async (req: AuthenticatedRequest, res, next) => {

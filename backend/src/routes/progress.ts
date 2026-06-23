@@ -382,4 +382,58 @@ router.patch("/lecture/:courseSlug/:lectureId", requireAuth, async (req: Authent
   } catch (error) { next(error); }
 });
 
+router.get("/activity", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const days = Math.min(Math.max(Number(req.query.days) || 28, 1), 90);
+
+    const since = new Date();
+    since.setDate(since.getDate() - (days - 1));
+    since.setHours(0, 0, 0, 0);
+
+    const [quizAttempts, lectureCompletions, practiceSubmissions, projectCompletions] = await Promise.all([
+      prisma.quizAttempt.findMany({
+        where: { userId, createdAt: { gte: since } },
+        select: { createdAt: true },
+      }),
+      prisma.progress.findMany({
+        where: { userId, status: "COMPLETED", completedAt: { gte: since } },
+        select: { completedAt: true },
+      }),
+      prisma.practiceSubmission.findMany({
+        where: { userId, completed: true, createdAt: { gte: since } },
+        select: { createdAt: true },
+      }),
+      prisma.project.findMany({
+        where: { userId, status: "COMPLETED", completedAt: { gte: since } },
+        select: { completedAt: true },
+      }),
+    ]);
+
+    const counts: Record<string, number> = {};
+    for (let i = 0; i < days; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      counts[d.toISOString().split("T")[0]] = 0;
+    }
+
+    const tally = (date: Date | null | undefined) => {
+      if (!date) return;
+      const key = date.toISOString().split("T")[0];
+      if (key in counts) counts[key]++;
+    };
+
+    quizAttempts.forEach(a => tally(a.createdAt));
+    lectureCompletions.forEach(p => tally(p.completedAt));
+    practiceSubmissions.forEach(p => tally(p.createdAt));
+    projectCompletions.forEach(p => tally(p.completedAt));
+
+    const activity = Object.entries(counts)
+      .map(([date, count]) => ({ date, count }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    res.json({ activity });
+  } catch (error) { next(error); }
+});
+
 export default router;

@@ -11,16 +11,17 @@ export type AchievementDef = {
   title: string;
   icon: string;
   description: string;
+  completedDescription: string;
 };
 
 export const ACHIEVEMENTS: AchievementDef[] = [
-  { id: 'first_lecture', title: 'First Steps', icon: '🎯', description: 'Complete your first lecture' },
-  { id: 'first_quiz', title: 'Quiz Master', icon: '🧠', description: 'Pass your first quiz' },
-  { id: 'first_problem', title: 'Project Solver', icon: '🔥', description: 'Submit your first problem' },
-  { id: 'five_lectures', title: 'Halfway There', icon: '⚡', description: 'Complete 5 lectures' },
-  { id: 'ten_lectures', title: '10 Lectures Done', icon: '🏆', description: 'Complete 10 lectures' },
-  { id: 'first_project', title: 'First Project Submitted', icon: '💎', description: 'Submit your first hands-on task' },
-  { id: 'course_completed', title: 'Course Completed', icon: '🎓', description: 'Complete an entire course' },
+  { id: 'first_lecture', title: 'First Steps', icon: '🎯', description: 'Complete your first lecture', completedDescription: 'Completed your first lecture' },
+  { id: 'first_quiz', title: 'Quiz Master', icon: '🧠', description: 'Pass your first quiz', completedDescription: 'Passed your first quiz' },
+  { id: 'first_problem', title: 'Project Solver', icon: '🔥', description: 'Submit your first problem', completedDescription: 'Submitted your first problem' },
+  { id: 'five_lectures', title: 'Halfway There', icon: '⚡', description: 'Complete 5 lectures', completedDescription: 'Completed 5 lectures' },
+  { id: 'ten_lectures', title: '10 Lectures Done', icon: '🏆', description: 'Complete 10 lectures', completedDescription: 'Completed 10 lectures' },
+  { id: 'first_project', title: 'First Project Submitted', icon: '💎', description: 'Submit your first hands-on task', completedDescription: 'Submitted your first hands-on task' },
+  { id: 'course_completed', title: 'Course Completed', icon: '🎓', description: 'Complete an entire course', completedDescription: 'Completed an entire course' },
 ];
 
 export type StreakData = {

@@ -5,7 +5,7 @@ import { api, type Course, authFetch } from "../api";
 import { useAuth } from "../auth";
 import { Card, DynamicCourseIcon } from "../components";
 
-import { useGamification, ACHIEVEMENTS } from "../progress";
+import { useGamification, ACHIEVEMENTS, checkAchievements } from "../progress";
 
 const IconBook = () => (
   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -84,6 +84,7 @@ export default function Dashboard() {
   // ✅ Wired to real API — GET /gamification/stats (via useGamification hook)
   const { xp, achievements: unlockedAchievements, streak, stats, overallProgress } = useGamification();
 
+  const [activityData, setActivityData] = useState<{ date: string; count: number }[]>([]);
   const [activeCourseId] = useState<string | null>(null);
   const [activeStatId, setActiveStatId] = useState<string | null>(null);
   const [activeBadgeId, setActiveBadgeId] = useState<string | null>(null);
@@ -138,6 +139,14 @@ export default function Dashboard() {
   }, [courses]);
 
   useEffect(() => {
+    authFetch<{ activity: { date: string; count: number }[] }>('/progress/activity?days=28')
+      .then(data => setActivityData(data.activity))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => { checkAchievements(); }, []);
+
+  useEffect(() => {
     api
       .courses()
       .then(async (cs) => {
@@ -160,28 +169,17 @@ export default function Dashboard() {
 
   const totalCompleted = stats.tasksSubmitted + stats.projectsSolved;
 
-  // Get last 7 days for streak heatmap
-  const getStreakDays = () => {
-    const days = [];
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const today = new Date().toISOString().split('T')[0];
-    const lastActive = streak.lastLoginDate === today;
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      const isToday = i === 0;
-      const hasActivity = lastActive && (streak.currentStreak > (6 - i) || isToday);
-      days.push({
-        name: dayNames[date.getDay()],
-        hasActivity,
-        isToday,
-        count: hasActivity ? 1 : 0
-      });
-    }
-    return days;
-  };
-
-  const streakDays = getStreakDays();
+  const today = new Date().toISOString().split('T')[0];
+  const totalActivityCount = activityData.reduce((sum, d) => sum + d.count, 0);
+  const mostActiveDay = activityData.reduce(
+    (best, d) => (d.count > best.count ? d : best),
+    { date: today, count: 0 }
+  );
+  const mostActiveDayLabel = (() => {
+    if (mostActiveDay.count === 0) return 'No activity yet';
+    const d = new Date(mostActiveDay.date + 'T00:00:00');
+    return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  })();
 
   const displayAchievements = useMemo(() => {
     return ACHIEVEMENTS.map(a => ({
@@ -608,64 +606,44 @@ export default function Dashboard() {
 
             {/* Right Panel: Achievements */}
             <div>
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-2">
-                  <div className="text-slate-300">
-                    <IconTrophy />
-                  </div>
-                  <h3 className="text-lg font-bold text-white tracking-tight">Achievements</h3>
-                </div>
-                <div className="rounded-full bg-slate-900/60 border border-slate-800/80 px-2.5 py-0.5 text-[10px] font-semibold text-slate-400">
-                  {displayAchievements.filter(a => a.unlocked).length} / {displayAchievements.length} Unlocked
-                </div>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="text-slate-300"><IconTrophy /></div>
+                <h3 className="text-lg font-bold text-white tracking-tight">Achievements</h3>
               </div>
 
-              <Card className="bg-slate-950/40 border border-slate-800/60 rounded-3xl p-6 flex flex-col gap-5">
-                <div className="flex flex-col gap-4">
-                  {displayAchievements.map((achievement) => {
-                    const isActive = activeBadgeId === achievement.id;
-                    return (
-                      <button
-                        key={achievement.id}
-                        type="button"
-                        onClick={() => handleBadgeClick(achievement.id)}
-                        className={`relative flex items-start gap-4 p-3 rounded-2xl border text-left transition-all duration-300 active:scale-[0.96] overflow-hidden ${
-                          achievement.unlocked
-                            ? "border-emerald-500/10 bg-emerald-500/5 hover:border-emerald-500/20"
-                            : "border-slate-900 bg-slate-950/40 opacity-50 hover:border-slate-800"
-                        } ${isActive ? 'scale-[1.02] border-amber-500/60 bg-amber-500/5 shadow-md shadow-amber-500/5' : ''}`}
-                      >
-                        <div className="relative w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0">
-                          <div className={`absolute inset-0 rounded-full flex items-center justify-center ${
-                            achievement.unlocked
-                              ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                              : "bg-slate-900 text-slate-500 border border-slate-800"
-                          }`}>
-                            {achievement.icon}
-                          </div>
-                          {isActive && (
-                            <span className="absolute inset-0 rounded-full bg-amber-500/30 animate-ping pointer-events-none" />
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-xs font-bold text-white leading-tight">{achievement.title}</span>
-                            {achievement.unlocked && (
-                              <span className="px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-[8px] font-extrabold text-amber-400 tracking-wider">
-                                UNLOCKED
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-[10px] text-slate-400 mt-1 leading-normal">{achievement.description}</p>
-                        </div>
-                      </button>
-                    );
-                  })}
+              <Card className="bg-slate-950/40 border border-slate-800/60 rounded-3xl p-4">
+                <div className="grid grid-cols-2 gap-3">
+                  {displayAchievements.map((achievement) => (
+                    <div
+                      key={achievement.id}
+                      className={`relative flex flex-col items-center text-center gap-2 p-4 rounded-2xl border transition-all duration-200 ${
+                        achievement.unlocked
+                          ? 'border-emerald-500/40 bg-emerald-500/8'
+                          : 'border-slate-800/60 bg-slate-900/40'
+                      }`}
+                    >
+                      {/* Icon */}
+                      <div className={`text-3xl leading-none ${achievement.unlocked ? '' : 'grayscale opacity-30'}`}>
+                        {achievement.icon}
+                      </div>
+
+                      {/* Title */}
+                      <span className={`text-xs font-semibold leading-tight ${achievement.unlocked ? 'text-emerald-400' : 'text-slate-500'}`}>
+                        {achievement.title}
+                      </span>
+
+                      {/* Description */}
+                      <p className="text-[10px] leading-snug text-slate-500">
+                        {achievement.unlocked ? achievement.completedDescription : achievement.description}
+                      </p>
+
+                    </div>
+                  ))}
                 </div>
 
                 <Link
                   to="/leaderboard"
-                  className="mt-2 block w-full text-center py-2.5 bg-slate-900/40 hover:bg-slate-900/80 border border-slate-800 text-xs font-bold text-slate-300 rounded-2xl transition-all active:scale-[0.98]"
+                  className="mt-3 block w-full text-center py-2.5 bg-slate-900/40 hover:bg-slate-900/80 border border-slate-800 text-xs font-bold text-slate-300 rounded-2xl transition-all active:scale-[0.98]"
                 >
                   View Leaderboard →
                 </Link>
@@ -674,46 +652,99 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Bottom Submission Activity heatmap - kept exactly as is */}
-        <div className="mt-auto pt-4 pb-12 w-full px-4 md:px-0">
-          <Card className="bg-slate-900/60 border border-slate-800/80 p-5 rounded-2xl">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
-              <div>
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                  <IconChart /> Submission Activity
-                </h2>
-                <div className="text-xs text-slate-400 uppercase tracking-[0.24em]">Past 7 days</div>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                <div className="rounded-2xl bg-slate-950/70 p-3 text-xs uppercase tracking-[0.24em] text-slate-400">Total Submissions: {totalCompleted}</div>
-                <div className="rounded-2xl bg-slate-950/70 p-3 text-xs uppercase tracking-[0.24em] text-slate-400">Longest Streak: {streak.longestStreak} days</div>
-                <div className="rounded-2xl bg-slate-950/70 p-3 text-xs uppercase tracking-[0.24em] text-slate-400">Most Active Day: Today</div>
-              </div>
-            </div>
-            <div className="grid grid-cols-7 gap-1.5 mb-4">
-              {streakDays.map((day, idx) => (
-                <div key={idx} className="flex flex-col items-center gap-1">
-                  <div
-                    className={`w-full aspect-square rounded-md flex items-center justify-center text-[10px] font-bold transition-all duration-300 ${
-                      day.count >= 4
-                        ? 'bg-green-500 text-white'
-                        : day.count >= 2
-                          ? 'bg-green-600/70 text-white'
-                          : day.count >= 1
-                            ? 'bg-green-700/50 text-white'
-                            : day.isToday
-                              ? 'bg-slate-700 border border-dashed border-slate-600'
-                              : 'bg-slate-800'
-                    }`}
-                    title={`${day.count} submissions`}
-                  >
-                    {day.count > 0 ? day.count : ''}
-                  </div>
-                  <span className={`text-[9px] ${day.isToday ? 'text-green-400' : 'text-slate-500'}`}>
-                    {day.name.charAt(0)}
-                  </span>
+        {/* Submission Activity — two-column: stats left, heatmap right */}
+        <div className="pt-4 pb-6 w-full px-4 md:px-0">
+          <Card className="bg-slate-900/60 border border-slate-800/80 rounded-2xl overflow-hidden">
+            <div className="flex flex-col md:flex-row">
+
+              {/* Left: title + stats */}
+              <div className="flex flex-col justify-between gap-6 p-6 md:w-52 md:border-r border-slate-800/80 flex-shrink-0">
+                <div>
+                  <h2 className="text-base font-bold text-white flex items-center gap-2">
+                    <IconChart /> Activity
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-1">Past 28 days</p>
                 </div>
-              ))}
+                <div className="flex md:flex-col flex-wrap gap-5">
+                  <div>
+                    <div className="text-3xl font-extrabold text-white leading-none">{totalActivityCount}</div>
+                    <div className="text-xs text-slate-400 mt-1">Total activities</div>
+                  </div>
+                  <div>
+                    <div className="text-3xl font-extrabold text-white leading-none">{streak.longestStreak}</div>
+                    <div className="text-xs text-slate-400 mt-1">Longest streak (days)</div>
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-white leading-tight">{mostActiveDayLabel}</div>
+                    <div className="text-xs text-slate-400 mt-1">Most active day</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right: heatmap */}
+              <div className="flex-1 flex flex-col justify-center p-6 overflow-x-auto">
+                {/* Shared container keeps labels and cells the same width */}
+                <div style={{ width: 'calc(7 * 3.5rem + 6 * 0.375rem)' }}>
+
+                {/* Day labels */}
+                <div className="grid grid-cols-7 gap-1.5 mb-1.5">
+                  {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => (
+                    <div key={d} className="text-center text-xs text-slate-500 font-medium">{d}</div>
+                  ))}
+                </div>
+
+                {/* Cells */}
+                <div className="grid grid-cols-7 gap-1.5">
+                  {activityData.length === 0
+                    ? Array.from({ length: 28 }).map((_, i) => (
+                        <div key={i} className="aspect-square rounded-md bg-slate-800 animate-pulse" />
+                      ))
+                    : (() => {
+                        const firstDate = new Date(activityData[0].date + 'T00:00:00');
+                        const offset = (firstDate.getDay() + 6) % 7;
+                        return (
+                          <>
+                            {Array.from({ length: offset }).map((_, i) => (
+                              <div key={`pad-${i}`} className="aspect-square" />
+                            ))}
+                            {activityData.map((day) => {
+                              const isToday = day.date === today;
+                              const bg =
+                                day.count >= 5 ? '#4ade80'
+                                : day.count >= 3 ? 'rgba(34,197,94,0.78)'
+                                : day.count >= 1 ? 'rgba(21,128,61,0.65)'
+                                : isToday ? 'rgba(71,85,105,0.8)'
+                                : 'rgba(30,41,59,0.9)';
+                              return (
+                                <div
+                                  key={day.date}
+                                  title={`${day.date}: ${day.count} ${day.count === 1 ? 'activity' : 'activities'}`}
+                                  className="aspect-square rounded-md transition-opacity duration-150 hover:opacity-70 cursor-default"
+                                  style={{ background: bg, outline: isToday ? '2px solid rgba(100,116,139,0.5)' : 'none', outlineOffset: '-2px' }}
+                                />
+                              );
+                            })}
+                          </>
+                        );
+                      })()}
+                </div>
+                </div>{/* end shared width container */}
+
+                {/* Legend */}
+                <div className="flex items-center gap-1.5 mt-4">
+                  <span className="text-xs text-slate-500">Less</span>
+                  {[
+                    'rgba(30,41,59,0.9)',
+                    'rgba(21,128,61,0.65)',
+                    'rgba(34,197,94,0.78)',
+                    '#4ade80',
+                  ].map((bg, i) => (
+                    <div key={i} className="w-4 h-4 rounded-[3px]" style={{ background: bg }} />
+                  ))}
+                  <span className="text-xs text-slate-500">More</span>
+                </div>
+              </div>
+
             </div>
           </Card>
         </div>

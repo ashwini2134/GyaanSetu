@@ -44,6 +44,7 @@ model User {
   projectFiles        ProjectFile[]
   taskProgress        ProjectTaskProgress[]
   notifications       InAppNotification[]
+  issuedCertificates  IssuedCertificate[]
 }
 
 model InAppNotification {
@@ -326,4 +327,17 @@ model AssessmentProgress {
 
   @@unique([userId, category, subsection])
   @@map("assessment_progress")
+}
+
+model IssuedCertificate {
+  id          String   @id @default(uuid())
+  userId      String
+  courseSlug  String
+  certNumber  String   @unique
+  issuedAt    DateTime @default(now())
+  issuedBy    String
+  avgScore    Float?
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseSlug])
 }
