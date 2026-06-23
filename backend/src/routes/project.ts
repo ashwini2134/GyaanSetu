@@ -174,7 +174,7 @@ router.get("/", requireAuth, async (req: AuthenticatedRequest, res, next) => {
 router.get("/:projectId", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
     const userId = req.user!.id;
-    const { projectId } = req.params;
+    const projectId = req.params.projectId as string;
     // ensure it's not matching 'status'
     if (projectId === "status") return next();
 
@@ -218,7 +218,7 @@ router.get("/status", requireAuth, async (req: AuthenticatedRequest, res, next) 
 router.patch("/:projectId/start", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
     const userId = req.user!.id;
-    const { projectId } = req.params;
+    const projectId = req.params.projectId as string;
 
     const project = await prisma.project.upsert({
       where: {
@@ -249,7 +249,7 @@ router.patch("/:projectId/start", requireAuth, async (req: AuthenticatedRequest,
 router.patch("/:projectId/complete", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
     const userId = req.user!.id;
-    const { projectId } = req.params;
+    const projectId = req.params.projectId as string;
 
     const { code, githubUrl, liveDemoUrl, description } = req.body;
 

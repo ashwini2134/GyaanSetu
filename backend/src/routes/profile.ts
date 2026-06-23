@@ -49,7 +49,7 @@ router.get("/projects", requireAuth, async (req: AuthenticatedRequest, res, next
 router.get("/timeline", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
     const userId = req.user!.id;
-    const events: { date: string; rawDate: Date; type: string; title: string; description?: string }[] = [];
+    const events: { date: string; rawDate: Date; type: string; title: string; description?: string; projectId?: string }[] = [];
 
     // 1. User joined event
     const user = await prisma.user.findUnique({ where: { id: userId } });

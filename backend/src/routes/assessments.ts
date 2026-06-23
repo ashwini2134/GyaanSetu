@@ -17,7 +17,7 @@ const CATEGORY_STRUCTURE: Record<string, string[]> = {
 
 router.get("/progress/:userId", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
-    const userId = req.params.userId;
+    const userId = req.params.userId as string;
     if (userId !== req.user!.id && req.user!.role !== "admin") {
       return res.status(403).json({ error: "Forbidden" });
     }
@@ -65,7 +65,7 @@ router.get("/progress/:userId", requireAuth, async (req: AuthenticatedRequest, r
 
 router.get("/subsection-status/:userId", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
-    const userId = req.params.userId;
+    const userId = req.params.userId as string;
     if (userId !== req.user!.id && req.user!.role !== "admin") {
       return res.status(403).json({ error: "Forbidden" });
     }
@@ -208,7 +208,7 @@ router.post('/submit', async (req, res) => {
 
 router.get("/analytics/:userId", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
-    const userId = req.params.userId;
+    const userId = req.params.userId as string;
     if (userId !== req.user!.id && req.user!.role !== "admin") {
       return res.status(403).json({ error: "Forbidden" });
     }
