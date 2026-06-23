@@ -28,29 +28,18 @@ export function createApp() {
   const app = express();
 
   app.use(helmet());
-  app.use(
-    cors({
-      origin(origin, callback) {
-        if (!origin) {
-          callback(null, true);
-          return;
-        }
-        const allowedOrigins = new Set([
-          config.frontendUrl.replace(/\/$/, ""),
-          "http://localhost:5173",
-          "http://127.0.0.1:5173",
-          "http://localhost:4173",
-          "http://127.0.0.1:4173",
-        ]);
-        if (allowedOrigins.has(origin)) {
-          callback(null, true);
-          return;
-        }
-        callback(null, true);
-      },
-      credentials: true,
-    })
-  );
+  const allowedOrigins = [
+    'http://localhost:5173',
+    'https://lms05.vercel.app',
+    process.env.FRONTEND_URL
+  ].filter(Boolean) as string[];
+
+  app.use(cors({
+    origin: allowedOrigins,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  }));
   app.use(express.json({ limit: "5mb" }));
   app.use(cookieParser());
 
