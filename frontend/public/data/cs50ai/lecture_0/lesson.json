@@ -46,11 +46,11 @@
         },
         {
           "type": "practice",
-          "title": "Classifying AI vs Rule-Based Tasks",
-          "instructions": "Given a list of tasks, identify which ones use AI (learn from data) and which are rule-based (follow fixed instructions).",
-          "starterCode": "tasks = [\n    \"Sorting numbers\",\n    \"Translating language\",\n    \"Adding two numbers\",\n    \"Recognizing faces\",\n]\n# Print each task with \"Uses AI\" or \"Rule-based\"\nfor task in tasks:\n    if task == \"Sorting numbers\":\n        print(f\"{task} - Rule-based\")\n    elif task == \"Translating language\":\n        print(f\"{task} - Uses AI\")\n    elif task == \"Adding two numbers\":\n        print(f\"{task} - Rule-based\")\n    elif task == \"Recognizing faces\":\n        print(f\"{task} - Uses AI\")",
-          "solution": "tasks = [\"Sorting numbers\", \"Translating language\", \"Adding two numbers\", \"Recognizing faces\"]\nfor task in tasks:\n    if task in [\"Translating language\", \"Recognizing faces\"]:\n        print(f\"{task} - Uses AI\")\n    else:\n        print(f\"{task} - Rule-based\")",
-          "hint": "Think about which tasks require learning from examples vs. following fixed instructions."
+          "title": "AI vs Traditional Programs",
+          "instructions": "WHAT YOU'LL LEARN\n\nThe difference between traditional programs and AI systems.\n\nYOUR CHALLENGE\n\nClassify real-world applications as traditional programming or AI.\n\nPROMPT HINT\n\nDoes the application follow rules or learn from data?",
+          "starterCode": "# Classify each application\n# Write 'Traditional' or 'AI' next to each\nprint(\"Calculator: \") \nprint(\"Spam filter: \") \nprint(\"Google Maps: \") \nprint(\"Netflix: \")",
+          "solution": "print(\"Calculator: Traditional\")\nprint(\"Spam filter: AI\")\nprint(\"Google Maps: AI\")\nprint(\"Netflix: AI\")",
+          "hint": "Ask yourself for each: Does it follow fixed rules or learn from data?"
         }
       ]
     },

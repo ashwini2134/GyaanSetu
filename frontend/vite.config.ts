@@ -8,6 +8,7 @@ export default defineConfig({
     tailwindcss(),
   ],
 
+  base: "/",
   server: {
     proxy: {
       "/api": {
