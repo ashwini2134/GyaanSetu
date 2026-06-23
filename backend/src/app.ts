@@ -54,13 +54,8 @@ export function createApp() {
   app.use(express.json({ limit: "5mb" }));
   app.use(cookieParser());
 
-  app.get("/api/health", async (req, res) => {
-    try {
-      const userCount = await prisma.user.count();
-      res.json({ status: "ok", db: "connected", users: userCount });
-    } catch (error: any) {
-      res.json({ status: "ok", db: "error", message: error.message, dbUrlSet: !!process.env.DATABASE_URL });
-    }
+  app.get("/api/health", (_req, res) => {
+    res.json({ status: "ok" });
   });
 
   app.use("/api/auth", authRoutes);
