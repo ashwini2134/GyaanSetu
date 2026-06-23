@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "start": "node dist/index.js",
-    "build": "npx prisma generate && npx prisma db push --accept-data-loss && tsc",
+    "start": "npx prisma db push --accept-data-loss && node dist/index.js",
+    "build": "npx prisma generate && tsc",
     "test": "vitest run",
     "test:watch": "vitest",
     "seed:assessments": "tsx src/seeds/assessmentQuestions.ts"
