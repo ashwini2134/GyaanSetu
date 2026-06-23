@@ -8,7 +8,6 @@ export default defineConfig({
     tailwindcss(),
   ],
 
-  base: "/LMS/",
   server: {
     proxy: {
       "/api": {
