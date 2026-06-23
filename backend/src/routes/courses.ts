@@ -14,16 +14,27 @@ router.get("/progress", requireAuth, async (req: AuthenticatedRequest, res, next
   try {
     const userId = req.user!.id;
 
-    const lectureProgressRecords = await prisma.lectureProgress.findMany({
-      where: { userId, isCompleted: true },
-    });
+    const [lectureProgressRecords, completedLectures] = await Promise.all([
+      prisma.lectureProgress.findMany({
+        where: { userId, isCompleted: true },
+      }),
+      prisma.progress.findMany({
+        where: { userId, status: "COMPLETED" },
+        select: { courseSlug: true, lectureId: true },
+      }),
+    ]);
 
-    const completedSectionsMap: Record<string, Record<string, number>> = {};
+    const lectureCompletedSet = new Set(
+      completedLectures.map(p => `${p.courseSlug}:${p.lectureId}`)
+    );
+
+    const sectionsPerLecture: Record<string, Record<string, number>> = {};
     for (const record of lectureProgressRecords) {
-      if (!completedSectionsMap[record.courseSlug]) {
-        completedSectionsMap[record.courseSlug] = {};
+      if (!sectionsPerLecture[record.courseSlug]) {
+        sectionsPerLecture[record.courseSlug] = {};
       }
-      completedSectionsMap[record.courseSlug][record.lectureId] = (completedSectionsMap[record.courseSlug][record.lectureId] || 0) + 1;
+      sectionsPerLecture[record.courseSlug][record.lectureId] =
+        (sectionsPerLecture[record.courseSlug][record.lectureId] || 0) + 1;
     }
 
     const courseStatsMap: Record<string, {
@@ -35,57 +46,46 @@ router.get("/progress", requireAuth, async (req: AuthenticatedRequest, res, next
       status: "not_started" | "in_progress" | "completed";
     }> = {};
 
-    for (const [slug, total] of Object.entries(COURSE_LECTURE_COUNTS)) {
-      const lecturesForCourse = completedSectionsMap[slug] || {};
-      let completedLectures = 0;
-      let inProgressLectures = 0;
+    function isLectureCompleted(courseSlug: string, lectureId: string): boolean {
+      if (lectureCompletedSet.has(`${courseSlug}:${lectureId}`)) return true;
+      const sectionCount = sectionsPerLecture[courseSlug]?.[lectureId] ?? 0;
+      return sectionCount >= 6;
+    }
 
-      for (const sectionsCount of Object.values(lecturesForCourse)) {
-        if (sectionsCount >= 6) {
-          completedLectures++;
-        } else if (sectionsCount > 0) {
-          inProgressLectures++;
+    const allCourseSlugs = new Set(Object.keys(COURSE_LECTURE_COUNTS));
+    for (const p of completedLectures) allCourseSlugs.add(p.courseSlug);
+    for (const p of lectureProgressRecords) allCourseSlugs.add(p.courseSlug);
+
+    for (const slug of allCourseSlugs) {
+      const total = COURSE_LECTURE_COUNTS[slug] ?? 10;
+
+      const lectureIds = new Set<string>();
+      for (const key of lectureCompletedSet) {
+        const [cs, lid] = key.split(":");
+        if (cs === slug) lectureIds.add(lid);
+      }
+      for (const lid of Object.keys(sectionsPerLecture[slug] || {})) {
+        lectureIds.add(lid);
+      }
+
+      let completedCount = 0;
+      let inProgressCount = 0;
+      for (const lid of lectureIds) {
+        if (isLectureCompleted(slug, lid)) {
+          completedCount++;
+        } else {
+          inProgressCount++;
         }
       }
 
       courseStatsMap[slug] = {
         courseId: slug,
-        completedLectures,
-        inProgressLectures,
+        completedLectures: completedCount,
+        inProgressLectures: inProgressCount,
         totalLectures: total,
-        percentage: Math.min(100, Math.round((completedLectures / total) * 100)),
-        status: completedLectures === 0 && inProgressLectures === 0 ? "not_started" : completedLectures >= total ? "completed" : "in_progress",
+        percentage: Math.min(100, Math.round((completedCount / total) * 100)),
+        status: completedCount === 0 && inProgressCount === 0 ? "not_started" : completedCount >= total ? "completed" : "in_progress",
       };
-    }
-
-    // Also include any courses the user has progress in but aren't in the map
-    const allSlugs = new Set(Object.keys(courseStatsMap));
-    for (const p of lectureProgressRecords) {
-      if (!allSlugs.has(p.courseSlug)) {
-        const lecturesForCourse = completedSectionsMap[p.courseSlug] || {};
-        let completedLectures = 0;
-        let inProgressLectures = 0;
-
-        for (const sectionsCount of Object.values(lecturesForCourse)) {
-          if (sectionsCount >= 6) {
-            completedLectures++;
-          } else if (sectionsCount > 0) {
-            inProgressLectures++;
-          }
-        }
-
-        const total = COURSE_LECTURE_COUNTS[p.courseSlug] || 10;
-
-        courseStatsMap[p.courseSlug] = {
-          courseId: p.courseSlug,
-          completedLectures,
-          inProgressLectures,
-          totalLectures: total,
-          percentage: Math.min(100, Math.round((completedLectures / total) * 100)),
-          status: completedLectures === 0 && inProgressLectures === 0 ? "not_started" : completedLectures >= total ? "completed" : "in_progress",
-        };
-        allSlugs.add(p.courseSlug);
-      }
     }
 
     res.json(Object.values(courseStatsMap));

@@ -34,7 +34,7 @@ router.get('/eligibility', requireAuth, async (req: AuthenticatedRequest, res, n
 router.get('/admin/eligible', requireAuth, requireRole('admin'), async (_req, res, next) => {
   try {
     const students = await prisma.user.findMany({
-      where: { role: 'student' },
+      where: { role: 'student', email: { not: { endsWith: '@test.com' } } },
       select: { id: true, name: true, email: true },
     });
 

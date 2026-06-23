@@ -102,7 +102,12 @@ router.get("/me", requireAuth, async (req: AuthenticatedRequest, res, next) => {
 
 router.get("/leaderboard", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
-    const leaderboard = await getLeaderboard(req.user!.id);
+    const period = (req.query.period as string) || "all";
+    const courseSlug = req.query.courseSlug as string | undefined;
+    if (!["all", "week", "month"].includes(period)) {
+      return res.status(400).json({ error: "Invalid period. Use 'all', 'week', or 'month'." });
+    }
+    const leaderboard = await getLeaderboard(req.user!.id, { period: period as "all" | "week" | "month", courseSlug });
     res.json({ leaderboard });
   } catch (error) {
     next(error);

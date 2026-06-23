@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth';
 import { authFetch } from '../authClient';
-import { Trophy, Flame, Medal, Crown, TrendingUp, BookOpen, Brain, Code, LayoutDashboard } from 'lucide-react';
+import { Trophy, Flame, Medal, Crown, TrendingUp, BookOpen, Brain, Code, LayoutDashboard, ChevronUp, ChevronDown, Minus, BarChart3 } from 'lucide-react';
 
 interface LeaderboardEntry {
   rank: number;
@@ -14,17 +14,17 @@ interface LeaderboardEntry {
   projectsCompleted: number;
   streak: number;
   score: number;
+  rankChange: number;
+  breakdown: Record<string, number>;
+  xpToNext: number | null;
+  nextRankName: string | null;
 }
 
-async function fetchLeaderboard(): Promise<LeaderboardEntry[]> {
-  try {
-    const data = await authFetch<{ leaderboard?: LeaderboardEntry[] }>('/progress/leaderboard');
-    return data.leaderboard ?? [];
-  } catch (err) {
-    console.warn('Failed to fetch leaderboard:', err);
-    return [];
-  }
-}
+type Period = 'all' | 'week' | 'month';
+type CourseFilter = 'overall' | 'python' | 'cs50ai';
+
+const PERIOD_LABELS: Record<Period, string> = { all: 'All Time', week: 'This Week', month: 'This Month' };
+const COURSE_LABELS: Record<CourseFilter, string> = { overall: 'Overall', python: 'CS50P Python', cs50ai: 'CS50 AI' };
 
 function getInitials(name: string) {
   return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
@@ -82,28 +82,102 @@ const rankColors = [
   { ring: 'ring-amber-600', bg: 'bg-amber-600/10', border: 'border-amber-600/20', text: 'text-amber-600' },
 ];
 
+function RankChangeBadge({ change }: { change: number }) {
+  if (change > 0) {
+    return <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-emerald-400"><ChevronUp size={11} />{change}</span>;
+  }
+  if (change < 0) {
+    return <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-red-400"><ChevronDown size={11} />{Math.abs(change)}</span>;
+  }
+  return <span className="inline-flex items-center text-[10px] text-slate-600"><Minus size={11} /></span>;
+}
+
+function BreakdownPopover({ breakdown, score }: { breakdown: Record<string, number>; score: number }) {
+  const [open, setOpen] = useState(false);
+  const items = [
+    { key: 'lectures', label: 'Lectures', color: 'text-blue-400' },
+    { key: 'quizzes', label: 'Quizzes', color: 'text-purple-400' },
+    { key: 'practice', label: 'Practice', color: 'text-teal-400' },
+    { key: 'problems', label: 'Problems', color: 'text-emerald-400' },
+    { key: 'projects', label: 'Projects', color: 'text-amber-400' },
+    { key: 'courseComplete', label: 'Course Bonus', color: 'text-rose-400' },
+    { key: 'sections', label: 'Sections', color: 'text-cyan-400' },
+    { key: 'other', label: 'Other', color: 'text-slate-400' },
+  ].filter(item => (breakdown[item.key] ?? 0) > 0);
+
+  return (
+    <div className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+      <button className="text-slate-500 hover:text-slate-300 transition-colors">
+        <BarChart3 size={13} />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full mt-1 z-50 w-44 rounded-lg border border-slate-700 bg-slate-900 shadow-xl p-3">
+          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">XP Breakdown</p>
+          <div className="space-y-1.5">
+            {items.map(item => (
+              <div key={item.key} className="flex items-center justify-between text-[11px]">
+                <span className={item.color}>{item.label}</span>
+                <span className="text-slate-300 font-mono">+{breakdown[item.key]}</span>
+              </div>
+            ))}
+          </div>
+          <div className="border-t border-slate-700 mt-2 pt-2 flex items-center justify-between text-[11px] font-bold">
+            <span className="text-slate-400">Total</span>
+            <span className="text-blue-400">{score}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TabBar<T extends string>({ options, selected, onChange }: { options: { value: T; label: string }[]; selected: T; onChange: (v: T) => void }) {
+  return (
+    <div className="flex gap-1 bg-slate-800/60 rounded-xl p-1 border border-slate-700/50">
+      {options.map(o => (
+        <button
+          key={o.value}
+          onClick={() => onChange(o.value)}
+          className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+            selected === o.value
+              ? 'bg-blue-600 text-white shadow-md'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function LeaderboardPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [period, setPeriod] = useState<Period>('all');
+  const [courseFilter, setCourseFilter] = useState<CourseFilter>('overall');
 
-  useEffect(() => {
-    if (!user) {
-      setEntries([]);
-      setLoading(false);
-      return;
-    }
-
+  const fetchLeaderboard = useCallback(async (p: Period, cf: CourseFilter) => {
+    if (!user) { setEntries([]); setLoading(false); return; }
     setLoading(true);
-    fetchLeaderboard().then(data => {
-      setEntries(data);
-      setLoading(false);
-    });
+    try {
+      const params = new URLSearchParams({ period: p });
+      if (cf !== 'overall') params.set('courseSlug', cf);
+      const data = await authFetch<{ leaderboard: LeaderboardEntry[] }>(`/progress/leaderboard?${params}`);
+      setEntries(data.leaderboard ?? []);
+    } catch { setEntries([]); }
+    setLoading(false);
   }, [user]);
 
+  useEffect(() => {
+    fetchLeaderboard(period, courseFilter);
+  }, [period, courseFilter, fetchLeaderboard]);
+
+  const showPodium = entries.length >= 3;
   const top3 = entries.slice(0, 3);
-  const rest = entries.slice(3);
+  const rest = entries;
   const currentUserEntry = entries.find(e => e.email === user?.email);
 
   function PodiumCard({ entry, position }: { entry: LeaderboardEntry; position: 'first' | 'second' | 'third' }) {
@@ -150,7 +224,6 @@ export default function LeaderboardPage() {
 
   return (
     <div className="min-h-screen bg-[#0b0f19] text-slate-100">
-      {/* Hero */}
       <div className="relative overflow-hidden border-b border-slate-800">
         <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 via-transparent to-blue-500/5" />
         <div className="absolute top-0 right-0 w-96 h-96 bg-yellow-500/3 rounded-full blur-3xl" />
@@ -176,6 +249,20 @@ export default function LeaderboardPage() {
       </div>
 
       <div className="max-w-5xl mx-auto px-4 md:px-8 py-8">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
+          <TabBar options={[
+            { value: 'all', label: 'All Time' },
+            { value: 'week', label: 'This Week' },
+            { value: 'month', label: 'This Month' },
+          ]} selected={period} onChange={setPeriod} />
+
+          <TabBar options={[
+            { value: 'overall', label: 'Overall' },
+            { value: 'python', label: 'CS50P Python' },
+            { value: 'cs50ai', label: 'CS50 AI' },
+          ]} selected={courseFilter} onChange={setCourseFilter} />
+        </div>
+
         {loading ? (
           <div className="space-y-4">
             {[1, 2, 3].map(i => (
@@ -200,8 +287,7 @@ export default function LeaderboardPage() {
           </div>
         ) : (
           <>
-            {/* Podium */}
-            {top3.length === 3 && (
+            {showPodium && (
               <div className="mb-10">
                 <div className="flex items-end justify-center gap-3 md:gap-6">
                   <PodiumCard entry={top3[1]} position="second" />
@@ -211,127 +297,108 @@ export default function LeaderboardPage() {
               </div>
             )}
 
-            {/* Current user mini-card (if not in top 3) */}
-            {currentUserEntry && top3.length === 3 && !top3.find(e => e.email === user?.email) && (
-              <div className="mb-6 p-4 rounded-2xl bg-blue-500/5 border border-blue-500/20 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full ring-2 ring-blue-400/50 bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center text-sm font-bold text-white">
-                    {getInitials(currentUserEntry.name)}
+            {currentUserEntry && showPodium && !top3.find(e => e.email === user?.email) && (
+              <div className="mb-6 p-4 rounded-2xl bg-blue-500/5 border border-blue-500/20">
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full ring-2 ring-blue-400/50 bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center text-sm font-bold text-white">
+                      {getInitials(currentUserEntry.name)}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-white flex items-center gap-2">
+                        #{currentUserEntry.rank} — {currentUserEntry.name}
+                        <span className="text-[10px] text-blue-400 bg-blue-500/10 border border-blue-500/20 px-1.5 py-0.5 rounded-full">You</span>
+                        <RankChangeBadge change={currentUserEntry.rankChange} />
+                      </p>
+                      <p className="text-xs text-slate-400">{currentUserEntry.score} XP — {currentUserEntry.lecturesCompleted} lectures, {currentUserEntry.quizzesPassed} quizzes, {currentUserEntry.projectsCompleted} projects</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-white">#{currentUserEntry.rank} — {currentUserEntry.name} <span className="text-[10px] text-blue-400 bg-blue-500/10 border border-blue-500/20 px-1.5 py-0.5 rounded-full ml-1">You</span></p>
-                    <p className="text-xs text-slate-400">{currentUserEntry.score} XP — {currentUserEntry.lecturesCompleted} lectures, {currentUserEntry.quizzesPassed} quizzes, {currentUserEntry.projectsCompleted} projects</p>
+                  <div className="text-right">
+                    <p className={`text-[11px] font-semibold uppercase ${getLevel(currentUserEntry.score).color}`}>{getLevel(currentUserEntry.score).label}</p>
+                    {nextLevelXp(currentUserEntry.score) > 0 && (
+                      <p className="text-[10px] text-slate-500">{nextLevelXp(currentUserEntry.score)} XP to next level</p>
+                    )}
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className={`text-[11px] font-semibold uppercase ${getLevel(currentUserEntry.score).color}`}>{getLevel(currentUserEntry.score).label}</p>
-                  {nextLevelXp(currentUserEntry.score) > 0 && (
-                    <p className="text-[10px] text-slate-500">{nextLevelXp(currentUserEntry.score)} XP to next level</p>
-                  )}
-                </div>
+                {currentUserEntry.xpToNext !== null && currentUserEntry.nextRankName && (
+                  <div className="mt-3 pt-3 border-t border-blue-500/10 flex items-center gap-2 text-xs">
+                    <TrendingUp size={13} className="text-emerald-400" />
+                    <span className="text-slate-400">
+                      <span className="text-emerald-400 font-semibold">{currentUserEntry.xpToNext} XP</span> away from passing <span className="text-slate-200 font-semibold">#{currentUserEntry.rank - 1} {currentUserEntry.nextRankName}</span>
+                    </span>
+                  </div>
+                )}
               </div>
             )}
 
-            {/* Leaderboard list */}
             <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl overflow-hidden">
-              {/* Header */}
               <div className="grid grid-cols-12 gap-3 px-5 py-3.5 border-b border-slate-800 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
                 <div className="col-span-1 md:col-span-1">#</div>
-                <div className="col-span-4 md:col-span-4">Name</div>
+                <div className="col-span-1 text-center hidden sm:block"></div>
+                <div className="col-span-5 md:col-span-3">Name</div>
                 <div className="col-span-2 text-center hidden md:block">Lectures</div>
                 <div className="col-span-2 text-center hidden md:block">Quizzes</div>
                 <div className="col-span-2 text-center hidden md:block">Projects</div>
-                <div className="col-span-2 md:col-span-1 text-center hidden md:block">Streak</div>
+                <div className="col-span-1 text-center hidden md:block">Streak</div>
                 <div className="col-span-3 md:col-span-2 text-right">XP</div>
               </div>
 
               <div className="divide-y divide-slate-800/40">
-                {rest.length > 0 ? (
-                  rest.map((entry, i) => {
-                    const actualRank = i + 4;
-                    const isYou = entry.email === user?.email;
-                    return (
-                      <div
-                        key={entry.email}
-                        className={`grid grid-cols-12 gap-3 px-5 py-3.5 items-center transition-colors hover:bg-slate-800/20 ${
-                          isYou ? 'bg-blue-500/5 relative' : ''
-                        }`}
-                      >
-                        {isYou && <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-blue-400" />}
-                        <div className="col-span-1 flex items-center">
-                          <span className="text-sm font-mono text-slate-500 w-6">{actualRank}</span>
+                {rest.map(entry => {
+                  const isYou = entry.email === user?.email;
+                  return (
+                    <div
+                      key={entry.email}
+                      className={`grid grid-cols-12 gap-3 px-5 py-3.5 items-center transition-colors hover:bg-slate-800/20 ${
+                        isYou ? 'bg-blue-500/5 relative' : ''
+                      }`}
+                    >
+                      {isYou && <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-blue-400" />}
+                      <div className="col-span-1 flex items-center gap-1">
+                        <span className="text-sm font-mono text-slate-500 w-6">{entry.rank}</span>
+                      </div>
+                      <div className="col-span-1 text-center hidden sm:block">
+                        <RankChangeBadge change={entry.rankChange} />
+                      </div>
+                      <div className="col-span-5 md:col-span-3 flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${getGradient(entry.rank - 1)} flex items-center justify-center text-xs font-bold text-white shadow-md flex-shrink-0`}>
+                          {getInitials(entry.name)}
                         </div>
-                        <div className="col-span-4 flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${getGradient(actualRank - 1)} flex items-center justify-center text-xs font-bold text-white shadow-md flex-shrink-0`}>
-                            {getInitials(entry.name)}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-sm font-semibold text-slate-200 truncate flex items-center gap-2">
-                              {entry.name}
-                              {isYou && <span className="text-[9px] text-blue-400 bg-blue-500/10 border border-blue-500/20 px-1.5 py-0.5 rounded-full">You</span>}
-                            </p>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-slate-200 truncate flex items-center gap-2">
+                            {entry.name}
+                            {isYou && <span className="text-[9px] text-blue-400 bg-blue-500/10 border border-blue-500/20 px-1.5 py-0.5 rounded-full">You</span>}
+                          </p>
+                          <div className="flex items-center gap-2">
                             <span className={`text-[10px] font-medium ${getLevel(entry.score).color}`}>{getLevel(entry.score).label}</span>
                           </div>
                         </div>
-                        <div className="col-span-2 text-center text-xs text-slate-400 hidden md:block">{entry.lecturesCompleted}</div>
-                        <div className="col-span-2 text-center text-xs text-slate-400 hidden md:block">{entry.quizzesPassed}</div>
-                        <div className="col-span-2 text-center text-xs text-slate-400 hidden md:block">{entry.projectsCompleted}</div>
-                        <div className="col-span-1 text-center hidden md:block">
-                          <span className="inline-flex items-center gap-1 text-xs">
-                            <Flame size={12} className={entry.streak > 0 ? 'text-amber-400' : 'text-slate-600'} />
-                            <span className={entry.streak > 0 ? 'text-amber-400' : 'text-slate-500'}>{entry.streak}</span>
-                          </span>
-                        </div>
-                        <div className="col-span-3 md:col-span-2 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <div className="hidden md:block w-16 h-1.5 rounded-full bg-slate-700 overflow-hidden">
-                              <div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-purple-500" style={{ width: `${levelProgress(entry.score)}%` }} />
-                            </div>
-                            <span className="text-sm font-bold text-blue-400">{entry.score}</span>
+                      </div>
+                      <div className="col-span-2 text-center text-xs text-slate-400 hidden md:block">{entry.lecturesCompleted}</div>
+                      <div className="col-span-2 text-center text-xs text-slate-400 hidden md:block">{entry.quizzesPassed}</div>
+                      <div className="col-span-2 text-center text-xs text-slate-400 hidden md:block">{entry.projectsCompleted}</div>
+                      <div className="col-span-1 text-center hidden md:block">
+                        <span className="inline-flex items-center gap-1 text-xs">
+                          <Flame size={12} className={entry.streak > 0 ? 'text-amber-400' : 'text-slate-600'} />
+                          <span className={entry.streak > 0 ? 'text-amber-400' : 'text-slate-500'}>{entry.streak}</span>
+                        </span>
+                      </div>
+                      <div className="col-span-3 md:col-span-2 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <div className="hidden md:block w-16 h-1.5 rounded-full bg-slate-700 overflow-hidden">
+                            <div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-purple-500" style={{ width: `${levelProgress(entry.score)}%` }} />
                           </div>
+                          <span className="text-sm font-bold text-blue-400">{entry.score}</span>
+                          <BreakdownPopover breakdown={entry.breakdown} score={entry.score} />
                         </div>
                       </div>
-                    );
-                  })
-                ) : (
-                  <div className="px-5 py-8 text-center text-sm text-slate-500">
-                    {entries.length <= 3 ? 'Only top 3 ranked so far. Keep learning to see more competitors!' : 'No more entries.'}
-                  </div>
-                )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Rules card */}
-            <div className="mt-6 bg-slate-900/40 border border-slate-800/60 rounded-2xl p-5">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
-                  <span className="text-blue-400 text-sm font-bold">i</span>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-slate-300 mb-1">How XP is Earned</p>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
-                    {[
-                      { label: 'Lecture', xp: 50, icon: BookOpen, color: 'text-blue-400' },
-                      { label: 'Quiz Pass', xp: 30, icon: Brain, color: 'text-purple-400' },
-                      { label: 'Problem', xp: 20, icon: Code, color: 'text-emerald-400' },
-                      { label: 'Project', xp: 100, icon: Trophy, color: 'text-amber-400' },
-                    ].map((item, i) => {
-                      const Icon = item.icon;
-                      return (
-                        <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-slate-800/30 border border-slate-700/30">
-                          <Icon size={14} className={item.color} />
-                          <div>
-                            <p className="text-[11px] text-slate-400">{item.label}</p>
-                            <p className={`text-xs font-bold ${item.color}`}>+{item.xp} XP</p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <p className="text-[11px] text-slate-500 mt-2">Daily streaks also multiply your learning momentum. Rankings update in real-time as you progress.</p>
-                </div>
-              </div>
-            </div>
+
           </>
         )}
       </div>

@@ -6,11 +6,17 @@ const COURSE_NAMES: Record<string, string> = {
   cs50ai:  'CS50 AI with Python',
 };
 
+// Total real (non-similar) problems per course
+const COURSE_PROBLEM_COUNTS: Record<string, number> = {
+  python:  37,
+  cs50ai:  20,
+};
+
 export interface EligibilityConditions {
   lecturesCompleted:  { done: number; required: number; passed: boolean };
   practiceCompleted:  { done: number; required: number; passed: boolean };
   quizzesAttempted:   { done: number; required: number; passed: boolean };
-  problemsSubmitted:  { done: number; passed: boolean };
+  problemsSubmitted:  { done: number; required: number; passed: boolean };
   projectCompleted:   { done: number; passed: boolean };
 }
 
@@ -25,6 +31,8 @@ export async function checkEligibility(userId: string, courseSlug: string): Prom
   const totalLectures = COURSE_LECTURE_COUNTS[courseSlug];
   if (!totalLectures) throw new Error(`Unknown course: ${courseSlug}`);
 
+  const totalProblems = COURSE_PROBLEM_COUNTS[courseSlug] ?? 0;
+
   const [
     existing,
     lecturesDone,
@@ -37,12 +45,21 @@ export async function checkEligibility(userId: string, courseSlug: string): Prom
     prisma.issuedCertificate.findUnique({ where: { userId_courseSlug: { userId, courseSlug } } }),
     prisma.progress.count({ where: { userId, courseSlug, status: 'COMPLETED' } }),
     prisma.progress.count({ where: { userId, courseSlug, practiceCompleted: true } }),
-    // one row per distinct quiz (lecture) attempted
     prisma.quizAttempt.groupBy({
       by: ['quizId'],
       where: { userId, quizId: { startsWith: `${courseSlug}-` } },
     }),
-    prisma.submission.count({ where: { userId, status: 'PASSED' } }),
+    // count PASSED submissions excluding auto-generated similar-question variants (_sim1, _sim2)
+    prisma.submission.count({
+      where: {
+        userId,
+        status: 'PASSED',
+        NOT: [
+          { problemId: { endsWith: '_sim1' } },
+          { problemId: { endsWith: '_sim2' } },
+        ],
+      },
+    }),
     prisma.project.count({ where: { userId, status: 'COMPLETED' } }),
     prisma.quizAttempt.findMany({
       where: { userId, quizId: { startsWith: `${courseSlug}-` } },
@@ -59,7 +76,7 @@ export async function checkEligibility(userId: string, courseSlug: string): Prom
     lecturesCompleted: { done: lecturesDone,          required: totalLectures, passed: lecturesDone >= totalLectures },
     practiceCompleted: { done: practiceDone,          required: totalLectures, passed: practiceDone >= totalLectures },
     quizzesAttempted:  { done: quizLectures.length,   required: totalLectures, passed: quizLectures.length >= totalLectures },
-    problemsSubmitted: { done: submissionsDone,        passed: submissionsDone > 0 },
+    problemsSubmitted: { done: submissionsDone, required: totalProblems, passed: submissionsDone >= totalProblems },
     projectCompleted:  { done: projectsDone,           passed: projectsDone > 0 },
   };
 
