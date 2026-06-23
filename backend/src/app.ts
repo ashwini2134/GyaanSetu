@@ -51,7 +51,7 @@ export function createApp() {
     try {
       const { execSync } = await import("child_process");
       const output = execSync("npx prisma db push --accept-data-loss", { encoding: "utf-8" });
-      res.json({ status: "success", output });
+      res.json({ status: "success", env: process.env.DATABASE_URL?.substring(0, 20) + "...", output });
     } catch (err: any) {
       res.status(500).json({ error: "Failed", stdout: err.stdout?.toString(), stderr: err.stderr?.toString(), message: err.message });
     }
