@@ -102,13 +102,84 @@ router.get("/me", requireAuth, async (req: AuthenticatedRequest, res, next) => {
 
 router.get("/leaderboard", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
-    const period = (req.query.period as string) || "all";
-    const courseSlug = req.query.courseSlug as string | undefined;
-    if (!["all", "week", "month"].includes(period)) {
-      return res.status(400).json({ error: "Invalid period. Use 'all', 'week', or 'month'." });
+    const timeframe = typeof req.query.timeframe === "string" ? req.query.timeframe : "all-time";
+    const data = await getLeaderboard(req.user!.id, timeframe);
+    res.json(data);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/profile/public/:userId", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const targetUserId = req.params.userId;
+    const targetUser = await prisma.user.findUnique({
+      where: { id: targetUserId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        bio: true,
+        avatarUrl: true,
+        createdAt: true,
+        totalXp: true,
+        currentStreak: true,
+        longestStreak: true,
+        _count: {
+          select: {
+            progress: { where: { status: "COMPLETED" } },
+            quizAttempts: { where: { passed: true } },
+            submissions: { where: { status: "PASSED" } },
+            projects: { where: { status: "COMPLETED" } },
+            issuedCertificates: true
+          }
+        }
+      }
+    });
+
+    if (!targetUser) {
+      return res.status(404).json({ error: "User not found" });
     }
-    const leaderboard = await getLeaderboard(req.user!.id, { period: period as "all" | "week" | "month", courseSlug });
-    res.json({ leaderboard });
+
+    const projects = await prisma.project.findMany({
+      where: { userId: targetUserId },
+      orderBy: { updatedAt: "desc" }
+    });
+
+    const timeline = await prisma.xpTransaction.findMany({
+      where: { userId: targetUserId },
+      orderBy: { createdAt: "desc" },
+      take: 20
+    });
+
+    const courseProgress = await prisma.progress.findMany({
+      where: { userId: targetUserId }
+    });
+
+    res.json({
+      user: {
+        id: targetUser.id,
+        name: targetUser.name,
+        email: targetUser.email,
+        bio: targetUser.bio,
+        avatarUrl: targetUser.avatarUrl,
+        createdAt: targetUser.createdAt,
+        role: "student",
+      },
+      stats: {
+        coursesCompleted: targetUser._count.issuedCertificates,
+        projectsSolved: targetUser._count.projects,
+        lecturesCompleted: targetUser._count.progress,
+        tasksSubmitted: targetUser._count.submissions,
+        xp: targetUser.totalXp,
+        streak: targetUser.currentStreak,
+        longestStreak: targetUser.longestStreak,
+      },
+      projects,
+      timeline,
+      courseProgress,
+      overallProgress: targetUser.overallProgress
+    });
   } catch (error) {
     next(error);
   }

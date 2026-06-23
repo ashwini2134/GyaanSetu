@@ -297,6 +297,10 @@ export default function App() {
             path="profile"
             element={<ProfilePage />}
           />
+          <Route
+            path="profile/:userId"
+            element={<ProfilePage />}
+          />
 
           {/* QA Center (admin only) */}
 

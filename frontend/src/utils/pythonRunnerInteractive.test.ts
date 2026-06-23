@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { runValidationTest } from './pythonRunnerInteractive';
+import { runPython, normalizeNumbers, stripPrompts } from './pythonRunner';
 
 describe('Interactive Python Runner', () => {
   beforeEach(() => {
@@ -251,5 +252,128 @@ with open("test.txt", "r") as f:
     expect(res.error).toBeNull();
     expect(res.stdout.trim()).toBe('hello world');
     expect(localStorage.getItem('fa_file_test.txt')).toBe('hello world');
+  });
+
+  it('handles empty dictionary literal {}', () => {
+    const code = `
+d = {}
+print(type(d))
+print(len(d))
+`;
+    const res = runPython(code, []);
+    expect(res.error).toBeNull();
+    expect(res.output.trim().split('\n').map(s => s.trim())).toEqual([
+      "<class 'dict'>",
+      "0"
+    ]);
+  });
+
+  it('distinguishes str() and repr() formatting and quotes keys', () => {
+    const code = `
+s = "hello"
+d = {"the": 3}
+print(str(s))
+print(repr(s))
+print(str(d))
+print(repr(d))
+`;
+    const res = runPython(code, []);
+    expect(res.error).toBeNull();
+    expect(res.output.trim().split('\n').map(s => s.trim())).toEqual([
+      "hello",
+      "'hello'",
+      "{'the': 3}",
+      "{'the': 3}"
+    ]);
+  });
+
+  it('handles string formatting % operator and augmented assignments', () => {
+    const code = `
+s = "%dC" % 32
+print(s)
+s += " and %s" % "hot"
+print(s)
+val = 85.123
+s = "%.2f" % val
+print(s)
+`;
+    const res = runPython(code, []);
+    expect(res.error).toBeNull();
+    expect(res.output.trim().split('\n').map(s => s.trim())).toEqual([
+      "32C",
+      "32C and hot",
+      "85.12"
+    ]);
+  });
+
+  it('handles file readlines()', () => {
+    const code = `
+with open("test_lines.txt", "w") as f:
+    f.write("line 1\\nline 2\\nline 3")
+
+with open("test_lines.txt", "r") as f:
+    lines = f.readlines()
+    print(lines)
+`;
+    const res = runPython(code, []);
+    expect(res.error).toBeNull();
+    expect(res.output.trim()).toBe("['line 1\\n', 'line 2\\n', 'line 3']");
+  });
+
+  it('handles Largest of Three with inputs 5, 12, 7', () => {
+    const code = `
+a = int(input("First: "))
+b = int(input("Second: "))
+c = int(input("Third: "))
+if a >= b and a >= c:
+    print("Largest:", a)
+elif b >= a and b >= c:
+    print("Largest:", b)
+else:
+    print("Largest:", c)
+`;
+    const res = runPython(code, ["5", "12", "7"]);
+    expect(res.error).toBeNull();
+    expect(res.output.trim()).toBe("First: Second: Third: Largest: 12");
+  });
+
+  it('verifies normalizeNumbers helper', () => {
+    expect(normalizeNumbers("9.0")).toBe("9");
+    expect(normalizeNumbers("9")).toBe("9");
+    expect(normalizeNumbers("32.0F")).toBe("32F");
+    expect(normalizeNumbers("0C = 32.0F")).toBe("0C = 32F");
+    expect(normalizeNumbers("Triangle b=6,h=3: 9.0")).toBe("Triangle b=6,h=3: 9");
+    expect(normalizeNumbers("Average: 85.00")).toBe("Average: 85");
+  });
+
+  it('handles Leap Year Checker with parenthesized logical expression', () => {
+    const code = `
+year = int(input("Enter year: "))
+if year % 4 == 0 and (year % 100 != 0 or year % 400 == 0):
+    print("Leap year")
+else:
+    print("Not a leap year")
+`;
+    const res2024 = runPython(code, ["2024"]);
+    expect(res2024.error).toBeNull();
+    expect(res2024.output.trim()).toBe("Enter year: Leap year");
+
+    const res2023 = runPython(code, ["2023"]);
+    expect(res2023.error).toBeNull();
+    expect(res2023.output.trim()).toBe("Enter year: Not a leap year");
+
+    const res2000 = runPython(code, ["2000"]);
+    expect(res2000.error).toBeNull();
+    expect(res2000.output.trim()).toBe("Enter year: Leap year");
+
+    const res1900 = runPython(code, ["1900"]);
+    expect(res1900.error).toBeNull();
+    expect(res1900.output.trim()).toBe("Enter year: Not a leap year");
+  });
+
+  it('verifies stripPrompts helper', () => {
+    const prompts = ["First: ", "Second: ", "Third: "];
+    expect(stripPrompts("First: Second: Third: Largest: 12", prompts)).toBe("Largest: 12");
+    expect(stripPrompts("First: Second: Third: Largest: 12", ["First: ", "Third: "])).toBe("Second: Largest: 12");
   });
 });

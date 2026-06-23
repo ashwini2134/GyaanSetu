@@ -8,56 +8,55 @@ datasource db {
 }
 
 model User {
-  id                  String               @id @default(uuid())
-  email               String               @unique
+  id                  String                @id @default(uuid())
+  email               String                @unique
   name                String
   passwordHash        String
-  createdAt           DateTime             @default(now())
-  totalXp             Int                  @default(0)
-  currentStreak       Int                  @default(0)
-  longestStreak       Int                  @default(0)
-  lastActiveAt        DateTime             @default(now())
-  emailVerified       Boolean              @default(false)
-  avatarUrl           String               @default("")
-  role                String               @default("student")
+  createdAt           DateTime              @default(now())
+  totalXp             Int                   @default(0)
+  currentStreak       Int                   @default(0)
+  longestStreak       Int                   @default(0)
+  lastActiveAt        DateTime              @default(now())
+  emailVerified       Boolean               @default(false)
+  role                String                @default("student")
   statsData           Json?
+  overallProgress     Int                   @default(0)
+  updatedAt           DateTime              @updatedAt
+  bio                 String                @default("")
+  avatarUrl           String                @default("")
   notificationPrefs   Json?
-  overallProgress     Int                  @default(0)
-  updatedAt           DateTime             @updatedAt
-  bio                 String               @default("")
   achievements        Achievement[]
   chatMessages        ChatMessage[]
   codeDrafts          CodeDraft[]
   dailyMissions       DailyMission[]
+  issuedCertificates  IssuedCertificate[]
+  lectureProgress     LectureProgress[]
   oauthAccounts       OAuthAccount[]
   oauthExchangeCodes  OAuthExchangeCode[]
   passwordResetTokens PasswordResetToken[]
-  progress            Progress[]
-  lectureProgress     LectureProgress[]
-  projects            Project[]
-  quizAttempts        QuizAttempt[]
-  assessmentProgress  AssessmentProgress[]
-  refreshTokens       RefreshToken[]
-  submissions         Submission[]
   practiceSubmissions PracticeSubmission[]
-  xpHistory           XpTransaction[]
+  progress            Progress[]
+  projects            Project[]
   projectFiles        ProjectFile[]
   taskProgress        ProjectTaskProgress[]
+  quizAttempts        QuizAttempt[]
+  refreshTokens       RefreshToken[]
+  submissions         Submission[]
+  xpHistory           XpTransaction[]
+  assessmentProgress  AssessmentProgress[]
   notifications       InAppNotification[]
-  issuedCertificates  IssuedCertificate[]
 }
 
 model InAppNotification {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   userId    String
   type      String
   title     String
   body      String
-  link      String   @default("")
+  link      String    @default("")
   readAt    DateTime?
-  createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, readAt])
   @@map("in_app_notifications")
@@ -84,7 +83,7 @@ model LectureProgress {
   userId       String
   courseSlug   String
   lectureId    String
-  sectionIndex Int      
+  sectionIndex Int
   isCompleted  Boolean  @default(false)
   updatedAt    DateTime @updatedAt
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -127,18 +126,18 @@ model ChatMessage {
 }
 
 model Project {
-  id          String    @id @default(uuid())
-  userId      String
-  projectId   String
-  code        String
-  status      String
-  startedAt   DateTime?
-  completedAt DateTime?
-  githubUrl   String?
-  liveDemoUrl String?
-  description String?
-  updatedAt   DateTime  @updatedAt
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String                @id @default(uuid())
+  userId       String
+  projectId    String
+  code         String
+  status       String
+  completedAt  DateTime?
+  updatedAt    DateTime              @updatedAt
+  description  String?
+  githubUrl    String?
+  liveDemoUrl  String?
+  startedAt    DateTime?
+  user         User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   taskProgress ProjectTaskProgress[]
 
   @@unique([userId, projectId])
@@ -173,7 +172,7 @@ model ProjectTaskProgress {
 }
 
 model ProjectTemplate {
-  id                String    @id
+  id                String   @id
   title             String
   category          String
   difficulty        String
@@ -189,8 +188,8 @@ model ProjectTemplate {
   image             String?
   githubLink        String?
   demoLink          String?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model Achievement {
@@ -298,13 +297,13 @@ model AssessmentQuestion {
   id            String   @id @default(cuid())
   category      String
   subsection    String
-  type          String   // "mcq" or "coding"
+  type          String
   question      String
-  options       String[] // for MCQ only, array of 4 options
-  correctAnswer String   // for MCQ: the correct option text. For coding: expected output
-  starterCode   String?  // for coding questions only
-  language      String?  // for coding: "python", "javascript" etc
-  difficulty    String   @default("medium") // "easy", "medium", "hard"
+  options       String[]
+  correctAnswer String
+  starterCode   String?
+  language      String?
+  difficulty    String   @default("medium")
   createdAt     DateTime @default(now())
 
   @@map("assessment_questions")
@@ -330,14 +329,14 @@ model AssessmentProgress {
 }
 
 model IssuedCertificate {
-  id          String   @id @default(uuid())
-  userId      String
-  courseSlug  String
-  certNumber  String   @unique
-  issuedAt    DateTime @default(now())
-  issuedBy    String
-  avgScore    Float?
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id         String   @id @default(uuid())
+  userId     String
+  courseSlug String
+  certNumber String   @unique
+  issuedAt   DateTime @default(now())
+  issuedBy   String
+  avgScore   Float?
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseSlug])
 }

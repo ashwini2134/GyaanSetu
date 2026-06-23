@@ -76,4 +76,39 @@ describe("Progress API", () => {
     expect(res.body.leaderboard[0]).toHaveProperty("rank");
     expect(res.body.leaderboard[0]).toHaveProperty("score");
   });
+
+  it("returns leaderboard data with timeframe and user stats", async () => {
+    const res = await request(app)
+      .get("/api/progress/leaderboard?timeframe=weekly")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body.leaderboard)).toBe(true);
+    expect(res.body.totalLearners).toBeGreaterThanOrEqual(1);
+    expect(res.body.currentUser).toHaveProperty("rank");
+    expect(res.body.currentUser).toHaveProperty("totalLearners");
+    expect(res.body.currentUser).toHaveProperty("score");
+    expect(res.body.currentUser).toHaveProperty("rankTitle");
+    expect(res.body.currentUser).toHaveProperty("progressPercent");
+  });
+
+  it("returns public profile details for another user", async () => {
+    const me = await request(app)
+      .get("/api/auth/me")
+      .set("Authorization", `Bearer ${token}`);
+    
+    const userId = me.body.user.id;
+
+    const publicProfile = await request(app)
+      .get(`/api/progress/profile/public/${userId}`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(publicProfile.status).toBe(200);
+    expect(publicProfile.body.user.id).toBe(userId);
+    expect(publicProfile.body.stats).toHaveProperty("coursesCompleted");
+    expect(publicProfile.body.stats).toHaveProperty("xp");
+    expect(publicProfile.body.stats).toHaveProperty("streak");
+    expect(publicProfile.body.stats).toHaveProperty("longestStreak");
+    expect(Array.isArray(publicProfile.body.projects)).toBe(true);
+  });
 });

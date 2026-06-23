@@ -9,10 +9,11 @@ export interface RunResult {
   output: string;
   error: string | null;
   exitCode: number; // 0 = success, 1 = error
+  prompts: string[];
 }
 
-export function runPython(code: string): RunResult {
-  return new MiniPython().run(code);
+export function runPython(code: string, inputs: string[] = []): RunResult {
+  return new MiniPython(inputs).run(code);
 }
 
 class LoopControl extends Error {
@@ -25,25 +26,37 @@ class LoopControl extends Error {
 class MiniPython {
   private globals: Env = new Map();
   private fns: Map<string, FnDef> = new Map();
-  private out: string[] = [];
+  private out: string = '';
   private traceback: string[] = [];
   private currentLine = 0;
+  private inputIdx = 0;
+  private prompts: string[] = [];
+
+  constructor(private inputs: string[] = []) {}
 
   run(code: string): RunResult {
     try {
       this.validateSyntax(code);
       const logicalLines = this.reconstructLogicalLines(code);
       this.execLines(logicalLines, 0, this.globals);
-      return { output: this.out.join('\n'), error: null, exitCode: 0 };
+      let output = this.out;
+      if (output.endsWith('\n')) {
+        output = output.slice(0, -1);
+      }
+      return { output, error: null, exitCode: 0, prompts: this.prompts };
     } catch (e) {
+      let output = this.out;
+      if (output.endsWith('\n')) {
+        output = output.slice(0, -1);
+      }
       if (e instanceof LoopControl) {
-        return { output: this.out.join('\n'), error: `  SyntaxError: '${e.ctype}' outside loop`, exitCode: 1 };
+        return { output, error: `  SyntaxError: '${e.ctype}' outside loop`, exitCode: 1, prompts: this.prompts };
       }
       const msg = String(e instanceof Error ? e.message : e);
       const tb = this.traceback.length > 0
         ? `Traceback (most recent call last):\n  File "<stdin>", line ${this.traceback[0]}, in <module>\n${msg}`
         : msg;
-      return { output: this.out.join('\n'), error: tb, exitCode: 1 };
+      return { output, error: tb, exitCode: 1, prompts: this.prompts };
     }
   }
 
@@ -201,25 +214,31 @@ class MiniPython {
         const rhs = this.eval(augM[3].trim(), env);
         const op = augM[2];
         let res: PyVal;
-        if (typeof cur !== 'number' || typeof rhs !== 'number') {
-          throw new Error(`  TypeError: unsupported operand type(s) for ${op}=: '${typeof cur}' and '${typeof rhs}'\n    at line ${i + 1}`);
-        }
-        switch (op) {
-          case '+': res = cur + rhs; break;
-          case '-': res = cur - rhs; break;
-          case '*': res = cur * rhs; break;
-          case '/':
-            if (rhs === 0) throw new Error(`  ZeroDivisionError: division by zero\n    at line ${i + 1}`);
-            res = cur / rhs; break;
-          case '//':
-            if (rhs === 0) throw new Error(`  ZeroDivisionError: integer division or modulo by zero\n    at line ${i + 1}`);
-            res = Math.floor(cur / rhs); break;
-          case '%':
-            if (rhs === 0) throw new Error(`  ZeroDivisionError: modulo by zero\n    at line ${i + 1}`);
-            res = cur % rhs; break;
-          case '**':
-            res = Math.pow(cur, rhs); break;
-          default: res = 0;
+        if (typeof cur === 'string' && op === '+') {
+          res = cur + String(rhs);
+        } else if (typeof cur === 'string' && op === '%') {
+          res = this.formatString(cur, rhs);
+        } else {
+          if (typeof cur !== 'number' || typeof rhs !== 'number') {
+            throw new Error(`  TypeError: unsupported operand type(s) for ${op}=: '${typeof cur}' and '${typeof rhs}'\n    at line ${i + 1}`);
+          }
+          switch (op) {
+            case '+': res = cur + rhs; break;
+            case '-': res = cur - rhs; break;
+            case '*': res = cur * rhs; break;
+            case '/':
+              if (rhs === 0) throw new Error(`  ZeroDivisionError: division by zero\n    at line ${i + 1}`);
+              res = cur / rhs; break;
+            case '//':
+              if (rhs === 0) throw new Error(`  ZeroDivisionError: integer division or modulo by zero\n    at line ${i + 1}`);
+              res = Math.floor(cur / rhs); break;
+            case '%':
+              if (rhs === 0) throw new Error(`  ZeroDivisionError: modulo by zero\n    at line ${i + 1}`);
+              res = cur % rhs; break;
+            case '**':
+              res = Math.pow(cur, rhs); break;
+            default: res = 0;
+          }
         }
         env.set(augM[1], res);
         i++; continue;
@@ -238,11 +257,42 @@ class MiniPython {
           body.push(bl);
           i++;
         }
-        if (cond) { this.execLines(body, ind + 1, env); continue; }
+        
+        // Helper: skip remaining elif/else blocks in the chain
+        const skipChain = () => {
+          while (i < lines.length) {
+            const skipLine = lines[i].trim();
+            if (!skipLine || skipLine.startsWith('#')) {
+              i++;
+              continue;
+            }
+            if (skipLine.startsWith('elif ') || skipLine.startsWith('else:') || skipLine.startsWith('else :')) {
+              i++;
+              while (i < lines.length) {
+                const bl = lines[i];
+                const bt = bl.trim();
+                if (bt && this.indent(bl) <= ind && !bt.startsWith('#')) break;
+                i++;
+              }
+            } else {
+              break;
+            }
+          }
+        };
+
+        if (cond) {
+          this.execLines(body, ind + 1, env);
+          skipChain();
+          continue;
+        }
 
         // Check for elif / else
         while (i < lines.length) {
           const nextLine = lines[i].trim();
+          if (!nextLine || nextLine.startsWith('#')) {
+            i++;
+            continue;
+          }
           if (nextLine.startsWith('elif ')) {
             const elCondStr = nextLine.slice(5, nextLine.lastIndexOf(':')).trim();
             const elCond = this.eval(elCondStr, env);
@@ -255,8 +305,12 @@ class MiniPython {
               elBody.push(bl);
               i++;
             }
-            if (elCond) { this.execLines(elBody, ind + 1, env); break; }
-          } else if (nextLine.startsWith('else:')) {
+            if (elCond) {
+              this.execLines(elBody, ind + 1, env);
+              skipChain();
+              break;
+            }
+          } else if (nextLine.startsWith('else:') || nextLine.startsWith('else :')) {
             const elBody: string[] = [];
             i++;
             while (i < lines.length) {
@@ -275,8 +329,11 @@ class MiniPython {
         continue;
       }
 
-      if (t.startsWith('else:')) {
+      if (t.startsWith('else:') || t.startsWith('else :')) {
         throw new Error(`  SyntaxError: 'else' without 'if' (line ${i + 1})`);
+      }
+      if (t.startsWith('elif ')) {
+        throw new Error(`  SyntaxError: 'elif' without 'if' (line ${i + 1})`);
       }
 
       // for loop (supports tuple unpacking: for i, item in enumerate(x))
@@ -336,7 +393,7 @@ class MiniPython {
           } else if (this.isFile(iterable)) {
             const fileObj = iterable as any;
             const content = this.readFile(fileObj.filename, fileObj.mode);
-            iterableList = content.split(/(?<=\n)/);
+            iterableList = content ? content.split(/(?<=\n)/) : [];
           }
           if (iterableList.length > 0 || Array.isArray(iterable)) {
             for (const val of iterableList) {
@@ -507,25 +564,31 @@ class MiniPython {
         const rhs = this.eval(augM[3].trim(), env);
         const op = augM[2];
         let res: PyVal;
-        if (typeof cur !== 'number' || typeof rhs !== 'number') {
-          throw new Error(`  TypeError: unsupported operand type(s) for ${op}=`);
-        }
-        switch (op) {
-          case '+': res = cur + rhs; break;
-          case '-': res = cur - rhs; break;
-          case '*': res = cur * rhs; break;
-          case '/':
-            if (rhs === 0) throw new Error(`  ZeroDivisionError: division by zero`);
-            res = cur / rhs; break;
-          case '//':
-            if (rhs === 0) throw new Error(`  ZeroDivisionError: integer division or modulo by zero`);
-            res = Math.floor(cur / rhs); break;
-          case '%':
-            if (rhs === 0) throw new Error(`  ZeroDivisionError: modulo by zero`);
-            res = cur % rhs; break;
-          case '**':
-            res = Math.pow(cur, rhs); break;
-          default: res = 0;
+        if (typeof cur === 'string' && op === '+') {
+          res = cur + String(rhs);
+        } else if (typeof cur === 'string' && op === '%') {
+          res = this.formatString(cur, rhs);
+        } else {
+          if (typeof cur !== 'number' || typeof rhs !== 'number') {
+            throw new Error(`  TypeError: unsupported operand type(s) for ${op}=`);
+          }
+          switch (op) {
+            case '+': res = cur + rhs; break;
+            case '-': res = cur - rhs; break;
+            case '*': res = cur * rhs; break;
+            case '/':
+              if (rhs === 0) throw new Error(`  ZeroDivisionError: division by zero`);
+              res = cur / rhs; break;
+            case '//':
+              if (rhs === 0) throw new Error(`  ZeroDivisionError: integer division or modulo by zero`);
+              res = Math.floor(cur / rhs); break;
+            case '%':
+              if (rhs === 0) throw new Error(`  ZeroDivisionError: modulo by zero`);
+              res = cur % rhs; break;
+            case '**':
+              res = Math.pow(cur, rhs); break;
+            default: res = 0;
+          }
         }
         env.set(augM[1], res);
         continue;
@@ -553,7 +616,8 @@ class MiniPython {
         mode
       };
     }
-    if (name === 'str') return this.repr(this.eval(argsStr, env));
+    if (name === 'str') return this.str(this.eval(argsStr, env));
+    if (name === 'repr') return this.repr(this.eval(argsStr, env));
     if (name === 'int') {
       const v = this.eval(argsStr, env);
       const n = Number(v);
@@ -571,10 +635,20 @@ class MiniPython {
       const v = this.eval(argsStr, env);
       if (typeof v === 'string') return v.length;
       if (Array.isArray(v)) return v.length;
+      if (this.isDict(v)) return Object.keys(v).length;
       if (v === null) return 0;
       throw new Error(`  TypeError: object of type '${typeof v}' has no len()`);
     }
-    if (name === 'input') return '[user input]';
+    if (name === 'input') {
+      const prompt = argsStr ? this.eval(argsStr, env) : '';
+      if (prompt !== null && prompt !== undefined && String(prompt) !== '') {
+        const pStr = String(prompt);
+        this.out += pStr;
+        this.prompts.push(pStr);
+      }
+      const val = this.inputs[this.inputIdx++];
+      return val !== undefined ? val : '';
+    }
     if (name === 'print') { this.handlePrint(argsStr, env); return null; }
     if (name === 'upper') {
       const v = this.eval(argsStr, env);
@@ -662,7 +736,7 @@ class MiniPython {
   // ── Print handler (supports multiple args, sep, end) ────────────────
 
   private handlePrint(argsStr: string, env: Env): void {
-    if (!argsStr.trim()) { this.out.push(''); return; }
+    if (!argsStr.trim()) { this.out += '\n'; return; }
 
     const parts: string[] = [];
     let cur = '', depth = 0, bracketDepth = 0, inStr = false, strCh = '';
@@ -702,17 +776,13 @@ class MiniPython {
     }
 
     const vals = positional.map(p => this.eval(p, env));
-    const result = vals.map(v => this.repr(v)).join(sep);
+    const result = vals.map(v => this.str(v)).join(sep);
 
-    if (end === '' && this.out.length > 0) {
-      this.out[this.out.length - 1] += result;
-    } else {
-      this.out.push(result);
-    }
+    this.out += result + end;
   }
 
   private isDict(v: PyVal): v is { [key: string]: PyVal } {
-    return typeof v === 'object' && v !== null && !Array.isArray(v);
+    return typeof v === 'object' && v !== null && !Array.isArray(v) && !('__type__' in v);
   }
 
   // ── Expression evaluator ───────────────────────────────────────────────
@@ -765,8 +835,8 @@ class MiniPython {
           }
           const val = this.eval(exprStr, env);
           const strVal = conversion === 'r'
-            ? (typeof val === 'string' ? `'${val}'` : this.repr(val))
-            : (Array.isArray(val) || this.isDict(val)) ? this.repr(val) : String(val);
+            ? this.repr(val)
+            : this.str(val);
           if (!formatSpec) return strVal;
           // Apply format spec
           const num = Number(val);
@@ -868,10 +938,30 @@ class MiniPython {
     }
 
     // Dict literal: {key: val, ...}
-    if (expr.startsWith('{') && expr.endsWith('}') && expr.includes(':')) {
+    if (expr.startsWith('{') && expr.endsWith('}')) {
       const inner = expr.slice(1, -1).trim();
       if (!inner) return {};
-      return this.parseDictLiteral(inner, env);
+      if (inner.includes(':')) return this.parseDictLiteral(inner, env);
+    }
+
+    // Logical operators (lowest precedence)
+    const logOps: Array<[string, (a: PyVal, b: PyVal) => PyVal]> = [
+      [' and ', (a, b) => a && b],
+      [' or ', (a, b) => a || b],
+    ];
+    for (const [op, fn] of logOps) {
+      const idx = this.findWordOutsideStrings(expr, op);
+      if (idx > 0) {
+        const lhs = this.eval(expr.slice(0, idx).trim(), env);
+        if (op === ' and ' && !lhs) return lhs;
+        if (op === ' or ' && lhs) return lhs;
+        return fn(lhs, this.eval(expr.slice(idx + op.length).trim(), env));
+      }
+    }
+
+    // not
+    if (expr.startsWith('not ')) {
+      return !this.eval(expr.slice(4).trim(), env);
     }
 
     // Comparison operators (lowest precedence)
@@ -909,25 +999,7 @@ class MiniPython {
       return this._contains(rhs, lhs);
     }
 
-    // Logical operators
-    const logOps: Array<[string, (a: PyVal, b: PyVal) => PyVal]> = [
-      [' and ', (a, b) => a && b],
-      [' or ', (a, b) => a || b],
-    ];
-    for (const [op, fn] of logOps) {
-      const idx = expr.indexOf(op);
-      if (idx > 0) {
-        const lhs = this.eval(expr.slice(0, idx).trim(), env);
-        if (op === ' and ' && !lhs) return lhs;
-        if (op === ' or ' && lhs) return lhs;
-        return fn(lhs, this.eval(expr.slice(idx + op.length).trim(), env));
-      }
-    }
 
-    // not
-    if (expr.startsWith('not ')) {
-      return !this.eval(expr.slice(4).trim(), env);
-    }
 
     // Binary operators
     const bin = this.findBinOp(expr);
@@ -940,6 +1012,7 @@ class MiniPython {
       }
       if (typeof lv === 'string' || typeof rv === 'string') {
         if (op === '+') return String(lv ?? '') + String(rv ?? '');
+        if (op === '%' && typeof lv === 'string') return this.formatString(lv, rv);
         throw new Error(`  TypeError: unsupported operand type(s) for ${op}: '${typeof lv}' and '${typeof rv}'`);
       }
       if (typeof lv !== 'number' || typeof rv !== 'number') {
@@ -1065,6 +1138,10 @@ class MiniPython {
         if (methodName === 'read') {
           return this.readFile(fileObj.filename, fileObj.mode);
         }
+        if (methodName === 'readlines') {
+          const content = this.readFile(fileObj.filename, fileObj.mode);
+          return content ? content.split(/(?<=\n)/) : [];
+        }
         if (methodName === 'close') {
           return null;
         }
@@ -1091,22 +1168,32 @@ class MiniPython {
 
   private findWordOutsideStrings(expr: string, word: string): number {
     let inStr = false, strCh = '';
+    let depth = 0, bracketDepth = 0, braceDepth = 0;
     const startsWithSpace = word.startsWith(' ');
     const endsWithSpace = word.endsWith(' ');
-    for (let i = 0; i <= expr.length - word.length; i++) {
+    for (let i = 0; i < expr.length; i++) {
       const ch = expr[i];
+      if (!inStr && depth === 0 && bracketDepth === 0 && braceDepth === 0 && i <= expr.length - word.length) {
+        if (expr.slice(i, i + word.length) === word) {
+          // Spaces in the pattern already act as word boundaries
+          if (startsWithSpace || endsWithSpace) return i;
+          const before = expr[i - 1];
+          const after = expr[i + word.length];
+          const isBoundaryBefore = i === 0 || !/[a-zA-Z0-9_]/.test(before);
+          const isBoundaryAfter = (i + word.length) >= expr.length || !/[a-zA-Z0-9_]/.test(after);
+          if (isBoundaryBefore && isBoundaryAfter) return i;
+        }
+      }
       if (ch === '"' || ch === "'") {
         if (!inStr) { inStr = true; strCh = ch; }
         else if (ch === strCh) inStr = false;
-      }
-      if (!inStr && expr.slice(i, i + word.length) === word) {
-        // Spaces in the pattern already act as word boundaries
-        if (startsWithSpace || endsWithSpace) return i;
-        const before = expr[i - 1];
-        const after = expr[i + word.length];
-        const isBoundaryBefore = i === 0 || !/[a-zA-Z0-9_]/.test(before);
-        const isBoundaryAfter = (i + word.length) >= expr.length || !/[a-zA-Z0-9_]/.test(after);
-        if (isBoundaryBefore && isBoundaryAfter) return i;
+      } else if (!inStr) {
+        if (ch === '(') depth++;
+        else if (ch === ')') depth--;
+        else if (ch === '[') bracketDepth++;
+        else if (ch === ']') bracketDepth--;
+        else if (ch === '{') braceDepth++;
+        else if (ch === '}') braceDepth--;
       }
     }
     return -1;
@@ -1142,13 +1229,23 @@ class MiniPython {
 
   private findOpOutsideStrings(expr: string, op: string): number {
     let inStr = false, strCh = '';
-    for (let i = 0; i <= expr.length - op.length; i++) {
+    let depth = 0, bracketDepth = 0, braceDepth = 0;
+    for (let i = 0; i < expr.length; i++) {
       const ch = expr[i];
+      if (!inStr && depth === 0 && bracketDepth === 0 && braceDepth === 0 && i <= expr.length - op.length) {
+        if (expr.slice(i, i + op.length) === op) return i;
+      }
       if (ch === '"' || ch === "'") {
         if (!inStr) { inStr = true; strCh = ch; }
         else if (ch === strCh) inStr = false;
+      } else if (!inStr) {
+        if (ch === '(') depth++;
+        else if (ch === ')') depth--;
+        else if (ch === '[') bracketDepth++;
+        else if (ch === ']') bracketDepth--;
+        else if (ch === '{') braceDepth++;
+        else if (ch === '}') braceDepth--;
       }
-      if (!inStr && expr.slice(i, i + op.length) === op) return i;
     }
     return -1;
   }
@@ -1165,7 +1262,7 @@ class MiniPython {
 
   private parseArgs(argsStr: string, env: Env): PyVal[] {
     const parts: string[] = [];
-    let cur = '', depth = 0, bracketDepth = 0, inStr = false, strCh = '';
+    let cur = '', depth = 0, bracketDepth = 0, braceDepth = 0, inStr = false, strCh = '';
     for (const ch of argsStr) {
       if (!inStr && (ch === '"' || ch === "'")) { inStr = true; strCh = ch; cur += ch; }
       else if (inStr && ch === strCh) { inStr = false; cur += ch; }
@@ -1173,7 +1270,9 @@ class MiniPython {
       else if (!inStr && ch === ')') { depth--; cur += ch; }
       else if (!inStr && ch === '[') { bracketDepth++; cur += ch; }
       else if (!inStr && ch === ']') { bracketDepth--; cur += ch; }
-      else if (!inStr && ch === ',' && !depth && !bracketDepth) { parts.push(cur.trim()); cur = ''; }
+      else if (!inStr && ch === '{') { braceDepth++; cur += ch; }
+      else if (!inStr && ch === '}') { braceDepth--; cur += ch; }
+      else if (!inStr && ch === ',' && !depth && !bracketDepth && !braceDepth) { parts.push(cur.trim()); cur = ''; }
       else cur += ch;
     }
     if (cur.trim()) parts.push(cur.trim());
@@ -1182,16 +1281,18 @@ class MiniPython {
 
   private findBinOp(expr: string): [string, string, string] | null {
     const ops = ['+', '-', '**', '*', '//', '/', '%'];
-    let inStr = false, strCh = '', depth = 0, bracketDepth = 0;
+    let inStr = false, strCh = '', depth = 0, bracketDepth = 0, braceDepth = 0;
     for (let i = expr.length - 1; i >= 1; i--) {
       const ch = expr[i];
       if (ch === ')') depth++;
       else if (ch === '(') depth--;
       else if (ch === ']') bracketDepth++;
       else if (ch === '[') bracketDepth--;
+      else if (ch === '}') braceDepth++;
+      else if (ch === '{') braceDepth--;
       else if (!inStr && (ch === '"' || ch === "'")) { inStr = true; strCh = ch; }
       else if (inStr && ch === strCh) inStr = false;
-      if (!inStr && !depth && !bracketDepth) {
+      if (!inStr && !depth && !bracketDepth && !braceDepth) {
         for (const op of ops) {
           if (expr.slice(i, i + op.length) === op) {
             // Skip '-' if it's likely unary minus (prev non-space char is not a valid expr ending)
@@ -1353,9 +1454,67 @@ class MiniPython {
     return logicalLines;
   }
 
+  private formatString(format: string, args: PyVal): string {
+    const argList = Array.isArray(args) ? args : [args];
+    let argIdx = 0;
+    
+    return format.replace(/%([-+ 0#]*)?(\d+)?(?:\.(\d+))?([sdiouxXeEfFgG%])/g, (match, flags, width, precision, type) => {
+      if (type === '%') return '%';
+      if (argIdx >= argList.length) {
+        throw new Error(`  TypeError: not enough arguments for format string`);
+      }
+      const val = argList[argIdx++];
+      
+      let formatted = '';
+      if (type === 's') {
+        formatted = this.str(val);
+      } else if (type === 'd' || type === 'i') {
+        formatted = String(Math.trunc(Number(val)));
+      } else if (type === 'f' || type === 'F') {
+        if (precision !== undefined) {
+          formatted = Number(val).toFixed(parseInt(precision, 10));
+        } else {
+          formatted = Number(val).toFixed(6);
+        }
+      } else if (type === 'x' || type === 'X') {
+        const num = Math.trunc(Number(val));
+        formatted = type === 'x' ? num.toString(16) : num.toString(16).toUpperCase();
+      } else {
+        formatted = String(val);
+      }
+      
+      if (width) {
+        const w = parseInt(width, 10);
+        const padChar = flags && flags.includes('0') ? '0' : ' ';
+        if (formatted.length < w) {
+          if (flags && flags.includes('-')) {
+            formatted = formatted.padEnd(w, ' ');
+          } else {
+            formatted = formatted.padStart(w, padChar);
+          }
+        }
+      }
+      return formatted;
+    });
+  }
+
+  private str(v: PyVal): string {
+    if (typeof v === 'string') return v;
+    return this.repr(v);
+  }
+
   private repr(v: PyVal): string {
     if (v === null) return 'None';
     if (typeof v === 'boolean') return v ? 'True' : 'False';
+    if (typeof v === 'string') {
+      const escaped = v
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/\n/g, '\\n')
+        .replace(/\r/g, '\\r')
+        .replace(/\t/g, '\\t');
+      return `'${escaped}'`;
+    }
     if (Array.isArray(v)) return '[' + v.map(x => this.repr(x)).join(', ') + ']';
     if (this.isDict(v)) {
       const entries = Object.entries(v).map(([k, val]) => `${this.repr(k)}: ${this.repr(val)}`);
@@ -1368,3 +1527,21 @@ class MiniPython {
     return String(v);
   }
 }
+
+export function normalizeNumbers(str: string): string {
+  return str.replace(/-?(?:\d+(?:\.\d+)?|\.\d+)/g, (match) => {
+    const val = parseFloat(match);
+    return isNaN(val) ? match : String(val);
+  });
+}
+
+export function stripPrompts(text: string, prompts: string[]): string {
+  let result = text;
+  for (const prompt of prompts) {
+    if (!prompt) continue;
+    const escaped = prompt.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    result = result.replace(new RegExp(escaped, 'g'), '');
+  }
+  return result;
+}
+

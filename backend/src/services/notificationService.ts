@@ -97,15 +97,19 @@ async function sendEmail(to: string, subject: string, body: string, link: string
     <p style="color:#888;font-size:12px;">You received this because your notification preferences are set to receive updates. <a href="${config.frontendUrl}/#/settings">Manage preferences</a>.</p>
   </div>`;
 
-  if (host && user) {
-    const transporter = (await import("nodemailer")).default.createTransport({
-      host,
-      port,
-      secure: port === 465,
-      auth: { user, pass },
-    });
-    await transporter.sendMail({ from, to, subject, html });
-    console.log(`[notifications] Email sent to ${to}: ${subject}`);
+  if (host && user && process.env.NODE_ENV !== "test") {
+    try {
+      const transporter = (await import("nodemailer")).default.createTransport({
+        host,
+        port,
+        secure: port === 465,
+        auth: { user, pass },
+      });
+      await transporter.sendMail({ from, to, subject, html });
+      console.log(`[notifications] Email sent to ${to}: ${subject}`);
+    } catch (err) {
+      console.error(`[notifications] Failed to send email to ${to}:`, err);
+    }
   } else {
     console.log("\n── Notification Email (dev mode fallback) ──");
     console.log(`To: ${to}`);

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link, useParams } from 'react-router-dom';
 import { useAuth } from '../auth';
 import { authApi, authFetch } from '../authClient';
 import { useGamification } from '../progress';
@@ -12,6 +12,7 @@ import {
   Code, 
   Award, 
   Target,
+  Flame,
   User, 
   Lock, 
   Bell, 
@@ -98,11 +99,28 @@ function LocationPicker({ value, onChange }: { value: string; onChange: (v: stri
 }
 
 export default function ProfilePage() {
+  const { userId } = useParams<{ userId?: string }>();
   const { user, checkAuth } = useAuth();
   const { stats, overallProgress } = useGamification();
   const location = useLocation();
   const [view, setView] = useState<TabView>(location.pathname === '/settings' ? 'settings' : 'profile');
   const [settingsTab, setSettingsTab] = useState('profileInfo');
+
+  const [publicUser, setPublicUser] = useState<any>(null);
+  const [publicStats, setPublicStats] = useState<any>(null);
+  const [publicProgress, setPublicProgress] = useState(0);
+  const [publicLoading, setPublicLoading] = useState(false);
+
+  const displayUser = userId ? publicUser : user;
+  const displayStats = userId ? publicStats : {
+    coursesCompleted: stats.coursesCompleted,
+    projectsSolved: stats.projectsSolved,
+    lecturesCompleted: stats.lecturesCompleted,
+    tasksSubmitted: stats.tasksSubmitted,
+    streak: stats.streak || 0,
+    longestStreak: stats.longestStreak || 0
+  };
+  const displayProgress = userId ? publicProgress : overallProgress;
 
   const [formName, setFormName] = useState(user?.name || '');
   const [formBio, setFormBio] = useState(user?.bio || '');
@@ -256,8 +274,12 @@ export default function ProfilePage() {
   }, [courseProgress, projects]);
 
   React.useEffect(() => {
-    setView(location.pathname === '/settings' ? 'settings' : 'profile');
-  }, [location.pathname]);
+    if (userId) {
+      setView('profile');
+    } else {
+      setView(location.pathname === '/settings' ? 'settings' : 'profile');
+    }
+  }, [location.pathname, userId]);
 
   React.useEffect(() => {
     if (view === 'settings' && settingsTab === 'notifications') {
@@ -267,38 +289,80 @@ export default function ProfilePage() {
 
   React.useEffect(() => {
     async function fetchData() {
-      try {
-        const [projRes, timeRes, courseRes] = await Promise.all([
-          authFetch<any[]>('/profile/projects').catch(() => []),
-          authFetch<any[]>('/profile/timeline').catch(() => []),
-          authFetch<any[]>('/courses/progress').catch(() => [])
-        ]);
-        
-        const enrichedProjects = projRes.map(p => {
-          const matched = projectsData.find(d => d.id === p.projectId);
-          if (matched) {
-            return {
-              ...p,
-              name: matched.title,
-              techStack: matched.technologies.join(', '),
-              difficulty: matched.difficulty,
-            };
-          }
-          return p;
-        });
+      setProjectsLoading(true);
+      setTimelineLoading(true);
+      if (userId) {
+        setPublicLoading(true);
+        try {
+          const data = await authFetch<{
+            user: any;
+            stats: any;
+            projects: any[];
+            timeline: any[];
+            courseProgress: any[];
+            overallProgress: number;
+          }>(`/progress/profile/public/${userId}`);
+          
+          setPublicUser(data.user);
+          setPublicStats(data.stats);
+          setPublicProgress(data.overallProgress || 0);
+          
+          const enrichedProjects = data.projects.map(p => {
+            const matched = projectsData.find(d => d.id === p.projectId);
+            if (matched) {
+              return {
+                ...p,
+                name: matched.title,
+                techStack: matched.technologies.join(', '),
+                difficulty: matched.difficulty,
+              };
+            }
+            return p;
+          });
+          setProjects(enrichedProjects);
+          setTimelineEvents(data.timeline);
+          setCourseProgress(data.courseProgress);
+        } catch (err) {
+          console.error("Failed to fetch public profile", err);
+        } finally {
+          setPublicLoading(false);
+          setProjectsLoading(false);
+          setTimelineLoading(false);
+        }
+      } else {
+        try {
+          const [projRes, timeRes, courseRes] = await Promise.all([
+            authFetch<any[]>('/profile/projects').catch(() => []),
+            authFetch<any[]>('/profile/timeline').catch(() => []),
+            authFetch<any[]>('/courses/progress').catch(() => [])
+          ]);
+          
+          const enrichedProjects = projRes.map(p => {
+            const matched = projectsData.find(d => d.id === p.projectId);
+            if (matched) {
+              return {
+                ...p,
+                name: matched.title,
+                techStack: matched.technologies.join(', '),
+                difficulty: matched.difficulty,
+              };
+            }
+            return p;
+          });
 
-        setProjects(enrichedProjects);
-        setTimelineEvents(timeRes);
-        setCourseProgress(courseRes);
-      } catch (err) {
-        console.error("Failed to fetch profile data", err);
-      } finally {
-        setProjectsLoading(false);
-        setTimelineLoading(false);
+          setProjects(enrichedProjects);
+          setTimelineEvents(timeRes);
+          setCourseProgress(courseRes);
+        } catch (err) {
+          console.error("Failed to fetch profile data", err);
+        } finally {
+          setProjectsLoading(false);
+          setTimelineLoading(false);
+        }
       }
     }
     fetchData();
-  }, []);
+  }, [userId]);
 
   const getInitials = (name: string) => {
     if (!name) return "U";
@@ -668,23 +732,27 @@ export default function ProfilePage() {
             {/* Avatar */}
             <div className="w-[72px] h-[72px] rounded-full bg-[#1F2937] flex items-center justify-center border-[3px] border-transparent shadow-lg z-10 overflow-hidden"
                  style={{ background: 'linear-gradient(#1F2937, #1F2937) padding-box, linear-gradient(135deg, #3B82F6, #A855F7) border-box' }}>
-              {user?.avatarUrl ? (
-                <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
+              {displayUser?.avatarUrl ? (
+                <img src={displayUser.avatarUrl} alt="" className="w-full h-full object-cover" />
               ) : (
                 <span className="text-xl font-bold text-white tracking-widest">{initials}</span>
               )}
             </div>
             <div className="mb-1">
               <div className="flex items-center gap-3 mb-1">
-                <h1 className="text-[22px] font-bold text-white">{user?.name || "User"}</h1>
+                <h1 className="text-[22px] font-bold text-white">{displayUser?.name || "User"}</h1>
                 <span className="px-3 py-1 bg-blue-500/20 text-blue-400 text-xs font-semibold rounded-[20px] border border-blue-500/30">
-                  {user?.role === 'admin' ? 'Admin' : 'Student Learner'}
+                  {displayUser?.role === 'admin' ? 'Admin' : 'Student Learner'}
                 </span>
               </div>
               <p className="text-[14px] text-slate-400">{displayTagline}</p>
-              <div className="flex items-center gap-4 mt-2 text-[12px] text-slate-500">
+              <div className="flex flex-wrap items-center gap-4 mt-2 text-[12px] text-slate-500">
                 <span className="flex items-center gap-1.5"><MapPin size={14}/> {displayLocation}</span>
                 <span className="flex items-center gap-1.5"><Calendar size={14}/> Joined {joinedDate}</span>
+                <span className="flex items-center gap-1.5 text-amber-500 font-semibold">
+                  <Flame size={14} className="text-amber-500 fill-amber-500" />
+                  Current Streak: {displayStats.streak} Days (Longest: {displayStats.longestStreak || 0} Days)
+                </span>
               </div>
             </div>
           </div>
@@ -693,10 +761,10 @@ export default function ProfilePage() {
         {/* STATS ROW */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
           {[
-            { label: 'Courses Completed', value: stats.coursesCompleted.toString(), icon: BookOpen, color: 'blue', colorHex: '#3B82F6' },
-            { label: 'Projects Built', value: stats.projectsSolved.toString(), icon: Code, color: 'purple', colorHex: '#A855F7' },
-            { label: 'Lectures Completed', value: stats.lecturesCompleted.toString(), icon: Award, color: 'green', colorHex: '#22C55E' },
-            { label: 'Tasks Submitted', value: stats.tasksSubmitted.toString(), icon: Target, color: 'amber', colorHex: '#F59E0B' },
+            { label: 'Courses Completed', value: displayStats.coursesCompleted.toString(), icon: BookOpen, color: 'blue', colorHex: '#3B82F6' },
+            { label: 'Projects Built', value: displayStats.projectsSolved.toString(), icon: Code, color: 'purple', colorHex: '#A855F7' },
+            { label: 'Lectures Completed', value: displayStats.lecturesCompleted.toString(), icon: Award, color: 'green', colorHex: '#22C55E' },
+            { label: 'Tasks Submitted', value: displayStats.tasksSubmitted.toString(), icon: Target, color: 'amber', colorHex: '#F59E0B' },
           ].map((stat, i) => {
             const Icon = stat.icon;
             return (
@@ -902,9 +970,9 @@ export default function ProfilePage() {
             <div className="relative w-[80px] h-[80px] mb-6">
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="8" />
-                <circle cx="50" cy="50" r="40" fill="none" stroke="#3B82F6" strokeWidth="8" strokeDasharray="251.2" strokeDashoffset={251.2 * (1 - overallProgress / 100)} strokeLinecap="round" />
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#3B82F6" strokeWidth="8" strokeDasharray="251.2" strokeDashoffset={251.2 * (1 - displayProgress / 100)} strokeLinecap="round" />
               </svg>
-              <div className="absolute inset-0 flex items-center justify-center text-xl font-bold text-white">{overallProgress}%</div>
+              <div className="absolute inset-0 flex items-center justify-center text-xl font-bold text-white">{displayProgress}%</div>
             </div>
             <h3 className="text-[20px] font-bold text-white mb-2">Take the next step in your learning journey</h3>
             <p className="text-[14px] text-slate-300 mb-8 max-w-sm">

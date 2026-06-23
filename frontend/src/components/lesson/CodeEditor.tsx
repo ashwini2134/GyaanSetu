@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
 import MonacoEditor from '@monaco-editor/react';
-import { runPython } from '../../utils/pythonRunner';
+import { runPython, normalizeNumbers, stripPrompts } from '../../utils/pythonRunner';
 import { scanForInput, injectInputs, type InputField } from '../../utils/prescanner';
 
 interface CodeEditorProps {
@@ -85,6 +85,7 @@ export default function CodeEditor({
   const [running, setRunning] = useState(false);
   const [inputFields, setInputFields] = useState<InputField[]>([]);
   const [showInputPanel, setShowInputPanel] = useState(false);
+  const [prompts, setPrompts] = useState<string[]>([]);
   const pendingAction = useRef<'run' | 'submit' | null>(null);
   const pendingCodeRef = useRef<string>('');
   const lastInjectedRef = useRef<string>('');
@@ -112,10 +113,12 @@ export default function CodeEditor({
     setRunning(true);
     setOutput(null);
     setRunError(null);
+    setPrompts([]);
     setTimeout(() => {
       try {
         const result = runPython(finalCode);
         setOutput(result.output);
+        setPrompts(result.prompts || []);
         if (result.error) {
           setRunError(friendlyError(result.error));
         }
@@ -211,11 +214,14 @@ export default function CodeEditor({
     onReset?.();
   };
 
+  const cleanOutput = output ? stripPrompts(output, prompts) : '';
+  const cleanExpected = expectedOutput ? stripPrompts(expectedOutput, prompts) : '';
+
   const isCorrect = expectedOutput !== undefined && output !== null &&
-    !runError && output.trim() === expectedOutput.trim();
+    !runError && normalizeNumbers(cleanOutput.trim()) === normalizeNumbers(cleanExpected.trim());
 
   const isWrong = expectedOutput !== undefined && output !== null &&
-    !runError && output.trim() !== expectedOutput.trim();
+    !runError && normalizeNumbers(cleanOutput.trim()) !== normalizeNumbers(cleanExpected.trim());
 
   const hasError = runError !== null;
 

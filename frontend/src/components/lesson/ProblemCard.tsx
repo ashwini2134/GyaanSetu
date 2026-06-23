@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { CodingProblem } from '../../types/lesson';
 import CodeEditor from './CodeEditor';
-import { runPython } from '../../utils/pythonRunner';
+import { runPython, normalizeNumbers, stripPrompts } from '../../utils/pythonRunner';
 import { authFetch } from '../../authClient';
 
 const DIFF_COLOR: Record<string, string> = {
@@ -36,7 +36,7 @@ function lineDiff(expected: string, actual: string): { diffLines: DiffLine[]; ex
   for (let i = 0; i < maxLen; i++) {
     const e = expLines[i] ?? '';
     const a = actLines[i] ?? '';
-    const match = e === a;
+    const match = normalizeNumbers(e) === normalizeNumbers(a);
     if (!match && firstMismatchLine < 0) firstMismatchLine = i;
     diffLines.push({ line: i + 1, expected: e, actual: a, match });
   }
@@ -159,12 +159,25 @@ export default function ProblemCard({ problem, index, completed, onComplete, onA
     setTimeout(() => {
       const results: TestResult[] = [];
       for (const tc of problem.testCases) {
-        let fullCode = code;
-        if (tc.input) {
-          fullCode = fullCode.replace(/input\([^)]*\)/g, `'${tc.input}'`);
-        }
-        const result = runPython(fullCode);
+        const inputs = tc.input ? tc.input.split('\n') : [];
+        const result = runPython(code, inputs);
         const actual = result.error ? result.error : result.output;
+        const actualPrompts = result.prompts || [];
+
+        let expectedPrompts: string[] = [];
+        if (problem.solution) {
+          try {
+            const solResult = runPython(problem.solution, inputs);
+            expectedPrompts = solResult.prompts || [];
+          } catch (e) {}
+        }
+        if (expectedPrompts.length === 0) {
+          expectedPrompts = actualPrompts;
+        }
+
+        const actualClean = result.error ? result.error : stripPrompts(actual, actualPrompts);
+        const expectedClean = stripPrompts(tc.expectedOutput, expectedPrompts);
+
         let passed = false;
         let diffLines: DiffLine[] = [];
         let explanation = '';
@@ -177,16 +190,16 @@ export default function ProblemCard({ problem, index, completed, onComplete, onA
           if (!passed) explanation = "Output does not match the required pattern.";
         } else if (tc.matchType === 'any_lines') {
           const expectedLinesCount = tc.expectedOutput.trim().split('\\n').length;
-          const actualLines = actual.trim().split('\\n').filter(l => l.trim().length > 0);
+          const actualLines = actualClean.trim().split('\\n').filter(l => l.trim().length > 0);
           passed = actualLines.length === expectedLinesCount;
           if (!passed) explanation = `Expected exactly ${expectedLinesCount} non-empty lines, but got ${actualLines.length}.`;
         } else {
-          const diff = lineDiff(tc.expectedOutput, actual);
+          const diff = lineDiff(expectedClean, actualClean);
           diffLines = diff.diffLines;
           explanation = diff.explanation;
-          passed = actual.trim() === tc.expectedOutput.trim();
+          passed = normalizeNumbers(actualClean.trim()) === normalizeNumbers(expectedClean.trim());
         }
-        results.push({ label: tc.label, passed, expected: tc.expectedOutput, actual, diffLines });
+        results.push({ label: tc.label, passed, expected: expectedClean, actual: actualClean, diffLines });
         // Store explanation on first failed test case
         if (!passed && results.filter(r => !r.passed).length === 1) {
           results[results.length - 1].diffLines = diffLines.map(d => ({ ...d, explanation: d.match ? undefined : explanation }));

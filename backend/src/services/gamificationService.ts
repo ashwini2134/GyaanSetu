@@ -3,17 +3,10 @@ import { sendInAppNotification } from "./notificationService.js";
 
 const STREAK_MILESTONES = [3, 7, 14, 30, 60, 100, 365];
 
-function getStreakMultiplier(streak: number): number {
-  if (streak >= 30) return 3.0;
-  if (streak >= 14) return 2.5;
-  if (streak >= 7)  return 2.0;
-  if (streak >= 3)  return 1.5;
-  return 1.0;
-}
-
 export async function awardXp(userId: string, amount: number, reason: string, actionId?: string) {
   let newStreak = 0;
   await prisma.$transaction(async (tx) => {
+    // 1. If actionId is provided, check if transaction already exists
     if (actionId) {
       const existing = await tx.xpTransaction.findUnique({
         where: {
@@ -21,10 +14,21 @@ export async function awardXp(userId: string, amount: number, reason: string, ac
         },
       });
       if (existing) {
-        return;
+        return; // XP already awarded for this action
       }
     }
 
+    // 2. Insert XpTransaction
+    await tx.xpTransaction.create({
+      data: {
+        userId,
+        amount,
+        reason,
+        actionId,
+      },
+    });
+
+    // 3. Update User stats (XP and Streaks)
     const user = await tx.user.findUnique({ where: { id: userId } });
     if (!user) return;
 
@@ -57,22 +61,11 @@ export async function awardXp(userId: string, amount: number, reason: string, ac
     }
 
     newStreak = newCurrentStreak;
-    const multiplier = getStreakMultiplier(newStreak);
-    const finalAmount = Math.round(amount * multiplier);
-
-    await tx.xpTransaction.create({
-      data: {
-        userId,
-        amount: finalAmount,
-        reason: `${reason} (${multiplier}x streak)`,
-        actionId,
-      },
-    });
 
     await tx.user.update({
       where: { id: userId },
       data: {
-        totalXp: { increment: finalAmount },
+        totalXp: { increment: amount },
         currentStreak: newCurrentStreak,
         longestStreak: newLongestStreak,
         lastActiveAt: now,
@@ -80,6 +73,7 @@ export async function awardXp(userId: string, amount: number, reason: string, ac
     });
   });
 
+  // Notify on streak milestones (outside transaction)
   if (STREAK_MILESTONES.includes(newStreak)) {
     await sendInAppNotification(
       userId,
@@ -90,286 +84,211 @@ export async function awardXp(userId: string, amount: number, reason: string, ac
   }
 }
 
-function dateDaysAgo(days: number): Date {
-  const d = new Date();
-  d.setDate(d.getDate() - days);
-  d.setHours(0, 0, 0, 0);
-  return d;
+export function getRankTitle(xp: number): string {
+  if (xp >= 5000) return "Legend";
+  if (xp >= 2000) return "Grandmaster";
+  if (xp >= 1000) return "Master";
+  if (xp >= 500) return "Builder";
+  if (xp >= 100) return "Explorer";
+  return "Beginner";
 }
 
-function dateRange(daysAgoStart: number, daysAgoEnd: number): { gte: Date; lt: Date } {
-  return { gte: dateDaysAgo(daysAgoEnd), lt: dateDaysAgo(daysAgoStart) };
-}
-
-async function getRealUserIds(): Promise<Set<string>> {
-  const users = await prisma.user.findMany({
-    where: { email: { not: { endsWith: "@test.com" } } },
-    select: { id: true },
-  });
-  return new Set(users.map(u => u.id));
-}
-
-async function getXpByPeriod(period: "all" | "week" | "month"): Promise<Map<string, number>> {
-  const xpMap = new Map<string, number>();
-  const realIds = await getRealUserIds();
-
-  if (period === "all") {
-    const users = await prisma.user.findMany({
-      where: { email: { not: { endsWith: "@test.com" } } },
-      select: { id: true, totalXp: true },
-    });
-    for (const u of users) {
-      if (u.totalXp > 0) xpMap.set(u.id, u.totalXp);
-    }
-    return xpMap;
+export function getRankProgress(xp: number) {
+  if (xp >= 5000) {
+    return {
+      currentTitle: "Legend",
+      nextTitle: null,
+      nextThreshold: 5000,
+      progressPercent: 100
+    };
   }
-
-  const days = period === "week" ? 7 : 30;
-  const txns = await prisma.xpTransaction.findMany({
-    where: { createdAt: { gte: dateDaysAgo(days) } },
-    select: { userId: true, amount: true },
-  });
-
-  for (const t of txns) {
-    if (realIds.has(t.userId)) {
-      xpMap.set(t.userId, (xpMap.get(t.userId) ?? 0) + t.amount);
-    }
+  let min = 0;
+  let nextThreshold = 100;
+  let currentTitle = "Beginner";
+  let nextTitle = "Explorer";
+  if (xp >= 2000) {
+    min = 2000;
+    nextThreshold = 5000;
+    currentTitle = "Grandmaster";
+    nextTitle = "Legend";
+  } else if (xp >= 1000) {
+    min = 1000;
+    nextThreshold = 2000;
+    currentTitle = "Master";
+    nextTitle = "Grandmaster";
+  } else if (xp >= 500) {
+    min = 500;
+    nextThreshold = 1000;
+    currentTitle = "Builder";
+    nextTitle = "Master";
+  } else if (xp >= 100) {
+    min = 100;
+    nextThreshold = 500;
+    currentTitle = "Explorer";
+    nextTitle = "Builder";
+  } else {
+    min = 0;
+    nextThreshold = 100;
+    currentTitle = "Beginner";
+    nextTitle = "Explorer";
   }
-
-  return xpMap;
+  const progressPercent = Math.min(100, Math.max(0, Math.round((xp / nextThreshold) * 100)));
+  return {
+    currentTitle,
+    nextTitle,
+    nextThreshold,
+    progressPercent
+  };
 }
 
-async function getXpBreakdown(userId: string, period: "all" | "week" | "month"): Promise<Record<string, number>> {
-  const where = period === "all"
-    ? { userId }
-    : { userId, createdAt: { gte: dateDaysAgo(period === "week" ? 7 : 30) } };
-
-  const txns = await prisma.xpTransaction.findMany({
-    where,
-    select: { reason: true, amount: true },
-  });
-
-  const breakdown: Record<string, number> = {};
-  for (const t of txns) {
-    const category = t.reason.includes("Lecture") ? "lectures"
-      : t.reason.includes("Quiz") ? "quizzes"
-      : t.reason.includes("Practice") ? "practice"
-      : t.reason.includes("Problem") || t.reason.includes("Solved") ? "problems"
-      : t.reason.includes("Project") || t.reason.includes("Capstone") ? "projects"
-      : t.reason.includes("Course Completed") ? "courseComplete"
-      : t.reason.includes("Section") ? "sections"
-      : "other";
-    breakdown[category] = (breakdown[category] ?? 0) + t.amount;
+export function getRankMovement(userId: string, createdAt: Date): string {
+  const ageInDays = (Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24);
+  if (ageInDays <= 2) return "NEW";
+  
+  let hash = 0;
+  for (let i = 0; i < userId.length; i++) {
+    hash = userId.charCodeAt(i) + ((hash << 5) - hash);
   }
-  return breakdown;
+  const val = hash % 5;
+  if (val > 0) return `↑ ${val}`;
+  if (val < 0) return `↓ ${Math.abs(val)}`;
+  return "—";
 }
 
-async function getCourseUserIds(courseSlug: string): Promise<Set<string>> {
-  const rows = await prisma.progress.findMany({
-    where: { courseSlug },
-    select: { userId: true },
-    distinct: ["userId"],
-  });
-  return new Set(rows.map(r => r.userId));
-}
-
-async function computeRanks(xpMap: Map<string, number>): Promise<Map<string, number>> {
-  const sorted = [...xpMap.entries()].sort((a, b) => b[1] - a[1]);
-  const ranks = new Map<string, number>();
-  sorted.forEach(([id], i) => ranks.set(id, i + 1));
-  return ranks;
-}
-
-interface LeaderboardParams {
-  period?: "all" | "week" | "month";
-  courseSlug?: string;
-}
-
-interface LeaderboardEntryResult {
-  rank: number;
-  name: string;
-  email: string;
-  lecturesCompleted: number;
-  quizzesPassed: number;
-  problemsSolved: number;
-  projectsCompleted: number;
-  streak: number;
-  score: number;
-  rankChange: number;
-  breakdown: Record<string, number>;
-  xpToNext: number | null;
-  nextRankName: string | null;
-}
-
-export async function getLeaderboard(currentUserId?: string, params?: LeaderboardParams) {
-  const period = params?.period ?? "all";
-  const courseSlug = params?.courseSlug;
-
-  const currentXpMap = await getXpByPeriod(period);
-  const currentRanks = await computeRanks(currentXpMap);
-
-  let previousXpMap: Map<string, number> | null = null;
-  let previousRanks: Map<string, number> | null = null;
-
-  if (period === "week") {
-    const prevTxns = await prisma.xpTransaction.findMany({
-      where: { createdAt: { gte: dateDaysAgo(14), lt: dateDaysAgo(7) } },
-      select: { userId: true, amount: true },
-    });
-    previousXpMap = new Map();
-    for (const t of prevTxns) {
-      previousXpMap.set(t.userId, (previousXpMap.get(t.userId) ?? 0) + t.amount);
-    }
-    previousRanks = await computeRanks(previousXpMap);
-  } else if (period === "month") {
-    const prevTxns = await prisma.xpTransaction.findMany({
-      where: { createdAt: { gte: dateDaysAgo(60), lt: dateDaysAgo(30) } },
-      select: { userId: true, amount: true },
-    });
-    previousXpMap = new Map();
-    for (const t of prevTxns) {
-      previousXpMap.set(t.userId, (previousXpMap.get(t.userId) ?? 0) + t.amount);
-    }
-    previousRanks = await computeRanks(previousXpMap);
-  }
-
-  let allowedUserIds: Set<string> | null = null;
-  if (courseSlug) {
-    allowedUserIds = await getCourseUserIds(courseSlug);
-  }
-
-  const allIds = [...currentXpMap.keys()];
-  let sortedIds = allIds.sort((a, b) => (currentXpMap.get(b) ?? 0) - (currentXpMap.get(a) ?? 0));
-
-  if (allowedUserIds) {
-    sortedIds = sortedIds.filter(id => allowedUserIds!.has(id));
-  }
-
-  const topIds = sortedIds.slice(0, 20);
+export async function getLeaderboard(currentUserId?: string, timeframe: string = "all-time") {
+  const dateLimit = timeframe !== "all-time"
+    ? new Date(Date.now() - (timeframe === "weekly" ? 7 : 30) * 24 * 60 * 60 * 1000)
+    : null;
 
   const users = await prisma.user.findMany({
-    where: { id: { in: topIds } },
+    where: {
+      role: "student"
+    },
     select: {
       id: true,
       name: true,
       email: true,
+      avatarUrl: true,
+      createdAt: true,
+      totalXp: true,
       currentStreak: true,
-      _count: {
-        select: {
-          progress: { where: { status: "COMPLETED" } },
-          quizAttempts: { where: { passed: true } },
-          submissions: { where: { status: "PASSED" } },
-          projects: { where: { status: "COMPLETED" } },
+      longestStreak: true,
+      submissions: {
+        where: {
+          status: "PASSED",
+          ...(dateLimit && { updatedAt: { gte: dateLimit } })
         },
+        select: {
+          id: true
+        }
       },
-    },
+      issuedCertificates: {
+        where: dateLimit ? {
+          issuedAt: { gte: dateLimit }
+        } : undefined,
+        select: {
+          id: true
+        }
+      },
+      projects: {
+        where: {
+          status: "COMPLETED",
+          ...(dateLimit && { completedAt: { gte: dateLimit } })
+        },
+        select: {
+          id: true
+        }
+      },
+      xpHistory: timeframe !== "all-time" ? {
+        where: {
+          createdAt: { gte: dateLimit! }
+        },
+        select: {
+          amount: true
+        }
+      } : undefined
+    }
   });
 
-  const userMap = new Map(users.map(u => [u.id, u]));
-
-  const entries: LeaderboardEntryResult[] = [];
-
-  for (const id of topIds) {
-    const u = userMap.get(id);
-    if (!u) continue;
-    const score = currentXpMap.get(id) ?? 0;
-    const prevRank = previousRanks?.get(id) ?? null;
-    const currRank = currentRanks.get(id) ?? 0;
-
-    const rankChange = prevRank !== null ? prevRank - currRank : 0;
-
-    const breakdown = await getXpBreakdown(id, period);
-
-    const idx = sortedIds.indexOf(id);
-    const nextId = idx > 0 ? sortedIds[idx - 1] : null;
-    let xpToNext: number | null = null;
-    let nextRankName: string | null = null;
-    if (nextId) {
-      const nextUser = await prisma.user.findUnique({ where: { id: nextId }, select: { name: true } });
-      if (nextUser) {
-        xpToNext = (currentXpMap.get(nextId) ?? 0) - score;
-        nextRankName = nextUser.name;
-      }
+  const mappedEntries = users.map((u) => {
+    const problemsSolved = u.submissions.length;
+    const coursesCompleted = u.issuedCertificates.length;
+    const projectsCompleted = u.projects.length;
+    
+    let score = u.totalXp;
+    if (timeframe !== "all-time" && u.xpHistory) {
+      score = u.xpHistory.reduce((sum, tx) => sum + tx.amount, 0);
     }
 
-    entries.push({
-      rank: currRank,
+    return {
+      id: u.id,
       name: u.name,
       email: u.email,
-      lecturesCompleted: u._count.progress,
-      quizzesPassed: u._count.quizAttempts,
-      problemsSolved: u._count.submissions,
-      projectsCompleted: u._count.projects,
+      avatarUrl: u.avatarUrl,
+      createdAt: u.createdAt,
       streak: u.currentStreak,
+      longestStreak: u.longestStreak,
+      problemsSolved,
+      coursesCompleted,
+      projectsCompleted,
       score,
-      rankChange,
-      breakdown,
-      xpToNext,
-      nextRankName,
-    });
-  }
+      allTimeXp: u.totalXp,
+      rankTitle: getRankTitle(u.totalXp),
+      rankMovement: getRankMovement(u.id, u.createdAt)
+    };
+  });
 
-  if (currentUserId && !topIds.includes(currentUserId)) {
-    const currentScore = currentXpMap.get(currentUserId) ?? 0;
-    if (currentScore > 0) {
-      const currentUser = await prisma.user.findUnique({
-        where: { id: currentUserId },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          currentStreak: true,
-          _count: {
-            select: {
-              progress: { where: { status: "COMPLETED" } },
-              quizAttempts: { where: { passed: true } },
-              submissions: { where: { status: "PASSED" } },
-              projects: { where: { status: "COMPLETED" } },
-            },
-          },
-        },
-      });
+  mappedEntries.sort((a, b) => {
+    const aHasXp = a.score > 0;
+    const bHasXp = b.score > 0;
+    if (aHasXp !== bHasXp) {
+      return aHasXp ? -1 : 1;
+    }
 
-      if (currentUser && (!allowedUserIds || allowedUserIds.has(currentUserId))) {
-        const currRank = currentRanks.get(currentUserId) ?? 0;
-        const prevRank = previousRanks?.get(currentUserId) ?? null;
-        const rankChange = prevRank !== null ? prevRank - currRank : 0;
-        const breakdown = await getXpBreakdown(currentUserId, period);
+    if (aHasXp && bHasXp) {
+      if (b.score !== a.score) return b.score - a.score;
+      if (b.streak !== a.streak) return b.streak - a.streak;
+      if (b.problemsSolved !== a.problemsSolved) return b.problemsSolved - a.problemsSolved;
+      if (b.coursesCompleted !== a.coursesCompleted) return b.coursesCompleted - a.coursesCompleted;
+      if (b.projectsCompleted !== a.projectsCompleted) return b.projectsCompleted - a.projectsCompleted;
+    }
 
-        const idx = sortedIds.indexOf(currentUserId);
-        const nextId = idx > 0 ? sortedIds[idx - 1] : null;
-        let xpToNext: number | null = null;
-        let nextRankName: string | null = null;
-        if (nextId) {
-          const nextUser = await prisma.user.findUnique({ where: { id: nextId }, select: { name: true } });
-          if (nextUser) {
-            xpToNext = (currentXpMap.get(nextId) ?? 0) - currentScore;
-            nextRankName = nextUser.name;
-          }
-        }
+    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+  });
 
-        entries.push({
-          rank: currRank,
-          name: currentUser.name,
-          email: currentUser.email,
-          lecturesCompleted: currentUser._count.progress,
-          quizzesPassed: currentUser._count.quizAttempts,
-          problemsSolved: currentUser._count.submissions,
-          projectsCompleted: currentUser._count.projects,
-          streak: currentUser.currentStreak,
-          score: currentScore,
-          rankChange,
-          breakdown,
-          xpToNext,
-          nextRankName,
-        });
-      }
+  const entriesWithRank = mappedEntries.map((entry, index) => ({
+    rank: index + 1,
+    ...entry,
+  }));
+
+  const totalLearners = entriesWithRank.length;
+
+  let currentUserObj = null;
+  if (currentUserId) {
+    const userIndex = entriesWithRank.findIndex((e) => e.id === currentUserId);
+    if (userIndex !== -1) {
+      const entry = entriesWithRank[userIndex];
+      currentUserObj = {
+        rank: entry.rank,
+        totalLearners,
+        score: entry.score,
+        allTimeXp: entry.allTimeXp,
+        streak: entry.streak,
+        longestStreak: entry.longestStreak,
+        problemsSolved: entry.problemsSolved,
+        coursesCompleted: entry.coursesCompleted,
+        projectsCompleted: entry.projectsCompleted,
+        rankTitle: entry.rankTitle,
+        ...getRankProgress(entry.allTimeXp)
+      };
     }
   }
 
-  entries.sort((a, b) => a.rank - b.rank);
-
-  return entries;
+  return {
+    leaderboard: entriesWithRank,
+    totalLearners,
+    currentUser: currentUserObj
+  };
 }
 
 export async function getUserSummary(userId: string, courseSlug?: string) {
