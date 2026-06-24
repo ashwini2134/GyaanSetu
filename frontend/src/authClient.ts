@@ -12,8 +12,17 @@ export type AuthUser = {
 };
 
 const TOKEN_KEY = "fa_token";
-const API_BASE = import.meta.env.VITE_API_URL ?? "/api";
-const BACKEND_BASE = import.meta.env.VITE_BACKEND_URL ?? "http://localhost:3001";
+function ensureAbsoluteUrl(url: string | undefined, defaultUrl: string) {
+  if (!url) return defaultUrl;
+  if (url.startsWith("/")) return url;
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    return `https://${url}`;
+  }
+  return url;
+}
+
+const API_BASE = ensureAbsoluteUrl(import.meta.env.VITE_API_URL, "https://lms-production-3895.up.railway.app/api");
+const BACKEND_BASE = ensureAbsoluteUrl(import.meta.env.VITE_BACKEND_URL, "https://lms-production-3895.up.railway.app");
 
 export type OAuthProvider = "github" | "linkedin" | "google";
 
