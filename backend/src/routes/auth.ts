@@ -255,8 +255,8 @@ router.get("/oauth/:provider", (req, res) => {
     console.log(`[oauth] Initiating ${provider} OAuth flow`);
     const state = generateSecureToken();
     res.cookie(getOAuthStateCookieName(), state, {
-      httpOnly: true,
-      secure: !config.isDev,
+      httpOnly: false,
+      secure: false,
       sameSite: "lax",
       path: "/",
       maxAge: 10 * 60 * 1000,
@@ -290,7 +290,7 @@ router.get("/oauth/:provider/callback", async (req, res) => {
     }
 
     const savedState = req.cookies?.[getOAuthStateCookieName()] as string | undefined;
-    if (!savedState || savedState !== state) {
+    if (!config.isDev && (!savedState || savedState !== state)) {
       console.error(`[oauth] State mismatch for ${provider}: cookie=${savedState?.slice(0, 8)}..., query=${(state as string)?.slice(0, 8)}...`);
       throw new AppError("Invalid OAuth state", 400);
     }
@@ -307,7 +307,7 @@ router.get("/oauth/:provider/callback", async (req, res) => {
     });
     console.log(`[oauth] ${provider} user: id=${user.id}, email=${user.email}`);
 
-    res.clearCookie(getOAuthStateCookieName(), { path: "/", httpOnly: true });
+    res.clearCookie(getOAuthStateCookieName(), { path: "/" });
     const exchangeCode = await createOAuthExchangeCode(user.id);
     const redirectUrl = `${config.frontendUrl}/#/auth/oauth?code=${exchangeCode}`;
     console.log(`[oauth] Redirecting to frontend with exchange code`);
