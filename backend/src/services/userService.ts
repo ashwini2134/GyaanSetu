@@ -34,7 +34,7 @@ export async function createUser(input: {
   role?: UserRole;
   emailVerified?: boolean;
 }): Promise<SafeUser> {
-  const passwordHash = input.password ? await hashPassword(input.password) : "";
+  const passwordHash = input.password ? await hashPassword(input.password) : null;
   const role = input.role ?? "student";
   const emailVerified = input.emailVerified ?? false;
 
@@ -59,7 +59,7 @@ export async function createUser(input: {
 
 export async function authenticateUser(email: string, password: string): Promise<SafeUser> {
   const user = await findUserByEmail(email);
-  if (!user || !user.passwordHash) throw new Error("Invalid email or password");
+  if (!user || !user.passwordHash || user.passwordHash === "") throw new Error("Invalid email or password");
   const valid = await verifyPassword(password, user.passwordHash);
   if (!valid) throw new Error("Invalid email or password");
   const { passwordHash: _, ...safe } = user;
@@ -102,7 +102,7 @@ export async function findOrCreateOAuthUser(input: {
       data: {
         email: input.email.toLowerCase(),
         name: input.name,
-        passwordHash: "",
+        passwordHash: null,
         emailVerified: true,
       },
     });
