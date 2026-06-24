@@ -360,6 +360,25 @@ router.post("/action", requireAuth, async (req: AuthenticatedRequest, res, next)
       case "project":
         xpAmount = 100;
         reason = "Capstone Project Solved";
+        // Create project entry for leaderboard tracking
+        await prisma.project.upsert({
+          where: {
+            userId_projectId: {
+              userId,
+              projectId: actionId
+            }
+          },
+          update: {
+            status: "COMPLETED",
+            completedAt: new Date()
+          },
+          create: {
+            userId,
+            projectId: actionId,
+            status: "COMPLETED",
+            completedAt: new Date()
+          }
+        });
         break;
       case "course_start":
         break;

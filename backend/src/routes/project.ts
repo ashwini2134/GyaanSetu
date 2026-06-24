@@ -47,6 +47,26 @@ router.post("/complete", requireAuth, async (req: AuthenticatedRequest, res, nex
       },
     });
 
+    // Also create/update project entry for leaderboard tracking
+    await prisma.project.upsert({
+      where: {
+        userId_projectId: {
+          userId,
+          projectId
+        }
+      },
+      update: {
+        status: "COMPLETED",
+        completedAt: new Date()
+      },
+      create: {
+        userId,
+        projectId,
+        status: "COMPLETED",
+        completedAt: new Date()
+      }
+    });
+
     await awardXp(userId, 100, "Completed Project", `project_complete_${courseSlug}_${projectId}`);
 
     await sendNotification(
