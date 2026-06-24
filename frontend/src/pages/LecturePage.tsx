@@ -85,6 +85,7 @@ export default function LecturePage() {
     markLectureCompleted,
     isSectionCompleted,
     quizScore,
+    projectCompleted,
   } = useLectureProgress(slug, !isNaN(lectureNumber) ? String(lectureNumber) : undefined);
   const { refreshCourseProgress } = useCourseProgress(slug);
 
@@ -96,7 +97,6 @@ export default function LecturePage() {
   const scrollRef = useRef<HTMLElement>(null);
   const [skippedSections, setSkippedSections] = useState<Set<number>>(new Set());
   const [completedProblems, setCompletedProblems] = useState<string[]>([]);
-  const [projectCompleted] = useState(false);
   // Check if content fits without scrolling
   useEffect(() => {
     setScrolledToBottom(false);

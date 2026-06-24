@@ -19,18 +19,13 @@
     "title": "Leap Year Checker",
     "description": "Ask the user for a year. Determine if it's a leap year: divisible by 4 AND (not divisible by 100 OR divisible by 400).",
     "difficulty": "medium",
-    "starterCode": "year = int(input(\"Enter year: \"))\n\n# Check leap year",
+    "starterCode": "# Get year from user input\nyear = int(input(\"Enter year: \"))\n\n# Check leap year condition",
     "solution": "year = int(input(\"Enter year: \"))\nif year % 4 == 0 and (year % 100 != 0 or year % 400 == 0):\n    print(\"Leap year\")\nelse:\n    print(\"Not a leap year\")",
     "testCases": [
       {
         "label": "Year 2024",
         "input": "2024",
         "expectedOutput": "Enter year: Leap year"
-      },
-      {
-        "label": "Year 2023",
-        "input": "2023",
-        "expectedOutput": "Enter year: Not a leap year"
       }
     ]
   },

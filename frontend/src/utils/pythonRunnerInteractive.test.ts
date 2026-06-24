@@ -320,6 +320,35 @@ with open("test_lines.txt", "r") as f:
     expect(res.output.trim()).toBe("['line 1\\n', 'line 2\\n', 'line 3']");
   });
 
+  it('handles file iteration directly in for loop', () => {
+    const code = `
+with open("test_lines_loop.txt", "w") as f:
+    f.write("a\\nb\\nc\\n")
+
+with open("test_lines_loop.txt", "r") as f:
+    for line in f:
+        print(line.strip())
+`;
+    const res = runPython(code, []);
+    expect(res.error).toBeNull();
+    expect(res.output.trim().split('\n').map(s => s.trim())).toEqual(['a', 'b', 'c']);
+  });
+
+  it('handles file enumerate with start value', () => {
+    const code = `
+with open("test_lines_enum.txt", "w") as f:
+    f.write("first\\nsecond\\n")
+
+with open("test_lines_enum.txt", "r") as f:
+    for i, line in enumerate(f, 1):
+        print(str(i) + ". " + line.strip())
+`;
+    const res = runPython(code, []);
+    expect(res.error).toBeNull();
+    expect(res.output.trim().split('\n').map(s => s.trim())).toEqual(['1. first', '2. second']);
+  });
+
+
   it('handles Largest of Three with inputs 5, 12, 7', () => {
     const code = `
 a = int(input("First: "))
@@ -375,5 +404,103 @@ else:
     const prompts = ["First: ", "Second: ", "Third: "];
     expect(stripPrompts("First: Second: Third: Largest: 12", prompts)).toBe("Largest: 12");
     expect(stripPrompts("First: Second: Third: Largest: 12", ["First: ", "Third: "])).toBe("Second: Largest: 12");
+  });
+
+  it('handles slicing with step parameters', () => {
+    const code = `
+s = "hello"
+print(s[::-1])
+print(s[1:4:2])
+nums = [1, 2, 3, 4, 5]
+print(nums[::-1])
+print(nums[::2])
+`;
+    const res = runPython(code, []);
+    expect(res.error).toBeNull();
+    expect(res.output.trim().split('\n').map(s => s.trim())).toEqual([
+      "olleh",
+      "el",
+      "[5, 4, 3, 2, 1]",
+      "[1, 3, 5]"
+    ]);
+  });
+
+  it('handles reversed() built-in', () => {
+    const code = `
+nums = [1, 2, 3]
+print(list(reversed(nums)))
+`;
+    const res = runPython(code, []);
+    expect(res.error).toBeNull();
+    expect(res.output.trim()).toBe("[3, 2, 1]");
+  });
+
+  it('handles Even or Odd Checker', () => {
+    const code = `
+num = int(input("Enter a number: "))
+if num % 2 == 0:
+    print("Even")
+else:
+    print("Odd")
+`;
+    const res7 = runPython(code, ["7"]);
+    expect(res7.error).toBeNull();
+    expect(res7.output.trim()).toBe("Enter a number: Odd");
+
+    const res10 = runPython(code, ["10"]);
+    expect(res10.error).toBeNull();
+    expect(res10.output.trim()).toBe("Enter a number: Even");
+  });
+
+  it('handles Sum from 1 to N', () => {
+    const code = `
+n = int(input("Enter N: "))
+total = 0
+for i in range(1, n + 1):
+    total += i
+print(f"Sum: {total}")
+`;
+    const res5 = runPython(code, ["5"]);
+    expect(res5.error).toBeNull();
+    expect(res5.output.trim()).toBe("Enter N: Sum: 15");
+
+    const res10 = runPython(code, ["10"]);
+    expect(res10.error).toBeNull();
+    expect(res10.output.trim()).toBe("Enter N: Sum: 55");
+  });
+
+  it('handles Palindrome Checker', () => {
+    const code = `
+word = input("Enter a word: ")
+cleaned = word.lower().strip()
+if cleaned == cleaned[::-1]:
+    print("Palindrome")
+else:
+    print("Not a palindrome")
+`;
+    const resRacecar = runPython(code, ["Racecar"]);
+    expect(resRacecar.error).toBeNull();
+    expect(resRacecar.output.trim()).toBe("Enter a word: Palindrome");
+
+    const resPython = runPython(code, ["Python"]);
+    expect(resPython.error).toBeNull();
+    expect(resPython.output.trim()).toBe("Enter a word: Not a palindrome");
+  });
+
+  it('handles Word Frequency Dictionary exercise', () => {
+    const code = `
+sentence = "the cat and the dog and the bird"
+words = sentence.split()
+counts = {}
+for word in words:
+    if word in counts:
+        counts[word] += 1
+    else:
+        counts[word] = 1
+print(counts)
+`;
+    const res = runPython(code, []);
+    expect(res.error).toBeNull();
+    expect(res.output.trim()).toBe("{'the': 3, 'cat': 1, 'and': 2, 'dog': 1, 'bird': 1}");
   });
 });

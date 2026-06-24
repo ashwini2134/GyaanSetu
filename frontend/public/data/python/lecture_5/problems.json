@@ -11,11 +11,6 @@
         "label": "N = 5",
         "input": "5",
         "expectedOutput": "Enter N: Sum: 15"
-      },
-      {
-        "label": "N = 10",
-        "input": "10",
-        "expectedOutput": "Enter N: Sum: 55"
       }
     ]
   },

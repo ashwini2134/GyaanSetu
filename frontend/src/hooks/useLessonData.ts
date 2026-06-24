@@ -77,20 +77,32 @@ export function useLessonData(
             );
             if (rawProblems) {
               const problems: CodingProblem[] = [];
+              const projects: ProjectSummary[] = [];
               for (const p of rawProblems) {
-                if (p.starterCode === undefined) continue;
                 const difficulty = (['easy', 'medium', 'hard'].includes(p.difficulty ?? '') ? p.difficulty : 'easy') as 'easy' | 'medium' | 'hard';
-                problems.push({
-                  id: p.id,
-                  title: p.title,
-                  description: p.description,
-                  difficulty,
-                  starterCode: p.starterCode,
-                  solution: p.solution ?? '',
-                  testCases: p.testCases ?? [],
-                });
+                if (p.starterCode === undefined) {
+                  projects.push({
+                    id: p.id,
+                    title: p.title,
+                    description: p.description,
+                    difficulty,
+                  });
+                } else {
+                  problems.push({
+                    id: p.id,
+                    title: p.title,
+                    description: p.description,
+                    difficulty,
+                    starterCode: p.starterCode,
+                    solution: p.solution ?? '',
+                    testCases: p.testCases ?? [],
+                  });
+                }
               }
               lesson.problems = problems;
+              if (projects.length > 0) {
+                lesson.projects = projects;
+              }
             }
           }
 

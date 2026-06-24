@@ -73,6 +73,10 @@ const ProjectDetailsPage = lazy(
   () => import("./pages/ProjectDetailsPage")
 );
 
+const InteractiveProjectPage = lazy(
+  () => import("./pages/InteractiveProjectPage")
+);
+
 const ProfilePage = lazy(
   () => import("./pages/ProfilePage")
 );
@@ -287,6 +291,13 @@ export default function App() {
           <Route
             path="course/:slug/lecture/:number"
             element={<LecturePage />}
+          />
+
+          {/* Interactive Project Workspace */}
+
+          <Route
+            path="course/:slug/lecture/:number/project/:projectId"
+            element={<InteractiveProjectPage />}
           />
 
           {/* Quiz */}

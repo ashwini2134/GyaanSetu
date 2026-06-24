@@ -13,13 +13,21 @@ export interface RunResult {
 }
 
 export function runPython(code: string, inputs: string[] = []): RunResult {
-  return new MiniPython(inputs).run(code);
+  const instance = new MiniPython(inputs);
+  return instance.run(code);
 }
 
 class LoopControl extends Error {
   constructor(public ctype: 'break' | 'continue') {
     super(ctype);
     this.name = 'LoopControl';
+  }
+}
+
+class ReturnControl extends Error {
+  constructor(public value: PyVal) {
+    super('return');
+    this.name = 'ReturnControl';
   }
 }
 
@@ -35,6 +43,15 @@ class MiniPython {
   constructor(private inputs: string[] = []) {}
 
   run(code: string): RunResult {
+    // Reset state at the start of each run to ensure clean execution
+    this.inputIdx = 0;
+    this.out = '';
+    this.traceback = [];
+    this.currentLine = 0;
+    this.prompts = [];
+    this.globals = new Map();
+    this.fns = new Map();
+    
     try {
       this.validateSyntax(code);
       const logicalLines = this.reconstructLogicalLines(code);
@@ -57,6 +74,11 @@ class MiniPython {
         ? `Traceback (most recent call last):\n  File "<stdin>", line ${this.traceback[0]}, in <module>\n${msg}`
         : msg;
       return { output, error: tb, exitCode: 1, prompts: this.prompts };
+    } finally {
+      // Clear in-memory filesystem for test isolation
+      MiniPython.clearInMemoryFs();
+      // Clear localStorage file entries for test isolation
+      MiniPython.clearLocalStorageFiles();
     }
   }
 
@@ -136,7 +158,7 @@ class MiniPython {
 
   // ── Code execution ─────────────────────────────────────────────────────
 
-  private execLines(lines: string[], base: number, env: Env): void {
+  private execLines(lines: string[], base: number, env: Env, inFn = false): void {
     let i = 0;
     while (i < lines.length) {
       this.currentLine = i + 1;
@@ -190,7 +212,7 @@ class MiniPython {
         };
         env.set(varName, fileObj);
         try {
-          this.execLines(body, ind + 1, env);
+          this.execLines(body, ind + 1, env, inFn);
         } finally {
           env.delete(varName);
         }
@@ -244,6 +266,64 @@ class MiniPython {
         i++; continue;
       }
 
+      // Dict/List augmented assignment: d[key] += value
+      const dictAugM = t.match(/^([a-zA-Z_]\w*)\[([^\]]+)\]\s*(\*\*|[+\-*\/%]|\/\/)=\s*(.+)$/);
+      if (dictAugM) {
+        const dict = env.get(dictAugM[1]) ?? this.globals.get(dictAugM[1]);
+        if (dict && (this.isDict(dict) || Array.isArray(dict))) {
+          const key = String(this.eval(dictAugM[2].trim(), env));
+          const op = dictAugM[3];
+          const rhs = this.eval(dictAugM[4].trim(), env);
+          
+          let cur: PyVal;
+          if (this.isDict(dict)) {
+            cur = dict[key];
+          } else {
+            cur = (dict as PyVal[])[Number(key)];
+          }
+
+          if (cur === undefined || cur === null) {
+            if (this.isDict(dict)) throw new Error(`  KeyError: '${key}'\n    at line ${i + 1}`);
+            throw new Error(`  IndexError: list index out of range\n    at line ${i + 1}`);
+          }
+
+          let res: PyVal;
+          if (typeof cur === 'string' && op === '+') {
+            res = cur + String(rhs);
+          } else {
+            if (typeof cur !== 'number' || typeof rhs !== 'number') {
+              throw new Error(`  TypeError: unsupported operand type(s) for ${op}=: '${typeof cur}' and '${typeof rhs}'\n    at line ${i + 1}`);
+            }
+            switch (op) {
+              case '+': res = cur + rhs; break;
+              case '-': res = cur - rhs; break;
+              case '*': res = cur * rhs; break;
+              case '/':
+                if (rhs === 0) throw new Error(`  ZeroDivisionError: division by zero\n    at line ${i + 1}`);
+                res = cur / rhs; break;
+              case '//':
+                if (rhs === 0) throw new Error(`  ZeroDivisionError: integer division or modulo by zero\n    at line ${i + 1}`);
+                res = Math.floor(cur / rhs); break;
+              case '%':
+                if (rhs === 0) throw new Error(`  ZeroDivisionError: modulo by zero\n    at line ${i + 1}`);
+                res = cur % rhs; break;
+              case '**':
+                res = Math.pow(cur, rhs); break;
+              default: res = 0;
+            }
+          }
+
+          if (this.isDict(dict)) {
+            dict[key] = res;
+          } else {
+            (dict as PyVal[])[Number(key)] = res;
+          }
+        } else {
+          throw new Error(`  TypeError: '${typeof dict}' object does not support item assignment\n    at line ${i + 1}`);
+        }
+        i++; continue;
+      }
+
       // if / elif / else
       if (t.startsWith('if ') || t.startsWith('elif ')) {
         const condStr = t.slice(t.startsWith('elif ') ? 5 : 3, t.lastIndexOf(':')).trim();
@@ -281,7 +361,7 @@ class MiniPython {
         };
 
         if (cond) {
-          this.execLines(body, ind + 1, env);
+          this.execLines(body, ind + 1, env, inFn);
           skipChain();
           continue;
         }
@@ -306,7 +386,7 @@ class MiniPython {
               i++;
             }
             if (elCond) {
-              this.execLines(elBody, ind + 1, env);
+              this.execLines(elBody, ind + 1, env, inFn);
               skipChain();
               break;
             }
@@ -320,7 +400,7 @@ class MiniPython {
               elBody.push(bl);
               i++;
             }
-            this.execLines(elBody, ind + 1, env);
+            this.execLines(elBody, ind + 1, env, inFn);
             break;
           } else {
             break;
@@ -377,7 +457,7 @@ class MiniPython {
           for (let val = start; step > 0 ? val < stop : val > stop; val += step) {
             env.set(varNames[0], val);
             try {
-              this.execLines(body, ind + 1, env);
+              this.execLines(body, ind + 1, env, inFn);
             } catch (e) {
               if (e instanceof LoopControl) {
                 if (e.ctype === 'break') break;
@@ -385,27 +465,20 @@ class MiniPython {
             }
           }
         } else {
-          // Try to evaluate as a list/tuple
           const iterable = this.eval(iterExpr, env);
-          let iterableList: PyVal[] = [];
-          if (Array.isArray(iterable)) {
-            iterableList = iterable;
-          } else if (this.isFile(iterable)) {
-            const fileObj = iterable as any;
-            const content = this.readFile(fileObj.filename, fileObj.mode);
-            iterableList = content ? content.split(/(?<=\n)/) : [];
+          const iterableList = this.toIterableList(iterable);
+          if (iterableList === null) {
+            throw new Error(`  TypeError: '${iterable === null ? 'NoneType' : typeof iterable}' object is not iterable\n    at line ${this.currentLine}`);
           }
-          if (iterableList.length > 0 || Array.isArray(iterable)) {
-            for (const val of iterableList) {
-              setVars(val);
-              try {
-                this.execLines(body, ind + 1, env);
-              } catch (e) {
-                if (e instanceof LoopControl) {
-                  if (e.ctype === 'break') break;
-                  // continue falls through to next iteration
-                } else { throw e; }
-              }
+          for (const val of iterableList) {
+            setVars(val);
+            try {
+              this.execLines(body, ind + 1, env, inFn);
+            } catch (e) {
+              if (e instanceof LoopControl) {
+                if (e.ctype === 'break') break;
+                // continue falls through to next iteration
+              } else { throw e; }
             }
           }
         }
@@ -430,7 +503,7 @@ class MiniPython {
         const maxIter = 10000; // Prevent infinite loops
         while (this.eval(condStr, env) && iterations < maxIter) {
           try {
-            this.execLines(body, ind + 1, env);
+            this.execLines(body, ind + 1, env, inFn);
           } catch (e) {
             if (e instanceof LoopControl) {
               if (e.ctype === 'break') break;
@@ -524,84 +597,20 @@ class MiniPython {
         i++; continue;
       }
 
-      // return outside function
+      // return
       if (t.startsWith('return ')) {
-        throw new Error(`  SyntaxError: 'return' outside function (line ${i + 1})`);
+        if (!inFn) {
+          throw new Error(`  SyntaxError: 'return' outside function (line ${i + 1})`);
+        }
+        const val = this.eval(t.slice(7).trim(), env);
+        throw new ReturnControl(val);
       }
 
       i++;
     }
   }
 
-  private runBody(lines: string[], env: Env): PyVal {
-    let baseInd = Infinity;
-    for (const l of lines) {
-      if (l.trim()) { baseInd = this.indent(l); break; }
-    }
-    if (!isFinite(baseInd)) return null;
 
-    for (let i = 0; i < lines.length; i++) {
-      this.currentLine = this.currentLine + 1;
-      const raw = lines[i];
-      const t = raw.trim();
-      if (!t || t.startsWith('#')) continue;
-
-      if (t === 'break') throw new LoopControl('break');
-      if (t === 'continue') throw new LoopControl('continue');
-      if (t === 'pass') continue;
-
-      if (t.startsWith('return ')) return this.eval(t.slice(7).trim(), env);
-
-      if (t.startsWith('print(') || t.startsWith('print (')) {
-        const inner = this.unParen(t.slice(t.indexOf('(')));
-        this.handlePrint(inner, env);
-        continue;
-      }
-
-      const augM = t.match(/^([a-zA-Z_]\w*)\s*(\*\*|[+\-*\/%]|\/\/)=\s*(.+)$/);
-      if (augM) {
-        const cur = this.eval(augM[1], env);
-        const rhs = this.eval(augM[3].trim(), env);
-        const op = augM[2];
-        let res: PyVal;
-        if (typeof cur === 'string' && op === '+') {
-          res = cur + String(rhs);
-        } else if (typeof cur === 'string' && op === '%') {
-          res = this.formatString(cur, rhs);
-        } else {
-          if (typeof cur !== 'number' || typeof rhs !== 'number') {
-            throw new Error(`  TypeError: unsupported operand type(s) for ${op}=`);
-          }
-          switch (op) {
-            case '+': res = cur + rhs; break;
-            case '-': res = cur - rhs; break;
-            case '*': res = cur * rhs; break;
-            case '/':
-              if (rhs === 0) throw new Error(`  ZeroDivisionError: division by zero`);
-              res = cur / rhs; break;
-            case '//':
-              if (rhs === 0) throw new Error(`  ZeroDivisionError: integer division or modulo by zero`);
-              res = Math.floor(cur / rhs); break;
-            case '%':
-              if (rhs === 0) throw new Error(`  ZeroDivisionError: modulo by zero`);
-              res = cur % rhs; break;
-            case '**':
-              res = Math.pow(cur, rhs); break;
-            default: res = 0;
-          }
-        }
-        env.set(augM[1], res);
-        continue;
-      }
-
-      const assignM = t.match(/^([a-zA-Z_]\w*)\s*=(?!=)\s*(.+)$/);
-      if (assignM) { env.set(assignM[1], this.eval(assignM[2].trim(), env)); continue; }
-
-      const callM = t.match(/^([a-zA-Z_]\w*)\s*\((.*)?\)\s*$/);
-      if (callM) { this.call(callM[1], callM[2] ?? '', env); continue; }
-    }
-    return null;
-  }
 
   // ── Function call ───────────────────────────────────────────────────────
 
@@ -663,37 +672,73 @@ class MiniPython {
       return typeof v === 'string' ? v.trim() : null;
     }
     if (name === 'sum') {
-      const v = this.eval(argsStr, env);
-      if (Array.isArray(v)) return v.reduce((a, b) => Number(a) + Number(b), 0);
-      throw new Error(`  TypeError: '${typeof v}' object is not iterable`);
+      const args = argsStr.trim() ? this.parseArgs(argsStr, env) : [];
+      if (args.length === 0) throw new Error(`  TypeError: sum() takes at least 1 argument (0 given)`);
+      const v = args[0];
+      const start = args[1] !== undefined ? Number(args[1]) : 0;
+      const list = this.toIterableList(v);
+      if (list === null) throw new Error(`  TypeError: '${v === null ? 'NoneType' : typeof v}' object is not iterable`);
+      return list.reduce((a, b) => Number(a) + Number(b), start);
     }
     if (name === 'min') {
-      const v = this.eval(argsStr, env);
-      if (Array.isArray(v)) return Math.min(...v.filter(x => typeof x === 'number'));
-      throw new Error(`  TypeError: '${typeof v}' object is not iterable`);
+      const args = argsStr.trim() ? this.parseArgs(argsStr, env) : [];
+      if (args.length === 0) throw new Error(`  TypeError: min() takes at least 1 argument (0 given)`);
+      const v = args[0];
+      const list = this.toIterableList(v);
+      if (list === null) throw new Error(`  TypeError: '${v === null ? 'NoneType' : typeof v}' object is not iterable`);
+      return Math.min(...list.filter(x => typeof x === 'number'));
     }
     if (name === 'max') {
-      const v = this.eval(argsStr, env);
-      if (Array.isArray(v)) return Math.max(...v.filter(x => typeof x === 'number'));
-      throw new Error(`  TypeError: '${typeof v}' object is not iterable`);
+      const args = argsStr.trim() ? this.parseArgs(argsStr, env) : [];
+      if (args.length === 0) throw new Error(`  TypeError: max() takes at least 1 argument (0 given)`);
+      const v = args[0];
+      const list = this.toIterableList(v);
+      if (list === null) throw new Error(`  TypeError: '${v === null ? 'NoneType' : typeof v}' object is not iterable`);
+      return Math.max(...list.filter(x => typeof x === 'number'));
     }
     if (name === 'sorted') {
-      const v = this.eval(argsStr, env);
-      if (Array.isArray(v)) return [...v].sort((a, b) => {
+      const args = argsStr.trim() ? this.parseArgs(argsStr, env) : [];
+      if (args.length === 0) throw new Error(`  TypeError: sorted() takes at least 1 argument (0 given)`);
+      const v = args[0];
+      const list = this.toIterableList(v);
+      if (list === null) throw new Error(`  TypeError: '${v === null ? 'NoneType' : typeof v}' object is not iterable`);
+      return [...list].sort((a, b) => {
         if (typeof a === 'number' && typeof b === 'number') return a - b;
         return String(a).localeCompare(String(b));
       });
-      throw new Error(`  TypeError: '${typeof v}' object is not iterable`);
     }
     if (name === 'set') {
-      const v = this.eval(argsStr, env);
-      if (Array.isArray(v)) return [...new Set(v)];
-      throw new Error(`  TypeError: '${typeof v}' object is not iterable`);
+      const args = argsStr.trim() ? this.parseArgs(argsStr, env) : [];
+      if (args.length === 0) return [];
+      const v = args[0];
+      const list = this.toIterableList(v);
+      if (list === null) throw new Error(`  TypeError: '${v === null ? 'NoneType' : typeof v}' object is not iterable`);
+      return [...new Set(list)];
+    }
+    if (name === 'list') {
+      const args = argsStr.trim() ? this.parseArgs(argsStr, env) : [];
+      if (args.length === 0) return [];
+      const v = args[0];
+      const list = this.toIterableList(v);
+      if (list === null) throw new Error(`  TypeError: '${v === null ? 'NoneType' : typeof v}' object is not iterable`);
+      return list;
+    }
+    if (name === 'reversed') {
+      const args = argsStr.trim() ? this.parseArgs(argsStr, env) : [];
+      if (args.length === 0) throw new Error(`  TypeError: reversed() takes at least 1 argument (0 given)`);
+      const v = args[0];
+      const list = this.toIterableList(v);
+      if (list === null) throw new Error(`  TypeError: '${v === null ? 'NoneType' : typeof v}' object is not iterable`);
+      return [...list].reverse();
     }
     if (name === 'enumerate') {
-      const v = this.eval(argsStr, env);
-      if (Array.isArray(v)) return v.map((item, idx) => [idx, item]);
-      throw new Error(`  TypeError: '${typeof v}' object is not iterable`);
+      const args = argsStr.trim() ? this.parseArgs(argsStr, env) : [];
+      if (args.length === 0) throw new Error(`  TypeError: enumerate() takes at least 1 argument (0 given)`);
+      const v = args[0];
+      const start = args[1] !== undefined ? Number(args[1]) : 0;
+      const list = this.toIterableList(v);
+      if (list === null) throw new Error(`  TypeError: '${v === null ? 'NoneType' : typeof v}' object is not iterable`);
+      return list.map((item, idx) => [idx + start, item]);
     }
     if (name === 'type') {
       const v = this.eval(argsStr, env);
@@ -730,7 +775,17 @@ class MiniPython {
     }
     const local: Env = new Map(this.globals);
     fn.params.forEach((p, i) => local.set(p, argVals[i] ?? null));
-    return this.runBody(fn.bodyLines, local);
+    
+    const baseInd = fn.bodyLines.length > 0 ? this.indent(fn.bodyLines[0]) : 0;
+    try {
+      this.execLines(fn.bodyLines, baseInd, local, true);
+    } catch (e) {
+      if (e instanceof ReturnControl) {
+        return e.value;
+      }
+      throw e;
+    }
+    return null;
   }
 
   // ── Print handler (supports multiple args, sep, end) ────────────────
@@ -783,6 +838,25 @@ class MiniPython {
 
   private isDict(v: PyVal): v is { [key: string]: PyVal } {
     return typeof v === 'object' && v !== null && !Array.isArray(v) && !('__type__' in v);
+  }
+
+  private toIterableList(v: PyVal): PyVal[] | null {
+    if (Array.isArray(v)) return v;
+    if (typeof v === 'string') return v.split('');
+    if (this.isFile(v)) {
+      const fileObj = v as any;
+      try {
+        const content = this.readFile(fileObj.filename, fileObj.mode);
+        return content ? content.split(/(?<=\n)/) : [];
+      } catch (e) {
+        // If file read fails, return empty array
+        return [];
+      }
+    }
+    if (this.isDict(v)) {
+      return Object.keys(v);
+    }
+    return null;
   }
 
   // ── Expression evaluator ───────────────────────────────────────────────
@@ -1050,16 +1124,46 @@ class MiniPython {
         const parts = inner.split(':');
         const startStr = parts[0].trim();
         const endStr = (parts[1] ?? '').trim();
-        const start = startStr ? Number(this.eval(startStr, env)) : 0;
+        const stepStr = (parts[2] ?? '').trim();
+
+        if (typeof target !== 'string' && !Array.isArray(target)) {
+          throw new Error(`  TypeError: object of type '${typeof target}' is not subscriptable`);
+        }
+
+        const step = stepStr ? Number(this.eval(stepStr, env)) : 1;
+        if (isNaN(step) || step === 0) throw new Error("  ValueError: slice step cannot be zero");
+
+        let start: number;
+        if (startStr) {
+          start = Number(this.eval(startStr, env));
+          if (start < 0) start = target.length + start;
+        } else {
+          start = step > 0 ? 0 : target.length - 1;
+        }
+
+        let end: number;
+        if (endStr) {
+          end = Number(this.eval(endStr, env));
+          if (end < 0) end = target.length + end;
+        } else {
+          end = step > 0 ? target.length : -1;
+        }
+
+        const result: any[] = [];
+        if (step > 0) {
+          for (let k = start; k < end; k += step) {
+            if (k >= 0 && k < target.length) result.push(target[k]);
+          }
+        } else {
+          for (let k = start; k > end; k += step) {
+            if (k >= 0 && k < target.length) result.push(target[k]);
+          }
+        }
+
         if (typeof target === 'string') {
-          const end = endStr ? Number(this.eval(endStr, env)) : target.length;
-          return target.slice(start, end);
+          return result.join('');
         }
-        if (Array.isArray(target)) {
-          const end = endStr ? Number(this.eval(endStr, env)) : target.length;
-          return target.slice(start, end);
-        }
-        throw new Error(`  TypeError: object of type '${typeof target}' is not subscriptable`);
+        return result;
       }
       const index = this.eval(inner, env);
       const idx = typeof index === 'number' ? index : Number(index);
@@ -1317,6 +1421,27 @@ class MiniPython {
   }
 
   private static inMemoryFs = new Map<string, string>();
+
+  // Clear in-memory filesystem (for test isolation)
+  private static clearInMemoryFs(): void {
+    MiniPython.inMemoryFs.clear();
+  }
+
+  // Clear localStorage file entries (for test isolation)
+  private static clearLocalStorageFiles(): void {
+    if (typeof localStorage !== 'undefined') {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('fa_file_')) {
+          keysToRemove.push(key);
+        }
+      }
+      for (const key of keysToRemove) {
+        localStorage.removeItem(key);
+      }
+    }
+  }
 
   private isFile(v: PyVal): boolean {
     return typeof v === 'object' && v !== null && '__type__' in v && (v as any).__type__ === 'file';

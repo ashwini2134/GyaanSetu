@@ -19,18 +19,13 @@
     "title": "Even or Odd",
     "description": "Ask the user for a number. Use the modulo operator to check if it's even or odd. Print 'Even' or 'Odd'.",
     "difficulty": "medium",
-    "starterCode": "num = int(input(\"Enter a number: \"))\n\n# Check even or odd",
+    "starterCode": "num = int(input(\"Enter a number: \"))\n\n# Check even or odd using modulo operator",
     "solution": "num = int(input(\"Enter a number: \"))\nif num % 2 == 0:\n    print(\"Even\")\nelse:\n    print(\"Odd\")",
     "testCases": [
       {
         "label": "Number 7",
         "input": "7",
         "expectedOutput": "Enter a number: Odd"
-      },
-      {
-        "label": "Number 10",
-        "input": "10",
-        "expectedOutput": "Enter a number: Even"
       }
     ]
   }

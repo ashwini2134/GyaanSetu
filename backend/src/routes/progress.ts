@@ -402,6 +402,7 @@ router.get("/lecture/:courseSlug/:lectureId", requireAuth, async (req: Authentic
     res.json({
       sections,
       lectureCompleted: lectureProgress?.status === "COMPLETED",
+      projectCompleted: lectureProgress?.projectCompleted || false,
       quizAttempt: quizAttempts[0] || null,
     });
   } catch (error) { next(error); }

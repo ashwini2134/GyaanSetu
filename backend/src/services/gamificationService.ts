@@ -239,19 +239,11 @@ export async function getLeaderboard(currentUserId?: string, timeframe: string =
   });
 
   mappedEntries.sort((a, b) => {
-    const aHasXp = a.score > 0;
-    const bHasXp = b.score > 0;
-    if (aHasXp !== bHasXp) {
-      return aHasXp ? -1 : 1;
-    }
-
-    if (aHasXp && bHasXp) {
-      if (b.score !== a.score) return b.score - a.score;
-      if (b.streak !== a.streak) return b.streak - a.streak;
-      if (b.problemsSolved !== a.problemsSolved) return b.problemsSolved - a.problemsSolved;
-      if (b.coursesCompleted !== a.coursesCompleted) return b.coursesCompleted - a.coursesCompleted;
-      if (b.projectsCompleted !== a.projectsCompleted) return b.projectsCompleted - a.projectsCompleted;
-    }
+    if (b.score !== a.score) return b.score - a.score;
+    if (b.streak !== a.streak) return b.streak - a.streak;
+    if (b.problemsSolved !== a.problemsSolved) return b.problemsSolved - a.problemsSolved;
+    if (b.coursesCompleted !== a.coursesCompleted) return b.coursesCompleted - a.coursesCompleted;
+    if (b.projectsCompleted !== a.projectsCompleted) return b.projectsCompleted - a.projectsCompleted;
 
     return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
   });

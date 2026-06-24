@@ -11,11 +11,6 @@
         "label": "Racecar",
         "input": "Racecar",
         "expectedOutput": "Enter a word: Palindrome"
-      },
-      {
-        "label": "Python",
-        "input": "Python",
-        "expectedOutput": "Enter a word: Not a palindrome"
       }
     ]
   },

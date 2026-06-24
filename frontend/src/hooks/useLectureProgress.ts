@@ -11,6 +11,7 @@ export interface SectionProgress {
 interface LectureData {
   sections: SectionProgress[];
   lectureCompleted: boolean;
+  projectCompleted: boolean;
   quizAttempt: { score: number; total: number; passed: boolean } | null;
 }
 
@@ -28,6 +29,7 @@ async function apiCall<T>(path: string, init: RequestInit = {}): Promise<T> {
 export function useLectureProgress(courseSlug: string | undefined, lectureId: string | undefined) {
   const [sections, setSections] = useState<Record<number, boolean>>({});
   const [lectureCompleted, setLectureCompleted] = useState(false);
+  const [projectCompleted, setProjectCompleted] = useState(false);
   const [quizScore, setQuizScore] = useState<number | null>(null);
   const [quizTotal, setQuizTotal] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -37,6 +39,7 @@ export function useLectureProgress(courseSlug: string | undefined, lectureId: st
     setLoading(true);
     setSections({});
     setLectureCompleted(false);
+    setProjectCompleted(false);
     setQuizScore(null);
     setQuizTotal(null);
     try {
@@ -47,6 +50,7 @@ export function useLectureProgress(courseSlug: string | undefined, lectureId: st
       });
       setSections(map);
       setLectureCompleted(data.lectureCompleted);
+      setProjectCompleted(data.projectCompleted || false);
       if (data.quizAttempt) {
         setQuizScore(data.quizAttempt.score);
         setQuizTotal(data.quizAttempt.total);
@@ -142,6 +146,7 @@ export function useLectureProgress(courseSlug: string | undefined, lectureId: st
   return {
     sections,
     lectureCompleted,
+    projectCompleted,
     quizScore,
     quizTotal,
     loading,

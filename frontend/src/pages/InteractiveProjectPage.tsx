@@ -3,8 +3,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { saveCompletedProject } from '../api';
-import { markProjectCompletedDirect } from '../hooks/useProgress';
+import { authFetch } from '../authClient';
 import { runPythonMock, type DebugStep } from '../interpreter';
 import { getProjectDefaultInput, getProjectChecklist, runChecklist, getProjectDefinition } from '../projects/registry';
 import SimulationModal from '../simulation/SimulationModal';
@@ -281,20 +280,31 @@ export default function InteractiveProjectPage() {
       setAutoClose(false);
       setShowModal(true);
     } else if (slug && projectId) {
-      saveCompletedProject(slug, projectId, true);
-      const num = Number(number);
-      if (!isNaN(num)) markProjectCompletedDirect(slug, num, projectId);
-      setRunStatus('submitted');
+      authFetch('/projects/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ courseSlug: slug, lectureId: number, projectId }),
+      }).then(() => {
+        setRunStatus('submitted');
+      }).catch(err => {
+        console.error('Failed to complete project', err);
+        setRunStatus('idle');
+      });
     }
   }, [runCode, isSim, slug, projectId, number]);
 
   const handleModalClose = useCallback(() => {
     setShowModal(false);
     if (!autoClose && slug && projectId) {
-      setRunStatus('submitted');
-      saveCompletedProject(slug, projectId, true);
-      const num = Number(number);
-      if (!isNaN(num)) markProjectCompletedDirect(slug, num, projectId);
+      authFetch('/projects/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ courseSlug: slug, lectureId: number, projectId }),
+      }).then(() => {
+        setRunStatus('submitted');
+      }).catch(err => {
+        console.error('Failed to complete project', err);
+      });
     }
   }, [autoClose, slug, projectId, number]);
 
