@@ -281,7 +281,7 @@ export default function Dashboard() {
         {/* Separated Content Wrapper Pane */}
         <div className="bg-[#0c101b]/80 border border-slate-800/60 rounded-3xl p-6 md:p-8 mb-8">
           {/* Main Columns layout */}
-          <div className="grid gap-8 lg:grid-cols-3 items-start">
+          <div className="grid gap-8 lg:grid-cols-3">
             {/* Left Panel */}
             <div className="lg:col-span-2 space-y-8">
               {/* 6 Stats card grid */}
@@ -605,38 +605,32 @@ export default function Dashboard() {
             </div>
 
             {/* Right Panel: Achievements */}
-            <div>
+            <div className="flex flex-col">
               <div className="flex items-center gap-2 mb-4">
                 <div className="text-slate-300"><IconTrophy /></div>
                 <h3 className="text-lg font-bold text-white tracking-tight">Achievements</h3>
               </div>
 
-              <Card className="bg-slate-950/40 border border-slate-800/60 rounded-3xl p-4">
-                <div className="grid grid-cols-2 gap-3">
+              <Card className="flex-1 bg-slate-950/40 border border-slate-800/60 rounded-3xl p-4">
+                <div className="grid grid-cols-2 gap-3 auto-rows-fr h-full">
                   {displayAchievements.map((achievement) => (
                     <div
                       key={achievement.id}
-                      className={`relative flex flex-col items-center text-center gap-2 p-4 rounded-2xl border transition-all duration-200 ${
+                      className={`group relative flex flex-col items-center text-center justify-center gap-1.5 p-3 rounded-2xl border transition-all duration-[280ms] hover:scale-[1.03] hover:-translate-y-0.5 ${
                         achievement.unlocked
-                          ? 'border-emerald-500/40 bg-emerald-500/8'
-                          : 'border-slate-800/60 bg-slate-900/40'
+                          ? 'border-emerald-500/40 bg-emerald-500/8 hover:border-emerald-400/60 hover:shadow-[0_0_20px_rgba(52,211,153,0.15)]'
+                          : 'border-slate-800/60 bg-slate-900/40 hover:border-slate-700/80 hover:shadow-[0_0_20px_rgba(148,163,184,0.08)]'
                       }`}
                     >
-                      {/* Icon */}
-                      <div className={`text-3xl leading-none ${achievement.unlocked ? '' : 'grayscale opacity-30'}`}>
-                        {achievement.icon}
+                      <div className={`transition-all duration-200 group-hover:scale-110 ${achievement.unlocked ? '' : 'grayscale opacity-30 group-hover:opacity-50'}`}>
+                        <achievement.icon size={24} className={achievement.unlocked ? 'text-emerald-400' : 'text-slate-600'} />
                       </div>
-
-                      {/* Title */}
-                      <span className={`text-xs font-semibold leading-tight ${achievement.unlocked ? 'text-emerald-400' : 'text-slate-500'}`}>
+                      <span className={`text-[11px] font-semibold leading-tight text-center transition-colors duration-200 ${achievement.unlocked ? 'text-emerald-400 group-hover:text-emerald-300' : 'text-slate-500 group-hover:text-slate-400'}`}>
                         {achievement.title}
                       </span>
-
-                      {/* Description */}
-                      <p className="text-[10px] leading-snug text-slate-500">
+                      <p className="text-[9px] leading-snug text-slate-500 transition-colors duration-200 group-hover:text-slate-400 text-center">
                         {achievement.unlocked ? achievement.completedDescription : achievement.description}
                       </p>
-
                     </div>
                   ))}
                 </div>

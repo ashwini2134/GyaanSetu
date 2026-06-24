@@ -105,10 +105,10 @@ router.get("/subsection-status/:userId", requireAuth, async (req: AuthenticatedR
   }
 });
 
-router.get('/questions/:category/:subsection', async (req, res) => {
+router.get('/questions/:category/:subsection', requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    const category = decodeURIComponent(req.params.category).trim();
-    const subsection = decodeURIComponent(req.params.subsection).trim();
+    const category = decodeURIComponent(req.params.category as string).trim();
+    const subsection = decodeURIComponent(req.params.subsection as string).trim();
 
     const questions = await prisma.assessmentQuestion.findMany({
       where: {
@@ -135,21 +135,31 @@ router.get('/questions/:category/:subsection', async (req, res) => {
       });
     }
 
-    return res.status(200).json({ questions });
+    // Strip correctAnswer for non-admin users to prevent answer key leakage
+    const isAdmin = req.user!.role === 'admin';
+    const sanitized = isAdmin ? questions : questions.map(q => {
+      const { correctAnswer, ...rest } = q;
+      return rest;
+    });
+
+    return res.status(200).json({ questions: sanitized });
   } catch (error) {
     console.error('Error fetching questions:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-router.post('/submit', async (req, res) => {
+router.post('/submit', requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    const { userId, category, subsection, score, totalQuestions, timeTaken, answers } = req.body;
+    const { category, subsection, score, totalQuestions, timeTaken, answers } = req.body;
 
-    if (!userId || !category || !subsection) {
+    // Derive userId from authenticated JWT, never trust request body
+    const userId = req.user!.id;
+
+    if (!category || !subsection) {
       return res.status(400).json({ 
         error: 'Missing required fields', 
-        required: ['userId', 'category', 'subsection'] 
+        required: ['category', 'subsection'] 
       });
     }
 

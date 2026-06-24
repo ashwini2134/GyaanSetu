@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { requireAuth } from "../middleware/auth.js";
+import { requireAuth, requireRole } from "../middleware/auth.js";
 import { prisma } from "../prisma.js";
 import type { AuthenticatedRequest } from "../middleware/auth.js";
 import { z } from "zod";
@@ -145,6 +145,96 @@ router.get("/download/:projectId", requireAuth, async (req: AuthenticatedRequest
   }
 });
 
+// Admin: list pending projects for review
+router.get("/admin/pending", requireAuth, requireRole("admin"), async (_req: AuthenticatedRequest, res, next) => {
+  try {
+    const pending = await prisma.project.findMany({
+      where: { status: "PENDING_REVIEW" },
+      orderBy: { completedAt: "asc" },
+      include: {
+        user: { select: { id: true, name: true, email: true } },
+      },
+    });
+    res.json({ pending });
+  } catch (err) {
+    next(err);
+  }
+});
+
+const reviewSchema = z.object({ userId: z.string(), notes: z.string().optional() });
+
+router.post("/admin/approve/:projectId", requireAuth, requireRole("admin"), async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const projectId = req.params.projectId as string;
+    const { userId, notes } = reviewSchema.parse(req.body);
+
+    const project = await prisma.project.findUnique({
+      where: { userId_projectId: { userId, projectId } },
+    });
+    if (!project) return res.status(404).json({ error: "Project not found" });
+
+    const updated = await prisma.project.update({
+      where: { userId_projectId: { userId, projectId } },
+      data: { status: "COMPLETED" },
+    });
+
+    await awardXp(userId, 150, "Approved Project", `general_project_approved_${projectId}`);
+
+    await sendNotification(
+      userId,
+      "project_approved",
+      "Project Approved!",
+      `Your project "${projectId}" has been approved${notes ? ` — ${notes}` : ""}. Great work!`,
+      "/projects"
+    );
+
+    // Resolve review queue item
+    await prisma.reviewQueue.updateMany({
+      where: { itemType: "project", itemId: projectId, userId, status: "pending" },
+      data: { status: "resolved", resolvedAt: new Date(), resolvedBy: req.user!.id, notes: notes ?? null },
+    });
+
+    res.json({ project: updated });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post("/admin/reject/:projectId", requireAuth, requireRole("admin"), async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const projectId = req.params.projectId as string;
+    const { userId, notes } = reviewSchema.parse(req.body);
+
+    const project = await prisma.project.findUnique({
+      where: { userId_projectId: { userId, projectId } },
+    });
+    if (!project) return res.status(404).json({ error: "Project not found" });
+
+    const updated = await prisma.project.update({
+      where: { userId_projectId: { userId, projectId } },
+      data: { status: "REJECTED" },
+    });
+
+    await sendNotification(
+      userId,
+      "project_rejected",
+      "Project Needs Revision",
+      `Your project "${projectId}" needs changes${notes ? ` — ${notes}` : ""}. Please review and resubmit.`,
+      "/projects"
+    );
+
+    // Reject review queue item
+    await prisma.reviewQueue.updateMany({
+      where: { itemType: "project", itemId: projectId, userId, status: "pending" },
+      data: { status: "rejected", resolvedAt: new Date(), resolvedBy: req.user!.id, notes: notes ?? null },
+    });
+
+    res.json({ project: updated });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get("/", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
     const userId = req.user!.id;
@@ -261,7 +351,7 @@ router.patch("/:projectId/complete", requireAuth, async (req: AuthenticatedReque
         }
       },
       update: {
-        status: "COMPLETED",
+        status: "PENDING_REVIEW",
         code: code || "",
         githubUrl,
         liveDemoUrl,
@@ -275,20 +365,32 @@ router.patch("/:projectId/complete", requireAuth, async (req: AuthenticatedReque
         githubUrl,
         liveDemoUrl,
         description,
-        status: "COMPLETED",
+        status: "PENDING_REVIEW",
         completedAt: new Date()
       }
     });
 
-    await awardXp(userId, 150, "Completed Project", `general_project_complete_${projectId}`);
-
     await sendNotification(
       userId,
       "project_review",
-      "Project Completed!",
-      `You completed the project "${projectId}". Great work!`,
+      "Project Submitted for Review!",
+      `Your project "${projectId}" has been submitted and is pending admin review.`,
       "/projects"
     );
+
+    // Insert into review queue
+    await prisma.reviewQueue.create({
+      data: {
+        itemType: "project",
+        itemId: projectId,
+        userId,
+        priority: "medium",
+        status: "pending",
+        title: `Project: ${projectId}`,
+        description: description || `Project "${projectId}" submitted for review`,
+        metadata: { githubUrl, liveDemoUrl },
+      },
+    });
 
     res.json(project);
   } catch (err) {

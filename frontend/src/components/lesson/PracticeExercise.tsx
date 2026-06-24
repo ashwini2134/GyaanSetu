@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { authFetch } from "../../authClient";
-import { getPracticeExercise } from "../../data/practiceExercises";
-import type { PracticeExerciseConfig } from "../../data/practiceExercises";
+import type { PracticeExerciseConfig } from "../../types/lesson";
 import { Wand2, CheckCircle, SendHorizonal, Target, Lightbulb, Sparkles, ListChecks } from "lucide-react";
 
 interface PracticeExerciseProps {
@@ -21,7 +20,8 @@ interface SubmissionStatus {
 }
 
 export default function PracticeExercise({ courseSlug, lectureId, onComplete }: PracticeExerciseProps) {
-  const config: PracticeExerciseConfig | null = getPracticeExercise(courseSlug, lectureId);
+  const [config, setConfig] = useState<PracticeExerciseConfig | null>(null);
+  const [configLoading, setConfigLoading] = useState(true);
 
   const [prompt, setPrompt] = useState("");
   const [response, setResponse] = useState("");
@@ -31,6 +31,22 @@ export default function PracticeExercise({ courseSlug, lectureId, onComplete }: 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    async function loadConfig() {
+      try {
+        const data = await authFetch<{ exercise: PracticeExerciseConfig | null }>(
+          `/practice-exercises/config/${courseSlug}/${lectureId}`
+        );
+        setConfig(data.exercise);
+      } catch {
+        setConfig(null);
+      } finally {
+        setConfigLoading(false);
+      }
+    }
+    loadConfig();
+  }, [courseSlug, lectureId]);
 
   useEffect(() => {
     async function load() {
@@ -45,7 +61,7 @@ export default function PracticeExercise({ courseSlug, lectureId, onComplete }: 
     load();
   }, [courseSlug, lectureId]);
 
-  if (loading) {
+  if (configLoading || loading) {
     return (
       <div className="flex items-center justify-center py-16">
         <div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />

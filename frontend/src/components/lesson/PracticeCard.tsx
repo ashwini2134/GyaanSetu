@@ -3,7 +3,7 @@ import type { PracticeBlock } from '../../types/lesson';
 import CodeEditor from './CodeEditor';
 import { renderMarkdown } from '../../utils/renderContent';
 import { authFetch } from '../../authClient';
-import { getPracticeExercise } from '../../data/practiceExercises';
+import type { PracticeExerciseConfig } from '../../types/lesson';
 import { Target, Lightbulb, HelpCircle, ListChecks, Wand2, SendHorizonal, CheckCircle } from 'lucide-react';
 import { generateProgressiveHint } from '../../utils/logicValidation';
 import { scanForInput } from '../../utils/prescanner';
@@ -20,13 +20,28 @@ interface PracticeCardProps {
 const SAVE_PREFIX = 'lms:practice:';
 
 function AIPracticeCard({ block, courseSlug, lectureNumber, sectionId, onAttempt, onComplete }: PracticeCardProps) {
-  const config = getPracticeExercise(courseSlug, String(lectureNumber), sectionId);
+  const [config, setConfig] = useState<PracticeExerciseConfig | null>(null);
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState('');
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    async function loadConfig() {
+      try {
+        const url = sectionId
+          ? `/practice-exercises/config/${courseSlug}/${lectureNumber}?sectionId=${encodeURIComponent(sectionId)}`
+          : `/practice-exercises/config/${courseSlug}/${lectureNumber}`;
+        const data = await authFetch<{ exercise: PracticeExerciseConfig | null }>(url);
+        setConfig(data.exercise);
+      } catch {
+        setConfig(null);
+      }
+    }
+    loadConfig();
+  }, [courseSlug, lectureNumber, sectionId]);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;

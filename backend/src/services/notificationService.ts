@@ -9,6 +9,8 @@ type NotifType =
   | "streak"
   | "message"
   | "project_review"
+  | "project_approved"
+  | "project_rejected"
   | "daily_mission";
 
 const TYPE_TO_PREF_KEY: Record<NotifType, { email: string; inApp: string }> = {
@@ -18,8 +20,10 @@ const TYPE_TO_PREF_KEY: Record<NotifType, { email: string; inApp: string }> = {
   achievement:     { email: "emailAchievements",     inApp: "inAppMessages" },
   streak:          { email: "emailStreakReminders",   inApp: "inAppMessages" },
   message:         { email: "emailCourseUpdates",     inApp: "inAppMessages" },
-  project_review:  { email: "emailCourseUpdates",     inApp: "inAppProjectReviews" },
-  daily_mission:   { email: "emailCourseUpdates",     inApp: "inAppDailyMissions" },
+  project_review:   { email: "emailCourseUpdates",     inApp: "inAppProjectReviews" },
+  project_approved: { email: "emailCourseUpdates",     inApp: "inAppProjectReviews" },
+  project_rejected: { email: "emailCourseUpdates",     inApp: "inAppProjectReviews" },
+  daily_mission:    { email: "emailCourseUpdates",     inApp: "inAppDailyMissions" },
 };
 
 export async function getUserNotifPrefs(userId: string): Promise<Record<string, boolean>> {

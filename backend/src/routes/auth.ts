@@ -348,6 +348,20 @@ router.post("/oauth/exchange", authLimiter, async (req, res, next) => {
   }
 });
 
+router.post("/admin/promote", requireAuth, requireRole("admin"), async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const { userId } = z.object({ userId: z.string().uuid() }).parse(req.body);
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: { role: "admin" },
+      select: { id: true, name: true, email: true, role: true },
+    });
+    res.json({ user });
+  } catch (err) {
+    next(err instanceof z.ZodError ? new AppError("Valid userId required") : err);
+  }
+});
+
 router.get("/admin/users", requireAuth, requireRole("admin"), async (_req, res, next) => {
   try {
     const users = await prisma.user.findMany({

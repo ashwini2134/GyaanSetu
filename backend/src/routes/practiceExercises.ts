@@ -105,4 +105,48 @@ router.get("/:courseId/:lectureId/status", requireAuth, async (req: Authenticate
   }
 });
 
+// Student-facing: get practice exercise config from database
+router.get("/config/:courseId/:lectureId", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const courseId = String(req.params.courseId);
+    const lectureId = String(req.params.lectureId);
+    const sectionId = req.query.sectionId ? String(req.query.sectionId) : null;
+
+    const where: any = {
+      courseId,
+      lectureId,
+      status: "published",
+    };
+    if (sectionId) where.sectionId = sectionId;
+
+    const exercise = await prisma.practiceExercise.findFirst({
+      where,
+      orderBy: { updatedAt: "desc" },
+    });
+
+    if (!exercise) {
+      res.json({ exercise: null });
+      return;
+    }
+
+    // Map DB fields to the student-facing config shape
+    res.json({
+      exercise: {
+        id: exercise.id,
+        title: exercise.title,
+        learningGoal: exercise.learningGoal,
+        challenge: exercise.challenge,
+        promptHint: exercise.promptHint,
+        systemInstruction: exercise.systemInstruction,
+        successCriteria: exercise.completionCriteria as string[] | [],
+        type: exercise.type,
+        difficulty: exercise.difficulty,
+        estimatedTime: exercise.estimatedTime,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default router;

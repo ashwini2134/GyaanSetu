@@ -23,6 +23,11 @@ import practiceExercisesRoutes from "./routes/practiceExercises.js";
 import assessmentsRoutes from "./routes/assessments.js";
 import projectTasksRoutes from "./routes/projectTasks.js";
 import certificationsRoutes from "./routes/certifications.js";
+import adminRoutes from "./routes/admin.js";
+import adminContentRoutes from "./routes/adminContent.js";
+import adminPracticeExercisesRoutes from "./routes/adminPracticeExercises.js";
+import reviewQueueRoutes from "./routes/reviewQueue.js";
+import analyticsRoutes from "./routes/analytics.js";
 
 export function createApp() {
   const app = express();
@@ -75,6 +80,11 @@ export function createApp() {
   app.use("/api/practice-exercises", practiceExercisesRoutes);
   app.use("/api/assessments", assessmentsRoutes);
   app.use("/api/certifications", certificationsRoutes);
+  app.use("/api/admin", adminRoutes);
+  app.use("/api/admin/content", adminContentRoutes);
+  app.use("/api/admin", adminPracticeExercisesRoutes);
+  app.use("/api/admin", reviewQueueRoutes);
+  app.use("/api/admin/analytics", analyticsRoutes);
 
   app.use(errorHandler);
   return app;

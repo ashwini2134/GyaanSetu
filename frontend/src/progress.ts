@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from './auth';
 import { authFetch } from './authClient';
+import { Target, Brain, Code, Flame, Zap, Gem, Trophy, FlaskConical, Laptop, Building2, GraduationCap, Star } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 // ── Constants & Keys ─────────────────────────────────────────────────────────
 const EVENT_NAME = 'fraylon:progress:update';
@@ -9,19 +11,24 @@ const EVENT_NAME = 'fraylon:progress:update';
 export type AchievementDef = {
   id: string;
   title: string;
-  icon: string;
+  icon: LucideIcon;
   description: string;
   completedDescription: string;
 };
 
 export const ACHIEVEMENTS: AchievementDef[] = [
-  { id: 'first_lecture', title: 'First Steps', icon: '🎯', description: 'Complete your first lecture', completedDescription: 'Completed your first lecture' },
-  { id: 'first_quiz', title: 'Quiz Master', icon: '🧠', description: 'Pass your first quiz', completedDescription: 'Passed your first quiz' },
-  { id: 'first_problem', title: 'Project Solver', icon: '🔥', description: 'Submit your first problem', completedDescription: 'Submitted your first problem' },
-  { id: 'five_lectures', title: 'Halfway There', icon: '⚡', description: 'Complete 5 lectures', completedDescription: 'Completed 5 lectures' },
-  { id: 'ten_lectures', title: '10 Lectures Done', icon: '🏆', description: 'Complete 10 lectures', completedDescription: 'Completed 10 lectures' },
-  { id: 'first_project', title: 'First Project Submitted', icon: '💎', description: 'Submit your first hands-on task', completedDescription: 'Submitted your first hands-on task' },
-  { id: 'course_completed', title: 'Course Completed', icon: '🎓', description: 'Complete an entire course', completedDescription: 'Completed an entire course' },
+  { id: 'first_lecture', title: 'First Steps', icon: Target, description: 'Complete your first lecture', completedDescription: 'Completed your first lecture' },
+  { id: 'first_quiz', title: 'Quiz Master', icon: Brain, description: 'Pass your first quiz', completedDescription: 'Passed your first quiz' },
+  { id: 'first_problem', title: 'Problem Solver', icon: Code, description: 'Submit your first problem', completedDescription: 'Submitted your first problem' },
+  { id: 'streak_3', title: 'On Fire', icon: Flame, description: 'Reach a 3-day streak', completedDescription: 'Reached a 3-day streak' },
+  { id: 'five_lectures', title: 'Halfway There', icon: Zap, description: 'Complete 5 lectures', completedDescription: 'Completed 5 lectures' },
+  { id: 'first_project', title: 'First Project', icon: Gem, description: 'Submit your first project', completedDescription: 'Submitted your first project' },
+  { id: 'ten_lectures', title: '10 Lectures Done', icon: Trophy, description: 'Complete 10 lectures', completedDescription: 'Completed 10 lectures' },
+  { id: 'ten_quizzes', title: 'Quiz Whiz', icon: FlaskConical, description: 'Pass 10 quizzes', completedDescription: 'Passed 10 quizzes' },
+  { id: 'ten_problems', title: 'Code Crusher', icon: Laptop, description: 'Solve 10 problems', completedDescription: 'Solved 10 problems' },
+  { id: 'two_projects', title: 'Builder', icon: Building2, description: 'Complete 2 projects', completedDescription: 'Completed 2 projects' },
+  { id: 'course_completed', title: 'Course Completed', icon: GraduationCap, description: 'Complete an entire course', completedDescription: 'Completed an entire course' },
+  { id: 'all_courses', title: 'Full Stack', icon: Star, description: 'Complete both courses', completedDescription: 'Completed both courses' },
 ];
 
 export type StreakData = {
@@ -127,9 +134,10 @@ async function unlockAchievement(id: string) {
 
 export async function checkAchievements() {
   try {
-    const [resStats, resAch] = await Promise.all([
+    const [resStats, resAch, resStreak] = await Promise.all([
       authFetch<{ stats?: StatsData }>('/progress'),
-      authFetch<{ achievements?: string[] }>('/achievements')
+      authFetch<{ achievements?: string[] }>('/achievements'),
+      authFetch<StreakData>('/streaks')
     ]);
 
     const stats = resStats.stats || {
@@ -141,15 +149,21 @@ export async function checkAchievements() {
       projectsSolved: 0,
     };
 
+    const streak = resStreak?.currentStreak ?? 0;
     const unlocked: string[] = resAch.achievements || [];
 
     if (stats.lecturesCompleted >= 1 && !unlocked.includes('first_lecture')) await unlockAchievement('first_lecture');
     if (stats.quizzesPassed >= 1 && !unlocked.includes('first_quiz')) await unlockAchievement('first_quiz');
     if (stats.tasksSubmitted >= 1 && !unlocked.includes('first_problem')) await unlockAchievement('first_problem');
-    if (stats.tasksSubmitted >= 1 && !unlocked.includes('first_project')) await unlockAchievement('first_project'); // first hands on task
+    if (stats.projectsSolved >= 1 && !unlocked.includes('first_project')) await unlockAchievement('first_project');
+    if (streak >= 3 && !unlocked.includes('streak_3')) await unlockAchievement('streak_3');
     if (stats.lecturesCompleted >= 5 && !unlocked.includes('five_lectures')) await unlockAchievement('five_lectures');
     if (stats.lecturesCompleted >= 10 && !unlocked.includes('ten_lectures')) await unlockAchievement('ten_lectures');
+    if (stats.quizzesPassed >= 10 && !unlocked.includes('ten_quizzes')) await unlockAchievement('ten_quizzes');
+    if (stats.tasksSubmitted >= 10 && !unlocked.includes('ten_problems')) await unlockAchievement('ten_problems');
+    if (stats.projectsSolved >= 2 && !unlocked.includes('two_projects')) await unlockAchievement('two_projects');
     if (stats.coursesCompleted >= 1 && !unlocked.includes('course_completed')) await unlockAchievement('course_completed');
+    if (stats.coursesCompleted >= 2 && !unlocked.includes('all_courses')) await unlockAchievement('all_courses');
   } catch (err) {
     console.error("Failed to check achievements", err);
   }

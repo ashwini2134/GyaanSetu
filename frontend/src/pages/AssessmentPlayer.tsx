@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft, CheckCircle, Clock, PlayCircle, Trophy, RefreshCw, Loader2, AlertCircle } from "lucide-react";
-import { api } from "../api";
+import { authFetch } from "../api";
 import { useAuth } from "../auth";
 
 interface Question {
@@ -39,18 +39,8 @@ export default function AssessmentPlayer({ category, subsection, onClose, onComp
       try {
         const encodedCategory = encodeURIComponent(category.trim());
         const encodedSubsection = encodeURIComponent(subsection.trim());
-        const response = await fetch(`/api/assessments/questions/${encodedCategory}/${encodedSubsection}`);
+        const data = await authFetch<{ questions: any[] }>(`/assessments/questions/${encodedCategory}/${encodedSubsection}`);
         
-        if (!response.ok) {
-          const errorData = await response.json();
-          if (isMounted) {
-            setError(errorData.message || 'No questions found for this assessment.');
-            setLoading(false);
-          }
-          return;
-        }
-
-        const data = await response.json();
         if (!data.questions || data.questions.length === 0) {
           if (isMounted) {
             setError('No questions found for this assessment.');
@@ -63,10 +53,10 @@ export default function AssessmentPlayer({ category, subsection, onClose, onComp
           setQuestions(data.questions);
           setLoading(false);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to fetch questions:", err);
         if (isMounted) {
-          setError('Failed to connect to server.');
+          setError(err?.message || 'Failed to connect to server.');
           setLoading(false);
         }
       }
@@ -114,7 +104,6 @@ export default function AssessmentPlayer({ category, subsection, onClose, onComp
       }, 0);
 
       const requestBody = {
-        userId,
         category,
         subsection,
         score: correctCount,
@@ -126,21 +115,10 @@ export default function AssessmentPlayer({ category, subsection, onClose, onComp
         }))
       };
 
-      const response = await fetch('/api/assessments/submit', {
+      const data = await authFetch<{ score: number; passed: boolean }>('/assessments/submit', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
         body: JSON.stringify(requestBody)
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Submit failed:', errorData);
-        throw new Error(errorData.error || 'Submission failed');
-      }
-
-      const data = await response.json();
       setResult(data);
 
     } catch (err) {

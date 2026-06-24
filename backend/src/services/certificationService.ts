@@ -12,11 +12,28 @@ const COURSE_PROBLEM_COUNTS: Record<string, number> = {
   cs50ai:  20,
 };
 
+// Per-lecture quiz count for score averaging
+const COURSE_QUIZ_COUNTS: Record<string, number> = {
+  python: 10,
+  cs50ai: 10,
+};
+
+export interface ConditionDetail {
+  done: number;
+  required: number;
+  passed: boolean;
+  details?: {
+    lectureNumbers?: number[];
+    quizIds?: string[];
+    avgScore?: number | null;
+  };
+}
+
 export interface EligibilityConditions {
-  lecturesCompleted:  { done: number; required: number; passed: boolean };
-  practiceCompleted:  { done: number; required: number; passed: boolean };
-  quizzesAttempted:   { done: number; required: number; passed: boolean };
-  problemsSubmitted:  { done: number; required: number; passed: boolean };
+  lecturesCompleted:  ConditionDetail;
+  practiceCompleted:  ConditionDetail;
+  quizzesAttempted:   ConditionDetail;
+  problemsSubmitted:  ConditionDetail;
   projectCompleted:   { done: number; passed: boolean };
 }
 
@@ -25,6 +42,11 @@ export interface EligibilityResult {
   alreadyIssued: boolean;
   conditions:    EligibilityConditions;
   avgQuizScore:  number | null;
+  lectureDetails?: {
+    total: number;
+    completed: number[];
+    remaining: number[];
+  };
 }
 
 export async function checkEligibility(userId: string, courseSlug: string): Promise<EligibilityResult> {
@@ -35,16 +57,17 @@ export async function checkEligibility(userId: string, courseSlug: string): Prom
 
   const [
     existing,
-    lecturesDone,
-    practiceDone,
+    progressRecords,
     quizLectures,
     submissionsDone,
     projectsDone,
     quizScores,
   ] = await Promise.all([
     prisma.issuedCertificate.findUnique({ where: { userId_courseSlug: { userId, courseSlug } } }),
-    prisma.progress.count({ where: { userId, courseSlug, status: 'COMPLETED' } }),
-    prisma.progress.count({ where: { userId, courseSlug, practiceCompleted: true } }),
+    prisma.progress.findMany({
+      where: { userId, courseSlug },
+      select: { lectureId: true, status: true, practiceCompleted: true },
+    }),
     prisma.quizAttempt.groupBy({
       by: ['quizId'],
       where: { userId, quizId: { startsWith: `${courseSlug}-` } },
@@ -63,9 +86,15 @@ export async function checkEligibility(userId: string, courseSlug: string): Prom
     prisma.project.count({ where: { userId, status: 'COMPLETED' } }),
     prisma.quizAttempt.findMany({
       where: { userId, quizId: { startsWith: `${courseSlug}-` } },
-      select: { score: true, total: true },
+      select: { score: true, total: true, quizId: true },
     }),
   ]);
+
+  const lecturesDone = progressRecords.filter(p => p.status === 'COMPLETED').length;
+  const practiceDone = progressRecords.filter(p => p.practiceCompleted).length;
+  const completedLectureIds = progressRecords.filter(p => p.status === 'COMPLETED').map(p => Number(p.lectureId)).sort((a, b) => a - b);
+  const allLectureNumbers = Array.from({ length: totalLectures }, (_, i) => i);
+  const remainingLectures = allLectureNumbers.filter(n => !completedLectureIds.includes(n));
 
   const avgQuizScore =
     quizScores.length > 0
@@ -73,15 +102,43 @@ export async function checkEligibility(userId: string, courseSlug: string): Prom
       : null;
 
   const conditions: EligibilityConditions = {
-    lecturesCompleted: { done: lecturesDone,          required: totalLectures, passed: lecturesDone >= totalLectures },
-    practiceCompleted: { done: practiceDone,          required: totalLectures, passed: practiceDone >= totalLectures },
-    quizzesAttempted:  { done: quizLectures.length,   required: totalLectures, passed: quizLectures.length >= totalLectures },
-    problemsSubmitted: { done: submissionsDone, required: totalProblems, passed: submissionsDone >= totalProblems },
-    projectCompleted:  { done: projectsDone,           passed: projectsDone > 0 },
+    lecturesCompleted: {
+      done: lecturesDone,
+      required: totalLectures,
+      passed: lecturesDone >= totalLectures,
+      details: { lectureNumbers: completedLectureIds },
+    },
+    practiceCompleted: {
+      done: practiceDone,
+      required: totalLectures,
+      passed: practiceDone >= totalLectures,
+    },
+    quizzesAttempted: {
+      done: quizLectures.length,
+      required: totalLectures,
+      passed: quizLectures.length >= totalLectures,
+      details: { quizIds: quizLectures.map(q => q.quizId), avgScore: avgQuizScore },
+    },
+    problemsSubmitted: {
+      done: submissionsDone,
+      required: totalProblems,
+      passed: submissionsDone >= totalProblems,
+    },
+    projectCompleted: { done: projectsDone, passed: projectsDone > 0 },
   };
 
   const eligible = Object.values(conditions).every(c => c.passed);
-  return { eligible, alreadyIssued: !!existing, conditions, avgQuizScore };
+  return {
+    eligible,
+    alreadyIssued: !!existing,
+    conditions,
+    avgQuizScore,
+    lectureDetails: {
+      total: totalLectures,
+      completed: completedLectureIds,
+      remaining: remainingLectures,
+    },
+  };
 }
 
 export async function issueCertForStudent(

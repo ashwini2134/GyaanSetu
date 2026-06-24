@@ -133,6 +133,19 @@ export interface ReflectionBlock {
   followupOutput?: string;
 }
 
+export interface PracticeExerciseConfig {
+  id?: string;
+  title: string;
+  learningGoal: string;
+  challenge: string;
+  promptHint: string;
+  successCriteria: string[];
+  systemInstruction: string;
+  type?: string;
+  difficulty?: string;
+  estimatedTime?: number | null;
+}
+
 export interface PracticeBlock {
   type: 'practice';
   title: string;
