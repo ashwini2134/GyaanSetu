@@ -91,6 +91,7 @@ function tokenResponse(res: import("express").Response, tokens: { accessToken: s
 
 router.post("/register", authLimiter, async (req, res, next) => {
   try {
+    console.log("[register] Attempting:", req.body.email);
     const body = registerSchema.parse(req.body);
     const user = await createUser(body);
     const tokens = await issueAuthTokens(user);

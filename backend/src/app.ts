@@ -32,6 +32,18 @@ import analyticsRoutes from "./routes/analytics.js";
 export function createApp() {
   const app = express();
 
+  app.get("/api/test-db", async (_req, res) => {
+    try {
+      const { PrismaClient } = await import("@prisma/client");
+      const prisma = new PrismaClient();
+      await prisma.$connect();
+      const count = await prisma.user.count();
+      res.json({ status: "connected", userCount: count });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   app.use(helmet());
   const allowedOrigins = [
     'http://localhost:5173',

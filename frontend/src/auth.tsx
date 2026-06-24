@@ -82,8 +82,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // ignore
     }
     clearToken();
-    clearLmsStorage();
+    localStorage.clear();
+    sessionStorage.clear();
     setUser(null);
+    window.location.href = "/#/login";
   };
 
   const completeOAuth = async (code: string) => {

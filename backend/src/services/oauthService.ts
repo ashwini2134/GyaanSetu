@@ -39,6 +39,7 @@ export function buildOAuthAuthorizeUrl(provider: OAuthProvider, state: string): 
       response_type: "code",
       scope: "openid profile email",
       state,
+      prompt: "select_account",
     });
     return `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
   }
