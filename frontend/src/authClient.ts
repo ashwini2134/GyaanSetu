@@ -21,8 +21,14 @@ function ensureAbsoluteUrl(url: string | undefined, defaultUrl: string) {
   return url;
 }
 
-const API_BASE = ensureAbsoluteUrl(import.meta.env.VITE_API_URL, "https://lms-production-3895.up.railway.app/api");
-const BACKEND_BASE = ensureAbsoluteUrl(import.meta.env.VITE_BACKEND_URL, "https://lms-production-3895.up.railway.app");
+const API_BASE = ensureAbsoluteUrl(
+  import.meta.env.VITE_API_URL, 
+  "http://localhost:3001/api"
+);
+const BACKEND_BASE = ensureAbsoluteUrl(
+  import.meta.env.VITE_BACKEND_URL, 
+  "http://localhost:3001"
+);
 
 export type OAuthProvider = "github" | "linkedin" | "google";
 
