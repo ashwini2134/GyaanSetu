@@ -256,8 +256,8 @@ router.get("/oauth/:provider", (req, res) => {
     const state = generateSecureToken();
     res.cookie(getOAuthStateCookieName(), state, {
       httpOnly: false,
-      secure: false,
-      sameSite: "lax",
+      secure: config.isDev ? false : true,
+      sameSite: config.isDev ? "lax" : "none",
       path: "/",
       maxAge: 10 * 60 * 1000,
     });
@@ -307,7 +307,11 @@ router.get("/oauth/:provider/callback", async (req, res) => {
     });
     console.log(`[oauth] ${provider} user: id=${user.id}, email=${user.email}`);
 
-    res.clearCookie(getOAuthStateCookieName(), { path: "/" });
+    res.clearCookie(getOAuthStateCookieName(), {
+      path: "/",
+      secure: config.isDev ? false : true,
+      sameSite: config.isDev ? "lax" : "none",
+    });
     const exchangeCode = await createOAuthExchangeCode(user.id);
     const redirectUrl = `${config.frontendUrl}/#/auth/oauth?code=${exchangeCode}`;
     console.log(`[oauth] Redirecting to frontend with exchange code`);

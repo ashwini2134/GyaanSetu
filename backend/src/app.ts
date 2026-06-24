@@ -30,7 +30,6 @@ export function createApp() {
   app.use(helmet());
   const allowedOrigins = [
     'http://localhost:5173',
-    'https://lms05.vercel.app',
     process.env.FRONTEND_URL
   ].filter(Boolean) as string[];
 
