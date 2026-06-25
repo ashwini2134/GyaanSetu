@@ -96,6 +96,12 @@ const AdminSettingsPage = lazy(
 
 // ── NEW PHASE 1 ADMIN COMPONENTS ──
 const ContentStudio = lazy(() => import("./pages/admin/ContentStudio"));
+const BlueprintBuilder = lazy(() => import("./pages/admin/BlueprintBuilder"));
+const LessonEditor = lazy(() => import("./pages/admin/LessonEditor"));
+const QuizBuilder = lazy(() => import("./pages/admin/QuizBuilder"));
+const ProjectBuilder = lazy(() => import("./pages/admin/ProjectBuilder"));
+const VersionHistory = lazy(() => import("./pages/admin/VersionHistory"));
+const BetaTesting = lazy(() => import("./pages/admin/BetaTesting"));
 const OperationsMonitor = lazy(() => import("./pages/admin/OperationsMonitor"));
 const Analytics = lazy(() => import("./pages/admin/Analytics"));
 const Settings = lazy(() => import("./pages/admin/Settings"));
@@ -340,6 +346,12 @@ export default function App() {
         <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
           <Route index element={<Navigate to="/admin/content-studio" replace />} />
           <Route path="content-studio" element={<ContentStudio />} />
+          <Route path="content-studio/new" element={<BlueprintBuilder />} />
+          <Route path="content-studio/:courseId/lessons" element={<LessonEditor />} />
+          <Route path="content-studio/:courseId/quiz" element={<QuizBuilder />} />
+          <Route path="content-studio/:courseId/project" element={<ProjectBuilder />} />
+          <Route path="content-studio/:courseId/versions" element={<VersionHistory />} />
+          <Route path="content-studio/:courseId/beta" element={<BetaTesting />} />
           <Route path="operations" element={<OperationsMonitor />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="settings" element={<Settings />} />

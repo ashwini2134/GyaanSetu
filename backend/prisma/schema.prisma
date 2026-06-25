@@ -363,3 +363,116 @@ model IssuedCertificate {
 
   @@unique([userId, courseSlug])
 }
+
+model Course {
+  id               String          @id @default(cuid())
+  title            String
+  description      String
+  thumbnailUrl     String?
+  category         String
+  difficulty       String
+  estimatedDuration Int
+  status           String          @default("DRAFT")
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  lessons          Lesson[]
+  quiz             Quiz?
+  project          CourseProject?
+  versions         CourseVersion[]
+  betaTesters      BetaTester[]
+  betaFeedback     BetaFeedback[]
+  prerequisites    Course[]        @relation("CoursePrerequisites")
+  requiredBy       Course[]        @relation("CoursePrerequisites")
+}
+
+model Lesson {
+  id        String     @id @default(cuid())
+  courseId  String
+  course    Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title     String
+  content   String?
+  videoUrl  String?
+  order     Int
+  type      String     @default("content")
+  exercises Exercise[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Exercise {
+  id              String   @id @default(cuid())
+  lessonId        String
+  lesson          Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  type            String
+  question        String
+  options         Json?
+  correctAnswer   String?
+  hints           Json?
+  attemptsAllowed Int      @default(3)
+  points          Int      @default(10)
+  createdAt       DateTime @default(now())
+}
+
+model Quiz {
+  id          String         @id @default(cuid())
+  courseId    String         @unique
+  course      Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  passScore   Int            @default(70)
+  timeLimit   Int            @default(0)
+  maxAttempts Int            @default(3)
+  shuffle     Boolean        @default(false)
+  questions   QuizQuestion[]
+}
+
+model QuizQuestion {
+  id            String   @id @default(cuid())
+  quizId        String
+  quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  type          String
+  question      String
+  options       Json?
+  correctAnswer String?
+  points        Int      @default(10)
+  order         Int
+}
+
+model CourseProject {
+  id               String   @id @default(cuid())
+  courseId         String   @unique
+  course           Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title            String
+  requirements     String
+  submissionType   String
+  rubric           Json?
+  validationRules  Json?
+  isCapstone       Boolean  @default(false)
+  learningObjectives Json?
+}
+
+model CourseVersion {
+  id            String   @id @default(cuid())
+  courseId      String
+  course        Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  versionNumber Int
+  snapshot      Json
+  changelog     String?
+  createdAt     DateTime @default(now())
+}
+
+model BetaTester {
+  courseId String
+  userId   String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  @@id([courseId, userId])
+}
+
+model BetaFeedback {
+  id           String   @id @default(cuid())
+  courseId     String
+  course       Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  userId       String
+  lessonId     String?
+  feedbackText String
+  isReviewed   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+}
