@@ -17,6 +17,60 @@ export default function StudentProfilePage() {
   const [tab, setTab] = useState<Tab>("overview");
   const [activity, setActivity] = useState<any[]>([]);
 
+  // Award Modal state
+  const [showAwardModal, setShowAwardModal] = useState(false);
+  const [awardType, setAwardType] = useState<"xp" | "achievement">("xp");
+  const [awardXpAmount, setAwardXpAmount] = useState(100);
+  const [awardAchievementId, setAwardAchievementId] = useState("first_lecture");
+  const [awardReason, setAwardReason] = useState("");
+  const [awarding, setAwarding] = useState(false);
+  const [awardError, setAwardError] = useState<string | null>(null);
+
+  const ACHIEVEMENTS_LIST = [
+    { id: "first_lecture", label: "First Steps (Complete first lecture)" },
+    { id: "first_quiz", label: "Quiz Master (Pass first quiz)" },
+    { id: "first_problem", label: "Problem Solver (Submit first problem)" },
+    { id: "streak_3", label: "On Fire (3-day streak)" },
+    { id: "five_lectures", label: "Halfway There (5 lectures completed)" },
+    { id: "first_project", label: "First Project Submitted (Submit first capstone)" },
+    { id: "ten_lectures", label: "10 Lectures Completed (10 lectures)" },
+    { id: "ten_quizzes", label: "Quiz Whiz (10 quizzes passed)" },
+    { id: "ten_problems", label: "Code Crusher (10 problems solved)" },
+    { id: "two_projects", label: "Builder (2 projects completed)" },
+    { id: "course_completed", label: "Course Completed (Finish a course)" },
+    { id: "all_courses", label: "Full Stack (Finish both courses)" }
+  ];
+
+  const handleAwardSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!awardReason.trim()) {
+      setAwardError("A reason is required");
+      return;
+    }
+    setAwarding(true);
+    setAwardError(null);
+    try {
+      await authFetch(`/admin/students/${userId}/award`, {
+        method: "POST",
+        body: JSON.stringify({
+          type: awardType,
+          amount: awardType === "xp" ? Number(awardXpAmount) : undefined,
+          achievementId: awardType === "achievement" ? awardAchievementId : undefined,
+          reason: awardReason,
+        })
+      });
+      setShowAwardModal(false);
+      setAwardReason("");
+      
+      const profile = await authFetch<any>(`/admin/students/${userId}`);
+      setData(profile);
+    } catch (err: any) {
+      setAwardError(err.message || "Failed to award stats");
+    } finally {
+      setAwarding(false);
+    }
+  };
+
   useEffect(() => {
     if (!userId) return;
     setLoading(true);
@@ -46,7 +100,6 @@ export default function StudentProfilePage() {
 
   const { user, progress, quizAttempts, submissions, projects, certificates } = data;
   const completedLectures = progress.filter((p: any) => p.status === "COMPLETED").length;
-  const courseSlugs = [...new Set(progress.map((p: any) => p.courseSlug))];
 
   const tabs: { key: Tab; label: string; icon: typeof User }[] = [
     { key: "overview", label: "Overview", icon: User },
@@ -71,6 +124,14 @@ export default function StudentProfilePage() {
           </h1>
           <p className="text-sm text-slate-400">{user.email}</p>
         </div>
+
+        <button
+          onClick={() => setShowAwardModal(true)}
+          className="ml-2 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95"
+        >
+          <Award size={14} /> Award Stats
+        </button>
+
         <span className={`ml-auto inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border ${
           user.status === "active" ? "bg-emerald-900/40 text-emerald-300 border-emerald-500/30"
           : "bg-red-900/40 text-red-300 border-red-500/30"
@@ -254,6 +315,117 @@ export default function StudentProfilePage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Award Modal */}
+      {showAwardModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <form onSubmit={handleAwardSubmit} className="w-full max-w-md rounded-2xl bg-[#161B22] border border-slate-800 p-6 space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <Award className="text-blue-400" size={20} /> Award Student Stats
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowAwardModal(false)}
+                className="text-slate-400 hover:text-white font-bold"
+              >
+                &times;
+              </button>
+            </div>
+
+            {awardError && (
+              <div className="rounded-lg bg-red-900/20 border border-red-500/25 p-3 text-red-300 text-xs">
+                {awardError}
+              </div>
+            )}
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Award Type</label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setAwardType("xp")}
+                  className={`flex-1 py-2 text-xs font-bold rounded-lg border transition-all ${
+                    awardType === "xp"
+                      ? "bg-blue-600/25 text-blue-300 border-blue-500/40"
+                      : "bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-300"
+                  }`}
+                >
+                  Experience Points (XP)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAwardType("achievement")}
+                  className={`flex-1 py-2 text-xs font-bold rounded-lg border transition-all ${
+                    awardType === "achievement"
+                      ? "bg-blue-600/25 text-blue-300 border-blue-500/40"
+                      : "bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-300"
+                  }`}
+                >
+                  Achievement
+                </button>
+              </div>
+            </div>
+
+            {awardType === "xp" ? (
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">XP Amount</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={5000}
+                  value={awardXpAmount}
+                  onChange={(e) => setAwardXpAmount(Number(e.target.value))}
+                  className="w-full h-10 bg-slate-900 border border-slate-800 rounded-lg px-3 text-white text-sm focus:outline-none focus:border-blue-500"
+                />
+              </div>
+            ) : (
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Select Achievement</label>
+                <select
+                  value={awardAchievementId}
+                  onChange={(e) => setAwardAchievementId(e.target.value)}
+                  className="w-full h-10 bg-slate-900 border border-slate-800 rounded-lg px-3 text-white text-sm focus:outline-none focus:border-blue-500"
+                >
+                  {ACHIEVEMENTS_LIST.map((ach) => (
+                    <option key={ach.id} value={ach.id}>
+                      {ach.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Reason / Description</label>
+              <textarea
+                value={awardReason}
+                onChange={(e) => setAwardReason(e.target.value)}
+                placeholder="e.g. Completed extra sandbox problems, outstanding Discord help..."
+                rows={3}
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg p-3 text-white text-sm focus:outline-none focus:border-blue-500 resize-none"
+              />
+            </div>
+
+            <div className="flex gap-3 justify-end pt-3 border-t border-slate-800">
+              <button
+                type="button"
+                onClick={() => setShowAwardModal(false)}
+                className="px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold border border-slate-800"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={awarding}
+                className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-all disabled:opacity-50"
+              >
+                {awarding ? "Awarding..." : "Award Stats"}
+              </button>
+            </div>
+          </form>
         </div>
       )}
     </div>

@@ -1,6 +1,6 @@
 // Fraylon - Phase 2.5 & 3
 import { Worker } from 'bullmq';
-import IORedis from 'ioredis';
+import { Redis } from 'ioredis';
 import { mockWorkers } from '../lib/queue.js';
 import { processQuizGrading } from './quizGradingWorker.js';
 import { processProjectReview } from './projectReviewWorker.js';
@@ -12,7 +12,7 @@ export function startWorkers() {
   const isRedisAvailable = !!process.env.REDIS_URL;
 
   if (isRedisAvailable) {
-    const connection = new IORedis(process.env.REDIS_URL as string, { maxRetriesPerRequest: null });
+    const connection = new Redis(process.env.REDIS_URL as string, { maxRetriesPerRequest: null }) as any;
     
     new Worker('quizGrading', processQuizGrading, { connection });
     new Worker('projectReview', processProjectReview, { connection });

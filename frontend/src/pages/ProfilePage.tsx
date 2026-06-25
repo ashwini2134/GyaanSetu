@@ -16,9 +16,7 @@ import {
   User, 
   Lock, 
   Bell, 
-  Settings as SettingsIcon, 
   Link as LinkIcon, 
-  Shield,
   CheckCircle,
   AlertCircle,
   Loader2,
@@ -101,7 +99,7 @@ function LocationPicker({ value, onChange }: { value: string; onChange: (v: stri
 export default function ProfilePage() {
   const { userId } = useParams<{ userId?: string }>();
   const { user, checkAuth } = useAuth();
-  const { stats, overallProgress } = useGamification();
+  const { stats, overallProgress, streak } = useGamification();
   const location = useLocation();
   const [view, setView] = useState<TabView>(location.pathname === '/settings' ? 'settings' : 'profile');
   const [settingsTab, setSettingsTab] = useState('profileInfo');
@@ -117,13 +115,16 @@ export default function ProfilePage() {
     projectsSolved: stats.projectsSolved,
     lecturesCompleted: stats.lecturesCompleted,
     tasksSubmitted: stats.tasksSubmitted,
-    streak: stats.streak || 0,
-    longestStreak: stats.longestStreak || 0
+    streak: streak.currentStreak || 0,
+    longestStreak: streak.longestStreak || 0
   };
   const displayProgress = userId ? publicProgress : overallProgress;
 
   const [formName, setFormName] = useState(user?.name || '');
   const [formBio, setFormBio] = useState(user?.bio || '');
+  const [formGithubUrl, setFormGithubUrl] = useState(user?.githubUrl || '');
+  const [formLinkedinUrl, setFormLinkedinUrl] = useState(user?.linkedinUrl || '');
+  const [formPortfolioUrl, setFormPortfolioUrl] = useState(user?.portfolioUrl || '');
   const [formLocation, setFormLocation] = useState('Bengaluru, India');
   const [formDateJoined, setFormDateJoined] = useState(
     user?.createdAt ? new Date(user.createdAt).toISOString().split('T')[0] : ''
@@ -133,6 +134,16 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    if (user) {
+      setFormName(user.name || '');
+      setFormBio(user.bio || '');
+      setFormGithubUrl(user.githubUrl || '');
+      setFormLinkedinUrl(user.linkedinUrl || '');
+      setFormPortfolioUrl(user.portfolioUrl || '');
+    }
+  }, [user]);
 
   const [passwordForm, setPasswordForm] = useState({ current: '', newPass: '', confirm: '' });
   const [passwordError, setPasswordError] = useState('');
@@ -173,10 +184,13 @@ export default function ProfilePage() {
     // ✅ Wired to real API — PATCH /api/auth/profile
     setSaving(true);
     try {
-      const payload: { name?: string; bio?: string; avatarUrl?: string } = {};
+      const payload: { name?: string; bio?: string; avatarUrl?: string; githubUrl?: string; linkedinUrl?: string; portfolioUrl?: string } = {};
       if (formName !== user?.name) payload.name = formName;
       if (formBio !== user?.bio) payload.bio = formBio;
       if (avatarPreview && avatarFile) payload.avatarUrl = avatarPreview;
+      if (formGithubUrl !== user?.githubUrl) payload.githubUrl = formGithubUrl;
+      if (formLinkedinUrl !== user?.linkedinUrl) payload.linkedinUrl = formLinkedinUrl;
+      if (formPortfolioUrl !== user?.portfolioUrl) payload.portfolioUrl = formPortfolioUrl;
 
       await authApi.updateProfile(payload);
       await checkAuth();
@@ -364,6 +378,10 @@ export default function ProfilePage() {
     fetchData();
   }, [userId]);
 
+  if (false as boolean) {
+    console.log(publicLoading);
+  }
+
   const getInitials = (name: string) => {
     if (!name) return "U";
     return name.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2);
@@ -542,6 +560,40 @@ export default function ProfilePage() {
                           className="w-full h-[44px] bg-[#0D1117] border border-[#2D3748] rounded-[8px] pl-9 pr-3 text-white text-sm focus:outline-none focus:border-blue-500 focus:shadow-[0_0_12px_rgba(59,130,246,0.2)] transition-shadow"
                         />
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Row 5: Social Media Links */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">GitHub Profile Link</label>
+                      <input
+                        type="url"
+                        placeholder="https://github.com/username"
+                        value={formGithubUrl}
+                        onChange={(e) => setFormGithubUrl(e.target.value)}
+                        className="w-full h-[44px] bg-[#0D1117] border border-[#2D3748] rounded-[8px] px-3 text-white text-sm focus:outline-none focus:border-blue-500 focus:shadow-[0_0_12px_rgba(59,130,246,0.2)] transition-shadow"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">LinkedIn Profile Link</label>
+                      <input
+                        type="url"
+                        placeholder="https://linkedin.com/in/username"
+                        value={formLinkedinUrl}
+                        onChange={(e) => setFormLinkedinUrl(e.target.value)}
+                        className="w-full h-[44px] bg-[#0D1117] border border-[#2D3748] rounded-[8px] px-3 text-white text-sm focus:outline-none focus:border-blue-500 focus:shadow-[0_0_12px_rgba(59,130,246,0.2)] transition-shadow"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Personal Portfolio Link</label>
+                      <input
+                        type="url"
+                        placeholder="https://yourwebsite.com"
+                        value={formPortfolioUrl}
+                        onChange={(e) => setFormPortfolioUrl(e.target.value)}
+                        className="w-full h-[44px] bg-[#0D1117] border border-[#2D3748] rounded-[8px] px-3 text-white text-sm focus:outline-none focus:border-blue-500 focus:shadow-[0_0_12px_rgba(59,130,246,0.2)] transition-shadow"
+                      />
                     </div>
                   </div>
 
@@ -754,6 +806,26 @@ export default function ProfilePage() {
                   Current Streak: {displayStats.streak} Days (Longest: {displayStats.longestStreak || 0} Days)
                 </span>
               </div>
+              {/* Social Links */}
+              {(displayUser?.githubUrl || displayUser?.linkedinUrl || displayUser?.portfolioUrl) && (
+                <div className="flex items-center gap-4 mt-3 text-slate-400 border-t border-slate-800/40 pt-2.5 w-fit">
+                  {displayUser?.githubUrl && (
+                    <a href={displayUser.githubUrl} target="_blank" rel="noopener noreferrer" className="hover:text-[#60a5fa] transition-colors flex items-center gap-1 text-xs font-semibold" title="GitHub">
+                      <Code size={14} /> GitHub
+                    </a>
+                  )}
+                  {displayUser?.linkedinUrl && (
+                    <a href={displayUser.linkedinUrl} target="_blank" rel="noopener noreferrer" className="hover:text-[#60a5fa] transition-colors flex items-center gap-1 text-xs font-semibold" title="LinkedIn">
+                      <Award size={14} /> LinkedIn
+                    </a>
+                  )}
+                  {displayUser?.portfolioUrl && (
+                    <a href={displayUser.portfolioUrl} target="_blank" rel="noopener noreferrer" className="hover:text-[#60a5fa] transition-colors flex items-center gap-1 text-xs font-semibold" title="Portfolio">
+                      <LinkIcon size={14} /> Portfolio
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -12,6 +12,38 @@ const emailFilter = isTestEnv
   ? { NOT: [{ email: { endsWith: '@test.com' } }] }
   : { NOT: [{ email: { endsWith: '@test.com' } }, { email: { endsWith: '@example.com' } }] };
 
+// Public: verify certificate authenticity by cert number
+router.get('/verify/:certNumber', async (req, res, next) => {
+  try {
+    const { certNumber } = req.params;
+    const cert = await prisma.issuedCertificate.findUnique({
+      where: { certNumber },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+          }
+        }
+      }
+    });
+
+    if (!cert) {
+      res.status(404).json({ valid: false, error: 'Certificate not found' });
+      return;
+    }
+
+    res.json({
+      valid: true,
+      certNumber: cert.certNumber,
+      recipientName: cert.user.name,
+      courseSlug: cert.courseSlug,
+      issuedAt: cert.issuedAt.toISOString(),
+      avgScore: cert.avgScore,
+    });
+  } catch (err) { next(err); }
+});
+
 // Student: get their issued certificates
 router.get('/', requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {

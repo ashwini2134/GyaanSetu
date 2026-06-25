@@ -279,7 +279,7 @@ interface HierarchyExpandConfig {
       items?: { label: string; icon: string; category?: string; explanation?: string }[];
       visual?: { nodes: { label: string; icon: string; depth: number }[] };
     }[];
-    finalTree: { label: string; icon: string; children: { label: string; icon: string; children?: { label: string; icon: string }[] }[] }[];
+    finalTree: any[];
     nonAIExamples: string[];
   };
 }

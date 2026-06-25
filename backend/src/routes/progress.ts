@@ -112,7 +112,7 @@ router.get("/leaderboard", requireAuth, async (req: AuthenticatedRequest, res, n
 
 router.get("/profile/public/:userId", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
-    const targetUserId = req.params.userId;
+    const targetUserId = req.params.userId as string;
     const targetUser = await prisma.user.findUnique({
       where: { id: targetUserId },
       select: {
@@ -121,10 +121,14 @@ router.get("/profile/public/:userId", requireAuth, async (req: AuthenticatedRequ
         email: true,
         bio: true,
         avatarUrl: true,
+        githubUrl: true,
+        linkedinUrl: true,
+        portfolioUrl: true,
         createdAt: true,
         totalXp: true,
         currentStreak: true,
         longestStreak: true,
+        overallProgress: true,
         _count: {
           select: {
             progress: { where: { status: "COMPLETED" } },
@@ -163,6 +167,9 @@ router.get("/profile/public/:userId", requireAuth, async (req: AuthenticatedRequ
         email: targetUser.email,
         bio: targetUser.bio,
         avatarUrl: targetUser.avatarUrl,
+        githubUrl: targetUser.githubUrl,
+        linkedinUrl: targetUser.linkedinUrl,
+        portfolioUrl: targetUser.portfolioUrl,
         createdAt: targetUser.createdAt,
         role: "student",
       },
@@ -375,6 +382,7 @@ router.post("/action", requireAuth, async (req: AuthenticatedRequest, res, next)
           create: {
             userId,
             projectId: actionId,
+            code: "",
             status: "COMPLETED",
             completedAt: new Date()
           }

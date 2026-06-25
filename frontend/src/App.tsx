@@ -80,6 +80,9 @@ const InteractiveProjectPage = lazy(
 const ProfilePage = lazy(
   () => import("./pages/ProfilePage")
 );
+const VerifyCertificatePage = lazy(
+  () => import("./pages/VerifyCertificatePage")
+);
 
 const AdminContentStudioPage = lazy(
   () => import("./pages/AdminContentStudioPage")
@@ -238,6 +241,11 @@ export default function App() {
         <Route
           path="/auth/oauth"
           element={<OAuthCallback />}
+        />
+
+        <Route
+          path="/verify/:certNumber"
+          element={<VerifyCertificatePage />}
         />
 
         {/* PRIVATE ROUTES */}

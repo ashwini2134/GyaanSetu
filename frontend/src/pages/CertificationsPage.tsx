@@ -248,6 +248,82 @@ export default function CertificationsPage() {
   );
 }
 
+function downloadCertificateAsSvg(studentName: string, courseFullName: string, certNumber: string, dateString: string, accentColor: string) {
+  const svgContent = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <defs>
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b0f19" />
+      <stop offset="50%" stop-color="#111827" />
+      <stop offset="100%" stop-color="#070a13" />
+    </linearGradient>
+    <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="50%" stop-color="#d97706" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Outer border -->
+  <rect x="10" y="10" width="780" height="580" rx="20" fill="url(#bg-grad)" stroke="${accentColor}" stroke-width="3" />
+  <rect x="25" y="25" width="750" height="550" rx="15" fill="none" stroke="#1e293b" stroke-width="1" />
+  
+  <!-- Corner marks -->
+  <path d="M 35 55 L 35 35 L 55 35" fill="none" stroke="${accentColor}" stroke-width="2" />
+  <path d="M 765 55 L 765 35 L 745 35" fill="none" stroke="${accentColor}" stroke-width="2" />
+  <path d="M 35 545 L 35 565 L 55 565" fill="none" stroke="${accentColor}" stroke-width="2" />
+  <path d="M 765 545 L 765 565 L 745 565" fill="none" stroke="${accentColor}" stroke-width="2" />
+  
+  <!-- Content -->
+  <g text-anchor="middle" font-family="'Inter', sans-serif">
+    <!-- Academy Header -->
+    <text x="400" y="100" fill="${accentColor}" font-size="12" font-weight="900" letter-spacing="4">FRAYLON ACADEMY</text>
+    
+    <!-- Title -->
+    <text x="400" y="180" fill="#ffffff" font-size="32" font-weight="900" letter-spacing="1">CERTIFICATE OF COMPLETION</text>
+    <line x1="320" y1="205" x2="480" y2="205" stroke="${accentColor}" stroke-width="2" opacity="0.6" />
+    
+    <!-- Presented to -->
+    <text x="400" y="250" fill="#64748b" font-size="14" font-style="italic">This is proudly presented to</text>
+    
+    <!-- Student Name -->
+    <text x="400" y="315" fill="#ffffff" font-size="42" font-weight="900" font-family="'Georgia', serif">${studentName}</text>
+    
+    <!-- For completing -->
+    <text x="400" y="370" fill="#64748b" font-size="14" font-style="italic">for successfully completing the specialized program</text>
+    
+    <!-- Course Full Name -->
+    <text x="400" y="420" fill="${accentColor}" font-size="22" font-weight="800">${courseFullName}</text>
+    
+    <!-- Bottom Info -->
+    <line x1="280" y1="460" x2="520" y2="460" stroke="#334155" stroke-width="1" />
+    
+    <text x="400" y="495" fill="#94a3b8" font-size="12" font-weight="500">Issued on ${dateString}</text>
+    <text x="400" y="520" fill="#64748b" font-size="10" font-family="monospace">CREDENTIAL ID: ${certNumber}</text>
+  </g>
+  
+  <!-- Ribbon/Seal icon -->
+  <g transform="translate(680, 480) scale(0.8)">
+    <polygon points="30,40 45,95 20,80 -5,95 10,40" fill="#b45309" />
+    <polygon points="50,40 65,95 40,80 15,95 30,40" fill="#d97706" />
+    <circle cx="30" cy="30" r="35" fill="url(#gold-grad)" />
+    <circle cx="30" cy="30" r="28" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.6" />
+    <path d="M 30 18 L 33 26 L 41 26 L 35 31 L 37 39 L 30 34 L 23 39 L 25 31 L 19 26 L 27 26 Z" fill="#ffffff" opacity="0.9" />
+  </g>
+</svg>
+  `.trim();
+
+  const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `certificate-${certNumber}.svg`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 /* ─── CertBlock — one per course ─── */
 
 function CertBlock({
@@ -400,17 +476,15 @@ function CertBlock({
               <p className="text-xs font-mono text-slate-400">{cert!.certNumber}</p>
             </div>
             <div className="flex items-center gap-2">
-              <a
-                href={`${import.meta.env.VITE_CERTS_APP_URL}/c/${cert!.certNumber}`}
-                target="_blank"
-                rel="noreferrer"
+              <button
+                onClick={() => downloadCertificateAsSvg(studentName, course.fullName, cert!.certNumber, issueDate || '', accent)}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all hover:opacity-90 hover:-translate-y-0.5"
                 style={{ background: `${accent}20`, border: `1px solid ${accent}40`, color: accent }}
               >
                 <Download size={13} /> Download
-              </a>
+              </button>
               <a
-                href={`${import.meta.env.VITE_CERTS_APP_URL}/c/${cert!.certNumber}`}
+                href={`${window.location.origin}/#/verify/${cert!.certNumber}`}
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white transition-all hover:opacity-90 hover:-translate-y-0.5"

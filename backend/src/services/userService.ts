@@ -12,6 +12,9 @@ function toSafeUser(user: any): SafeUser {
     emailVerified: user.emailVerified,
     bio: user.bio,
     avatarUrl: user.avatarUrl ?? '',
+    githubUrl: user.githubUrl ?? '',
+    linkedinUrl: user.linkedinUrl ?? '',
+    portfolioUrl: user.portfolioUrl ?? '',
     createdAt: user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt,
   };
 }
@@ -34,7 +37,7 @@ export async function createUser(input: {
   role?: UserRole;
   emailVerified?: boolean;
 }): Promise<SafeUser> {
-  const passwordHash = input.password ? await hashPassword(input.password) : null;
+  const passwordHash = input.password ? await hashPassword(input.password) : "";
   const role = input.role ?? "student";
   const emailVerified = input.emailVerified ?? false;
 
@@ -102,7 +105,7 @@ export async function findOrCreateOAuthUser(input: {
       data: {
         email: input.email.toLowerCase(),
         name: input.name,
-        passwordHash: null,
+        passwordHash: "",
         emailVerified: true,
       },
     });
@@ -189,13 +192,23 @@ export async function consumeOAuthExchangeCode(code: string): Promise<string | n
   return record.userId;
 }
 
-export async function updateProfile(userId: string, input: { name?: string; bio?: string; avatarUrl?: string }): Promise<SafeUser> {
+export async function updateProfile(userId: string, input: { 
+  name?: string; 
+  bio?: string; 
+  avatarUrl?: string;
+  githubUrl?: string;
+  linkedinUrl?: string;
+  portfolioUrl?: string;
+}): Promise<SafeUser> {
   const updatedUser = await prisma.user.update({
     where: { id: userId },
     data: {
       ...(input.name !== undefined && { name: input.name }),
       ...(input.bio !== undefined && { bio: input.bio }),
       ...(input.avatarUrl !== undefined && { avatarUrl: input.avatarUrl }),
+      ...(input.githubUrl !== undefined && { githubUrl: input.githubUrl }),
+      ...(input.linkedinUrl !== undefined && { linkedinUrl: input.linkedinUrl }),
+      ...(input.portfolioUrl !== undefined && { portfolioUrl: input.portfolioUrl }),
     },
   });
   return toSafeUser(updatedUser);

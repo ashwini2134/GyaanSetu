@@ -52,7 +52,7 @@ router.post("/courses/:courseId/versions/:versionId/restore", async (req, res) =
     data: {
       courseId: req.params.courseId,
       versionNumber: vn,
-      snapshot: v.snapshot,
+      snapshot: v.snapshot as any,
       changelog: `Restored from v${v.versionNumber}`
     }
   });

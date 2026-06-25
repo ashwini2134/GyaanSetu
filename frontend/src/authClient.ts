@@ -8,6 +8,9 @@ export type AuthUser = {
   emailVerified: boolean;
   bio?: string;
   avatarUrl?: string;
+  githubUrl?: string;
+  linkedinUrl?: string;
+  portfolioUrl?: string;
   createdAt?: string;
 };
 
@@ -152,7 +155,15 @@ export const authApi = {
   markAllNotificationsRead: () =>
     authFetch<{ ok: boolean }>('/notifications/in-app/read-all', { method: 'POST' }),
 
-  updateProfile: (data: { name?: string; bio?: string; avatarUrl?: string; notificationPrefs?: Record<string, boolean> }) =>
+  updateProfile: (data: { 
+    name?: string; 
+    bio?: string; 
+    avatarUrl?: string; 
+    githubUrl?: string;
+    linkedinUrl?: string;
+    portfolioUrl?: string;
+    notificationPrefs?: Record<string, boolean>;
+  }) =>
     authFetch<{ user: AuthUser }>("/auth/profile", {
       method: "PATCH",
       body: JSON.stringify(data),

@@ -162,6 +162,9 @@ const profileSchema = z.object({
   name: z.string().min(1).max(100).trim().optional(),
   bio: z.string().max(500).trim().optional(),
   avatarUrl: z.string().max(5000000).optional(),
+  githubUrl: z.string().max(255).trim().optional(),
+  linkedinUrl: z.string().max(255).trim().optional(),
+  portfolioUrl: z.string().max(255).trim().optional(),
   notificationPrefs: z.record(z.boolean()).optional(),
   currentPassword: z.string().min(1).optional(),
   password: z.string().min(8).max(128).optional(),
@@ -178,6 +181,9 @@ router.patch("/profile", requireAuth, async (req: AuthenticatedRequest, res, nex
       name: body.name,
       bio: body.bio,
       avatarUrl: body.avatarUrl,
+      githubUrl: body.githubUrl,
+      linkedinUrl: body.linkedinUrl,
+      portfolioUrl: body.portfolioUrl,
     });
 
     if (body.notificationPrefs) {

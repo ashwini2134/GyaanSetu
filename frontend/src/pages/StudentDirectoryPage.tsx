@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authFetch } from "../authClient";
 import {
-  AlertTriangle, CheckCircle, ChevronDown, Clock, Loader2, Search, SlidersHorizontal, UserCheck, UserX, XCircle,
+  AlertTriangle, CheckCircle, ChevronDown, Clock, Loader2, Search, UserCheck, UserX, XCircle, Download
 } from "lucide-react";
 
 type Student = {
@@ -65,6 +65,50 @@ export default function StudentDirectoryPage() {
   const SortIcon = ({ field }: { field: string }) =>
     sortBy === field ? <ChevronDown size={14} className={`ml-1 transition-transform ${sortOrder === "asc" ? "rotate-180" : ""}`} /> : null;
 
+  const exportToCsv = () => {
+    if (students.length === 0) return;
+    const headers = [
+      "Student Name",
+      "Email",
+      "XP",
+      "Current Streak",
+      "Status",
+      "Lectures Completed",
+      "Quizzes Passed",
+      "Problems Solved",
+      "Projects Completed",
+      "Certificates Issued",
+      "Last Active"
+    ];
+    const rows = students.map(s => [
+      s.name,
+      s.email,
+      s.xp,
+      s.streak,
+      s.status,
+      s.lecturesCompleted,
+      s.quizzesPassed,
+      s.problemsSolved,
+      s.projectsCount,
+      s.certificatesIssued,
+      new Date(s.lastActive).toLocaleDateString()
+    ]);
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `students-directory-${new Date().toISOString().split("T")[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="min-h-screen bg-[#0B0F17] p-4 md:p-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -75,6 +119,12 @@ export default function StudentDirectoryPage() {
           </h1>
           <p className="text-sm text-slate-400 mt-1">{total} student{total !== 1 ? "s" : ""}</p>
         </div>
+        <button
+          onClick={exportToCsv}
+          className="flex items-center gap-1.5 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/50 rounded-xl text-xs font-semibold transition-all active:scale-[0.98]"
+        >
+          <Download size={14} /> Export CSV
+        </button>
       </div>
 
       {/* Filters */}

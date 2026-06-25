@@ -1,12 +1,12 @@
 // Fraylon - Phase 2.5 & 3
 import { Queue } from 'bullmq';
-import IORedis from 'ioredis';
+import { Redis } from 'ioredis';
 
 const isRedisAvailable = !!process.env.REDIS_URL;
 
-let connection: IORedis | undefined;
+let connection: Redis | undefined;
 if (isRedisAvailable) {
-  connection = new IORedis(process.env.REDIS_URL as string, { maxRetriesPerRequest: null });
+  connection = new Redis(process.env.REDIS_URL as string, { maxRetriesPerRequest: null });
 }
 
 export class MockQueue {
@@ -29,8 +29,8 @@ export class MockQueue {
 
 export const mockWorkers: Record<string, (job: any) => Promise<void>> = {};
 
-export const quizGradingQueue = isRedisAvailable && connection ? new Queue('quizGrading', { connection }) : new MockQueue('quizGrading');
-export const projectReviewQueue = isRedisAvailable && connection ? new Queue('projectReview', { connection }) : new MockQueue('projectReview');
-export const capstoneReviewQueue = isRedisAvailable && connection ? new Queue('capstoneReview', { connection }) : new MockQueue('capstoneReview');
-export const certificateQueue = isRedisAvailable && connection ? new Queue('certificate', { connection }) : new MockQueue('certificate');
-export const notificationQueue = isRedisAvailable && connection ? new Queue('notification', { connection }) : new MockQueue('notification');
+export const quizGradingQueue = isRedisAvailable && connection ? new Queue('quizGrading', { connection: connection as any }) : new MockQueue('quizGrading');
+export const projectReviewQueue = isRedisAvailable && connection ? new Queue('projectReview', { connection: connection as any }) : new MockQueue('projectReview');
+export const capstoneReviewQueue = isRedisAvailable && connection ? new Queue('capstoneReview', { connection: connection as any }) : new MockQueue('capstoneReview');
+export const certificateQueue = isRedisAvailable && connection ? new Queue('certificate', { connection: connection as any }) : new MockQueue('certificate');
+export const notificationQueue = isRedisAvailable && connection ? new Queue('notification', { connection: connection as any }) : new MockQueue('notification');

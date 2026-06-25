@@ -62,6 +62,7 @@ router.post("/complete", requireAuth, async (req: AuthenticatedRequest, res, nex
       create: {
         userId,
         projectId,
+        code: "",
         status: "COMPLETED",
         completedAt: new Date()
       }

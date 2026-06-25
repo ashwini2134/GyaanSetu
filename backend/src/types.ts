@@ -8,11 +8,14 @@ export type User = {
   emailVerified: boolean;
   bio: string;
   avatarUrl: string;
+  githubUrl: string;
+  linkedinUrl: string;
+  portfolioUrl: string;
   createdAt: string;
   updatedAt: string;
 };
 
-export type SafeUser = Pick<User, "id" | "email" | "name" | "role" | "emailVerified" | "bio" | "avatarUrl" | "createdAt">;
+export type SafeUser = Pick<User, "id" | "email" | "name" | "role" | "emailVerified" | "bio" | "avatarUrl" | "githubUrl" | "linkedinUrl" | "portfolioUrl" | "createdAt">;
 
 export type OAuthProvider = "github" | "linkedin" | "google";
 
