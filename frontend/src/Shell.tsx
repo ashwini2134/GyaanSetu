@@ -17,6 +17,13 @@ import {
   Trophy,
   User,
   X,
+  PlusCircle,
+  FileText,
+  Layout,
+  Code,
+  HelpCircle,
+  Briefcase,
+  UploadCloud
 } from "lucide-react";
 import { authApi } from "./authClient";
 
@@ -107,6 +114,12 @@ export default function Shell() {
 
   const onCoursePage = location.pathname.startsWith("/course/");
   const courseSlug = onCoursePage ? location.pathname.split("/")[2] : null;
+
+  const pathParts = location.pathname.split('/');
+  let adminCourseId = "draft";
+  if (pathParts[1] === "admin" && pathParts[2] === "content-studio" && pathParts[3] && pathParts[3] !== "new") {
+    adminCourseId = pathParts[3];
+  }
 
   useEffect(() => {
     api.courses().then(setCourses).catch(err => console.error('[shell] load courses failed', err));
@@ -357,12 +370,64 @@ export default function Shell() {
                 Admin
               </div>
 
-              <NavLink to="/admin/content-studio" onClick={() => setSidebarOpen(false)}
-                className={({ isActive }) => `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
-                title="Content Studio">
-                <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><BookOpen size={18} /></span>
-                <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>Content Studio</span>
-              </NavLink>
+              {/* Content Studio Section */}
+              <div className="mb-2">
+                <div className={`flex items-center gap-2 px-3 py-2 text-sm font-bold text-slate-300 transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0'}`}>
+                  <BookOpen size={18} />
+                  <span className="truncate">Content Studio</span>
+                </div>
+                
+                <div className={`flex flex-col space-y-0.5 ${expanded ? 'pl-4' : ''}`}>
+                  <NavLink to="/admin/content-studio" end onClick={() => setSidebarOpen(false)}
+                    className={({ isActive }) => `${subLinkBase} ${isActive ? subLinkActive : subLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
+                    title="Course Creation">
+                    <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><PlusCircle size={16} /></span>
+                    <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>Course Creation</span>
+                  </NavLink>
+
+                  <NavLink to="/admin/content-studio/new" onClick={() => setSidebarOpen(false)}
+                    className={({ isActive }) => `${subLinkBase} ${isActive ? subLinkActive : subLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
+                    title="Blueprint Builder">
+                    <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><FileText size={16} /></span>
+                    <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>Blueprint Builder</span>
+                  </NavLink>
+
+                  <NavLink to={`/admin/content-studio/${adminCourseId}/lessons`} onClick={() => setSidebarOpen(false)}
+                    className={({ isActive }) => `${subLinkBase} ${isActive ? subLinkActive : subLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
+                    title="Lesson Editor">
+                    <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><Layout size={16} /></span>
+                    <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>Lesson Editor</span>
+                  </NavLink>
+
+                  <NavLink to={`/admin/content-studio/${adminCourseId}/exercise`} onClick={() => setSidebarOpen(false)}
+                    className={({ isActive }) => `${subLinkBase} ${isActive ? subLinkActive : subLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
+                    title="Exercise Builder">
+                    <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><Code size={16} /></span>
+                    <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>Exercise Builder</span>
+                  </NavLink>
+
+                  <NavLink to={`/admin/content-studio/${adminCourseId}/quiz`} onClick={() => setSidebarOpen(false)}
+                    className={({ isActive }) => `${subLinkBase} ${isActive ? subLinkActive : subLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
+                    title="Quiz Builder">
+                    <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><HelpCircle size={16} /></span>
+                    <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>Quiz Builder</span>
+                  </NavLink>
+
+                  <NavLink to={`/admin/content-studio/${adminCourseId}/project`} onClick={() => setSidebarOpen(false)}
+                    className={({ isActive }) => `${subLinkBase} ${isActive ? subLinkActive : subLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
+                    title="Project Builder">
+                    <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><Briefcase size={16} /></span>
+                    <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>Project Builder</span>
+                  </NavLink>
+
+                  <NavLink to={`/admin/content-studio/${adminCourseId}/publish`} onClick={() => setSidebarOpen(false)}
+                    className={({ isActive }) => `${subLinkBase} ${isActive ? subLinkActive : subLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
+                    title="Course Publishing">
+                    <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><UploadCloud size={16} /></span>
+                    <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>Course Publishing</span>
+                  </NavLink>
+                </div>
+              </div>
 
               <NavLink to="/admin/analytics" onClick={() => setSidebarOpen(false)}
                 className={({ isActive }) => `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
