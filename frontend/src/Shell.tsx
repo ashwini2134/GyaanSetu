@@ -371,7 +371,7 @@ export default function Shell() {
                 <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>Analytics</span>
               </NavLink>
 
-              <NavLink to="/admin/operations-monitor" onClick={() => setSidebarOpen(false)}
+              <NavLink to="/admin/operations" onClick={() => setSidebarOpen(false)}
                 className={({ isActive }) => `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
                 title="Operations Monitor">
                 <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><AlertTriangle size={18} /></span>

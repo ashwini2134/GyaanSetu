@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation, Outlet } from "react-router-dom";
 import type { ReactNode } from "react";
 import { Suspense, lazy } from "react";
 
@@ -106,7 +106,6 @@ const OperationsMonitor = lazy(() => import("./pages/admin/OperationsMonitor"));
 const Analytics = lazy(() => import("./pages/admin/Analytics"));
 const Settings = lazy(() => import("./pages/admin/Settings"));
 import { AdminRoute } from "./components/admin/AdminRoute";
-import { AdminLayout } from "./components/admin/AdminLayout";
 
 const LandingPage = lazy(
   () => import("./pages/LandingPage")
@@ -337,24 +336,23 @@ export default function App() {
           />
 
           {/* ── Admin: Redirects (legacy routes) ── */}
-          <Route path="admin/*" element={<Navigate to="/admin" replace />} />
           <Route path="qa" element={<Navigate to="/admin/operations" replace />} />
 
-        </Route>
+          {/* ── NEW PHASE 1 ADMIN ROUTER (NOW INSIDE DASHBOARD SHELL) ── */}
+          <Route path="admin" element={<AdminRoute><Outlet /></AdminRoute>}>
+            <Route index element={<Navigate to="content-studio" replace />} />
+            <Route path="content-studio" element={<ContentStudio />} />
+            <Route path="content-studio/new" element={<BlueprintBuilder />} />
+            <Route path="content-studio/:courseId/lessons" element={<LessonEditor />} />
+            <Route path="content-studio/:courseId/quiz" element={<QuizBuilder />} />
+            <Route path="content-studio/:courseId/project" element={<ProjectBuilder />} />
+            <Route path="content-studio/:courseId/versions" element={<VersionHistory />} />
+            <Route path="content-studio/:courseId/beta" element={<BetaTesting />} />
+            <Route path="operations" element={<OperationsMonitor />} />
+            <Route path="analytics" element={<Analytics />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
 
-        {/* ── NEW PHASE 1 ADMIN ROUTER ── */}
-        <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
-          <Route index element={<Navigate to="/admin/content-studio" replace />} />
-          <Route path="content-studio" element={<ContentStudio />} />
-          <Route path="content-studio/new" element={<BlueprintBuilder />} />
-          <Route path="content-studio/:courseId/lessons" element={<LessonEditor />} />
-          <Route path="content-studio/:courseId/quiz" element={<QuizBuilder />} />
-          <Route path="content-studio/:courseId/project" element={<ProjectBuilder />} />
-          <Route path="content-studio/:courseId/versions" element={<VersionHistory />} />
-          <Route path="content-studio/:courseId/beta" element={<BetaTesting />} />
-          <Route path="operations" element={<OperationsMonitor />} />
-          <Route path="analytics" element={<Analytics />} />
-          <Route path="settings" element={<Settings />} />
         </Route>
 
         {/* FALLBACK */}
