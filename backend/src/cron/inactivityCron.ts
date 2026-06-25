@@ -5,6 +5,11 @@ import { notificationQueue } from '../lib/queue.js';
 
 import { prisma } from "../prisma.js";
 
+const isTestEnv = process.env.NODE_ENV === "test";
+const emailFilter = isTestEnv
+  ? { NOT: [{ email: { endsWith: "@test.com" } }] }
+  : { NOT: [{ email: { endsWith: "@test.com" } }, { email: { endsWith: "@example.com" } }] };
+
 export function startCronJobs() {
   // Run daily at 9am
   cron.schedule('0 9 * * *', async () => {
@@ -16,7 +21,8 @@ export function startCronJobs() {
       const inactiveUsers = await prisma.user.findMany({
         where: {
           lastActiveAt: { lt: threeDaysAgo },
-          role: 'student'
+          role: 'student',
+          ...emailFilter
         }
       });
 

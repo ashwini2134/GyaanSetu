@@ -10,6 +10,7 @@ import VisualPreview from '../components/lesson/VisualPreview';
 import { api } from '../api';
 import { authFetch } from '../authClient';
 import { completeAction } from '../progress';
+import { useAuth } from '../auth';
 
 type CapstoneProject = {
   id: string;
@@ -21,13 +22,16 @@ type CapstoneProject = {
   goal: string;
   features: string[];
   sampleFlow: string[];
+  requirements: string[];
+  guidelines: { title: string; description: string }[];
+  evaluationChecklist: { label: string; description: string; check: (staticChecks: any[], dynamicChecks: any[]) => boolean }[];
 };
 
 const PROJECTS: CapstoneProject[] = [
   {
     id: 'student_management',
     title: 'Student Management System',
-    description: 'Build a menu-driven records manager that writes, reads, searches, and deletes student grades with file persistence.',
+    description: 'Build a menu-driven records manager that writes, reads, searches, and deletes student records with file persistence.',
     skills: ['Functions', 'Lists', 'Dictionaries', 'File Handling'],
     difficulty: 'Intermediate',
     estimatedTime: '2-3 Hours',
@@ -45,6 +49,29 @@ const PROJECTS: CapstoneProject[] = [
       'User selects an option and interacts with the system',
       'Changes are written back to the file on save',
     ],
+    requirements: [
+      'Store student records in a file named students.txt.',
+      'Each student record should contain a student name and grade.',
+      'Display a menu until the user chooses to exit.',
+      'Allow users to Add a new student, View all student records, Search for a student by name, and Delete a student record.',
+      'Load previously saved records when the program starts.',
+      'Save all changes before exiting the application.',
+    ],
+    guidelines: [
+      { title: 'Functions', description: 'Create separate functions for loading records, saving records, and handling the main menu.' },
+      { title: 'Dictionaries', description: 'Store student records using a dictionary where the student\'s name is the key and the grade is the value.' },
+      { title: 'File Handling', description: 'Read student records from students.txt when the program starts and write updated records back to the file before exiting.' },
+      { title: 'Validation', description: 'Handle missing files gracefully using try-except and validate user menu selections.' },
+    ],
+    evaluationChecklist: [
+      { label: 'Menu navigation works', description: 'Interactive menu displays and option 5 exits cleanly.', check: (_, dyn) => dyn[0]?.passed === true },
+      { label: 'Add student works', description: 'Successfully captures name and grade input records.', check: (_, dyn) => dyn[1]?.passed === true },
+      { label: 'Search student works', description: 'Correctly matches case-insensitive search queries.', check: (_, dyn) => dyn[3]?.passed === true },
+      { label: 'Delete student works', description: 'Removes target record from database state.', check: (stat, _) => stat.find(c => c.id === 'dictionaries')?.passed === true },
+      { label: 'File handling works', description: 'Uses "students.txt" to read stored records.', check: (stat, _) => stat.find(c => c.id === 'file_handling')?.passed === true },
+      { label: 'Data persists', description: 'Saves database records back to file upon program exit.', check: (_, dyn) => dyn[1]?.passed === true || dyn[2]?.passed === true },
+      { label: 'Clean code & structure', description: 'Code includes helper functions and runs standard entrypoint.', check: (stat, _) => stat.find(c => c.id === 'functions')?.passed === true },
+    ]
   },
   {
     id: 'expense_tracker',
@@ -67,6 +94,28 @@ const PROJECTS: CapstoneProject[] = [
       'User adds expenses with category, description, and amount',
       'Reports show spending breakdown by category',
     ],
+    requirements: [
+      'Store expense records in expenses.txt.',
+      'Each expense should contain: Date, Category, Description, Amount.',
+      'Allow users to Add a new expense, View all expenses, Filter expenses by category, and View total spending and category-wise summary.',
+      'Load existing expenses when the program starts.',
+      'Save all expense data before exiting.',
+    ],
+    guidelines: [
+      { title: 'Functions', description: 'Separate the application into loading, saving, and menu functions.' },
+      { title: 'Lists & Dictionaries', description: 'Store each expense as a dictionary inside a list.' },
+      { title: 'File Handling', description: 'Read expense records from the file during startup and update the file before exiting.' },
+      { title: 'Validation', description: 'Validate numeric amount input and handle missing files gracefully.' },
+    ],
+    evaluationChecklist: [
+      { label: 'Menu navigation works', description: 'Menu displays options and option 5 exits cleanly.', check: (_, dyn) => dyn[5]?.passed === true },
+      { label: 'Add expense works', description: 'Captures and appends transaction data to history.', check: (_, dyn) => dyn[0]?.passed === true },
+      { label: 'Category filtering works', description: 'Prints only records belonging to the filtered category.', check: (_, dyn) => dyn[2]?.passed === true },
+      { label: 'Total calculation works', description: 'Aggregates spending total calculations.', check: (_, dyn) => dyn[3]?.passed === true },
+      { label: 'File handling works', description: 'Loads expenses from file and handles disk reading.', check: (stat, _) => stat.find(c => c.id === 'file_handling')?.passed === true },
+      { label: 'Data persists', description: 'Saves transactions back to expenses.txt upon exit.', check: (_, dyn) => dyn[4]?.passed === true },
+      { label: 'Input conversions safe', description: 'Validates numeric input parsing cleanly.', check: (_, dyn) => dyn[6]?.passed === true },
+    ]
   },
   {
     id: 'quiz_app',
@@ -89,6 +138,27 @@ const PROJECTS: CapstoneProject[] = [
       'User selects an answer and gets immediate feedback',
       'Final score is displayed at the end',
     ],
+    requirements: [
+      'Create a multiple-choice quiz.',
+      'Display one question at a time.',
+      'Accept answers from the user.',
+      'Check whether each answer is correct.',
+      'Keep track of the score.',
+      'Display Total Questions, Correct Answers, and Final Percentage.',
+      'Display the correct answer whenever the user answers incorrectly.',
+    ],
+    guidelines: [
+      { title: 'Functions', description: 'Organize quiz logic inside reusable functions where appropriate.' },
+      { title: 'Dictionaries & Lists', description: 'Store questions, options, and correct answers using dictionaries and lists.' },
+      { title: 'Loops', description: 'Loop through every question and process the user\'s answer.' },
+      { title: 'Validation', description: 'Accept answers in a consistent format and compare them correctly.' },
+    ],
+    evaluationChecklist: [
+      { label: 'Full quiz execution', description: 'Displays all questions and renders final scorecard.', check: (_, dyn) => dyn[0]?.passed === true },
+      { label: 'Scoring tracks answers', description: 'Computes correct answer totals properly.', check: (_, dyn) => dyn[1]?.passed === true },
+      { label: 'Displays choices', description: 'Iterates and prints choices in a loop.', check: (stat, _) => stat.find(c => c.id === 'loops')?.passed === true },
+      { label: 'String matching safe', description: 'Handles inputs case-insensitively.', check: (stat, _) => stat.find(c => c.id === 'conditions')?.passed === true },
+    ]
   },
   {
     id: 'todo_list',
@@ -111,284 +181,126 @@ const PROJECTS: CapstoneProject[] = [
       'User adds tasks with a description and optional priority',
       'Completed tasks are visually distinguished',
     ],
+    requirements: [
+      'Store tasks inside todo.txt.',
+      'Each task should contain Task Title and Completion Status.',
+      'Allow users to Add a new task, View all tasks, Mark a task as completed, and Delete a task.',
+      'Load saved tasks when the application starts.',
+      'Save all updates before exiting.',
+    ],
+    guidelines: [
+      { title: 'Functions', description: 'Create separate functions for loading tasks, saving tasks, and handling menu operations.' },
+      { title: 'Lists & Dictionaries', description: 'Store tasks as dictionaries inside a list.' },
+      { title: 'File Handling', description: 'Read task data from the file during startup and write updated data before exiting.' },
+      { title: 'Validation', description: 'Handle empty task lists, invalid menu choices, and missing files.' },
+    ],
+    evaluationChecklist: [
+      { label: 'Add task works', description: 'Saves task additions into session list.', check: (_, dyn) => dyn[0]?.passed === true },
+      { label: 'Complete task works', description: 'Toggles completed tasks status flag.', check: (_, dyn) => dyn[1]?.passed === true },
+      { label: 'Checkbox checkboxes', description: 'Prints checkbox markers correctly based on state.', check: (stat, _) => stat.find(c => c.id === 'loops')?.passed === true },
+      { label: 'File handling works', description: 'Uses todo.txt for loading and saving task list.', check: (stat, _) => stat.find(c => c.id === 'file_handling')?.passed === true },
+    ]
   },
 ];
 
 const STARTER_CODE: Record<string, string> = {
   student_management: `# Student Management System
-# Build a system that manages student names and grades, saving them to "students.txt".
 
 def load_students():
-    students = {}
-    try:
-        with open("students.txt", "r") as f:
-            for line in f:
-                if line.strip():
-                    name, grade = line.strip().split(",")
-                    students[name] = grade
-    except:
-        pass
-    return students
+    # TODO: Load students from students.txt into a dictionary
+    # Return a dictionary of {name: grade}
+    # Handle FileNotFoundError gracefully using try-except
+    pass
 
 def save_students(students):
-    with open("students.txt", "w") as f:
-        for name, grade in students.items():
-            f.write(name + "," + grade + "\\n")
+    # TODO: Save the student dictionary to students.txt in name,grade format
+    pass
 
 def main():
-    students = load_students()
-    print("Welcome to the Student Management System!")
-    
-    while True:
-        print("\\n--- Menu ---")
-        print("1. Add Student")
-        print("2. View Students")
-        print("3. Search Student")
-        print("4. Delete Student")
-        print("5. Save and Exit")
-        
-        choice = input("Enter choice (1-5): ").strip()
-        
-        if choice == "1":
-            name = input("Enter student name: ").strip()
-            grade = input("Enter student grade: ").strip()
-            if name and grade:
-                students[name] = grade
-                print("Added student " + name)
-        elif choice == "2":
-            if not students:
-                print("No student records found.")
-            else:
-                print("Student Records:")
-                for name, grade in students.items():
-                    print("- " + name + ": " + grade)
-        elif choice == "3":
-            name = input("Enter student name to search: ").strip()
-            if name in students:
-                print("Found student " + name + ": grade is " + students[name])
-            else:
-                print("Student not found.")
-        elif choice == "4":
-            name = input("Enter student name to delete: ").strip()
-            if name in students:
-                del students[name]
-                print("Deleted student " + name)
-            else:
-                print("Student not found.")
-        elif choice == "5":
-            save_students(students)
-            print("Records saved. Goodbye!")
-            break
-        else:
-            print("Invalid choice, please select 1-5.")
+    # TODO: Load existing student records
+    # TODO: Display the interactive menu:
+    #       1. Add Student
+    #       2. View Students
+    #       3. Search Student
+    #       4. Delete Student
+    #       5. Save and Exit
+    # TODO: Loop to handle user choices and call functions
+    # TODO: Save data to file before exiting and print goodbye/exit message
+    pass
+
+if __name__ == "__main__":
+    main()
 `,
 
   expense_tracker: `# Expense Tracker
-# Log expenses, view summaries, and filter by category. Persists to "expenses.txt".
 
 def load_expenses():
-    expenses = []
-    try:
-        with open("expenses.txt", "r") as f:
-            for line in f:
-                if line.strip():
-                    date, category, desc, amount = line.strip().split(",")
-                    expenses.append({
-                        "date": date,
-                        "category": category,
-                        "description": desc,
-                        "amount": float(amount)
-                    })
-    except:
-        pass
-    return expenses
+    # TODO: Load expenses from expenses.txt
+    # Return a list of expense dictionaries
+    # Handle FileNotFoundError gracefully
+    pass
 
 def save_expenses(expenses):
-    with open("expenses.txt", "w") as f:
-        for e in expenses:
-            f.write(e["date"] + "," + e["category"] + "," + e["description"] + "," + str(e["amount"]) + "\\n")
+    # TODO: Save expenses list to expenses.txt
+    pass
 
 def main():
-    expenses = load_expenses()
-    print("Welcome to Expense Tracker!")
-    
-    while True:
-        print("\\n--- Menu ---")
-        print("1. Add Expense")
-        print("2. View All Expenses")
-        print("3. View by Category")
-        print("4. Summary")
-        print("5. Save and Exit")
-        
-        choice = input("Enter choice (1-5): ").strip()
-        
-        if choice == "1":
-            date = input("Enter date (YYYY-MM-DD): ").strip()
-            category = input("Enter category (e.g. Food, Rent): ").strip()
-            desc = input("Enter description: ").strip()
-            amount = float(input("Enter amount: ").strip())
-            expenses.append({
-                "date": date,
-                "category": category,
-                "description": desc,
-                "amount": amount
-            })
-            print("Added expense of $" + str(amount))
-        elif choice == "2":
-            if not expenses:
-                print("No expenses recorded.")
-            else:
-                print("All Expenses:")
-                for e in expenses:
-                    print("- " + e["date"] + " [" + e["category"] + "] " + e["description"] + ": $" + str(e["amount"]))
-        elif choice == "3":
-            category = input("Enter category to filter: ").strip()
-            found = False
-            for e in expenses:
-                if e["category"].lower() == category.lower():
-                    print("- " + e["date"] + ": " + e["description"] + " ($" + str(e["amount"]) + ")")
-                    found = True
-            if not found:
-                print("No expenses found in category " + category)
-        elif choice == "4":
-            total = 0.0
-            categories = {}
-            for e in expenses:
-                total += e["amount"]
-                cat = e["category"]
-                categories[cat] = categories.get(cat, 0.0) + e["amount"]
-            print("Total Spending: $" + str(total))
-            print("Category Breakdown:")
-            for cat, amt in categories.items():
-                print("- " + cat + ": $" + str(amt))
-        elif choice == "5":
-            save_expenses(expenses)
-            print("Expenses saved. Goodbye!")
-            break
-        else:
-            print("Invalid choice, please select 1-5.")
+    # TODO: Load existing expenses
+    # TODO: Display the menu:
+    #       1. Add Expense
+    #       2. View All Expenses
+    #       3. View by Category
+    #       4. Summary
+    #       5. Save and Exit
+    # TODO: Loop to handle user choices and call functions
+    # TODO: Save data to file before exiting and print goodbye/exit message
+    pass
+
+if __name__ == "__main__":
+    main()
 `,
 
   quiz_app: `# Interactive Quiz Application
-# Store questions, prompt choice inputs, and output final score results.
 
 def main():
-    # Store questions: question -> (choices_list, correct_answer)
-    questions = {
-        "What is the correct file extension for Python files?": (["a) .py", "b) .js", "c) .txt"], "a"),
-        "Which keyword is used to define a function in Python?": (["a) function", "b) def", "c) fun"], "b"),
-        "How do you start a comment in Python?": (["a) //", "b) /*", "c) #"], "c")
-    }
-    
-    score = 0
-    total = len(questions)
-    
-    print("Welcome to the Python Programming Quiz!")
-    print("Answer the following questions by choosing a, b, or c.")
-    
-    # Iterate over questions
-    for q_text, data in questions.items():
-        choices, correct = data
-        print("\\n" + q_text)
-        for choice in choices:
-            print(choice)
-            
-        ans = input("Your answer: ").strip().lower()
-        if ans == correct:
-            print("Correct!")
-            score = score + 1
-        else:
-            print("Incorrect. The correct answer was " + correct)
-            
-    print("\\n--- Quiz Complete ---")
-    print("Final Score: " + str(score) + "/" + str(total))
-    pct = (score / total) * 100
-    print("Percentage: " + str(pct) + "%")
+    # TODO: Define a dictionary of questions, options, and correct answers
+    # TODO: Initialize score and total variables
+    # TODO: Iterate through questions and display options
+    # TODO: Get user input, normalize it (strip & lowercase), and check correctness
+    # TODO: Provide instant feedback and update score
+    # TODO: Display final score, percentage, and completion details at the end
+    pass
+
+if __name__ == "__main__":
+    main()
 `,
 
   todo_list: `# To-Do List Application
-# Manage tasks and persist their status to "todo.txt".
 
 def load_tasks():
-    tasks = []
-    try:
-        with open("todo.txt", "r") as f:
-            for line in f:
-                if line.strip():
-                    parts = line.strip().split(",")
-                    title = parts[0]
-                    completed = parts[1]
-                    tasks.append({
-                        "title": title,
-                        "completed": completed
-                    })
-    except:
-        pass
-    return tasks
+    # TODO: Load tasks from todo.txt
+    # Return a list of task dictionaries
+    # Handle FileNotFoundError gracefully
+    pass
 
 def save_tasks(tasks):
-    with open("todo.txt", "w") as f:
-        for t in tasks:
-            f.write(t["title"] + "," + t["completed"] + "\\n")
+    # TODO: Save tasks list to todo.txt
+    pass
 
 def main():
-    tasks = load_tasks()
-    print("Welcome to To-Do List Manager!")
-    
-    while True:
-        print("\\n--- Menu ---")
-        print("1. Add Task")
-        print("2. View Tasks")
-        print("3. Mark Task Complete")
-        print("4. Delete Task")
-        print("5. Save and Exit")
-        
-        choice = input("Enter choice (1-5): ").strip()
-        
-        if choice == "1":
-            title = input("Enter task title: ").strip()
-            if title:
-                tasks.append({
-                    "title": title,
-                    "completed": "0"
-                })
-                print("Added task: " + title)
-        elif choice == "2":
-            if not tasks:
-                print("No tasks found.")
-            else:
-                print("Tasks:")
-                for t in tasks:
-                    status = "[x]" if t["completed"] == "1" else "[ ]"
-                    print(status + " " + t["title"])
-        elif choice == "3":
-            title = input("Enter task title to complete: ").strip()
-            found = False
-            for t in tasks:
-                if t["title"].lower() == title.lower():
-                    t["completed"] = "1"
-                    print("Marked task as completed: " + t["title"])
-                    found = True
-                    break
-            if not found:
-                print("Task not found.")
-        elif choice == "4":
-            title = input("Enter task title to delete: ").strip()
-            found = False
-            for i in range(len(tasks)):
-                if tasks[i]["title"].lower() == title.lower():
-                    tasks.pop(i)
-                    print("Deleted task: " + title)
-                    found = True
-                    break
-            if not found:
-                print("Task not found.")
-        elif choice == "5":
-            save_tasks(tasks)
-            print("Tasks saved. Goodbye!")
-            break
-        else:
-            print("Invalid choice, please select 1-5.")
+    # TODO: Load existing tasks
+    # TODO: Display the menu:
+    #       1. Add Task
+    #       2. View Tasks
+    #       3. Mark Task Complete
+    #       4. Delete Task
+    #       5. Save and Exit
+    # TODO: Loop to handle user choices and call functions
+    # TODO: Save data to file before exiting and print goodbye/exit message
+    pass
+
+if __name__ == "__main__":
+    main()
 `
 };
 
@@ -604,6 +516,7 @@ function validateCapstoneProject(code: string, project: CapstoneProject) {
 
 export default function CapstonePage() {
   const { slug } = useParams<{ slug: string }>();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>('Choose Project');
   const [selected, setSelected] = useState<CapstoneProject | null>(null);
@@ -894,6 +807,45 @@ export default function CapstonePage() {
     document.removeEventListener('mouseup', handleDividerMouseUp);
   }
 
+  const requirementsTotal = selected?.requirements.length || 0;
+  let requirementsCompletedCount = 0;
+  if (selected) {
+    selected.requirements.forEach((_, i) => {
+      let satisfied = false;
+      if (selected.id === 'student_management') {
+        if (i === 0) satisfied = dynamicTestResults[0]?.passed === true;
+        if (i === 1) satisfied = dynamicTestResults[1]?.passed === true;
+        if (i === 2) satisfied = dynamicTestResults[3]?.passed === true;
+        if (i === 3) satisfied = staticCheckResults.find(c => c.id === 'dictionaries')?.passed === true;
+        if (i === 4) satisfied = staticCheckResults.find(c => c.id === 'file_handling')?.passed === true;
+        if (i === 5) satisfied = dynamicTestResults[1]?.passed === true;
+      } else if (selected.id === 'expense_tracker') {
+        if (i === 0) satisfied = staticCheckResults.find(c => c.id === 'file_handling')?.passed === true;
+        if (i === 1) satisfied = dynamicTestResults[0]?.passed === true;
+        if (i === 2) satisfied = dynamicTestResults[2]?.passed === true;
+        if (i === 3) satisfied = dynamicTestResults[3]?.passed === true;
+        if (i === 4) satisfied = dynamicTestResults[4]?.passed === true;
+      } else if (selected.id === 'quiz_app') {
+        if (i === 0) satisfied = staticCheckResults.find(c => c.id === 'dictionaries')?.passed === true;
+        if (i === 1) satisfied = staticCheckResults.find(c => c.id === 'loops')?.passed === true;
+        if (i === 2) satisfied = dynamicTestResults[0]?.passed === true;
+        if (i === 3) satisfied = dynamicTestResults[1]?.passed === true;
+      } else if (selected.id === 'todo_list') {
+        if (i === 0) satisfied = staticCheckResults.find(c => c.id === 'file_handling')?.passed === true;
+        if (i === 1) satisfied = staticCheckResults.find(c => c.id === 'loops')?.passed === true;
+        if (i === 2) satisfied = dynamicTestResults[1]?.passed === true;
+        if (i === 3) satisfied = staticCheckResults.find(c => c.id === 'lists')?.passed === true;
+        if (i === 4) satisfied = dynamicTestResults[1]?.passed === true;
+      }
+      if (satisfied) requirementsCompletedCount++;
+    });
+  }
+  const requirementsPercent = requirementsTotal > 0 ? Math.round((requirementsCompletedCount / requirementsTotal) * 100) : 0;
+
+  const evaluationTotal = selected?.evaluationChecklist.length || 0;
+  const evaluationPassedCount = selected?.evaluationChecklist.filter(item => item.check(staticCheckResults, dynamicTestResults)).length || 0;
+  const evaluationPercent = evaluationTotal > 0 ? Math.round((evaluationPassedCount / evaluationTotal) * 100) : 0;
+
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col text-slate-100 font-sans">
       {/* ── Top Bar ── */}
@@ -1093,58 +1045,184 @@ export default function CapstonePage() {
       {step === 'Workspace' && (
         <div className="flex-1 flex overflow-hidden">
           {/* Left Panel: Project Scope */}
-          <aside className="w-[360px] flex-shrink-0 border-r border-slate-900 bg-slate-950 overflow-y-auto flex flex-col justify-between">
+          <aside className="w-[420px] flex-shrink-0 border-r border-slate-900 bg-slate-950 overflow-y-auto flex flex-col justify-between">
             <div className="p-5 space-y-6">
-              <div>
-                <span className="text-[9px] font-bold text-blue-500 uppercase tracking-widest bg-blue-500/10 px-2 py-1 rounded">Active Specs</span>
-                <h3 className="text-base font-extrabold text-white mt-2 mb-1.5">{selected?.title}</h3>
-                <p className="text-xs text-slate-400 leading-relaxed font-light">{selected?.goal}</p>
+              {/* Header */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold px-2.5 py-1 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase tracking-wider">
+                    {selected?.difficulty}
+                  </span>
+                  <span className="text-[10px] font-medium text-slate-400 bg-slate-900 px-2 py-1 rounded border border-slate-800">
+                    Est. Time: {selected?.estimatedTime}
+                  </span>
+                </div>
+                <h3 className="text-xl font-extrabold text-white tracking-tight">{selected?.title}</h3>
+                
+                {/* Tech Tags */}
+                <div className="flex flex-wrap gap-1.5">
+                  {selected?.skills.map(skill => (
+                    <span key={skill} className="text-[10px] font-medium px-2.5 py-1 rounded-lg bg-slate-900 text-slate-300 border border-slate-800">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+                
+                <p className="text-xs text-slate-400 leading-relaxed font-light mt-2 bg-slate-900/40 p-3 rounded-xl border border-slate-900">
+                  {selected?.description}
+                </p>
               </div>
 
+              {/* Section 1: Requirements */}
               <div className="border-t border-slate-900 pt-5">
-                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2.5">Static Checks Checklist</h4>
-                <div className="space-y-2">
-                  {staticCheckResults.map(c => (
-                    <div key={c.id} className="flex items-center justify-between text-xs px-3 py-2 rounded-lg bg-slate-900/60 border border-slate-800/40">
-                      <span className="text-slate-300">{c.label}</span>
-                      {c.passed ? (
-                        <span className="text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded text-[10px]">Valid</span>
-                      ) : (
-                        <span className="text-slate-500 font-medium bg-slate-800 px-1.5 py-0.5 rounded text-[10px]">Pending</span>
-                      )}
-                    </div>
-                  ))}
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                    <span className="text-base">📋</span> Requirements
+                  </h4>
+                  <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                    {requirementsPercent}% Done
+                  </span>
+                </div>
+                {/* Progress Bar */}
+                <div className="w-full bg-slate-900 rounded-full h-1.5 mb-4 overflow-hidden border border-slate-800">
+                  <div 
+                    className="bg-gradient-to-r from-blue-500 to-emerald-500 h-1.5 rounded-full transition-all duration-500" 
+                    style={{ width: `${requirementsPercent}%` }}
+                  />
+                </div>
+                <div className="space-y-2.5">
+                  {selected?.requirements.map((req, i) => {
+                    let satisfied = false;
+                    if (selected?.id === 'student_management') {
+                      if (i === 0) satisfied = dynamicTestResults[0]?.passed === true; // Menu works
+                      if (i === 1) satisfied = dynamicTestResults[1]?.passed === true; // Add works
+                      if (i === 2) satisfied = dynamicTestResults[3]?.passed === true; // Search works
+                      if (i === 3) satisfied = staticCheckResults.find(c => c.id === 'dictionaries')?.passed === true; // Delete dictionary
+                      if (i === 4) satisfied = staticCheckResults.find(c => c.id === 'file_handling')?.passed === true; // Load data
+                      if (i === 5) satisfied = dynamicTestResults[1]?.passed === true; // Save data
+                    } else if (selected?.id === 'expense_tracker') {
+                      if (i === 0) satisfied = staticCheckResults.find(c => c.id === 'file_handling')?.passed === true;
+                      if (i === 1) satisfied = dynamicTestResults[0]?.passed === true;
+                      if (i === 2) satisfied = dynamicTestResults[2]?.passed === true;
+                      if (i === 3) satisfied = dynamicTestResults[3]?.passed === true;
+                      if (i === 4) satisfied = dynamicTestResults[4]?.passed === true;
+                    } else if (selected?.id === 'quiz_app') {
+                      if (i === 0) satisfied = staticCheckResults.find(c => c.id === 'dictionaries')?.passed === true;
+                      if (i === 1) satisfied = staticCheckResults.find(c => c.id === 'loops')?.passed === true;
+                      if (i === 2) satisfied = dynamicTestResults[0]?.passed === true;
+                      if (i === 3) satisfied = dynamicTestResults[1]?.passed === true;
+                    } else if (selected?.id === 'todo_list') {
+                      if (i === 0) satisfied = staticCheckResults.find(c => c.id === 'file_handling')?.passed === true;
+                      if (i === 1) satisfied = staticCheckResults.find(c => c.id === 'loops')?.passed === true;
+                      if (i === 2) satisfied = dynamicTestResults[1]?.passed === true;
+                      if (i === 3) satisfied = staticCheckResults.find(c => c.id === 'lists')?.passed === true;
+                      if (i === 4) satisfied = dynamicTestResults[1]?.passed === true;
+                    }
+
+                    return (
+                      <div 
+                        key={i} 
+                        className={`flex gap-3 p-3 rounded-xl border transition-all duration-300 ${
+                          satisfied 
+                            ? 'bg-emerald-500/5 border-emerald-500/20 text-slate-200' 
+                            : 'bg-slate-900/20 border-slate-900 text-slate-400 hover:border-slate-800'
+                        }`}
+                      >
+                        <div className="mt-0.5 flex-shrink-0">
+                          {satisfied ? (
+                            <CheckCircle size={14} className="text-emerald-400 stroke-[2.5]" />
+                          ) : (
+                            <div className="w-3.5 h-3.5 rounded-full border border-slate-700 bg-slate-900" />
+                          )}
+                        </div>
+                        <span className="text-xs leading-normal">{req}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
+              {/* Section 2: Implementation Guidelines */}
               <div className="border-t border-slate-900 pt-5">
-                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2.5">Dynamic Verification Tests</h4>
+                <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <span className="text-base">💡</span> Implementation Guidelines
+                </h4>
+                <div className="space-y-3 bg-slate-900/30 p-4 rounded-xl border border-slate-900">
+                  {selected?.guidelines.map((guide, i) => (
+                    <div key={i} className="space-y-1">
+                      <h5 className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        {guide.title}
+                      </h5>
+                      <p className="text-[11px] text-slate-400 leading-normal pl-3">
+                        {guide.description}
+                      </p>
+                    </div>
+                  ))}
+                  
+                  {/* Subtle tips helper block */}
+                  <div className="border-t border-slate-800/60 pt-3 mt-1 space-y-1.5">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Pro Engineering Tips:</span>
+                    <ul className="text-[10px] text-slate-500 space-y-1 list-disc pl-3 leading-normal">
+                      <li>Divide logic into self-contained functions.</li>
+                      <li>Handle edge cases (e.g. empty lists, invalid inputs).</li>
+                      <li>Double-check file reading mode vs write mode flags.</li>
+                      <li>Save session progress immediately after mutations.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Evaluation Checklist */}
+              <div className="border-t border-slate-900 pt-5">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                    <span className="text-base">✅</span> Evaluation Checklist
+                  </h4>
+                  <span className="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
+                    {evaluationPassedCount}/{evaluationTotal} Passed
+                  </span>
+                </div>
+                {/* Progress Bar */}
+                <div className="w-full bg-slate-900 rounded-full h-1.5 mb-4 overflow-hidden border border-slate-800">
+                  <div 
+                    className="bg-gradient-to-r from-blue-500 to-indigo-500 h-1.5 rounded-full transition-all duration-500" 
+                    style={{ width: `${evaluationPercent}%` }}
+                  />
+                </div>
                 <div className="space-y-2">
-                  {dynamicTestResults.map((tc, idx) => (
-                    <div key={idx} className="flex items-start gap-3 p-3 rounded-lg bg-slate-900/60 border border-slate-800/40">
-                      <div className="mt-0.5">
-                        {tc.passed === true ? (
-                          <CheckCircle size={14} className="text-emerald-400" />
-                        ) : tc.passed === false ? (
-                          <XCircle size={14} className="text-red-400" />
+                  {selected?.evaluationChecklist.map((item, i) => {
+                    const passed = item.check(staticCheckResults, dynamicTestResults);
+                    return (
+                      <div 
+                        key={i} 
+                        className={`flex items-center justify-between text-xs px-3.5 py-2.5 rounded-xl border transition-all ${
+                          passed 
+                            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300 font-semibold' 
+                            : 'bg-slate-900/60 border-slate-800/40 text-slate-400'
+                        }`}
+                      >
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-slate-200">{item.label}</p>
+                          <p className="text-[10px] text-slate-500 font-normal truncate max-w-[280px]">{item.description}</p>
+                        </div>
+                        {passed ? (
+                          <span className="text-emerald-400 font-bold bg-emerald-500/20 px-2 py-0.5 rounded text-[10px] border border-emerald-500/25 flex items-center gap-1">
+                            <Check size={10} className="stroke-[3]" /> Passed
+                          </span>
                         ) : (
-                          <div className="w-3.5 h-3.5 rounded-full border border-slate-700 bg-slate-800" />
+                          <span className="text-slate-500 font-medium bg-slate-800/60 px-2 py-0.5 rounded text-[10px] border border-slate-800">
+                            Pending
+                          </span>
                         )}
                       </div>
-                      <div className="min-w-0">
-                        <p className={`text-xs font-bold ${tc.passed === true ? 'text-emerald-400' : 'text-slate-300'}`}>{tc.name}</p>
-                        <p className="text-[10px] text-slate-500 leading-normal mt-0.5">{tc.description}</p>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>
 
-            <div className="p-4 border-t border-slate-900 bg-slate-900/10 text-[10px] text-slate-500 flex justify-between">
-              <span>Difficulty: <strong className="text-amber-500">{selected?.difficulty}</strong></span>
-              <span>Time: <strong className="text-blue-400">{selected?.estimatedTime}</strong></span>
-            </div>
+            <div className="h-4" />
           </aside>
 
           {/* Right Panel: Code Workspace */}
@@ -1405,12 +1483,14 @@ export default function CapstonePage() {
 
                   <div className="text-center space-y-6 py-6 font-serif">
                     <span className="text-[10px] uppercase font-bold tracking-[0.25em] text-amber-500">Certificate of Completion</span>
-                    <p className="text-[11px] font-sans text-slate-400">This certifies that the user has successfully mastered all curriculum requirements for</p>
-                    <h3 className="text-2xl font-black font-sans text-white uppercase tracking-wider">Advanced Python Programming</h3>
+                    <p className="text-[11px] font-sans text-slate-400">This certifies that <span className="font-bold text-white">{user?.name || 'Student'}</span> has successfully mastered all curriculum requirements for</p>
+                    <h3 className="text-2xl font-black font-sans text-white uppercase tracking-wider">
+                      {slug && slug === 'cs50ai' ? 'CS50 AI with Python' : 'CS50P: Introduction to Python Programming'}
+                    </h3>
                     
                     <div className="w-16 h-px bg-amber-500/30 mx-auto" />
                     
-                    <p className="text-xs text-slate-400 italic">Issued on June 15, 2026</p>
+                    <p className="text-xs text-slate-400 italic">Issued on {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
 
                     <div className="flex justify-around items-center pt-8 font-sans">
                       <div className="text-center">

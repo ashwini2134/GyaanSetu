@@ -7,6 +7,11 @@ import { checkEligibility, issueCertForStudent } from '../services/certification
 
 const router = Router();
 
+const isTestEnv = process.env.NODE_ENV === 'test';
+const emailFilter = isTestEnv
+  ? { NOT: [{ email: { endsWith: '@test.com' } }] }
+  : { NOT: [{ email: { endsWith: '@test.com' } }, { email: { endsWith: '@example.com' } }] };
+
 // Student: get their issued certificates
 router.get('/', requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
@@ -34,7 +39,10 @@ router.get('/eligibility', requireAuth, async (req: AuthenticatedRequest, res, n
 router.get('/admin/eligible', requireAuth, requireRole('admin'), async (_req, res, next) => {
   try {
     const students = await prisma.user.findMany({
-      where: { role: 'student', email: { not: { endsWith: '@test.com' } } },
+      where: {
+        role: 'student',
+        ...emailFilter
+      },
       select: { id: true, name: true, email: true },
     });
 

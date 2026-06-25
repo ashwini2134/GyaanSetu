@@ -11,6 +11,11 @@ type QueueItemWithUser = Prisma.ReviewQueueGetPayload<{
 
 const router = Router();
 
+const isTestEnv = process.env.NODE_ENV === "test";
+const emailFilter = isTestEnv
+  ? { NOT: [{ email: { endsWith: "@test.com" } }] }
+  : { NOT: [{ email: { endsWith: "@test.com" } }, { email: { endsWith: "@example.com" } }] };
+
 router.use(requireAuth, requireRole("admin"));
 
 const PRIORITY_ORDER: Record<string, number> = {
@@ -57,7 +62,7 @@ router.get("/review-queue", async (_req: AuthenticatedRequest, res, next) => {
       where: {
         role: "student",
         lastActiveAt: { lt: thirtyDaysAgo },
-        email: { not: { endsWith: "@test.com" } },
+        ...emailFilter
       },
       select: {
         id: true,
@@ -154,7 +159,7 @@ router.get("/review-queue/counts", async (_req: AuthenticatedRequest, res, next)
         where: {
           role: "student",
           lastActiveAt: { lt: thirtyDaysAgo },
-          email: { not: { endsWith: "@test.com" } },
+          ...emailFilter
         },
       }),
     ]);

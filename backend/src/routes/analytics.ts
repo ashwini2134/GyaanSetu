@@ -7,6 +7,11 @@ import { COURSE_LECTURE_COUNTS } from "./courses.js";
 const router = Router();
 router.use(requireAuth, requireRole("admin"));
 
+const isTestEnv = process.env.NODE_ENV === "test";
+const emailFilter = isTestEnv
+  ? { NOT: [{ email: { endsWith: "@test.com" } }] }
+  : { NOT: [{ email: { endsWith: "@test.com" } }, { email: { endsWith: "@example.com" } }] };
+
 // ─────────────────────────────────────────────────────────────────────────────
 // B — LEARNING ANALYTICS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -17,15 +22,30 @@ router.get("/learning/lectures", async (_req: AuthenticatedRequest, res, next) =
     const courses = await prisma.progress.groupBy({
       by: ["courseSlug", "lectureId"],
       _count: { id: true },
-      where: { status: "COMPLETED" },
+      where: {
+        status: "COMPLETED",
+        user: {
+          ...emailFilter
+        }
+      },
     });
 
     const totalStudentsByCourse = await prisma.progress.groupBy({
       by: ["courseSlug"],
       _count: { userId: true },
+      where: {
+        user: {
+          ...emailFilter
+        }
+      },
     });
 
     const allProgress = await prisma.progress.findMany({
+      where: {
+        user: {
+          ...emailFilter
+        }
+      },
       select: { courseSlug: true, lectureId: true, userId: true, status: true },
     });
 
@@ -33,6 +53,11 @@ router.get("/learning/lectures", async (_req: AuthenticatedRequest, res, next) =
     const revisits = await prisma.lectureProgress.groupBy({
       by: ["courseSlug", "lectureId"],
       _count: { id: true },
+      where: {
+        user: {
+          ...emailFilter
+        }
+      },
     });
 
     // Count distinct users per course
@@ -108,9 +133,19 @@ router.get("/learning/practice", async (_req: AuthenticatedRequest, res, next) =
         select: { id: true, courseId: true, title: true, difficulty: true, estimatedTime: true },
       }),
       prisma.practiceAttempt.findMany({
+        where: {
+          user: {
+            ...emailFilter
+          }
+        },
         select: { exerciseId: true, passed: true, hintUsed: true, timeSpent: true, failureReason: true },
       }),
       prisma.practiceSubmission.findMany({
+        where: {
+          user: {
+            ...emailFilter
+          }
+        },
         select: { courseId: true, lectureId: true, completed: true },
       }),
     ]);
@@ -203,6 +238,11 @@ router.get("/assessments", async (_req: AuthenticatedRequest, res, next) => {
         select: { id: true, category: true, subsection: true, type: true, difficulty: true, correctAnswer: true },
       }),
       prisma.assessmentProgress.findMany({
+        where: {
+          user: {
+            ...emailFilter
+          }
+        },
         select: {
           category: true, subsection: true, score: true, totalQuestions: true,
           attempts: true, status: true, timeTaken: true,
@@ -299,6 +339,11 @@ router.get("/projects", async (_req: AuthenticatedRequest, res, next) => {
   try {
     const [projects, templates] = await Promise.all([
       prisma.project.findMany({
+        where: {
+          user: {
+            ...emailFilter
+          }
+        },
         select: {
           id: true, projectId: true, status: true, startedAt: true, completedAt: true,
           userId: true,
@@ -396,13 +441,24 @@ router.get("/certifications", async (_req: AuthenticatedRequest, res, next) => {
       issuedRecords,
       students,
     ] = await Promise.all([
-      prisma.issuedCertificate.count(),
-      prisma.issuedCertificate.groupBy({ by: ["courseSlug"], _count: { id: true } }),
-      prisma.issuedCertificate.groupBy({ by: ["status"], _count: { id: true } }),
-      prisma.user.count({ where: { role: "student", email: { not: { endsWith: "@test.com" } } } }),
-      prisma.issuedCertificate.findMany({ select: { issuedAt: true, status: true, courseSlug: true } }),
+      prisma.issuedCertificate.count({ where: { user: { ...emailFilter } } }),
+      prisma.issuedCertificate.groupBy({
+        by: ["courseSlug"],
+        _count: { id: true },
+        where: { user: { ...emailFilter } }
+      }),
+      prisma.issuedCertificate.groupBy({
+        by: ["status"],
+        _count: { id: true },
+        where: { user: { ...emailFilter } }
+      }),
+      prisma.user.count({ where: { role: "student", ...emailFilter } }),
+      prisma.issuedCertificate.findMany({
+        where: { user: { ...emailFilter } },
+        select: { issuedAt: true, status: true, courseSlug: true }
+      }),
       prisma.user.findMany({
-        where: { role: "student", email: { not: { endsWith: "@test.com" } } },
+        where: { role: "student", ...emailFilter },
         select: { id: true },
       }),
     ]);
@@ -469,7 +525,10 @@ router.get("/students", async (_req: AuthenticatedRequest, res, next) => {
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
     const students = await prisma.user.findMany({
-      where: { role: "student", email: { not: { endsWith: "@test.com" } } },
+      where: {
+        role: "student",
+        ...emailFilter
+      },
       select: {
         id: true, name: true, email: true, totalXp: true, currentStreak: true,
         status: true, createdAt: true, lastActiveAt: true, overallProgress: true,
@@ -489,7 +548,12 @@ router.get("/students", async (_req: AuthenticatedRequest, res, next) => {
     // Recent activity (within 7 days)
     const recentActivityMap: Record<string, boolean> = {};
     const recentProgress = await prisma.progress.findMany({
-      where: { completedAt: { gte: sevenDaysAgo } },
+      where: {
+        completedAt: { gte: sevenDaysAgo },
+        user: {
+          ...emailFilter
+        }
+      },
       select: { userId: true },
       distinct: ["userId"],
     });
@@ -594,15 +658,15 @@ router.get("/students", async (_req: AuthenticatedRequest, res, next) => {
 router.get("/full-report", async (_req: AuthenticatedRequest, res, next) => {
   try {
     const [students, progress, quizAttempts, submissions, projects, certs, practiceAttempts, practiceSubmissions, assessments] = await Promise.all([
-      prisma.user.count({ where: { role: "student", email: { not: { endsWith: "@test.com" } } } }),
-      prisma.progress.count(),
-      prisma.quizAttempt.count(),
-      prisma.submission.count({ where: { status: "PASSED" } }),
-      prisma.project.count(),
-      prisma.issuedCertificate.count(),
-      prisma.practiceAttempt.count(),
-      prisma.practiceSubmission.count({ where: { completed: true } }),
-      prisma.assessmentProgress.count({ where: { status: "completed" } }),
+      prisma.user.count({ where: { role: "student", ...emailFilter } }),
+      prisma.progress.count({ where: { user: { ...emailFilter } } }),
+      prisma.quizAttempt.count({ where: { user: { ...emailFilter } } }),
+      prisma.submission.count({ where: { status: "PASSED", user: { ...emailFilter } } }),
+      prisma.project.count({ where: { user: { ...emailFilter } } }),
+      prisma.issuedCertificate.count({ where: { user: { ...emailFilter } } }),
+      prisma.practiceAttempt.count({ where: { user: { ...emailFilter } } }),
+      prisma.practiceSubmission.count({ where: { completed: true, user: { ...emailFilter } } }),
+      prisma.assessmentProgress.count({ where: { status: "completed", user: { ...emailFilter } } }),
     ]);
 
     res.json({

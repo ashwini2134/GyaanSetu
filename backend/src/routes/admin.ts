@@ -8,6 +8,11 @@ import { z } from "zod";
 const router = Router();
 router.use(requireAuth, requireRole("admin"));
 
+const isTestEnv = process.env.NODE_ENV === "test";
+const emailFilter = isTestEnv
+  ? { NOT: [{ email: { endsWith: "@test.com" } }] }
+  : { NOT: [{ email: { endsWith: "@test.com" } }, { email: { endsWith: "@example.com" } }] };
+
 router.get("/stats", async (_req: AuthenticatedRequest, res, next) => {
   try {
     const [
@@ -19,13 +24,13 @@ router.get("/stats", async (_req: AuthenticatedRequest, res, next) => {
       pendingProjects,
       totalCertsIssued,
     ] = await Promise.all([
-      prisma.user.count({ where: { role: "student", email: { not: { endsWith: "@test.com" } } } }),
-      prisma.user.count({ where: { role: "student", status: "active", email: { not: { endsWith: "@test.com" } } } }),
+      prisma.user.count({ where: { role: "student", ...emailFilter } }),
+      prisma.user.count({ where: { role: "student", status: "active", ...emailFilter } }),
       prisma.user.count({ where: { role: "admin" } }),
       Promise.resolve(Object.keys(COURSE_LECTURE_COUNTS).length),
-      prisma.project.count({ where: { status: "COMPLETED" } }),
-      prisma.project.count({ where: { status: "PENDING_REVIEW" } }),
-      prisma.issuedCertificate.count(),
+      prisma.project.count({ where: { status: "COMPLETED", user: { ...emailFilter } } }),
+      prisma.project.count({ where: { status: "PENDING_REVIEW", user: { ...emailFilter } } }),
+      prisma.issuedCertificate.count({ where: { user: { ...emailFilter } } }),
     ]);
 
     res.json({ totalStudents, activeStudents, totalAdmins, totalCourses, totalProjects, pendingProjects, totalCertsIssued });
@@ -39,7 +44,10 @@ router.get("/students", async (req: AuthenticatedRequest, res, next) => {
     const sortBy = (req.query.sortBy as string) || "totalXp";
     const sortOrder = (req.query.sortOrder as string) === "asc" ? "asc" as const : "desc" as const;
 
-    const where: any = { role: "student", email: { not: { endsWith: "@test.com" } } };
+    const where: any = {
+      role: "student",
+      ...emailFilter
+    };
     if (status && ["active", "suspended"].includes(status)) where.status = status;
     if (search) {
       where.OR = [
@@ -197,7 +205,7 @@ router.get("/courses/:slug", async (req: AuthenticatedRequest, res, next) => {
     const enrolled = await prisma.user.findMany({
       where: {
         role: "student",
-        email: { not: { endsWith: "@test.com" } },
+        ...emailFilter,
         progress: { some: { courseSlug: slug } },
       },
       select: {
@@ -252,7 +260,13 @@ router.post("/notifications/send", async (req: AuthenticatedRequest, res, next) 
     const { title, body, type, userIds, link } = sendSchema.parse(req.body);
     const targets = userIds
       ? await prisma.user.findMany({ where: { id: { in: userIds } }, select: { id: true } })
-      : await prisma.user.findMany({ where: { role: "student", email: { not: { endsWith: "@test.com" } } }, select: { id: true } });
+      : await prisma.user.findMany({
+          where: {
+            role: "student",
+            ...emailFilter
+          },
+          select: { id: true }
+        });
 
     await prisma.inAppNotification.createMany({
       data: targets.map(u => ({ userId: u.id, type, title, body, link: link || "" })),
@@ -512,7 +526,10 @@ router.get("/certifications/trends", async (_req: AuthenticatedRequest, res, nex
 router.get("/reports/student-growth", async (_req: AuthenticatedRequest, res, next) => {
   try {
     const students = await prisma.user.findMany({
-      where: { role: "student", email: { not: { endsWith: "@test.com" } } },
+      where: {
+        role: "student",
+        ...emailFilter
+      },
       select: { createdAt: true },
       orderBy: { createdAt: "asc" },
     });
@@ -528,13 +545,13 @@ router.get("/reports/student-growth", async (_req: AuthenticatedRequest, res, ne
 router.get("/reports/overview", async (_req: AuthenticatedRequest, res, next) => {
   try {
     const [students, courses, practices, assessments, projects, certs, activeStudents] = await Promise.all([
-      prisma.user.count({ where: { role: "student", email: { not: { endsWith: "@test.com" } } } }),
+      prisma.user.count({ where: { role: "student", ...emailFilter } }),
       Promise.resolve(Object.keys(COURSE_LECTURE_COUNTS).length),
-      prisma.practiceSubmission.count(),
-      prisma.assessmentProgress.count(),
-      prisma.project.count(),
-      prisma.issuedCertificate.count(),
-      prisma.user.count({ where: { role: "student", status: "active", email: { not: { endsWith: "@test.com" } } } }),
+      prisma.practiceSubmission.count({ where: { user: { ...emailFilter } } }),
+      prisma.assessmentProgress.count({ where: { user: { ...emailFilter } } }),
+      prisma.project.count({ where: { user: { ...emailFilter } } }),
+      prisma.issuedCertificate.count({ where: { user: { ...emailFilter } } }),
+      prisma.user.count({ where: { role: "student", status: "active", ...emailFilter } }),
     ]);
     res.json({ totalStudents: students, activeStudents, totalCourses: courses, totalPractices: practices, totalAssessments: assessments, totalProjects: projects, totalCertificates: certs });
   } catch (err) { next(err); }
@@ -546,7 +563,10 @@ router.post("/automations/issue-all-certificates", async (req: AuthenticatedRequ
   try {
     const adminId = req.user!.id;
     const students = await prisma.user.findMany({
-      where: { role: "student", email: { not: { endsWith: "@test.com" } } },
+      where: {
+        role: "student",
+        ...emailFilter
+      },
       select: { id: true, name: true, email: true },
     });
 
@@ -580,7 +600,7 @@ router.post("/automations/suspend-inactive", async (req: AuthenticatedRequest, r
       where: {
         role: "student",
         status: "active",
-        email: { not: { endsWith: "@test.com" } },
+        ...emailFilter,
         lastActiveAt: { lt: cutoff },
       },
       select: { id: true, name: true, email: true, lastActiveAt: true },

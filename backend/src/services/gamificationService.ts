@@ -155,6 +155,11 @@ export function getRankMovement(userId: string, createdAt: Date): string {
   return "—";
 }
 
+const isTestEnv = process.env.NODE_ENV === "test";
+const emailFilter = isTestEnv
+  ? { NOT: [{ email: { endsWith: "@test.com" } }] }
+  : { NOT: [{ email: { endsWith: "@test.com" } }, { email: { endsWith: "@example.com" } }] };
+
 export async function getLeaderboard(currentUserId?: string, timeframe: string = "all-time") {
   const dateLimit = timeframe !== "all-time"
     ? new Date(Date.now() - (timeframe === "weekly" ? 7 : 30) * 24 * 60 * 60 * 1000)
@@ -162,7 +167,8 @@ export async function getLeaderboard(currentUserId?: string, timeframe: string =
 
   const users = await prisma.user.findMany({
     where: {
-      role: "student"
+      role: "student",
+      ...emailFilter
     },
     select: {
       id: true,
