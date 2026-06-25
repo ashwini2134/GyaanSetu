@@ -94,6 +94,14 @@ const AdminSettingsPage = lazy(
   () => import("./pages/AdminSettingsPage")
 );
 
+// ── NEW PHASE 1 ADMIN COMPONENTS ──
+const ContentStudio = lazy(() => import("./pages/admin/ContentStudio"));
+const OperationsMonitor = lazy(() => import("./pages/admin/OperationsMonitor"));
+const Analytics = lazy(() => import("./pages/admin/Analytics"));
+const Settings = lazy(() => import("./pages/admin/Settings"));
+import { AdminRoute } from "./components/admin/AdminRoute";
+import { AdminLayout } from "./components/admin/AdminLayout";
+
 const LandingPage = lazy(
   () => import("./pages/LandingPage")
 );
@@ -323,60 +331,18 @@ export default function App() {
           />
 
           {/* ── Admin: Redirects (legacy routes) ── */}
-          <Route path="admin" element={<Navigate to="/admin/content-studio" replace />} />
-          <Route path="admin/review-queue" element={<Navigate to="/admin/operations-monitor" replace />} />
-          <Route path="admin/students" element={<Navigate to="/admin/analytics" replace />} />
-          <Route path="admin/courses" element={<Navigate to="/admin/content-studio" replace />} />
-          <Route path="admin/notifications" element={<Navigate to="/admin/operations-monitor" replace />} />
-          <Route path="admin/projects" element={<Navigate to="/admin/content-studio" replace />} />
-          <Route path="admin/practice-exercises" element={<Navigate to="/admin/content-studio" replace />} />
-          <Route path="admin/assessments" element={<Navigate to="/admin/content-studio" replace />} />
-          <Route path="admin/certifications" element={<Navigate to="/admin/content-studio" replace />} />
-          <Route path="admin/content" element={<Navigate to="/admin/content-studio" replace />} />
-          <Route path="admin/reports" element={<Navigate to="/admin/analytics" replace />} />
-          <Route path="admin/automations" element={<Navigate to="/admin/operations-monitor" replace />} />
-          <Route path="qa" element={<Navigate to="/admin/operations-monitor" replace />} />
+          <Route path="admin/*" element={<Navigate to="/admin" replace />} />
+          <Route path="qa" element={<Navigate to="/admin/operations" replace />} />
 
-          {/* ── Admin: Content Studio ── */}
-          <Route
-            path="admin/content-studio"
-            element={
-              <RequireRole roles={["admin"]}>
-                <AdminContentStudioPage />
-              </RequireRole>
-            }
-          />
+        </Route>
 
-          {/* ── Admin: Analytics ── */}
-          <Route
-            path="admin/analytics"
-            element={
-              <RequireRole roles={["admin"]}>
-                <AdminReportsPage />
-              </RequireRole>
-            }
-          />
-
-          {/* ── Admin: Operations Monitor ── */}
-          <Route
-            path="admin/operations-monitor"
-            element={
-              <RequireRole roles={["admin"]}>
-                <AdminOperationsMonitorPage />
-              </RequireRole>
-            }
-          />
-
-          {/* ── Admin: Settings ── */}
-          <Route
-            path="admin/settings"
-            element={
-              <RequireRole roles={["admin"]}>
-                <AdminSettingsPage />
-              </RequireRole>
-            }
-          />
-
+        {/* ── NEW PHASE 1 ADMIN ROUTER ── */}
+        <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+          <Route index element={<Navigate to="/admin/content-studio" replace />} />
+          <Route path="content-studio" element={<ContentStudio />} />
+          <Route path="operations" element={<OperationsMonitor />} />
+          <Route path="analytics" element={<Analytics />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
 
         {/* FALLBACK */}
