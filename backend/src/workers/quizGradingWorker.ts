@@ -2,7 +2,7 @@
 import { PrismaClient } from '@prisma/client';
 import { certificateQueue } from '../lib/queue.js';
 
-const prisma = new PrismaClient();
+import { prisma } from "../prisma.js";
 
 export async function processQuizGrading(job: any) {
   const { studentId, quizId, submissionAnswers } = job.data;

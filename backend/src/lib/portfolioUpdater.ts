@@ -1,6 +1,6 @@
 // Fraylon - Phase 2.5 & 3
 import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import { prisma } from "../prisma.js";
 
 export async function updatePortfolio(studentId: string, type: 'courses' | 'projects' | 'certificates', data: any) {
   let portfolio = await prisma.studentPortfolio.findUnique({ where: { studentId } });

@@ -3,7 +3,7 @@ import cron from 'node-cron';
 import { PrismaClient } from '@prisma/client';
 import { notificationQueue } from '../lib/queue.js';
 
-const prisma = new PrismaClient();
+import { prisma } from "../prisma.js";
 
 export function startCronJobs() {
   // Run daily at 9am

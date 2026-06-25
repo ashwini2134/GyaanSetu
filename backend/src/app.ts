@@ -57,8 +57,10 @@ export function createApp() {
   app.use(helmet());
   const allowedOrigins = [
     'http://localhost:5173',
+    'http://localhost:5174',
     'http://localhost:3001',
     'http://127.0.0.1:5173',
+    'http://127.0.0.1:5174',
     'https://lms05.vercel.app',
     process.env.FRONTEND_URL
   ].filter(Boolean) as string[];
@@ -105,12 +107,6 @@ export function createApp() {
   app.use("/api/practice-exercises", practiceExercisesRoutes);
   app.use("/api/assessments", assessmentsRoutes);
   app.use("/api/certifications", certificationsRoutes);
-  app.use("/api/admin", adminRoutes);
-  app.use("/api/admin/content", adminContentRoutes);
-  app.use("/api/admin", adminPracticeExercisesRoutes);
-  app.use("/api/admin", reviewQueueRoutes);
-  app.use("/api/admin/analytics", analyticsRoutes);
-
   // Phase 2.5 & 3 Admin Routes Mount
   app.use("/api/admin/courses", phase3CoursesRoutes);
   app.use("/api/admin", phase3LessonsRoutes);
@@ -120,6 +116,12 @@ export function createApp() {
   app.use("/api/admin", phase3VersionsRoutes);
   app.use("/api/admin", phase3BetaRoutes);
   app.use("/api/admin/operations", phase3OperationsRoutes);
+
+  app.use("/api/admin", adminRoutes);
+  app.use("/api/admin/content", adminContentRoutes);
+  app.use("/api/admin", adminPracticeExercisesRoutes);
+  app.use("/api/admin", reviewQueueRoutes);
+  app.use("/api/admin/analytics", analyticsRoutes);
 
   app.use(errorHandler);
   return app;

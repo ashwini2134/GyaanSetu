@@ -7,7 +7,7 @@ import crypto from 'crypto';
 import { notificationQueue } from '../lib/queue.js';
 import { updatePortfolio } from '../lib/portfolioUpdater.js';
 
-const prisma = new PrismaClient();
+import { prisma } from "../prisma.js";
 
 export async function processCertificate(job: any) {
   const { studentId, courseId } = job.data;

@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { notificationQueue, certificateQueue } from '../lib/queue.js';
 import { updatePortfolio } from '../lib/portfolioUpdater.js';
 
-const prisma = new PrismaClient();
+import { prisma } from "../prisma.js";
 
 export async function processCapstoneReview(job: any) {
   const { submissionId } = job.data;

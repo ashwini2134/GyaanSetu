@@ -1,10 +1,9 @@
 // Fraylon - Phase 2.5 & 3
 import { Router } from "express";
-import { PrismaClient } from "@prisma/client";
 import { requireAuth, requireRole } from "../../middleware/auth.js";
 
 const router = Router({ mergeParams: true });
-const prisma = new PrismaClient();
+import { prisma } from "../../prisma.js";
 
 router.use(requireAuth, requireRole('admin'));
 

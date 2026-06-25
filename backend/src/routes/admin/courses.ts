@@ -1,12 +1,11 @@
 // Fraylon - Phase 2.5 & 3
 import { Router } from "express";
-import { PrismaClient } from "@prisma/client";
 import { requireAuth, requireRole } from "../../middleware/auth.js";
 import multer from 'multer';
 import fs from 'fs';
 
 const router = Router();
-const prisma = new PrismaClient();
+import { prisma } from "../../prisma.js";
 
 const uploadDir = 'uploads/thumbnails/';
 if (!fs.existsSync(uploadDir)) {
