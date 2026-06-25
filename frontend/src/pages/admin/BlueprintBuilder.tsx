@@ -1,14 +1,17 @@
 // Fraylon Admin - Phase 2
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { AdminBreadcrumb } from "../../components/admin/AdminBreadcrumb";
-import { UploadCloud, CheckCircle2, ChevronRight } from "lucide-react";
+import { UploadCloud, CheckCircle2, ChevronRight, Save } from "lucide-react";
 import { authFetch } from "../../authClient";
+import { CourseEditorNav } from "../../components/admin/CourseEditorNav";
 
 export default function BlueprintBuilder() {
+  const { courseId } = useParams();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(!!courseId);
   
   // Form State
   const [title, setTitle] = useState("");
@@ -20,28 +23,64 @@ export default function BlueprintBuilder() {
   const [noPrerequisites, setNoPrerequisites] = useState(false);
   const [thumbnailUrl, setThumbnailUrl] = useState("");
 
+  useEffect(() => {
+    if (courseId) {
+      authFetch<any>(`/admin/courses/${courseId}`).then(course => {
+        setTitle(course.title || "");
+        setDescription(course.description || "");
+        setCategory(course.category || "Web Development");
+        setDifficulty(course.difficulty || "Beginner");
+        setEstimatedDuration(course.estimatedDuration || "");
+        setPrerequisites(course.prerequisites || []);
+        setNoPrerequisites(!course.prerequisites || course.prerequisites.length === 0);
+        setThumbnailUrl(course.thumbnailUrl || "");
+        setIsLoading(false);
+      }).catch(err => {
+        console.error("Failed to fetch blueprint", err);
+        setIsLoading(false);
+      });
+    }
+  }, [courseId]);
+
   const handleSaveDraft = async () => {
     setIsSaving(true);
     try {
-      const course = await authFetch<any>("/admin/courses", {
-        method: "POST",
-        body: JSON.stringify({
-          title, description, category, difficulty, estimatedDuration, prerequisites: noPrerequisites ? [] : prerequisites, thumbnailUrl
-        })
-      });
-      navigate(`/admin/content-studio/${course.id}/lessons`);
+      if (courseId) {
+        await authFetch<any>(`/admin/courses/${courseId}`, {
+          method: "PATCH",
+          body: JSON.stringify({
+            title, description, category, difficulty, estimatedDuration, prerequisites: noPrerequisites ? [] : prerequisites, thumbnailUrl
+          })
+        });
+        alert("Blueprint updated successfully");
+        setIsSaving(false);
+      } else {
+        const course = await authFetch<any>("/admin/courses", {
+          method: "POST",
+          body: JSON.stringify({
+            title, description, category, difficulty, estimatedDuration, prerequisites: noPrerequisites ? [] : prerequisites, thumbnailUrl
+          })
+        });
+        navigate(`/admin/content-studio/${course.id}/lessons`);
+      }
     } catch (err: any) {
       alert("Failed to save: " + err.message);
       setIsSaving(false);
     }
   };
 
+  if (isLoading) {
+    return <div className="p-8 text-slate-400">Loading blueprint...</div>;
+  }
+
   return (
-    <div className="p-8 max-w-4xl mx-auto pb-24">
-      <AdminBreadcrumb items={[
-        { label: "Content Studio", path: "/admin/content-studio" },
-        { label: "New Course Blueprint" }
-      ]} />
+    <div className="flex flex-col h-full bg-[#0a0f1e] overflow-auto">
+      {courseId && <CourseEditorNav courseId={courseId} />}
+      <div className="p-8 max-w-4xl mx-auto pb-24 w-full">
+        <AdminBreadcrumb items={[
+          { label: "Content Studio", path: "/admin/content-studio" },
+          { label: courseId ? "Edit Course Blueprint" : "New Course Blueprint" }
+        ]} />
 
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-100 tracking-tight">Course Blueprint</h1>
@@ -247,13 +286,15 @@ export default function BlueprintBuilder() {
         ) : (
           <button 
             onClick={handleSaveDraft}
-            className="px-6 py-2.5 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-2"
+            disabled={isSaving}
+            className="px-6 py-2.5 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50"
           >
-            Save as Draft
-            <ChevronRight className="w-4 h-4" />
+            {isSaving ? "Saving..." : courseId ? "Save Changes" : "Save as Draft"}
+            {courseId ? <Save className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
           </button>
         )}
       </div>
     </div>
+  </div>
   );
 }

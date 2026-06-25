@@ -343,6 +343,7 @@ export default function App() {
             <Route index element={<Navigate to="content-studio" replace />} />
             <Route path="content-studio" element={<ContentStudio />} />
             <Route path="content-studio/new" element={<BlueprintBuilder />} />
+            <Route path="content-studio/:courseId/blueprint" element={<BlueprintBuilder />} />
             <Route path="content-studio/:courseId/lessons" element={<LessonEditor />} />
             <Route path="content-studio/:courseId/quiz" element={<QuizBuilder />} />
             <Route path="content-studio/:courseId/project" element={<ProjectBuilder />} />

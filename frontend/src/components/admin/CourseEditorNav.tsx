@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 
 export function CourseEditorNav({ courseId }: { courseId: string }) {
   const tabs = [
+    { label: "Blueprint", path: `/admin/content-studio/${courseId}/blueprint` },
     { label: "Lessons", path: `/admin/content-studio/${courseId}/lessons` },
     { label: "Quiz", path: `/admin/content-studio/${courseId}/quiz` },
     { label: "Project", path: `/admin/content-studio/${courseId}/project` },

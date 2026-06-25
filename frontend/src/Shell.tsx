@@ -385,7 +385,7 @@ export default function Shell() {
                     <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>Course Creation</span>
                   </NavLink>
 
-                  <NavLink to="/admin/content-studio/new" onClick={() => setSidebarOpen(false)}
+                  <NavLink to={adminCourseId === "draft" ? "/admin/content-studio/new" : `/admin/content-studio/${adminCourseId}/blueprint`} onClick={() => setSidebarOpen(false)}
                     className={({ isActive }) => `${subLinkBase} ${isActive ? subLinkActive : subLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
                     title="Blueprint Builder">
                     <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><FileText size={16} /></span>
