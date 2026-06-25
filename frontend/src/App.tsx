@@ -100,6 +100,8 @@ const BlueprintBuilder = lazy(() => import("./pages/admin/BlueprintBuilder"));
 const LessonEditor = lazy(() => import("./pages/admin/LessonEditor"));
 const QuizBuilder = lazy(() => import("./pages/admin/QuizBuilder"));
 const ProjectBuilder = lazy(() => import("./pages/admin/ProjectBuilder"));
+const ExerciseBuilder = lazy(() => import("./pages/admin/ExerciseBuilder"));
+const CoursePublishing = lazy(() => import("./pages/admin/CoursePublishing"));
 const VersionHistory = lazy(() => import("./pages/admin/VersionHistory"));
 const BetaTesting = lazy(() => import("./pages/admin/BetaTesting"));
 const OperationsMonitor = lazy(() => import("./pages/admin/OperationsMonitor"));
@@ -345,8 +347,10 @@ export default function App() {
             <Route path="content-studio/new" element={<BlueprintBuilder />} />
             <Route path="content-studio/:courseId/blueprint" element={<BlueprintBuilder />} />
             <Route path="content-studio/:courseId/lessons" element={<LessonEditor />} />
+            <Route path="content-studio/:courseId/exercise" element={<ExerciseBuilder />} />
             <Route path="content-studio/:courseId/quiz" element={<QuizBuilder />} />
             <Route path="content-studio/:courseId/project" element={<ProjectBuilder />} />
+            <Route path="content-studio/:courseId/publish" element={<CoursePublishing />} />
             <Route path="content-studio/:courseId/versions" element={<VersionHistory />} />
             <Route path="content-studio/:courseId/beta" element={<BetaTesting />} />
             <Route path="operations" element={<OperationsMonitor />} />

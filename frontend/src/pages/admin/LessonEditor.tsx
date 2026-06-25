@@ -4,7 +4,6 @@ import { useParams } from "react-router-dom";
 import { AdminBreadcrumb } from "../../components/admin/AdminBreadcrumb";
 import { CourseEditorNav } from "../../components/admin/CourseEditorNav";
 import { RichTextEditor } from "../../components/admin/RichTextEditor";
-import { ExerciseBuilder } from "../../components/admin/ExerciseBuilder";
 import { GripVertical, Plus, Settings, PlayCircle, BookOpen, LayoutTemplate, Dumbbell, Save, Trash2 } from "lucide-react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
@@ -43,7 +42,6 @@ export default function LessonEditor() {
   
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [activeLessonId, setActiveLessonId] = useState<string>('');
-  const [isExerciseBuilderOpen, setIsExerciseBuilderOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -181,11 +179,11 @@ export default function LessonEditor() {
                 <h2 className="text-lg font-bold text-slate-100">Lesson Details</h2>
                 <div className="flex items-center gap-3">
                   <button 
-                    onClick={() => setIsExerciseBuilderOpen(true)}
+                    onClick={() => window.location.href = `/admin/content-studio/${courseId}/exercise`}
                     className="flex items-center gap-2 px-4 py-2 bg-[#0f172a] border border-white/10 rounded-lg text-sm font-medium text-blue-400 hover:bg-blue-900/30 transition-colors"
                   >
                     <Dumbbell className="w-4 h-4" />
-                    Add Exercise
+                    Manage Exercises
                   </button>
                   <button 
                     onClick={saveActiveLesson}
@@ -254,11 +252,6 @@ export default function LessonEditor() {
           )}
         </div>
       </div>
-      
-      <ExerciseBuilder 
-        isOpen={isExerciseBuilderOpen} 
-        onClose={() => setIsExerciseBuilderOpen(false)} 
-      />
     </div>
   );
 }

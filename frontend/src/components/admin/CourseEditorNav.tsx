@@ -5,8 +5,10 @@ export function CourseEditorNav({ courseId }: { courseId: string }) {
   const tabs = [
     { label: "Blueprint", path: `/admin/content-studio/${courseId}/blueprint` },
     { label: "Lessons", path: `/admin/content-studio/${courseId}/lessons` },
+    { label: "Exercises", path: `/admin/content-studio/${courseId}/exercise` },
     { label: "Quiz", path: `/admin/content-studio/${courseId}/quiz` },
     { label: "Project", path: `/admin/content-studio/${courseId}/project` },
+    { label: "Publish", path: `/admin/content-studio/${courseId}/publish` },
     { label: "Versions", path: `/admin/content-studio/${courseId}/versions` },
     { label: "Beta", path: `/admin/content-studio/${courseId}/beta` },
   ];
