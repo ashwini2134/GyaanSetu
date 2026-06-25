@@ -5,7 +5,7 @@ import { AdminBreadcrumb } from "../../components/admin/AdminBreadcrumb";
 import { CourseEditorNav } from "../../components/admin/CourseEditorNav";
 import { RichTextEditor } from "../../components/admin/RichTextEditor";
 import { ExerciseBuilder } from "../../components/admin/ExerciseBuilder";
-import { GripVertical, Plus, Settings, PlayCircle, BookOpen, LayoutTemplate, Dumbbell, Save } from "lucide-react";
+import { GripVertical, Plus, Settings, PlayCircle, BookOpen, LayoutTemplate, Dumbbell, Save, Trash2 } from "lucide-react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -115,6 +115,19 @@ export default function LessonEditor() {
     }
   };
 
+  const deleteActiveLesson = async () => {
+    if (!activeLesson) return;
+    if (!confirm(`Are you sure you want to delete "${activeLesson.title}"? This cannot be undone.`)) return;
+    try {
+      await authFetch(`/admin/lessons/${activeLesson.id}`, { method: 'DELETE' });
+      const newLessons = lessons.filter(l => l.id !== activeLesson.id);
+      setLessons(newLessons);
+      setActiveLessonId(newLessons.length > 0 ? newLessons[0].id : '');
+    } catch (err: any) {
+      alert("Failed to delete lesson: " + err.message);
+    }
+  };
+
   return (
     <div className="flex flex-col h-[calc(100vh-2rem)]">
       <div className="p-8 pb-0 shrink-0">
@@ -181,6 +194,13 @@ export default function LessonEditor() {
                   >
                     <Save className="w-4 h-4" />
                     {isSaving ? "Saving..." : "Save Lesson"}
+                  </button>
+                  <button 
+                    onClick={deleteActiveLesson}
+                    className="flex items-center gap-2 px-3 py-2 bg-white border border-red-200 text-red-600 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
+                    title="Delete Lesson"
+                  >
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>

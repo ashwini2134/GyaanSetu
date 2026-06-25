@@ -1,6 +1,6 @@
 // Fraylon Admin - Phase 2
 import { useState } from "react";
-import { X, Code, CheckSquare, AlignLeft, Plus, Trash2 } from "lucide-react";
+import { X, Code, CheckSquare, AlignLeft, Plus, Trash2, Eye, Edit3 } from "lucide-react";
 import { authFetch } from "../../authClient";
 
 export function ExerciseBuilder({ isOpen, onClose, lessonId }: { isOpen: boolean, onClose: () => void, lessonId?: string }) {
@@ -8,6 +8,8 @@ export function ExerciseBuilder({ isOpen, onClose, lessonId }: { isOpen: boolean
   const [question, setQuestion] = useState('');
   const [options, setOptions] = useState(['', '']);
   const [correctOption, setCorrectOption] = useState(0);
+  const [attemptsAllowed, setAttemptsAllowed] = useState(3);
+  const [previewMode, setPreviewMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   if (!isOpen) return null;
@@ -26,6 +28,7 @@ export function ExerciseBuilder({ isOpen, onClose, lessonId }: { isOpen: boolean
           type: type.toUpperCase(),
           content: question,
           points: 10,
+          attemptsAllowed,
           validationRules: type === 'mcq' ? { options, correctOption } : {}
         })
       });
@@ -42,14 +45,51 @@ export function ExerciseBuilder({ isOpen, onClose, lessonId }: { isOpen: boolean
     <div className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-50 flex justify-end">
       <div className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
         <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-          <h3 className="font-semibold text-lg text-slate-900">Add Exercise</h3>
+          <div className="flex items-center gap-4">
+            <h3 className="font-semibold text-lg text-slate-900">Add Exercise</h3>
+            <button 
+              onClick={() => setPreviewMode(!previewMode)}
+              className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              {previewMode ? <Edit3 className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {previewMode ? "Edit" : "Preview"}
+            </button>
+          </div>
           <button onClick={onClose} className="p-2 text-slate-400 hover:bg-slate-100 rounded-lg transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          <div>
+          {previewMode ? (
+            <div className="space-y-6 bg-slate-50 p-6 rounded-xl border border-slate-200">
+              <div className="mb-4">
+                <span className="inline-block bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded mb-3 uppercase">{type} Exercise</span>
+                <p className="text-slate-900 font-medium whitespace-pre-wrap">{question || "Question prompt will appear here."}</p>
+              </div>
+              
+              {type === 'mcq' && (
+                <div className="space-y-3">
+                  {options.map((opt, i) => (
+                    <label key={i} className="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-not-allowed bg-white">
+                      <input type="radio" disabled className="w-4 h-4" />
+                      <span className="text-sm text-slate-700">{opt || `Option ${i + 1}`}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+              {type === 'coding' && (
+                <div className="bg-slate-900 rounded-lg p-4 font-mono text-sm text-slate-300">
+                  // Student code editor placeholder
+                </div>
+              )}
+              {type === 'text' && (
+                <textarea disabled className="w-full border border-slate-200 rounded-lg p-3 bg-white" placeholder="Student will type their answer here..."></textarea>
+              )}
+            </div>
+          ) : (
+            <>
+              <div>
             <label className="block text-sm font-medium text-slate-700 mb-3">Exercise Type</label>
             <div className="grid grid-cols-3 gap-3">
               <button 
@@ -146,6 +186,15 @@ export function ExerciseBuilder({ isOpen, onClose, lessonId }: { isOpen: boolean
           )}
 
           <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Attempts Allowed</label>
+            <input 
+              type="number" 
+              value={attemptsAllowed}
+              onChange={(e) => setAttemptsAllowed(Number(e.target.value))}
+              min="1"
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+            />
+            
             <label className="block text-sm font-medium text-slate-700 mb-2">Hints (Optional)</label>
             <input 
               type="text" 
@@ -153,6 +202,8 @@ export function ExerciseBuilder({ isOpen, onClose, lessonId }: { isOpen: boolean
               className="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+            </>
+          )}
         </div>
 
         <div className="p-4 border-t border-slate-200 bg-slate-50">

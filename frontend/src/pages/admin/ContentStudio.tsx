@@ -38,6 +38,24 @@ export default function ContentStudio() {
     }
   };
 
+  const handleArchive = async (courseId: string) => {
+    if (!confirm("Are you sure you want to archive this course?")) return;
+    try {
+      await authFetch(`/admin/courses/${courseId}/archive`, { method: "PATCH" });
+      setCourses(courses.map(c => c.id === courseId ? { ...c, status: "ARCHIVED" } : c));
+    } catch (err: any) {
+      try {
+        await authFetch(`/admin/courses/${courseId}/status`, { 
+          method: "PATCH",
+          body: JSON.stringify({ status: "ARCHIVED" })
+        });
+        setCourses(courses.map(c => c.id === courseId ? { ...c, status: "ARCHIVED" } : c));
+      } catch (e: any) {
+        alert("Error archiving course: " + e.message);
+      }
+    }
+  };
+
   return (
     <div className="p-8 max-w-7xl mx-auto h-[calc(100vh-2rem)] flex flex-col">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 shrink-0">
@@ -106,6 +124,7 @@ export default function ContentStudio() {
                   <th className="px-6 py-4">Course</th>
                   <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4">Lessons</th>
+                  <th className="px-6 py-4">Students</th>
                   <th className="px-6 py-4">Created Date</th>
                   <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
@@ -140,6 +159,9 @@ export default function ContentStudio() {
                     <td className="px-6 py-4">
                       <span className="text-slate-300 font-medium">{course._count?.lessons || 0}</span>
                     </td>
+                    <td className="px-6 py-4">
+                      <span className="text-slate-300 font-medium">{course.studentsEnrolled || 0}</span>
+                    </td>
                     <td className="px-6 py-4 text-slate-400">
                       {new Date(course.createdAt).toLocaleDateString()}
                     </td>
@@ -157,6 +179,14 @@ export default function ContentStudio() {
                             className="text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors"
                           >
                             Publish
+                          </button>
+                        )}
+                        {course.status !== 'ARCHIVED' && (
+                          <button 
+                            onClick={() => handleArchive(course.id)}
+                            className="text-sm font-medium text-amber-400 hover:text-amber-300 transition-colors"
+                          >
+                            Archive
                           </button>
                         )}
                         <button className="text-slate-500 hover:text-slate-300 transition-colors">

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { AdminBreadcrumb } from "../../components/admin/AdminBreadcrumb";
 import { CourseEditorNav } from "../../components/admin/CourseEditorNav";
-import { Plus, GripVertical, Settings2, Trash2 } from "lucide-react";
+import { Plus, GripVertical, Settings2, Trash2, ChevronDown } from "lucide-react";
 import { authFetch } from "../../authClient";
 
 export default function QuizBuilder() {
@@ -14,6 +14,7 @@ export default function QuizBuilder() {
   const [maxAttempts, setMaxAttempts] = useState(3);
   const [shuffle, setShuffle] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showQuestionTypes, setShowQuestionTypes] = useState(false);
 
   useEffect(() => {
     if (!courseId) return;
@@ -45,13 +46,26 @@ export default function QuizBuilder() {
     }
   };
 
-  const addQuestion = async () => {
+  const addQuestion = async (qType: string) => {
     try {
+      let body: any = { type: qType, question: "New Question" };
+      if (qType === "mcq") {
+        body.options = ["Option 1", "Option 2"];
+        body.correctAnswer = "Option 1";
+      } else if (qType === "tf") {
+        body.options = ["True", "False"];
+        body.correctAnswer = "True";
+      } else if (qType === "short") {
+        body.options = [];
+        body.correctAnswer = "";
+      }
+      
       const q = await authFetch(`/admin/courses/${courseId}/quiz/questions`, {
         method: 'POST',
-        body: JSON.stringify({ type: "mcq", question: "New Question", options: ["Option 1", "Option 2"], correctAnswer: "Option 1" })
+        body: JSON.stringify(body)
       });
       setQuestions([...questions, q]);
+      setShowQuestionTypes(false);
     } catch (err: any) {
       alert('Failed to add question. Please save quiz settings first.');
     }
@@ -94,13 +108,23 @@ export default function QuizBuilder() {
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
               <h3 className="font-semibold text-slate-900">Questions ({questions.length})</h3>
-              <button 
-                onClick={addQuestion}
-                className="flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                Add Question
-              </button>
+              <div className="relative">
+                <button 
+                  onClick={() => setShowQuestionTypes(!showQuestionTypes)}
+                  className="flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Question
+                  <ChevronDown className="w-4 h-4 ml-1" />
+                </button>
+                {showQuestionTypes && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-200 shadow-xl rounded-lg overflow-hidden z-20">
+                    <button onClick={() => addQuestion('mcq')} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">Multiple Choice</button>
+                    <button onClick={() => addQuestion('tf')} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors border-t border-slate-100">True / False</button>
+                    <button onClick={() => addQuestion('short')} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors border-t border-slate-100">Short Answer</button>
+                  </div>
+                )}
+              </div>
             </div>
             <div className="divide-y divide-slate-100">
               {questions.map((q, index) => (
@@ -125,12 +149,16 @@ export default function QuizBuilder() {
                       </div>
                     </div>
                     <div className="space-y-2 pl-12">
-                      {q.options && q.options.map((opt: string, i: number) => (
-                        <div key={i} className="flex items-center gap-3">
-                          <input type="radio" checked={q.correctAnswer === opt} readOnly className="text-emerald-500 focus:ring-emerald-500 w-4 h-4" />
-                          <span className={`text-sm ${q.correctAnswer === opt ? 'text-emerald-700 font-medium' : 'text-slate-600'}`}>{opt}</span>
-                        </div>
-                      ))}
+                      {q.type === 'short' ? (
+                        <div className="text-sm text-slate-500 italic bg-slate-50 p-3 rounded-lg border border-slate-200">Short answer question. Student types response.</div>
+                      ) : (
+                        q.options && q.options.map((opt: string, i: number) => (
+                          <div key={i} className="flex items-center gap-3">
+                            <input type="radio" checked={q.correctAnswer === opt} readOnly className="text-emerald-500 focus:ring-emerald-500 w-4 h-4" />
+                            <span className={`text-sm ${q.correctAnswer === opt ? 'text-emerald-700 font-medium' : 'text-slate-600'}`}>{opt}</span>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
                 </div>

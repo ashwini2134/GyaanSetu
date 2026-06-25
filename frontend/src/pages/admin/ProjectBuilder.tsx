@@ -18,6 +18,9 @@ export default function ProjectBuilder() {
     { criteria: "Code Quality", points: 20 },
     { criteria: "Functionality", points: 50 },
   ]);
+  const [maxFileSize, setMaxFileSize] = useState(10);
+  const [allowedFormats, setAllowedFormats] = useState(".zip, .rar");
+  const [requiredKeywords, setRequiredKeywords] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -34,6 +37,11 @@ export default function ProjectBuilder() {
           if (p.rubric && Array.isArray(p.rubric) && p.rubric.length > 0) {
             setRubric(p.rubric);
           }
+          if (p.validationRules) {
+            setMaxFileSize(p.validationRules.maxFileSize || 10);
+            setAllowedFormats(p.validationRules.allowedFormats || ".zip, .rar");
+            setRequiredKeywords(p.validationRules.requiredKeywords || "");
+          }
         }
       })
       .catch(console.error);
@@ -42,15 +50,16 @@ export default function ProjectBuilder() {
   const saveProject = async () => {
     setIsSaving(true);
     try {
+      const validationRules = { maxFileSize, allowedFormats, requiredKeywords };
       if (projectId) {
         await authFetch(`/admin/projects/${projectId}`, {
           method: 'PATCH',
-          body: JSON.stringify({ title, description: content, submissionType, isCapstone, rubric })
+          body: JSON.stringify({ title, description: content, submissionType, isCapstone, rubric, validationRules })
         });
       } else {
         const newProj = await authFetch<any>(`/admin/courses/${courseId}/projects`, {
           method: 'POST',
-          body: JSON.stringify({ title, description: content, submissionType, isCapstone, rubric })
+          body: JSON.stringify({ title, description: content, submissionType, isCapstone, rubric, validationRules })
         });
         setProjectId(newProj.id);
       }
@@ -159,6 +168,43 @@ export default function ProjectBuilder() {
             <div className="mt-6 pt-6 border-t border-slate-100 flex justify-between items-center font-medium text-slate-900">
               <span>Total Points:</span>
               <span>{rubric.reduce((acc, curr) => acc + curr.points, 0)}</span>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mt-8">
+            <h2 className="text-lg font-bold text-slate-900 mb-4 border-b border-slate-100 pb-2">Validation Rules</h2>
+            <p className="text-sm text-slate-500 mb-6">Set rules that submissions must pass before being graded.</p>
+
+            <div className="grid grid-cols-2 gap-6 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Max File Size (MB)</label>
+                <input 
+                  type="number" 
+                  value={maxFileSize}
+                  onChange={(e) => setMaxFileSize(Number(e.target.value))}
+                  className="w-full border border-slate-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Allowed Formats</label>
+                <input 
+                  type="text" 
+                  value={allowedFormats}
+                  onChange={(e) => setAllowedFormats(e.target.value)}
+                  placeholder=".zip, .pdf"
+                  className="w-full border border-slate-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500" 
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Required Keywords (comma separated)</label>
+              <input 
+                type="text" 
+                value={requiredKeywords}
+                onChange={(e) => setRequiredKeywords(e.target.value)}
+                placeholder="React, useState, useEffect"
+                className="w-full border border-slate-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500" 
+              />
             </div>
           </div>
         </div>
