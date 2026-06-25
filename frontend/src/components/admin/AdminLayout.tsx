@@ -14,7 +14,7 @@ export function AdminLayout() {
   ];
 
   return (
-    <div className="flex h-screen bg-slate-50 text-slate-900 font-sans overflow-hidden">
+    <div className="flex h-screen bg-[#0a0f1e] text-slate-100 font-sans overflow-hidden">
       {/* Sidebar */}
       <aside className="w-16 md:w-64 bg-slate-900 text-slate-300 flex flex-col justify-between shrink-0 transition-all duration-300 shadow-xl z-10">
         <div>
@@ -50,7 +50,7 @@ export function AdminLayout() {
         <div className="p-4 border-t border-slate-800 space-y-4">
           <div className="hidden md:flex flex-col px-3">
             <span className="text-sm text-slate-100 font-medium truncate">{user?.name}</span>
-            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{user?.role}</span>
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{user?.role}</span>
           </div>
           
           <button
@@ -65,7 +65,7 @@ export function AdminLayout() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-auto bg-slate-50 w-full relative">
+      <main className="flex-1 overflow-auto bg-[#0a0f1e] w-full relative">
         <Outlet />
       </main>
     </div>

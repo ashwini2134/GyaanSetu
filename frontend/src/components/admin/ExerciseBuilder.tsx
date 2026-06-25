@@ -43,37 +43,37 @@ export function ExerciseBuilder({ isOpen, onClose, lessonId }: { isOpen: boolean
 
   return (
     <div className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-50 flex justify-end">
-      <div className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
-        <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+      <div className="w-full max-w-md bg-[#0f172a] h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
+        <div className="p-4 border-b border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h3 className="font-semibold text-lg text-slate-900">Add Exercise</h3>
+            <h3 className="font-semibold text-lg text-slate-100">Add Exercise</h3>
             <button 
               onClick={() => setPreviewMode(!previewMode)}
-              className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 text-sm font-medium text-slate-400 hover:text-slate-300 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-colors"
             >
               {previewMode ? <Edit3 className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               {previewMode ? "Edit" : "Preview"}
             </button>
           </div>
-          <button onClick={onClose} className="p-2 text-slate-400 hover:bg-slate-100 rounded-lg transition-colors">
+          <button onClick={onClose} className="p-2 text-slate-400 hover:bg-white/10 rounded-lg transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {previewMode ? (
-            <div className="space-y-6 bg-slate-50 p-6 rounded-xl border border-slate-200">
+            <div className="space-y-6 bg-[#0a0f1e] p-6 rounded-xl border border-white/10">
               <div className="mb-4">
                 <span className="inline-block bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded mb-3 uppercase">{type} Exercise</span>
-                <p className="text-slate-900 font-medium whitespace-pre-wrap">{question || "Question prompt will appear here."}</p>
+                <p className="text-slate-100 font-medium whitespace-pre-wrap">{question || "Question prompt will appear here."}</p>
               </div>
               
               {type === 'mcq' && (
                 <div className="space-y-3">
                   {options.map((opt, i) => (
-                    <label key={i} className="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-not-allowed bg-white">
+                    <label key={i} className="flex items-center gap-3 p-3 border border-white/10 rounded-lg cursor-not-allowed bg-[#0f172a]">
                       <input type="radio" disabled className="w-4 h-4" />
-                      <span className="text-sm text-slate-700">{opt || `Option ${i + 1}`}</span>
+                      <span className="text-sm text-slate-300">{opt || `Option ${i + 1}`}</span>
                     </label>
                   ))}
                 </div>
@@ -84,31 +84,31 @@ export function ExerciseBuilder({ isOpen, onClose, lessonId }: { isOpen: boolean
                 </div>
               )}
               {type === 'text' && (
-                <textarea disabled className="w-full border border-slate-200 rounded-lg p-3 bg-white" placeholder="Student will type their answer here..."></textarea>
+                <textarea disabled className="w-full border border-white/10 rounded-lg p-3 bg-[#0f172a]" placeholder="Student will type their answer here..."></textarea>
               )}
             </div>
           ) : (
             <>
               <div>
-            <label className="block text-sm font-medium text-slate-700 mb-3">Exercise Type</label>
+            <label className="block text-sm font-medium text-slate-300 mb-3">Exercise Type</label>
             <div className="grid grid-cols-3 gap-3">
               <button 
                 onClick={() => setType('mcq')}
-                className={`flex flex-col items-center justify-center p-3 rounded-xl border ${type === 'mcq' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 hover:border-slate-300 text-slate-600'}`}
+                className={`flex flex-col items-center justify-center p-3 rounded-xl border ${type === 'mcq' ? 'border-blue-600 bg-blue-900/30 text-blue-400' : 'border-white/10 hover:border-white/10 text-slate-300'}`}
               >
                 <CheckSquare className="w-5 h-5 mb-1" />
                 <span className="text-xs font-medium">MCQ</span>
               </button>
               <button 
                 onClick={() => setType('coding')}
-                className={`flex flex-col items-center justify-center p-3 rounded-xl border ${type === 'coding' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 hover:border-slate-300 text-slate-600'}`}
+                className={`flex flex-col items-center justify-center p-3 rounded-xl border ${type === 'coding' ? 'border-blue-600 bg-blue-900/30 text-blue-400' : 'border-white/10 hover:border-white/10 text-slate-300'}`}
               >
                 <Code className="w-5 h-5 mb-1" />
                 <span className="text-xs font-medium">Coding</span>
               </button>
               <button 
                 onClick={() => setType('text')}
-                className={`flex flex-col items-center justify-center p-3 rounded-xl border ${type === 'text' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 hover:border-slate-300 text-slate-600'}`}
+                className={`flex flex-col items-center justify-center p-3 rounded-xl border ${type === 'text' ? 'border-blue-600 bg-blue-900/30 text-blue-400' : 'border-white/10 hover:border-white/10 text-slate-300'}`}
               >
                 <AlignLeft className="w-5 h-5 mb-1" />
                 <span className="text-xs font-medium">Short Text</span>
@@ -117,18 +117,18 @@ export function ExerciseBuilder({ isOpen, onClose, lessonId }: { isOpen: boolean
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Question Prompt</label>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Question Prompt</label>
             <textarea 
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               placeholder="Enter your question here..."
-              className="w-full border border-slate-300 rounded-lg p-3 min-h-[100px] outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-white/10 rounded-lg p-3 min-h-[100px] outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           {type === 'mcq' && (
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-3">Options & Correct Answer</label>
+              <label className="block text-sm font-medium text-slate-300 mb-3">Options & Correct Answer</label>
               <div className="space-y-3">
                 {options.map((opt, i) => (
                   <div key={i} className="flex items-center gap-3">
@@ -148,7 +148,7 @@ export function ExerciseBuilder({ isOpen, onClose, lessonId }: { isOpen: boolean
                         setOptions(newOps);
                       }}
                       placeholder={`Option ${i + 1}`}
-                      className={`flex-1 border rounded-lg px-3 py-2 outline-none focus:ring-2 ${correctOption === i ? 'border-emerald-500 focus:ring-emerald-500 bg-emerald-50/30' : 'border-slate-300 focus:ring-blue-500'}`}
+                      className={`flex-1 border rounded-lg px-3 py-2 outline-none focus:ring-2 ${correctOption === i ? 'border-emerald-500 focus:ring-emerald-500 bg-emerald-900/30/30' : 'border-white/10 focus:ring-blue-500'}`}
                     />
                     {options.length > 2 && (
                       <button 
@@ -167,7 +167,7 @@ export function ExerciseBuilder({ isOpen, onClose, lessonId }: { isOpen: boolean
               </div>
               <button 
                 onClick={() => setOptions([...options, ''])}
-                className="mt-4 flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700"
+                className="mt-4 flex items-center gap-1.5 text-sm font-medium text-blue-400 hover:text-blue-400"
               >
                 <Plus className="w-4 h-4" />
                 Add Option
@@ -177,36 +177,36 @@ export function ExerciseBuilder({ isOpen, onClose, lessonId }: { isOpen: boolean
 
           {type === 'coding' && (
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Validation Logic (JSON / Tests)</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Validation Logic (JSON / Tests)</label>
               <textarea 
                 placeholder="[{ input: '...', expectedOutput: '...' }]"
-                className="w-full border border-slate-300 rounded-lg p-3 min-h-[150px] font-mono text-sm bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-white/10 rounded-lg p-3 min-h-[150px] font-mono text-sm bg-[#0a0f1e] outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Attempts Allowed</label>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Attempts Allowed</label>
             <input 
               type="number" 
               value={attemptsAllowed}
               onChange={(e) => setAttemptsAllowed(Number(e.target.value))}
               min="1"
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+              className="w-full border border-white/10 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 mb-4"
             />
             
-            <label className="block text-sm font-medium text-slate-700 mb-2">Hints (Optional)</label>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Hints (Optional)</label>
             <input 
               type="text" 
               placeholder="Provide a hint if they fail"
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-white/10 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
             </>
           )}
         </div>
 
-        <div className="p-4 border-t border-slate-200 bg-slate-50">
+        <div className="p-4 border-t border-white/10 bg-[#0a0f1e]">
           <button 
             onClick={handleSave}
             disabled={isSaving}

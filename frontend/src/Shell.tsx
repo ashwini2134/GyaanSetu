@@ -43,13 +43,13 @@ function Logo({ expanded }: { expanded: boolean }) {
 }
 
 const navLinkBase =
-  "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 border";
+  "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 border-l-2";
 
 const navLinkActive =
-  "bg-blue-600/15 text-blue-300 border-blue-500/30 shadow-sm";
+  "bg-blue-600/15 text-white border-l-blue-500 shadow-sm";
 
 const navLinkInactive =
-  "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border-transparent hover:border-slate-700/50";
+  "text-white/75 hover:bg-white/5 hover:text-white border-transparent";
 
 const subLinkBase =
   "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 border";
@@ -276,8 +276,8 @@ export default function Shell() {
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           className={`fixed inset-y-0 left-0 md:relative md:inset-auto
-          flex-shrink-0 flex flex-col border-r border-slate-700/50
-          bg-slate-900/95 backdrop-blur-sm transition-all duration-200 ease-in-out
+          flex-shrink-0 flex flex-col border-r border-white/10
+          bg-[#0f172a] backdrop-blur-sm transition-all duration-200 ease-in-out
           z-40
           ${expanded ? "w-64" : "w-16"}
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}

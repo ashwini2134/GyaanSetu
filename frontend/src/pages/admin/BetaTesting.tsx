@@ -62,11 +62,11 @@ export default function BetaTesting() {
         ]} />
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Beta Testing</h1>
-            <p className="text-slate-500 mt-1">Invite users to test your course before public launch.</p>
+            <h1 className="text-2xl font-bold text-slate-100">Beta Testing</h1>
+            <p className="text-slate-400 mt-1">Invite users to test your course before public launch.</p>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-sm font-medium text-slate-600">Beta Mode:</span>
+            <span className="text-sm font-medium text-slate-300">Beta Mode:</span>
             <label className="relative inline-flex items-center cursor-pointer">
               <input 
                 type="checkbox" 
@@ -74,7 +74,7 @@ export default function BetaTesting() {
                 checked={betaActive}
                 onChange={toggleBeta}
               />
-              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#0f172a] after:border-white/10 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
             </label>
           </div>
         </div>
@@ -82,28 +82,28 @@ export default function BetaTesting() {
 
       <CourseEditorNav courseId={courseId || "draft"} />
 
-      <div className="flex-1 overflow-y-auto p-8 bg-slate-50">
+      <div className="flex-1 overflow-y-auto p-8 bg-[#0a0f1e]">
         <div className="max-w-5xl mx-auto space-y-8 pb-24">
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+            <div className="bg-[#0f172a] p-6 rounded-xl border border-white/10 shadow-sm">
               <div className="flex items-center gap-4 mb-2">
-                <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-blue-100 text-blue-400 rounded-lg flex items-center justify-center">
                   <Users className="w-5 h-5" />
                 </div>
-                <h3 className="font-semibold text-slate-900">Active Testers</h3>
+                <h3 className="font-semibold text-slate-100">Active Testers</h3>
               </div>
-              <p className="text-3xl font-bold text-slate-900 ml-14">{testers.length}</p>
+              <p className="text-3xl font-bold text-slate-100 ml-14">{testers.length}</p>
             </div>
             
-            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm md:col-span-2 flex items-center justify-between">
+            <div className="bg-[#0f172a] p-6 rounded-xl border border-white/10 shadow-sm md:col-span-2 flex items-center justify-between">
               <div>
-                <h3 className="font-semibold text-slate-900 mb-1">Invite Testers</h3>
-                <p className="text-sm text-slate-500">Send an email invitation to enrolled students or external users.</p>
+                <h3 className="font-semibold text-slate-100 mb-1">Invite Testers</h3>
+                <p className="text-sm text-slate-400">Send an email invitation to enrolled students or external users.</p>
               </div>
               <button 
                 onClick={inviteTester}
-                className="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2"
+                className="px-5 py-2.5 bg-[#0f172a] border border-white/10 text-slate-300 rounded-lg font-medium hover:bg-[#0a0f1e] transition-colors shadow-sm flex items-center gap-2"
               >
                 <Mail className="w-4 h-4" />
                 Invite Users
@@ -111,12 +111,12 @@ export default function BetaTesting() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="p-4 border-b border-slate-200 bg-slate-50">
-              <h3 className="font-semibold text-slate-900">Tester Feedback & Progress</h3>
+          <div className="bg-[#0f172a] rounded-xl shadow-sm border border-white/10 overflow-hidden">
+            <div className="p-4 border-b border-white/10 bg-[#0a0f1e]">
+              <h3 className="font-semibold text-slate-100">Tester Feedback & Progress</h3>
             </div>
-            <table className="w-full text-left text-sm text-slate-600">
-              <thead className="bg-slate-50 text-slate-500 font-medium text-xs uppercase border-b border-slate-200">
+            <table className="w-full text-left text-sm text-slate-300">
+              <thead className="bg-[#0a0f1e] text-slate-400 font-medium text-xs uppercase border-b border-white/10">
                 <tr>
                   <th className="px-6 py-4">User</th>
                   <th className="px-6 py-4">Progress</th>
@@ -124,29 +124,29 @@ export default function BetaTesting() {
                   <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-white/10">
                 {testers.map(t => (
-                  <tr key={t.id} className="hover:bg-slate-50/50">
+                  <tr key={t.id} className="hover:bg-[#0a0f1e]/50">
                     <td className="px-6 py-4">
-                      <p className="font-medium text-slate-900">{t.name || 'Unknown'}</p>
-                      <p className="text-xs text-slate-500">{t.email}</p>
+                      <p className="font-medium text-slate-100">{t.name || 'Unknown'}</p>
+                      <p className="text-xs text-slate-400">{t.email}</p>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden w-24">
-                          <div className="h-full bg-blue-500 rounded-full" style={{ width: `${t.progress || 0}%` }} />
+                          <div className="h-full bg-blue-900/300 rounded-full" style={{ width: `${t.progress || 0}%` }} />
                         </div>
-                        <span className="text-xs font-medium text-slate-700">{t.progress || 0}%</span>
+                        <span className="text-xs font-medium text-slate-300">{t.progress || 0}%</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-1.5 text-slate-600">
+                      <div className="flex items-center gap-1.5 text-slate-300">
                         <MessageSquare className="w-4 h-4" />
                         <span>{t.feedback || 0} items</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1 justify-end ml-auto">
+                      <button className="text-sm font-medium text-blue-400 hover:text-blue-800 transition-colors flex items-center gap-1 justify-end ml-auto">
                         View Log <ExternalLink className="w-3 h-3" />
                       </button>
                     </td>
@@ -154,7 +154,7 @@ export default function BetaTesting() {
                 ))}
                 {testers.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-slate-500">
+                    <td colSpan={4} className="px-6 py-12 text-center text-slate-400">
                       No beta testers invited yet.
                     </td>
                   </tr>

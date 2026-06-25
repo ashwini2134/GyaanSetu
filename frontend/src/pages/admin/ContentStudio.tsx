@@ -85,7 +85,7 @@ export default function ContentStudio() {
           </p>
           <button 
             onClick={() => navigate('/admin/content-studio/new')}
-            className="bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 px-6 rounded-lg transition-colors shadow-sm"
+            className="bg-blue-600 hover:bg-blue-900/300 text-white font-medium py-2.5 px-6 rounded-lg transition-colors shadow-sm"
           >
             Create Your First Course
           </button>
@@ -101,7 +101,7 @@ export default function ContentStudio() {
                 placeholder="Search courses..." 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-slate-700/50 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm bg-slate-900/50 text-slate-200 placeholder:text-slate-500"
+                className="w-full pl-10 pr-4 py-2 border border-slate-700/50 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm bg-slate-900/50 text-slate-200 placeholder:text-slate-400"
               />
             </div>
             <select 
@@ -146,9 +146,9 @@ export default function ContentStudio() {
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
-                        course.status === 'PUBLISHED' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
+                        course.status === 'PUBLISHED' ? 'bg-emerald-900/300/10 text-emerald-400 border-emerald-500/20' : 
                         course.status === 'DRAFT' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 
-                        'bg-slate-500/10 text-slate-400 border-slate-500/20'
+                        'bg-[#0a0f1e]0/10 text-slate-400 border-slate-500/20'
                       }`}>
                         {course.status === 'PUBLISHED' && <CheckCircle2 className="w-3.5 h-3.5" />}
                         {course.status === 'DRAFT' && <Clock className="w-3.5 h-3.5" />}
@@ -189,7 +189,7 @@ export default function ContentStudio() {
                             Archive
                           </button>
                         )}
-                        <button className="text-slate-500 hover:text-slate-300 transition-colors">
+                        <button className="text-slate-400 hover:text-slate-300 transition-colors">
                           <MoreVertical className="w-5 h-5" />
                         </button>
                       </div>

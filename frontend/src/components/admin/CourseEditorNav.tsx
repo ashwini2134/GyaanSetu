@@ -11,7 +11,7 @@ export function CourseEditorNav({ courseId }: { courseId: string }) {
   ];
 
   return (
-    <div className="bg-white border-b border-slate-200 sticky top-0 z-10 px-8 flex items-center gap-6">
+    <div className="bg-[#0f172a] border-b border-white/10 sticky top-0 z-10 px-8 flex items-center gap-6">
       {tabs.map((tab) => (
         <NavLink
           key={tab.path}
@@ -19,8 +19,8 @@ export function CourseEditorNav({ courseId }: { courseId: string }) {
           className={({ isActive }) =>
             `py-4 text-sm font-medium border-b-2 transition-colors ${
               isActive
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-slate-500 hover:text-slate-900 hover:border-slate-300"
+                ? "border-blue-600 text-blue-400"
+                : "border-transparent text-slate-400 hover:text-slate-100 hover:border-white/10"
             }`
           }
         >

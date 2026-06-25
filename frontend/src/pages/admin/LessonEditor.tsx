@@ -24,13 +24,13 @@ const SortableLessonItem = ({ lesson, activeId, onClick }: { lesson: Lesson, act
   const style = { transform: CSS.Transform.toString(transform), transition };
 
   return (
-    <div ref={setNodeRef} style={style} className={`flex items-center gap-2 p-3 rounded-lg cursor-pointer transition-colors ${activeId === lesson.id ? 'bg-blue-50 border border-blue-200' : 'hover:bg-slate-50 border border-transparent'}`} onClick={onClick}>
-      <div {...attributes} {...listeners} className="cursor-grab text-slate-400 hover:text-slate-600 p-1">
+    <div ref={setNodeRef} style={style} className={`flex items-center gap-2 p-3 rounded-lg cursor-pointer transition-colors ${activeId === lesson.id ? 'bg-blue-900/30 border border-blue-200' : 'hover:bg-[#0a0f1e] border border-transparent'}`} onClick={onClick}>
+      <div {...attributes} {...listeners} className="cursor-grab text-slate-400 hover:text-slate-300 p-1">
         <GripVertical className="w-4 h-4" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className={`text-sm font-medium truncate ${activeId === lesson.id ? 'text-blue-700' : 'text-slate-700'}`}>{lesson.title}</p>
-        <p className="text-xs text-slate-500 capitalize">{lesson.type}</p>
+        <p className={`text-sm font-medium truncate ${activeId === lesson.id ? 'text-blue-400' : 'text-slate-300'}`}>{lesson.title}</p>
+        <p className="text-xs text-slate-400 capitalize">{lesson.type}</p>
       </div>
       {lesson.type === 'video' && <PlayCircle className="w-4 h-4 text-slate-400 shrink-0" />}
       {lesson.type === 'content' && <BookOpen className="w-4 h-4 text-slate-400 shrink-0" />}
@@ -136,8 +136,8 @@ export default function LessonEditor() {
           { label: "Course Editor" }
         ]} />
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-slate-900">Course Editor</h1>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+          <h1 className="text-2xl font-bold text-slate-100">Course Editor</h1>
+          <button className="flex items-center gap-2 px-4 py-2 bg-[#0f172a] border border-white/10 rounded-lg text-sm font-medium text-slate-300 hover:bg-[#0a0f1e] transition-colors">
             <Settings className="w-4 h-4" />
             Course Settings
           </button>
@@ -146,12 +146,12 @@ export default function LessonEditor() {
 
       <CourseEditorNav courseId={courseId || "draft"} />
 
-      <div className="flex flex-1 overflow-hidden min-h-0 bg-white">
+      <div className="flex flex-1 overflow-hidden min-h-0 bg-[#0f172a]">
         {/* Left Sidebar - Lesson List */}
-        <div className="w-80 bg-slate-50 border-r border-slate-200 flex flex-col shrink-0">
-          <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-white shrink-0">
-            <h3 className="font-semibold text-slate-900">Curriculum</h3>
-            <button onClick={addLesson} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition-colors">
+        <div className="w-80 bg-[#0a0f1e] border-r border-white/10 flex flex-col shrink-0">
+          <div className="p-4 border-b border-white/10 flex items-center justify-between bg-[#0f172a] shrink-0">
+            <h3 className="font-semibold text-slate-100">Curriculum</h3>
+            <button onClick={addLesson} className="p-1.5 text-blue-400 hover:bg-blue-900/30 rounded-md transition-colors">
               <Plus className="w-5 h-5" />
             </button>
           </div>
@@ -174,15 +174,15 @@ export default function LessonEditor() {
         </div>
 
         {/* Right Area - Editor */}
-        <div className="flex-1 overflow-y-auto p-8 bg-slate-50 relative">
+        <div className="flex-1 overflow-y-auto p-8 bg-[#0a0f1e] relative">
           {activeLesson ? (
             <div className="max-w-4xl mx-auto space-y-6 pb-24">
               <div className="flex justify-between items-center">
-                <h2 className="text-lg font-bold text-slate-900">Lesson Details</h2>
+                <h2 className="text-lg font-bold text-slate-100">Lesson Details</h2>
                 <div className="flex items-center gap-3">
                   <button 
                     onClick={() => setIsExerciseBuilderOpen(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-[#0f172a] border border-white/10 rounded-lg text-sm font-medium text-blue-400 hover:bg-blue-900/30 transition-colors"
                   >
                     <Dumbbell className="w-4 h-4" />
                     Add Exercise
@@ -197,7 +197,7 @@ export default function LessonEditor() {
                   </button>
                   <button 
                     onClick={deleteActiveLesson}
-                    className="flex items-center gap-2 px-3 py-2 bg-white border border-red-200 text-red-600 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 bg-[#0f172a] border border-red-200 text-red-600 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
                     title="Delete Lesson"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -205,21 +205,21 @@ export default function LessonEditor() {
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+              <div className="bg-[#0f172a] p-6 rounded-xl border border-white/10 shadow-sm">
                 <input 
                   type="text"
                   value={activeLesson.title}
                   onChange={(e) => updateActiveLesson({ title: e.target.value })}
-                  className="text-2xl font-bold text-slate-900 w-full outline-none placeholder:text-slate-300 border-b border-transparent focus:border-slate-200 pb-2 mb-4"
+                  className="text-2xl font-bold text-slate-100 w-full outline-none placeholder:text-slate-300 border-b border-transparent focus:border-white/10 pb-2 mb-4"
                   placeholder="Lesson Title"
                 />
                 
                 <div className="flex items-center gap-4 mb-6">
-                  <label className="text-sm font-medium text-slate-700">Lesson Type:</label>
+                  <label className="text-sm font-medium text-slate-300">Lesson Type:</label>
                   <select 
                     value={activeLesson.type}
                     onChange={(e) => updateActiveLesson({ type: e.target.value })}
-                    className="border border-slate-300 rounded-lg px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                    className="border border-white/10 rounded-lg px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="content">Text Content</option>
                     <option value="video">Video Lesson</option>
@@ -228,17 +228,17 @@ export default function LessonEditor() {
 
                 {activeLesson.type === 'video' && (
                   <div className="mb-6">
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Video URL (YouTube/Vimeo)</label>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Video URL (YouTube/Vimeo)</label>
                     <input 
                       type="text" 
                       placeholder="https://..."
-                      className="w-full border border-slate-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full border border-white/10 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Lesson Content</label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Lesson Content</label>
                   <RichTextEditor 
                     content={activeLesson.content} 
                     onChange={(content) => updateActiveLesson({ content })}
@@ -247,7 +247,7 @@ export default function LessonEditor() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full text-slate-500">
+            <div className="flex flex-col items-center justify-center h-full text-slate-400">
               <LayoutTemplate className="w-12 h-12 mb-4 text-slate-300" />
               <p>Select a lesson to edit or create a new one.</p>
             </div>

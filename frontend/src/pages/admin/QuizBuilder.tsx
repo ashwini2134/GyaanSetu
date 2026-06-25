@@ -89,7 +89,7 @@ export default function QuizBuilder() {
           { label: "Course Editor" }
         ]} />
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-slate-900">Quiz Builder</h1>
+          <h1 className="text-2xl font-bold text-slate-100">Quiz Builder</h1>
           <button 
             onClick={saveQuiz}
             disabled={isSaving}
@@ -102,60 +102,60 @@ export default function QuizBuilder() {
 
       <CourseEditorNav courseId={courseId || "draft"} />
 
-      <div className="flex-1 overflow-y-auto p-8 bg-slate-50 flex gap-8 items-start">
+      <div className="flex-1 overflow-y-auto p-8 bg-[#0a0f1e] flex gap-8 items-start">
         {/* Main Quiz Area */}
         <div className="flex-1 max-w-4xl space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-              <h3 className="font-semibold text-slate-900">Questions ({questions.length})</h3>
+          <div className="bg-[#0f172a] rounded-xl shadow-sm border border-white/10 overflow-hidden">
+            <div className="p-4 border-b border-white/10 bg-[#0a0f1e] flex items-center justify-between">
+              <h3 className="font-semibold text-slate-100">Questions ({questions.length})</h3>
               <div className="relative">
                 <button 
                   onClick={() => setShowQuestionTypes(!showQuestionTypes)}
-                  className="flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors"
+                  className="flex items-center gap-1.5 text-sm font-medium text-blue-400 hover:text-blue-400 bg-blue-900/30 px-3 py-1.5 rounded-lg transition-colors"
                 >
                   <Plus className="w-4 h-4" />
                   Add Question
                   <ChevronDown className="w-4 h-4 ml-1" />
                 </button>
                 {showQuestionTypes && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-200 shadow-xl rounded-lg overflow-hidden z-20">
-                    <button onClick={() => addQuestion('mcq')} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">Multiple Choice</button>
-                    <button onClick={() => addQuestion('tf')} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors border-t border-slate-100">True / False</button>
-                    <button onClick={() => addQuestion('short')} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors border-t border-slate-100">Short Answer</button>
+                  <div className="absolute right-0 mt-2 w-48 bg-[#0f172a] border border-white/10 shadow-xl rounded-lg overflow-hidden z-20">
+                    <button onClick={() => addQuestion('mcq')} className="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-[#0a0f1e] transition-colors">Multiple Choice</button>
+                    <button onClick={() => addQuestion('tf')} className="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-[#0a0f1e] transition-colors border-t border-white/10">True / False</button>
+                    <button onClick={() => addQuestion('short')} className="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-[#0a0f1e] transition-colors border-t border-white/10">Short Answer</button>
                   </div>
                 )}
               </div>
             </div>
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-white/10">
               {questions.map((q, index) => (
-                <div key={q.id} className="p-6 flex gap-4 group hover:bg-slate-50 transition-colors">
-                  <div className="cursor-grab text-slate-300 hover:text-slate-500 pt-1">
+                <div key={q.id} className="p-6 flex gap-4 group hover:bg-[#0a0f1e] transition-colors">
+                  <div className="cursor-grab text-slate-300 hover:text-slate-400 pt-1">
                     <GripVertical className="w-5 h-5" />
                   </div>
                   <div className="flex-1">
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex items-center gap-3">
-                        <span className="bg-slate-100 text-slate-600 text-xs font-bold px-2 py-1 rounded">Q{index + 1}</span>
+                        <span className="bg-slate-100 text-slate-300 text-xs font-bold px-2 py-1 rounded">Q{index + 1}</span>
                         <input 
                           type="text" 
                           value={q.question} 
-                          className="font-medium text-slate-900 outline-none bg-transparent min-w-[300px] border-b border-transparent focus:border-blue-500" 
+                          className="font-medium text-slate-100 outline-none bg-transparent min-w-[300px] border-b border-transparent focus:border-blue-500" 
                           readOnly 
                         />
                       </div>
                       <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="p-1.5 text-slate-400 hover:text-blue-600 rounded-md hover:bg-white border border-transparent hover:border-slate-200"><Settings2 className="w-4 h-4" /></button>
-                        <button onClick={() => deleteQuestion(q.id)} className="p-1.5 text-slate-400 hover:text-red-600 rounded-md hover:bg-white border border-transparent hover:border-slate-200"><Trash2 className="w-4 h-4" /></button>
+                        <button className="p-1.5 text-slate-400 hover:text-blue-400 rounded-md hover:bg-[#0f172a] border border-transparent hover:border-white/10"><Settings2 className="w-4 h-4" /></button>
+                        <button onClick={() => deleteQuestion(q.id)} className="p-1.5 text-slate-400 hover:text-red-600 rounded-md hover:bg-[#0f172a] border border-transparent hover:border-white/10"><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </div>
                     <div className="space-y-2 pl-12">
                       {q.type === 'short' ? (
-                        <div className="text-sm text-slate-500 italic bg-slate-50 p-3 rounded-lg border border-slate-200">Short answer question. Student types response.</div>
+                        <div className="text-sm text-slate-400 italic bg-[#0a0f1e] p-3 rounded-lg border border-white/10">Short answer question. Student types response.</div>
                       ) : (
                         q.options && q.options.map((opt: string, i: number) => (
                           <div key={i} className="flex items-center gap-3">
                             <input type="radio" checked={q.correctAnswer === opt} readOnly className="text-emerald-500 focus:ring-emerald-500 w-4 h-4" />
-                            <span className={`text-sm ${q.correctAnswer === opt ? 'text-emerald-700 font-medium' : 'text-slate-600'}`}>{opt}</span>
+                            <span className={`text-sm ${q.correctAnswer === opt ? 'text-emerald-400 font-medium' : 'text-slate-300'}`}>{opt}</span>
                           </div>
                         ))
                       )}
@@ -164,7 +164,7 @@ export default function QuizBuilder() {
                 </div>
               ))}
               {questions.length === 0 && (
-                <div className="p-12 text-center text-slate-500">
+                <div className="p-12 text-center text-slate-400">
                   No questions added yet. Click "Add Question" to start.
                 </div>
               )}
@@ -173,39 +173,39 @@ export default function QuizBuilder() {
         </div>
 
         {/* Sidebar Settings */}
-        <div className="w-80 bg-white rounded-xl shadow-sm border border-slate-200 p-6 shrink-0 sticky top-8">
-          <h3 className="font-semibold text-slate-900 mb-6 flex items-center gap-2">
+        <div className="w-80 bg-[#0f172a] rounded-xl shadow-sm border border-white/10 p-6 shrink-0 sticky top-8">
+          <h3 className="font-semibold text-slate-100 mb-6 flex items-center gap-2">
             <Settings2 className="w-5 h-5 text-slate-400" />
             Quiz Settings
           </h3>
           
           <div className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Passing Score (%)</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Passing Score (%)</label>
               <input 
                 type="number" 
                 value={passScore}
                 onChange={(e) => setPassScore(Number(e.target.value))}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500" 
+                className="w-full border border-white/10 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500" 
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Time Limit (minutes)</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Time Limit (minutes)</label>
               <input 
                 type="number" 
                 value={timeLimit}
                 onChange={(e) => setTimeLimit(Number(e.target.value))}
                 placeholder="0 = unlimited" 
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500" 
+                className="w-full border border-white/10 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500" 
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Max Attempts</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Max Attempts</label>
               <input 
                 type="number" 
                 value={maxAttempts}
                 onChange={(e) => setMaxAttempts(Number(e.target.value))}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500" 
+                className="w-full border border-white/10 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500" 
               />
             </div>
             <label className="flex items-center gap-3 pt-2 cursor-pointer">
@@ -213,9 +213,9 @@ export default function QuizBuilder() {
                 type="checkbox" 
                 checked={shuffle}
                 onChange={(e) => setShuffle(e.target.checked)}
-                className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" 
+                className="w-4 h-4 text-blue-400 rounded border-white/10 focus:ring-blue-500" 
               />
-              <span className="text-sm font-medium text-slate-700">Shuffle Questions</span>
+              <span className="text-sm font-medium text-slate-300">Shuffle Questions</span>
             </label>
           </div>
         </div>

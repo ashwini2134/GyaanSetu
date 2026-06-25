@@ -23,7 +23,7 @@ export default function OperationsMonitor() {
               <h3 className="font-medium text-slate-100">{sys.name}</h3>
               <p className="text-sm text-slate-400 mt-1">Latency: {sys.ping}</p>
             </div>
-            <div className="flex items-center gap-2 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-full text-sm font-medium">
+            <div className="flex items-center gap-2 text-emerald-400 bg-emerald-900/300/10 border border-emerald-500/20 px-3 py-1.5 rounded-full text-sm font-medium">
               <CheckCircle2 className="w-4 h-4" />
               <span>{sys.status}</span>
             </div>

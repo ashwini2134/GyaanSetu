@@ -39,17 +39,17 @@ export function PublishChecklist({ onClose, onPublish, courseId }: { onClose: ()
 
   return (
     <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between p-4 border-b border-slate-100">
-          <h3 className="font-semibold text-lg text-slate-900">Ready to Publish?</h3>
-          <button onClick={onClose} className="p-1 hover:bg-slate-100 rounded-lg transition-colors">
-            <X className="w-5 h-5 text-slate-500" />
+      <div className="bg-[#0f172a] rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="flex items-center justify-between p-4 border-b border-white/10">
+          <h3 className="font-semibold text-lg text-slate-100">Ready to Publish?</h3>
+          <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-lg transition-colors">
+            <X className="w-5 h-5 text-slate-400" />
           </button>
         </div>
         
         <div className="p-6 space-y-4">
           {loading ? (
-            <div className="text-center py-4 text-slate-500">Checking course requirements...</div>
+            <div className="text-center py-4 text-slate-400">Checking course requirements...</div>
           ) : (
             checks.map((check, i) => (
               <div key={i} className="flex items-start gap-3">
@@ -61,11 +61,11 @@ export function PublishChecklist({ onClose, onPublish, courseId }: { onClose: ()
                   <AlertTriangle className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
                 )}
                 <div>
-                  <p className={`text-sm font-medium ${check.passed ? 'text-slate-700' : 'text-slate-900'}`}>
+                  <p className={`text-sm font-medium ${check.passed ? 'text-slate-300' : 'text-slate-100'}`}>
                     {check.label}
                   </p>
                   {!check.required && !check.passed && (
-                    <p className="text-xs text-slate-500 mt-0.5">Optional</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Optional</p>
                   )}
                 </div>
               </div>
@@ -74,7 +74,7 @@ export function PublishChecklist({ onClose, onPublish, courseId }: { onClose: ()
         </div>
 
 
-        <div className="p-4 border-t border-slate-100 bg-slate-50 flex flex-col gap-3">
+        <div className="p-4 border-t border-white/10 bg-[#0a0f1e] flex flex-col gap-3">
           <button
             onClick={onPublish}
             disabled={!allRequiredPassed}
