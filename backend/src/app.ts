@@ -29,6 +29,16 @@ import adminPracticeExercisesRoutes from "./routes/adminPracticeExercises.js";
 import reviewQueueRoutes from "./routes/reviewQueue.js";
 import analyticsRoutes from "./routes/analytics.js";
 
+// Phase 2.5 & 3 Admin Routes
+import phase3CoursesRoutes from "./routes/admin/courses.js";
+import phase3LessonsRoutes from "./routes/admin/lessons.js";
+import phase3ExercisesRoutes from "./routes/admin/exercises.js";
+import phase3QuizRoutes from "./routes/admin/quiz.js";
+import phase3ProjectsRoutes from "./routes/admin/projects.js";
+import phase3VersionsRoutes from "./routes/admin/versions.js";
+import phase3BetaRoutes from "./routes/admin/beta.js";
+import phase3OperationsRoutes from "./routes/admin/operations.js";
+
 export function createApp() {
   const app = express();
 
@@ -100,6 +110,16 @@ export function createApp() {
   app.use("/api/admin", adminPracticeExercisesRoutes);
   app.use("/api/admin", reviewQueueRoutes);
   app.use("/api/admin/analytics", analyticsRoutes);
+
+  // Phase 2.5 & 3 Admin Routes Mount
+  app.use("/api/admin/courses", phase3CoursesRoutes);
+  app.use("/api/admin", phase3LessonsRoutes);
+  app.use("/api/admin", phase3ExercisesRoutes);
+  app.use("/api/admin", phase3QuizRoutes);
+  app.use("/api/admin", phase3ProjectsRoutes);
+  app.use("/api/admin", phase3VersionsRoutes);
+  app.use("/api/admin", phase3BetaRoutes);
+  app.use("/api/admin/operations", phase3OperationsRoutes);
 
   app.use(errorHandler);
   return app;

@@ -1,16 +1,57 @@
 // Fraylon Admin - Phase 2
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { AdminBreadcrumb } from "../../components/admin/AdminBreadcrumb";
 import { CourseEditorNav } from "../../components/admin/CourseEditorNav";
 import { Users, Mail, MessageSquare, ExternalLink } from "lucide-react";
+import { authFetch } from "../../authClient";
 
 export default function BetaTesting() {
   const { courseId } = useParams();
+  const [betaActive, setBetaActive] = useState(false);
+  const [testers, setTesters] = useState<any[]>([]);
 
-  const testers = [
-    { id: 1, name: "Alice Smith", email: "alice@example.com", progress: 45, feedback: 2 },
-    { id: 2, name: "Bob Jones", email: "bob@example.com", progress: 100, feedback: 5 },
-  ];
+  useEffect(() => {
+    if (!courseId) return;
+    authFetch<any>(`/admin/courses/${courseId}/beta`)
+      .then(data => {
+        if (data) {
+          setBetaActive(data.betaActive);
+          if (data.testers) setTesters(data.testers);
+        }
+      })
+      .catch(console.error);
+  }, [courseId]);
+
+  const toggleBeta = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const active = e.target.checked;
+    setBetaActive(active); // Optimistic UI
+    try {
+      await authFetch(`/admin/courses/${courseId}/beta/toggle`, {
+        method: 'POST',
+        body: JSON.stringify({ active })
+      });
+    } catch (err: any) {
+      setBetaActive(!active); // Revert
+      alert("Failed to toggle beta: " + err.message);
+    }
+  };
+
+  const inviteTester = async () => {
+    const email = prompt("Enter tester email:");
+    if (!email) return;
+    try {
+      await authFetch(`/admin/courses/${courseId}/beta/invite`, {
+        method: 'POST',
+        body: JSON.stringify({ email })
+      });
+      alert("Invitation sent!");
+      const data = await authFetch<any>(`/admin/courses/${courseId}/beta`);
+      if (data && data.testers) setTesters(data.testers);
+    } catch (err: any) {
+      alert("Failed to invite: " + err.message);
+    }
+  };
 
   return (
     <div className="flex flex-col h-[calc(100vh-2rem)]">
@@ -27,7 +68,12 @@ export default function BetaTesting() {
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium text-slate-600">Beta Mode:</span>
             <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" className="sr-only peer" defaultChecked />
+              <input 
+                type="checkbox" 
+                className="sr-only peer" 
+                checked={betaActive}
+                onChange={toggleBeta}
+              />
               <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
             </label>
           </div>
@@ -47,7 +93,7 @@ export default function BetaTesting() {
                 </div>
                 <h3 className="font-semibold text-slate-900">Active Testers</h3>
               </div>
-              <p className="text-3xl font-bold text-slate-900 ml-14">24</p>
+              <p className="text-3xl font-bold text-slate-900 ml-14">{testers.length}</p>
             </div>
             
             <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm md:col-span-2 flex items-center justify-between">
@@ -55,7 +101,10 @@ export default function BetaTesting() {
                 <h3 className="font-semibold text-slate-900 mb-1">Invite Testers</h3>
                 <p className="text-sm text-slate-500">Send an email invitation to enrolled students or external users.</p>
               </div>
-              <button className="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2">
+              <button 
+                onClick={inviteTester}
+                className="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2"
+              >
                 <Mail className="w-4 h-4" />
                 Invite Users
               </button>
@@ -79,21 +128,21 @@ export default function BetaTesting() {
                 {testers.map(t => (
                   <tr key={t.id} className="hover:bg-slate-50/50">
                     <td className="px-6 py-4">
-                      <p className="font-medium text-slate-900">{t.name}</p>
+                      <p className="font-medium text-slate-900">{t.name || 'Unknown'}</p>
                       <p className="text-xs text-slate-500">{t.email}</p>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden w-24">
-                          <div className="h-full bg-blue-500 rounded-full" style={{ width: `${t.progress}%` }} />
+                          <div className="h-full bg-blue-500 rounded-full" style={{ width: `${t.progress || 0}%` }} />
                         </div>
-                        <span className="text-xs font-medium text-slate-700">{t.progress}%</span>
+                        <span className="text-xs font-medium text-slate-700">{t.progress || 0}%</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1.5 text-slate-600">
                         <MessageSquare className="w-4 h-4" />
-                        <span>{t.feedback} items</span>
+                        <span>{t.feedback || 0} items</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -103,6 +152,13 @@ export default function BetaTesting() {
                     </td>
                   </tr>
                 ))}
+                {testers.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-12 text-center text-slate-500">
+                      No beta testers invited yet.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

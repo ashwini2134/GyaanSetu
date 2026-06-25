@@ -1,17 +1,47 @@
 // Fraylon Admin - Phase 2
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { AdminBreadcrumb } from "../../components/admin/AdminBreadcrumb";
 import { CourseEditorNav } from "../../components/admin/CourseEditorNav";
 import { History, GitCommit, PlayCircle, Eye } from "lucide-react";
+import { authFetch } from "../../authClient";
 
 export default function VersionHistory() {
   const { courseId } = useParams();
+  const [versions, setVersions] = useState<any[]>([]);
 
-  const versions = [
-    { id: 1, version: "v1.2.0", date: "Today at 10:42 AM", author: "Admin", changes: "Added capstone project and fixed typo in React lesson" },
-    { id: 2, version: "v1.1.0", date: "Yesterday at 3:15 PM", author: "Admin", changes: "Updated video links for Node.js module" },
-    { id: 3, version: "v1.0.0", date: "Jun 16, 2025", author: "Admin", changes: "Initial course publication" },
-  ];
+  useEffect(() => {
+    if (!courseId) return;
+    authFetch<any[]>(`/admin/courses/${courseId}/versions`)
+      .then(setVersions)
+      .catch(console.error);
+  }, [courseId]);
+
+  const handleCreateSnapshot = async () => {
+    const changes = prompt("Enter a description for this snapshot:");
+    if (!changes) return;
+    try {
+      const v = await authFetch<any>(`/admin/courses/${courseId}/versions`, {
+        method: 'POST',
+        body: JSON.stringify({ changes })
+      });
+      setVersions([v, ...versions]);
+    } catch (err: any) {
+      alert("Failed: " + err.message);
+    }
+  };
+
+  const handleRestore = async (versionId: string) => {
+    if (!confirm("Are you sure you want to restore this version?")) return;
+    try {
+      await authFetch(`/admin/versions/${versionId}/restore`, { method: 'POST' });
+      alert("Version restored successfully!");
+      const updated = await authFetch<any[]>(`/admin/courses/${courseId}/versions`);
+      setVersions(updated);
+    } catch (err: any) {
+      alert("Restore failed: " + err.message);
+    }
+  };
 
   return (
     <div className="flex flex-col h-[calc(100vh-2rem)]">
@@ -22,7 +52,10 @@ export default function VersionHistory() {
         ]} />
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-slate-900">Version History</h1>
-          <button className="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2">
+          <button 
+            onClick={handleCreateSnapshot}
+            className="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2"
+          >
             <History className="w-4 h-4" />
             Create Snapshot
           </button>
@@ -50,10 +83,10 @@ export default function VersionHistory() {
                     <div className="flex items-start justify-between">
                       <div>
                         <div className="flex items-center gap-3 mb-1">
-                          <span className={`font-bold ${i === 0 ? 'text-blue-600' : 'text-slate-900'}`}>{v.version}</span>
+                          <span className={`font-bold ${i === 0 ? 'text-blue-600' : 'text-slate-900'}`}>{v.versionNumber}</span>
                           {i === 0 && <span className="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Current</span>}
                         </div>
-                        <p className="text-sm text-slate-500 mb-3">{v.date} by {v.author}</p>
+                        <p className="text-sm text-slate-500 mb-3">{new Date(v.createdAt).toLocaleString()}</p>
                         <p className="text-sm text-slate-700">{v.changes}</p>
                       </div>
                       
@@ -62,7 +95,10 @@ export default function VersionHistory() {
                           <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-transparent hover:border-blue-200" title="Preview this version">
                             <Eye className="w-4 h-4" />
                           </button>
-                          <button className="px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200">
+                          <button 
+                            onClick={() => handleRestore(v.id)}
+                            className="px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200"
+                          >
                             Restore
                           </button>
                         </div>
@@ -70,6 +106,11 @@ export default function VersionHistory() {
                     </div>
                   </div>
                 ))}
+                {versions.length === 0 && (
+                  <div className="pl-8 text-slate-500">
+                    No versions found for this course.
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -1,27 +1,42 @@
 // Fraylon Admin - Phase 2
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Plus, BookOpen, MoreVertical, Archive, CheckCircle2, Clock } from "lucide-react";
 import { PublishChecklist } from "../../components/admin/PublishChecklist";
+import { authFetch } from "../../authClient";
 
 export default function ContentStudio() {
   const navigate = useNavigate();
-  const [showPublishChecklist, setShowPublishChecklist] = useState(false);
+  const [showPublishChecklist, setShowPublishChecklist] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
+  const [courses, setCourses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data for Phase 2 UI
-  const courses = [
-    { id: "c1", title: "Full-Stack Web Development Bootcamp", status: "Published", enrolled: 1240, date: "Jun 16, 2025" },
-    { id: "c2", title: "Advanced Machine Learning with Python", status: "Draft", enrolled: 0, date: "Jun 18, 2025" },
-    { id: "c3", title: "UI/UX Design Masterclass", status: "Archived", enrolled: 350, date: "May 10, 2025" },
-  ];
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const data = await authFetch<any[]>(`/admin/courses?search=${encodeURIComponent(search)}&status=${filter}`);
+        setCourses(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    const debounce = setTimeout(fetchCourses, 300);
+    return () => clearTimeout(debounce);
+  }, [search, filter]);
 
-  const filteredCourses = courses.filter(c => {
-    if (filter !== "All" && c.status !== filter) return false;
-    if (search && !c.title.toLowerCase().includes(search.toLowerCase())) return false;
-    return true;
-  });
+  const handlePublish = async (courseId: string) => {
+    try {
+      await authFetch(`/admin/courses/${courseId}/publish`, { method: "PATCH" });
+      setCourses(courses.map(c => c.id === courseId ? { ...c, status: "PUBLISHED" } : c));
+      setShowPublishChecklist(null);
+    } catch (err: any) {
+      alert("Error publishing course: " + err.message);
+    }
+  };
 
   return (
     <div className="p-8 max-w-7xl mx-auto h-[calc(100vh-2rem)] flex flex-col">
@@ -39,7 +54,9 @@ export default function ContentStudio() {
         </button>
       </div>
 
-      {courses.length === 0 ? (
+      {loading ? (
+        <div className="flex-1 flex items-center justify-center">Loading...</div>
+      ) : courses.length === 0 && !search && filter === "All" ? (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex-1 flex flex-col items-center justify-center min-h-[400px]">
           <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-4">
             <BookOpen className="w-8 h-8" />
@@ -75,9 +92,9 @@ export default function ContentStudio() {
               className="border border-slate-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm bg-white min-w-[150px]"
             >
               <option value="All">All Statuses</option>
-              <option value="Published">Published</option>
-              <option value="Draft">Draft</option>
-              <option value="Archived">Archived</option>
+              <option value="PUBLISHED">Published</option>
+              <option value="DRAFT">Draft</option>
+              <option value="ARCHIVED">Archived</option>
             </select>
           </div>
 
@@ -88,39 +105,43 @@ export default function ContentStudio() {
                 <tr>
                   <th className="px-6 py-4">Course</th>
                   <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4">Students</th>
+                  <th className="px-6 py-4">Lessons</th>
                   <th className="px-6 py-4">Created Date</th>
                   <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredCourses.map(course => (
+                {courses.map(course => (
                   <tr key={course.id} className="hover:bg-slate-50/50 transition-colors group">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
-                          <BookOpen className="w-5 h-5" />
+                        <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 shrink-0 overflow-hidden">
+                          {course.thumbnailUrl ? (
+                            <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover" />
+                          ) : (
+                            <BookOpen className="w-5 h-5" />
+                          )}
                         </div>
                         <span className="font-medium text-slate-900 line-clamp-1">{course.title}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
-                        course.status === 'Published' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
-                        course.status === 'Draft' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 
+                        course.status === 'PUBLISHED' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
+                        course.status === 'DRAFT' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 
                         'bg-slate-100 text-slate-700 border-slate-200'
                       }`}>
-                        {course.status === 'Published' && <CheckCircle2 className="w-3.5 h-3.5" />}
-                        {course.status === 'Draft' && <Clock className="w-3.5 h-3.5" />}
-                        {course.status === 'Archived' && <Archive className="w-3.5 h-3.5" />}
+                        {course.status === 'PUBLISHED' && <CheckCircle2 className="w-3.5 h-3.5" />}
+                        {course.status === 'DRAFT' && <Clock className="w-3.5 h-3.5" />}
+                        {course.status === 'ARCHIVED' && <Archive className="w-3.5 h-3.5" />}
                         {course.status}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-slate-900 font-medium">{course.enrolled.toLocaleString()}</span>
+                      <span className="text-slate-900 font-medium">{course._count?.lessons || 0}</span>
                     </td>
                     <td className="px-6 py-4 text-slate-500">
-                      {course.date}
+                      {new Date(course.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -130,9 +151,9 @@ export default function ContentStudio() {
                         >
                           Edit
                         </button>
-                        {course.status === 'Draft' && (
+                        {course.status === 'DRAFT' && (
                           <button 
-                            onClick={() => setShowPublishChecklist(true)}
+                            onClick={() => setShowPublishChecklist(course.id)}
                             className="text-sm font-medium text-emerald-600 hover:text-emerald-800 transition-colors"
                           >
                             Publish
@@ -148,7 +169,7 @@ export default function ContentStudio() {
               </tbody>
             </table>
             
-            {filteredCourses.length === 0 && (
+            {courses.length === 0 && (search || filter !== "All") && (
               <div className="py-16 text-center text-slate-500">
                 No courses found matching your search.
               </div>
@@ -159,11 +180,8 @@ export default function ContentStudio() {
 
       {showPublishChecklist && (
         <PublishChecklist 
-          onClose={() => setShowPublishChecklist(false)} 
-          onPublish={() => {
-            alert("Course Published successfully!");
-            setShowPublishChecklist(false);
-          }} 
+          onClose={() => setShowPublishChecklist(null)} 
+          onPublish={() => handlePublish(showPublishChecklist)} 
         />
       )}
     </div>

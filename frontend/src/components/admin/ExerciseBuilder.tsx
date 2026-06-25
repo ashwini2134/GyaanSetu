@@ -1,14 +1,42 @@
 // Fraylon Admin - Phase 2
 import { useState } from "react";
 import { X, Code, CheckSquare, AlignLeft, Plus, Trash2 } from "lucide-react";
+import { authFetch } from "../../authClient";
 
-export function ExerciseBuilder({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
+export function ExerciseBuilder({ isOpen, onClose, lessonId }: { isOpen: boolean, onClose: () => void, lessonId?: string }) {
   const [type, setType] = useState('mcq');
   const [question, setQuestion] = useState('');
   const [options, setOptions] = useState(['', '']);
   const [correctOption, setCorrectOption] = useState(0);
+  const [isSaving, setIsSaving] = useState(false);
 
   if (!isOpen) return null;
+
+  const handleSave = async () => {
+    if (!lessonId) {
+      alert("Please select a lesson first");
+      return;
+    }
+    setIsSaving(true);
+    try {
+      await authFetch(`/admin/lessons/${lessonId}/exercises`, {
+        method: 'POST',
+        body: JSON.stringify({
+          title: "New Exercise",
+          type: type.toUpperCase(),
+          content: question,
+          points: 10,
+          validationRules: type === 'mcq' ? { options, correctOption } : {}
+        })
+      });
+      alert('Exercise added successfully!');
+      onClose();
+    } catch (err: any) {
+      alert('Failed to save exercise: ' + err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-50 flex justify-end">
@@ -129,10 +157,11 @@ export function ExerciseBuilder({ isOpen, onClose }: { isOpen: boolean, onClose:
 
         <div className="p-4 border-t border-slate-200 bg-slate-50">
           <button 
-            onClick={onClose}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition-colors"
+            onClick={handleSave}
+            disabled={isSaving}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50"
           >
-            Save Exercise
+            {isSaving ? "Saving..." : "Save Exercise"}
           </button>
         </div>
       </div>

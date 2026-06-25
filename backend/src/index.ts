@@ -3,6 +3,12 @@ dotenv.config();
 
 import { createApp } from "./app.js";
 import { config } from "./config.js";
+import { startWorkers } from "./workers/workers.js";
+import { startCronJobs } from "./cron/inactivityCron.js";
+
+// Start background services
+startWorkers();
+startCronJobs();
 
 process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);

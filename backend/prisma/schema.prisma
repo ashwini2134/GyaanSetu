@@ -92,15 +92,16 @@ model LectureProgress {
 }
 
 model QuizAttempt {
-  id        String   @id @default(uuid())
-  userId    String
-  quizId    String
-  score     Int
-  total     Int
-  passed    Boolean
-  answers   Json
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            String   @id @default(uuid())
+  userId        String
+  quizId        String
+  score         Float
+  total         Int?
+  passed        Boolean
+  answers       Json
+  attemptNumber Int      @default(1)
+  createdAt     DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Submission {
@@ -475,4 +476,47 @@ model BetaFeedback {
   feedbackText String
   isReviewed   Boolean  @default(false)
   createdAt    DateTime @default(now())
+}
+
+model StudentProgress {
+  id              String   @id @default(cuid())
+  studentId       String
+  courseId        String
+  lessonId        String
+  completed       Boolean  @default(false)
+  completedAt     DateTime?
+  @@unique([studentId, lessonId])
+}
+
+model ProjectSubmission {
+  id          String   @id @default(cuid())
+  studentId   String
+  projectId   String
+  content     String?
+  fileUrl     String?
+  githubUrl   String?
+  status      String   @default("PENDING")
+  score       Float?
+  feedback    String?
+  aiReview    Json?
+  submittedAt DateTime @default(now())
+  reviewedAt  DateTime?
+}
+
+model Certificate {
+  id             String   @id @default(cuid())
+  studentId      String
+  courseId       String
+  verificationId String   @unique @default(cuid())
+  pdfUrl         String
+  issuedAt       DateTime @default(now())
+}
+
+model StudentPortfolio {
+  id           String   @id @default(cuid())
+  studentId    String   @unique
+  courses      Json     @default("[]")
+  certificates Json     @default("[]")
+  projects     Json     @default("[]")
+  updatedAt    DateTime @updatedAt
 }

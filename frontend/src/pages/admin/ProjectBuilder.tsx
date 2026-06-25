@@ -3,16 +3,64 @@ import { useParams } from "react-router-dom";
 import { AdminBreadcrumb } from "../../components/admin/AdminBreadcrumb";
 import { CourseEditorNav } from "../../components/admin/CourseEditorNav";
 import { RichTextEditor } from "../../components/admin/RichTextEditor";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Trash2 } from "lucide-react";
+import { authFetch } from "../../authClient";
 
 export default function ProjectBuilder() {
   const { courseId } = useParams();
+  const [projectId, setProjectId] = useState<string | null>(null);
+  const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [rubric, setRubric] = useState([
+  const [submissionType, setSubmissionType] = useState("GITHUB");
+  const [isCapstone, setIsCapstone] = useState(false);
+  const [rubric, setRubric] = useState<any[]>([
     { criteria: "Code Quality", points: 20 },
     { criteria: "Functionality", points: 50 },
   ]);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (!courseId) return;
+    authFetch<any[]>(`/admin/courses/${courseId}/projects`)
+      .then(data => {
+        if (data && data.length > 0) {
+          const p = data[0];
+          setProjectId(p.id);
+          setTitle(p.title);
+          setContent(p.description || "");
+          setSubmissionType(p.submissionType || "GITHUB");
+          setIsCapstone(p.isCapstone || false);
+          if (p.rubric && Array.isArray(p.rubric) && p.rubric.length > 0) {
+            setRubric(p.rubric);
+          }
+        }
+      })
+      .catch(console.error);
+  }, [courseId]);
+
+  const saveProject = async () => {
+    setIsSaving(true);
+    try {
+      if (projectId) {
+        await authFetch(`/admin/projects/${projectId}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ title, description: content, submissionType, isCapstone, rubric })
+        });
+      } else {
+        const newProj = await authFetch<any>(`/admin/courses/${courseId}/projects`, {
+          method: 'POST',
+          body: JSON.stringify({ title, description: content, submissionType, isCapstone, rubric })
+        });
+        setProjectId(newProj.id);
+      }
+      alert('Project saved successfully!');
+    } catch (err: any) {
+      alert('Failed to save project: ' + err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="flex flex-col h-[calc(100vh-2rem)]">
@@ -23,8 +71,12 @@ export default function ProjectBuilder() {
         ]} />
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-slate-900">Project Builder</h1>
-          <button className="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm">
-            Save Project
+          <button 
+            onClick={saveProject}
+            disabled={isSaving}
+            className="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50"
+          >
+            {isSaving ? "Saving..." : "Save Project"}
           </button>
         </div>
       </div>
@@ -38,20 +90,35 @@ export default function ProjectBuilder() {
             <div className="grid grid-cols-2 gap-6 mb-6">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">Project Title</label>
-                <input type="text" placeholder="E-commerce Storefront" className="w-full border border-slate-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500" />
+                <input 
+                  type="text" 
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="E-commerce Storefront" 
+                  className="w-full border border-slate-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500" 
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">Submission Type</label>
-                <select className="w-full border border-slate-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500">
-                  <option>GitHub Repository</option>
-                  <option>File Upload (.zip)</option>
-                  <option>In-browser IDE</option>
+                <select 
+                  value={submissionType}
+                  onChange={(e) => setSubmissionType(e.target.value)}
+                  className="w-full border border-slate-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="GITHUB">GitHub Repository</option>
+                  <option value="ZIP">File Upload (.zip)</option>
+                  <option value="IDE">In-browser IDE</option>
                 </select>
               </div>
             </div>
             
             <label className="flex items-center gap-3 pt-2 cursor-pointer mb-6">
-              <input type="checkbox" className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" />
+              <input 
+                type="checkbox" 
+                checked={isCapstone}
+                onChange={(e) => setIsCapstone(e.target.checked)}
+                className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" 
+              />
               <div>
                 <span className="text-sm font-medium text-slate-900 block">Is Capstone Project?</span>
                 <span className="text-xs text-slate-500">Capstone projects are required for course completion and certificate generation.</span>

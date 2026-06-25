@@ -1,20 +1,22 @@
 // Fraylon Admin - Phase 2
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { AdminBreadcrumb } from "../../components/admin/AdminBreadcrumb";
 import { CourseEditorNav } from "../../components/admin/CourseEditorNav";
 import { RichTextEditor } from "../../components/admin/RichTextEditor";
 import { ExerciseBuilder } from "../../components/admin/ExerciseBuilder";
-import { GripVertical, Plus, Settings, PlayCircle, BookOpen, LayoutTemplate, Dumbbell } from "lucide-react";
+import { GripVertical, Plus, Settings, PlayCircle, BookOpen, LayoutTemplate, Dumbbell, Save } from "lucide-react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { authFetch } from "../../authClient";
 
 interface Lesson {
   id: string;
   title: string;
   type: string;
   content: string;
+  order?: number;
 }
 
 const SortableLessonItem = ({ lesson, activeId, onClick }: { lesson: Lesson, activeId: string, onClick: () => void }) => {
@@ -39,44 +41,78 @@ const SortableLessonItem = ({ lesson, activeId, onClick }: { lesson: Lesson, act
 export default function LessonEditor() {
   const { courseId } = useParams();
   
-  const [lessons, setLessons] = useState<Lesson[]>([
-    { id: '1', title: 'Welcome to the Course', type: 'video', content: '<h2>Welcome!</h2><p>This is the intro.</p>' },
-    { id: '2', title: 'Setting up your environment', type: 'content', content: '<h2>Setup</h2><p>Install Node.js.</p>' },
-  ]);
-  const [activeLessonId, setActiveLessonId] = useState<string>('1');
+  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [activeLessonId, setActiveLessonId] = useState<string>('');
   const [isExerciseBuilderOpen, setIsExerciseBuilderOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (!courseId) return;
+    authFetch<Lesson[]>(`/admin/courses/${courseId}/lessons`)
+      .then(data => {
+        setLessons(data);
+        if (data.length > 0) setActiveLessonId(data[0].id);
+      })
+      .catch(console.error);
+  }, [courseId]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  const handleDragEnd = (event: any) => {
+  const handleDragEnd = async (event: any) => {
     const { active, over } = event;
     if (active && over && active.id !== over.id) {
-      setLessons((items) => {
-        const oldIndex = items.findIndex(i => i.id === active.id);
-        const newIndex = items.findIndex(i => i.id === over.id);
-        return arrayMove(items, oldIndex, newIndex);
-      });
+      const oldIndex = lessons.findIndex(i => i.id === active.id);
+      const newIndex = lessons.findIndex(i => i.id === over.id);
+      const newLessons = arrayMove(lessons, oldIndex, newIndex);
+      setLessons(newLessons);
+      
+      try {
+        await authFetch(`/admin/courses/${courseId}/lessons/reorder`, {
+          method: 'PATCH',
+          body: JSON.stringify({ lessonIds: newLessons.map(l => l.id) })
+        });
+      } catch (err) {
+        console.error(err);
+      }
     }
   };
 
-  const addLesson = () => {
-    const newLesson: Lesson = {
-      id: Date.now().toString(),
-      title: 'New Lesson',
-      type: 'content',
-      content: ''
-    };
-    setLessons([...lessons, newLesson]);
-    setActiveLessonId(newLesson.id);
+  const addLesson = async () => {
+    try {
+      const newLesson = await authFetch<Lesson>(`/admin/courses/${courseId}/lessons`, {
+        method: 'POST',
+        body: JSON.stringify({ title: 'New Lesson', type: 'content' })
+      });
+      setLessons([...lessons, newLesson]);
+      setActiveLessonId(newLesson.id);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const activeLesson = lessons.find(l => l.id === activeLessonId);
 
   const updateActiveLesson = (updates: Partial<Lesson>) => {
     setLessons(lessons.map(l => l.id === activeLessonId ? { ...l, ...updates } : l));
+  };
+
+  const saveActiveLesson = async () => {
+    if (!activeLesson) return;
+    setIsSaving(true);
+    try {
+      await authFetch(`/admin/lessons/${activeLesson.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ title: activeLesson.title, type: activeLesson.type, content: activeLesson.content })
+      });
+      // Optionally show a toast here
+    } catch (err: any) {
+      alert("Failed to save lesson: " + err.message);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -130,13 +166,23 @@ export default function LessonEditor() {
             <div className="max-w-4xl mx-auto space-y-6 pb-24">
               <div className="flex justify-between items-center">
                 <h2 className="text-lg font-bold text-slate-900">Lesson Details</h2>
-                <button 
-                  onClick={() => setIsExerciseBuilderOpen(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors"
-                >
-                  <Dumbbell className="w-4 h-4" />
-                  Add Exercise
-                </button>
+                <div className="flex items-center gap-3">
+                  <button 
+                    onClick={() => setIsExerciseBuilderOpen(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors"
+                  >
+                    <Dumbbell className="w-4 h-4" />
+                    Add Exercise
+                  </button>
+                  <button 
+                    onClick={saveActiveLesson}
+                    disabled={isSaving}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+                  >
+                    <Save className="w-4 h-4" />
+                    {isSaving ? "Saving..." : "Save Lesson"}
+                  </button>
+                </div>
               </div>
 
               <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">

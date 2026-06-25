@@ -2,11 +2,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AdminBreadcrumb } from "../../components/admin/AdminBreadcrumb";
-import { UploadCloud, CheckCircle2 } from "lucide-react";
+import { UploadCloud, CheckCircle2, ChevronRight } from "lucide-react";
+import { authFetch } from "../../authClient";
 
 export default function BlueprintBuilder() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
+  const [isSaving, setIsSaving] = useState(false);
   
   // Form State
   const [title, setTitle] = useState("");
@@ -19,11 +21,19 @@ export default function BlueprintBuilder() {
   const [thumbnailUrl, setThumbnailUrl] = useState("");
 
   const handleSaveDraft = async () => {
-    // API Call placeholder
-    console.log("Saving course:", { title, description, category, difficulty, estimatedDuration, prerequisites, thumbnailUrl });
-    // Mock save & redirect to lesson editor
-    const mockCourseId = "new-course-" + Date.now();
-    navigate(`/admin/content-studio/${mockCourseId}/lessons`);
+    setIsSaving(true);
+    try {
+      const course = await authFetch<any>("/admin/courses", {
+        method: "POST",
+        body: JSON.stringify({
+          title, description, category, difficulty, estimatedDuration, prerequisites: noPrerequisites ? [] : prerequisites, thumbnailUrl
+        })
+      });
+      navigate(`/admin/content-studio/${course.id}/lessons`);
+    } catch (err: any) {
+      alert("Failed to save: " + err.message);
+      setIsSaving(false);
+    }
   };
 
   return (
