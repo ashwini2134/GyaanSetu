@@ -503,4 +503,68 @@ print(counts)
     expect(res.error).toBeNull();
     expect(res.output.trim()).toBe("{'the': 3, 'cat': 1, 'and': 2, 'dog': 1, 'bird': 1}");
   });
+
+  it('handles set literals, formatting and standard built-ins', () => {
+    const code = `
+s1 = {1, 2, 2, 3}
+print(s1)
+print(type(s1))
+print(len(s1))
+s2 = set([2, 3, 4, 4])
+print(s2)
+s3 = set()
+print(s3)
+`;
+    const res = runPython(code, []);
+    expect(res.error).toBeNull();
+    const lines = res.output.trim().split('\n').map(s => s.trim());
+    expect(lines[0]).toBe('{1, 2, 3}');
+    expect(lines[1]).toBe("<class 'set'>");
+    expect(lines[2]).toBe('3');
+    expect(lines[3]).toBe('{2, 3, 4}');
+    expect(lines[4]).toBe('set()');
+  });
+
+  it('handles set operators and methods', () => {
+    const code = `
+s1 = {1, 2, 3}
+s2 = {3, 4, 5}
+print(s1 | s2)
+print(s1 & s2)
+print(s1 - s2)
+s1.add(4)
+print(4 in s1)
+s1.remove(2)
+print(2 in s1)
+s1.discard(5)
+s1.clear()
+print(len(s1))
+`;
+    const res = runPython(code, []);
+    expect(res.error).toBeNull();
+    const lines = res.output.trim().split('\n').map(s => s.trim());
+    expect(lines[0]).toBe('{1, 2, 3, 4, 5}');
+    expect(lines[1]).toBe('{3}');
+    expect(lines[2]).toBe('{1, 2}');
+    expect(lines[3]).toBe('True');
+    expect(lines[4]).toBe('False');
+    expect(lines[5]).toBe('0');
+  });
+
+  it('handles interactive sets transpilation', () => {
+    const code = `
+s = {1, 2, 2, 3}
+print(s)
+s.add(4)
+print(s)
+print(4 in s)
+`;
+    const res = runValidationTest(code, []);
+    expect(res.error).toBeNull();
+    const lines = res.stdout.trim().split('\n').map(s => s.trim());
+    expect(lines[0]).toBe('{1, 2, 3}');
+    expect(lines[1]).toBe('{1, 2, 3, 4}');
+    expect(lines[2]).toBe('True');
+  });
 });
+

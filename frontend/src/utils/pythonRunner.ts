@@ -585,6 +585,25 @@ class MiniPython {
           }
           else if (method === 'sort') target.sort((a, b) => Number(a) - Number(b));
           else if (method === 'pop') target.pop();
+        } else if (this.isSet(target)) {
+          const vals = (target as any).values as PyVal[];
+          if (method === 'add' && args.length >= 1) {
+            if (!vals.some(v => this.isEqual(v, args[0]))) {
+              vals.push(args[0]);
+            }
+          } else if (method === 'remove' && args.length >= 1) {
+            const idx = vals.findIndex(v => this.isEqual(v, args[0]));
+            if (idx >= 0) vals.splice(idx, 1);
+            else throw new Error(`  KeyError: ${this.repr(args[0])}`);
+          } else if (method === 'discard' && args.length >= 1) {
+            const idx = vals.findIndex(v => this.isEqual(v, args[0]));
+            if (idx >= 0) vals.splice(idx, 1);
+          } else if (method === 'pop') {
+            if (vals.length === 0) throw new Error(`  KeyError: 'pop from an empty set'`);
+            vals.pop();
+          } else if (method === 'clear') {
+            vals.length = 0;
+          }
         } else if (this.isFile(target)) {
           const fileObj = target as any;
           if (method === 'write') {
@@ -649,6 +668,7 @@ class MiniPython {
       const v = this.eval(argsStr, env);
       if (typeof v === 'string') return v.length;
       if (Array.isArray(v)) return v.length;
+      if (this.isSet(v)) return (v as any).values.length;
       if (this.isDict(v)) return Object.keys(v).length;
       if (v === null) return 0;
       throw new Error(`  TypeError: object of type '${typeof v}' has no len()`);
@@ -714,11 +734,17 @@ class MiniPython {
     }
     if (name === 'set') {
       const args = argsStr.trim() ? this.parseArgs(argsStr, env) : [];
-      if (args.length === 0) return [];
+      if (args.length === 0) return { __type__: 'set', values: [] };
       const v = args[0];
       const list = this.toIterableList(v);
       if (list === null) throw new Error(`  TypeError: '${v === null ? 'NoneType' : typeof v}' object is not iterable`);
-      return [...new Set(list)];
+      const uniqueValues: PyVal[] = [];
+      for (const el of list) {
+        if (!uniqueValues.some(item => this.isEqual(item, el))) {
+          uniqueValues.push(el);
+        }
+      }
+      return { __type__: 'set', values: uniqueValues };
     }
     if (name === 'list') {
       const args = argsStr.trim() ? this.parseArgs(argsStr, env) : [];
@@ -752,6 +778,7 @@ class MiniPython {
       if (typeof v === 'number') return Number.isInteger(v) ? "<class 'int'>" : "<class 'float'>";
       if (typeof v === 'boolean') return "<class 'bool'>";
       if (Array.isArray(v)) return "<class 'list'>";
+      if (this.isSet(v)) return "<class 'set'>";
       if (this.isDict(v)) return "<class 'dict'>";
       return `<class '${typeof v}'>`;
     }
@@ -845,9 +872,78 @@ class MiniPython {
     return typeof v === 'object' && v !== null && !Array.isArray(v) && !('__type__' in v);
   }
 
+  private isSet(v: PyVal): boolean {
+    return typeof v === 'object' && v !== null && '__type__' in v && (v as any).__type__ === 'set';
+  }
+
+  private isEqual(a: PyVal, b: PyVal): boolean {
+    if (a === b) return true;
+    if (a === null || b === null) return false;
+    if (typeof a !== typeof b) return false;
+    if (Array.isArray(a) && Array.isArray(b)) {
+      if (a.length !== b.length) return false;
+      for (let i = 0; i < a.length; i++) {
+        if (!this.isEqual(a[i], b[i])) return false;
+      }
+      return true;
+    }
+    if (this.isDict(a) && this.isDict(b)) {
+      const keysA = Object.keys(a);
+      const keysB = Object.keys(b);
+      if (keysA.length !== keysB.length) return false;
+      for (const k of keysA) {
+        if (!this.isEqual(a[k], b[k])) return false;
+      }
+      return true;
+    }
+    if (this.isSet(a) && this.isSet(b)) {
+      const valuesA = (a as any).values as PyVal[];
+      const valuesB = (b as any).values as PyVal[];
+      if (valuesA.length !== valuesB.length) return false;
+      for (const val of valuesA) {
+        if (!valuesB.some(v => this.isEqual(v, val))) return false;
+      }
+      return true;
+    }
+    return false;
+  }
+
+  private getTypeName(v: PyVal): string {
+    if (v === null) return 'NoneType';
+    if (this.isSet(v)) return 'set';
+    if (this.isDict(v)) return 'dict';
+    if (Array.isArray(v)) return 'list';
+    if (typeof v === 'string') return 'str';
+    if (typeof v === 'number') return Number.isInteger(v) ? 'int' : 'float';
+    if (typeof v === 'boolean') return 'bool';
+    return typeof v;
+  }
+
+  private hasTopLevelColon(inner: string): boolean {
+    let depth = 0, bracketDepth = 0, braceDepth = 0, inStr = false, strCh = '';
+    for (let i = 0; i < inner.length; i++) {
+      const ch = inner[i];
+      if (!inStr && (ch === '"' || ch === "'")) { inStr = true; strCh = ch; }
+      else if (inStr && ch === strCh) { inStr = false; }
+      else if (!inStr) {
+        if (ch === '(') depth++;
+        else if (ch === ')') depth--;
+        else if (ch === '[') bracketDepth++;
+        else if (ch === ']') bracketDepth--;
+        else if (ch === '{') braceDepth++;
+        else if (ch === '}') braceDepth--;
+        else if (ch === ':' && depth === 0 && bracketDepth === 0 && braceDepth === 0) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   private toIterableList(v: PyVal): PyVal[] | null {
     if (Array.isArray(v)) return v;
     if (typeof v === 'string') return v.split('');
+    if (this.isSet(v)) return (v as any).values;
     if (this.isFile(v)) {
       const fileObj = v as any;
       try {
@@ -863,6 +959,7 @@ class MiniPython {
     }
     return null;
   }
+
 
   // ── Expression evaluator ───────────────────────────────────────────────
 
@@ -1016,12 +1113,27 @@ class MiniPython {
       return this.eval(expr.slice(1, -1).trim(), env);
     }
 
-    // Dict literal: {key: val, ...}
+    // Dict/Set literal: {key: val, ...} or {val1, val2, ...}
     if (expr.startsWith('{') && expr.endsWith('}')) {
       const inner = expr.slice(1, -1).trim();
       if (!inner) return {};
-      if (inner.includes(':')) return this.parseDictLiteral(inner, env);
+      if (this.hasTopLevelColon(inner)) {
+        return this.parseDictLiteral(inner, env);
+      } else {
+        const elements = this.parseArgs(inner, env);
+        const uniqueValues: PyVal[] = [];
+        for (const el of elements) {
+          if (!uniqueValues.some(item => this.isEqual(item, el))) {
+            uniqueValues.push(el);
+          }
+        }
+        return {
+          __type__: 'set',
+          values: uniqueValues
+        };
+      }
     }
+
 
     // Logical operators (lowest precedence)
     const logOps: Array<[string, (a: PyVal, b: PyVal) => PyVal]> = [
@@ -1086,16 +1198,51 @@ class MiniPython {
       const [lhs, op, rhs] = bin;
       const lv = this.eval(lhs, env);
       const rv = this.eval(rhs, env);
+      if (this.isSet(lv) || this.isSet(rv)) {
+        if (!this.isSet(lv) || !this.isSet(rv)) {
+          throw new Error(`  TypeError: unsupported operand type(s) for ${op}: '${this.getTypeName(lv)}' and '${this.getTypeName(rv)}'`);
+        }
+        const valsL = (lv as any).values as PyVal[];
+        const valsR = (rv as any).values as PyVal[];
+        if (op === '|') {
+          const unionVals = [...valsL];
+          for (const r of valsR) {
+            if (!unionVals.some(l => this.isEqual(l, r))) {
+              unionVals.push(r);
+            }
+          }
+          return { __type__: 'set', values: unionVals };
+        }
+        if (op === '&') {
+          const intersectVals: PyVal[] = [];
+          for (const l of valsL) {
+            if (valsR.some(r => this.isEqual(l, r))) {
+              intersectVals.push(l);
+            }
+          }
+          return { __type__: 'set', values: intersectVals };
+        }
+        if (op === '-') {
+          const diffVals: PyVal[] = [];
+          for (const l of valsL) {
+            if (!valsR.some(r => this.isEqual(l, r))) {
+              diffVals.push(l);
+            }
+          }
+          return { __type__: 'set', values: diffVals };
+        }
+        throw new Error(`  TypeError: unsupported operand type(s) for ${op}: 'set' and 'set'`);
+      }
       if (lv === null || rv === null) {
-        throw new Error(`  TypeError: unsupported operand type(s) for ${op}: '${typeof lv}' and '${typeof rv}'`);
+        throw new Error(`  TypeError: unsupported operand type(s) for ${op}: '${this.getTypeName(lv)}' and '${this.getTypeName(rv)}'`);
       }
       if (typeof lv === 'string' || typeof rv === 'string') {
         if (op === '+') return String(lv ?? '') + String(rv ?? '');
         if (op === '%' && typeof lv === 'string') return this.formatString(lv, rv);
-        throw new Error(`  TypeError: unsupported operand type(s) for ${op}: '${typeof lv}' and '${typeof rv}'`);
+        throw new Error(`  TypeError: unsupported operand type(s) for ${op}: '${this.getTypeName(lv)}' and '${this.getTypeName(rv)}'`);
       }
       if (typeof lv !== 'number' || typeof rv !== 'number') {
-        throw new Error(`  TypeError: unsupported operand type(s) for ${op}: '${typeof lv}' and '${typeof rv}'`);
+        throw new Error(`  TypeError: unsupported operand type(s) for ${op}: '${this.getTypeName(lv)}' and '${this.getTypeName(rv)}'`);
       }
       switch (op) {
         case '+': return lv + rv;
@@ -1112,8 +1259,13 @@ class MiniPython {
           return lv % rv;
         case '**':
           return Math.pow(lv, rv);
+        case '|':
+          return lv | rv;
+        case '&':
+          return lv & rv;
       }
     }
+
 
     // Function call
     const fnM = expr.match(/^([a-zA-Z_]\w*)\s*\((.*)?\)$/);
@@ -1237,6 +1389,69 @@ class MiniPython {
           }
         }
       }
+      if (this.isSet(target)) {
+        const vals = (target as any).values as PyVal[];
+        if (methodName === 'add' && args.length >= 1) {
+          if (!vals.some(v => this.isEqual(v, args[0]))) {
+            vals.push(args[0]);
+          }
+          return null;
+        }
+        if (methodName === 'remove' && args.length >= 1) {
+          const idx = vals.findIndex(v => this.isEqual(v, args[0]));
+          if (idx >= 0) {
+            vals.splice(idx, 1);
+          } else {
+            throw new Error(`  KeyError: ${this.repr(args[0])}`);
+          }
+          return null;
+        }
+        if (methodName === 'discard' && args.length >= 1) {
+          const idx = vals.findIndex(v => this.isEqual(v, args[0]));
+          if (idx >= 0) {
+            vals.splice(idx, 1);
+          }
+          return null;
+        }
+        if (methodName === 'pop') {
+          if (vals.length === 0) throw new Error(`  KeyError: 'pop from an empty set'`);
+          return vals.pop();
+        }
+        if (methodName === 'clear') {
+          vals.length = 0;
+          return null;
+        }
+        if (methodName === 'union' && args.length >= 1 && this.isSet(args[0])) {
+          const unionVals = [...vals];
+          const otherVals = (args[0] as any).values as PyVal[];
+          for (const r of otherVals) {
+            if (!unionVals.some(l => this.isEqual(l, r))) {
+              unionVals.push(r);
+            }
+          }
+          return { __type__: 'set', values: unionVals };
+        }
+        if (methodName === 'intersection' && args.length >= 1 && this.isSet(args[0])) {
+          const intersectVals: PyVal[] = [];
+          const otherVals = (args[0] as any).values as PyVal[];
+          for (const l of vals) {
+            if (otherVals.some(r => this.isEqual(l, r))) {
+              intersectVals.push(l);
+            }
+          }
+          return { __type__: 'set', values: intersectVals };
+        }
+        if (methodName === 'difference' && args.length >= 1 && this.isSet(args[0])) {
+          const diffVals: PyVal[] = [];
+          const otherVals = (args[0] as any).values as PyVal[];
+          for (const l of vals) {
+            if (!otherVals.some(r => this.isEqual(l, r))) {
+              diffVals.push(l);
+            }
+          }
+          return { __type__: 'set', values: diffVals };
+        }
+      }
       if (this.isFile(target)) {
         const fileObj = target as any;
         if (methodName === 'write') {
@@ -1276,8 +1491,12 @@ class MiniPython {
   private _contains(container: PyVal, item: PyVal): boolean {
     if (typeof container === 'string' && typeof item === 'string') return container.includes(item);
     if (Array.isArray(container)) return container.includes(item);
+    if (this.isSet(container)) {
+      const vals = (container as any).values as PyVal[];
+      return vals.some(v => this.isEqual(v, item));
+    }
     if (this.isDict(container)) return item !== null && item !== undefined && String(item) in container;
-    throw new Error(`  TypeError: argument of type '${typeof container}' is not iterable`);
+    throw new Error(`  TypeError: argument of type '${this.getTypeName(container)}' is not iterable`);
   }
 
   private findWordOutsideStrings(expr: string, word: string): number {
@@ -1394,41 +1613,64 @@ class MiniPython {
   }
 
   private findBinOp(expr: string): [string, string, string] | null {
-    const ops = ['+', '-', '**', '*', '//', '/', '%'];
-    let inStr = false, strCh = '', depth = 0, bracketDepth = 0, braceDepth = 0;
-    for (let i = expr.length - 1; i >= 1; i--) {
-      const ch = expr[i];
-      if (ch === ')') depth++;
-      else if (ch === '(') depth--;
-      else if (ch === ']') bracketDepth++;
-      else if (ch === '[') bracketDepth--;
-      else if (ch === '}') braceDepth++;
-      else if (ch === '{') braceDepth--;
-      else if (!inStr && (ch === '"' || ch === "'")) { inStr = true; strCh = ch; }
-      else if (inStr && ch === strCh) inStr = false;
-      if (!inStr && !depth && !bracketDepth && !braceDepth) {
-        for (const op of ops) {
-          if (expr.slice(i, i + op.length) === op) {
-            // Skip '-' if it's likely unary minus (prev non-space char is not a valid expr ending)
-            if (op === '-' && i > 0) {
-              let j = i - 1;
-              while (j >= 0 && expr[j] === ' ') j--;
-              const prev = j >= 0 ? expr[j] : '';
-              if (!prev || !/[a-zA-Z0-9_)\]}]/.test(prev)) continue;
+    const groups = [
+      ['|'],
+      ['&'],
+      ['+', '-'],
+      ['*', '//', '/', '%'],
+      ['**']
+    ];
+
+    for (const ops of groups) {
+      let inStr = false, strCh = '', depth = 0, bracketDepth = 0, braceDepth = 0;
+      for (let i = expr.length - 1; i >= 1; i--) {
+        const ch = expr[i];
+        if (ch === ')') depth++;
+        else if (ch === '(') depth--;
+        else if (ch === ']') bracketDepth++;
+        else if (ch === '[') bracketDepth--;
+        else if (ch === '}') braceDepth++;
+        else if (ch === '{') braceDepth--;
+        else if (!inStr && (ch === '"' || ch === "'")) { inStr = true; strCh = ch; }
+        else if (inStr && ch === strCh) inStr = false;
+        
+        if (!inStr && !depth && !bracketDepth && !braceDepth) {
+          for (const op of ops) {
+            if (expr.slice(i, i + op.length) === op) {
+              // Skip '&' if it is part of '&&'
+              if (op === '&') {
+                if ((i > 0 && expr[i - 1] === '&') || (i + 1 < expr.length && expr[i + 1] === '&')) continue;
+              }
+              // Skip '|' if it is part of '||'
+              if (op === '|') {
+                if ((i > 0 && expr[i - 1] === '|') || (i + 1 < expr.length && expr[i + 1] === '|')) continue;
+              }
+              // Skip '*' if it is part of '**'
+              if (op === '*') {
+                if ((i > 0 && expr[i - 1] === '*') || (i + 1 < expr.length && expr[i + 1] === '*')) continue;
+              }
+              // Skip '/' if it is part of '//'
+              if (op === '/') {
+                if ((i > 0 && expr[i - 1] === '/') || (i + 1 < expr.length && expr[i + 1] === '/')) continue;
+              }
+              // Skip '-' if it's likely unary minus (prev non-space char is not a valid expr ending)
+              if (op === '-' && i > 0) {
+                let j = i - 1;
+                while (j >= 0 && expr[j] === ' ') j--;
+                const prev = j >= 0 ? expr[j] : '';
+                if (!prev || !/[a-zA-Z0-9_)\]}]/.test(prev)) continue;
+              }
+              const lhs = expr.slice(0, i).trim();
+              const rhs = expr.slice(i + op.length).trim();
+              if (lhs && rhs && !lhs.endsWith('=')) return [lhs, op, rhs];
             }
-            // Skip '*' if it's the second char of '**'
-            if (op === '*' && i > 0 && expr[i - 1] === '*') continue;
-            // Skip '/' if it's the second char of '//'
-            if (op === '/' && i > 0 && expr[i - 1] === '/') continue;
-            const lhs = expr.slice(0, i).trim();
-            const rhs = expr.slice(i + op.length).trim();
-            if (lhs && rhs && !lhs.endsWith('=')) return [lhs, op, rhs];
           }
         }
       }
     }
     return null;
   }
+
 
   private static inMemoryFs = new Map<string, string>();
 
@@ -1646,6 +1888,11 @@ class MiniPython {
         .replace(/\r/g, '\\r')
         .replace(/\t/g, '\\t');
       return `'${escaped}'`;
+    }
+    if (this.isSet(v)) {
+      const vals = (v as any).values as PyVal[];
+      if (vals.length === 0) return 'set()';
+      return '{' + vals.map(x => this.repr(x)).join(', ') + '}';
     }
     if (Array.isArray(v)) return '[' + v.map(x => this.repr(x)).join(', ') + ']';
     if (this.isDict(v)) {

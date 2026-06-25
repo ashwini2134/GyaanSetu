@@ -104,6 +104,140 @@ function createDict(initialObj: Record<string, any> = {}): any {
   });
 }
 
+// Custom Set Proxy to mock Python set methods
+function createSet(initialArray: any[] = []): any {
+  const uniqueVals: any[] = [];
+  for (const item of initialArray) {
+    if (!uniqueVals.includes(item)) {
+      uniqueVals.push(item);
+    }
+  }
+  const s = new Set(uniqueVals);
+  return new Proxy(s, {
+    get(target, prop, receiver) {
+      if (prop === 'add') {
+        return (item: any) => {
+          target.add(item);
+          return null;
+        };
+      }
+      if (prop === 'remove') {
+        return (item: any) => {
+          if (target.has(item)) {
+            target.delete(item);
+            return null;
+          }
+          throw new Error(`KeyError: ${item}`);
+        };
+      }
+      if (prop === 'discard') {
+        return (item: any) => {
+          target.delete(item);
+          return null;
+        };
+      }
+      if (prop === 'pop') {
+        return () => {
+          if (target.size === 0) throw new Error(`KeyError: 'pop from an empty set'`);
+          const first = target.values().next().value;
+          target.delete(first);
+          return first;
+        };
+      }
+      if (prop === 'clear') {
+        return () => {
+          target.clear();
+          return null;
+        };
+      }
+      if (prop === 'union') {
+        return (other: any) => {
+          const unionSet = new Set(target);
+          if (other instanceof Set) {
+            for (const x of other) unionSet.add(x);
+          } else if (Array.isArray(other)) {
+            for (const x of other) unionSet.add(x);
+          }
+          return createSet(Array.from(unionSet));
+        };
+      }
+      if (prop === 'intersection') {
+        return (other: any) => {
+          const intersectSet = new Set();
+          const otherSet = other instanceof Set ? other : new Set(other);
+          for (const x of target) {
+            if (otherSet.has(x)) intersectSet.add(x);
+          }
+          return createSet(Array.from(intersectSet));
+        };
+      }
+      if (prop === 'difference') {
+        return (other: any) => {
+          const diffSet = new Set(target);
+          const otherSet = other instanceof Set ? other : new Set(other);
+          for (const x of otherSet) {
+            diffSet.delete(x);
+          }
+          return createSet(Array.from(diffSet));
+        };
+      }
+      if (prop === 'size') {
+        return target.size;
+      }
+      if (prop === Symbol.iterator) {
+        return target[Symbol.iterator].bind(target);
+      }
+      if (prop === 'has') {
+        return (item: any) => target.has(item);
+      }
+      const value = Reflect.get(target, prop, receiver);
+      if (typeof value === 'function') {
+        return value.bind(target);
+      }
+      return value;
+    }
+  });
+}
+
+function pyOr(a: any, b: any): any {
+  if (a instanceof Set || b instanceof Set) {
+    if (!(a instanceof Set) || !(b instanceof Set)) {
+      throw new Error("TypeError: unsupported operand type(s) for |");
+    }
+    return (a as any).union(b);
+  }
+  return a | b;
+}
+
+function pyAnd(a: any, b: any): any {
+  if (a instanceof Set || b instanceof Set) {
+    if (!(a instanceof Set) || !(b instanceof Set)) {
+      throw new Error("TypeError: unsupported operand type(s) for &");
+    }
+    return (a as any).intersection(b);
+  }
+  return a & b;
+}
+
+function pySub(a: any, b: any): any {
+  if (a instanceof Set || b instanceof Set) {
+    if (!(a instanceof Set) || !(b instanceof Set)) {
+      throw new Error("TypeError: unsupported operand type(s) for -");
+    }
+    return (a as any).difference(b);
+  }
+  return a - b;
+}
+
+function pyIn(x: any, y: any): boolean {
+  if (y === null || y === undefined) return false;
+  if (y instanceof Set) return y.has(x);
+  if (Array.isArray(y)) return y.includes(x);
+  if (typeof y === 'string') return y.includes(String(x));
+  if (typeof y === 'object') return x in y;
+  return false;
+}
+
 // Local storage-backed virtual filesystem helper
 function pyOpen(filename: string, mode: string = 'r') {
   const cleanFilename = filename.replace(/['"]/g, '').trim();
@@ -147,6 +281,10 @@ function pyOpen(filename: string, mode: string = 'r') {
 function repr(v: any): string {
   if (v === null || v === undefined) return 'None';
   if (typeof v === 'boolean') return v ? 'True' : 'False';
+  if (v instanceof Set) {
+    if (v.size === 0) return 'set()';
+    return '{' + Array.from(v).map(repr).join(', ') + '}';
+  }
   if (Array.isArray(v)) {
     return '[' + v.map(repr).join(', ') + ']';
   }
@@ -170,10 +308,14 @@ function* pyInput(prompt: any = ''): Generator<ExecEvent, string, string> {
 function pyLen(x: any): number {
   if (x === null || x === undefined) return 0;
   if (typeof x === 'string' || Array.isArray(x)) return x.length;
+  if (x instanceof Set) return x.size;
   return Object.keys(x).length;
 }
 
 function pyVal(val: any): any {
+  if (val instanceof Set) {
+    return val;
+  }
   if (Array.isArray(val)) {
     return createList(val.map(pyVal));
   }
@@ -201,6 +343,171 @@ function splitComment(line: string): [string, string] {
     }
   }
   return [line, ''];
+}
+
+function hasTopLevelColon(inner: string): boolean {
+  let depth = 0, bracketDepth = 0, braceDepth = 0, inStr = false, strCh = '';
+  for (let i = 0; i < inner.length; i++) {
+    const ch = inner[i];
+    if (!inStr && (ch === '"' || ch === "'")) { inStr = true; strCh = ch; }
+    else if (inStr && ch === strCh) { inStr = false; }
+    else if (!inStr) {
+      if (ch === '(') depth++;
+      else if (ch === ')') depth--;
+      else if (ch === '[') bracketDepth++;
+      else if (ch === ']') bracketDepth--;
+      else if (ch === '{') braceDepth++;
+      else if (ch === '}') braceDepth--;
+      else if (ch === ':' && depth === 0 && bracketDepth === 0 && braceDepth === 0) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function findTranspileBinOp(expr: string): [string, string, string] | null {
+  const groups = [
+    ['not in', 'in'],
+    ['|'],
+    ['&'],
+    ['+', '-'],
+    ['*', '//', '/', '%'],
+    ['**']
+  ];
+  for (const ops of groups) {
+    let inStr = false, strCh = '', depth = 0, bracketDepth = 0, braceDepth = 0;
+    for (let i = expr.length - 1; i >= 1; i--) {
+      const ch = expr[i];
+      if (ch === ')') depth++;
+      else if (ch === '(') depth--;
+      else if (ch === ']') bracketDepth++;
+      else if (ch === '[') bracketDepth--;
+      else if (ch === '}') braceDepth++;
+      else if (ch === '{') braceDepth--;
+      else if (!inStr && (ch === '"' || ch === "'")) { inStr = true; strCh = ch; }
+      else if (inStr && ch === strCh) inStr = false;
+      
+      if (!inStr && !depth && !bracketDepth && !braceDepth) {
+        for (const op of ops) {
+          if (expr.slice(i, i + op.length) === op) {
+            if (op === 'in' || op === 'not in') {
+              const beforeIdx = i - 1;
+              const afterIdx = i + op.length;
+              const beforeChar = beforeIdx >= 0 ? expr[beforeIdx] : ' ';
+              const afterChar = afterIdx < expr.length ? expr[afterIdx] : ' ';
+              if (/[a-zA-Z0-9_]/.test(beforeChar) || /[a-zA-Z0-9_]/.test(afterChar)) continue;
+            }
+            // Skip '&' if it is part of '&&'
+            if (op === '&') {
+              if ((i > 0 && expr[i - 1] === '&') || (i + 1 < expr.length && expr[i + 1] === '&')) continue;
+            }
+            // Skip '|' if it is part of '||'
+            if (op === '|') {
+              if ((i > 0 && expr[i - 1] === '|') || (i + 1 < expr.length && expr[i + 1] === '|')) continue;
+            }
+            // Skip '*' if it is part of '**'
+            if (op === '*') {
+              if ((i > 0 && expr[i - 1] === '*') || (i + 1 < expr.length && expr[i + 1] === '*')) continue;
+            }
+            // Skip '/' if it is part of '//'
+            if (op === '/') {
+              if ((i > 0 && expr[i - 1] === '/') || (i + 1 < expr.length && expr[i + 1] === '/')) continue;
+            }
+            if (op === '-' && i > 0) {
+              let j = i - 1;
+              while (j >= 0 && expr[j] === ' ') j--;
+              const prev = j >= 0 ? expr[j] : '';
+              if (!prev || !/[a-zA-Z0-9_)\]}]/.test(prev)) continue;
+            }
+            // Skip '*' if it is part of 'yield*'
+            if (op === '*' && i >= 5) {
+              let j = i - 1;
+              while (j >= 0 && expr[j] === ' ') j--;
+              if (j >= 4 && expr.slice(j - 4, j + 1) === 'yield') continue;
+            }
+            
+            const lhs = expr.slice(0, i).trim();
+            const rhs = expr.slice(i + op.length).trim();
+            if (lhs && rhs && !lhs.endsWith('=')) return [lhs, op, rhs];
+          }
+        }
+      }
+    }
+  }
+  return null;
+}
+
+function transpileSubExprs(expr: string): string {
+  let result = '';
+  let i = 0;
+  while (i < expr.length) {
+    const ch = expr[i];
+    if (ch === '(') {
+      let depth = 1;
+      let j = i + 1;
+      while (j < expr.length && depth > 0) {
+        if (expr[j] === '(') depth++;
+        else if (expr[j] === ')') depth--;
+        j++;
+      }
+      const inner = expr.slice(i + 1, j - 1);
+      result += '(' + transpileBinOps(inner) + ')';
+      i = j;
+    } else if (ch === '[') {
+      let depth = 1;
+      let j = i + 1;
+      while (j < expr.length && depth > 0) {
+        if (expr[j] === '[') depth++;
+        else if (expr[j] === ']') depth--;
+        j++;
+      }
+      const inner = expr.slice(i + 1, j - 1);
+      result += '[' + transpileBinOps(inner) + ']';
+      i = j;
+    } else if (expr.slice(i, i + 22) === '__DICT_LITERAL_START__') {
+      let depth = 1;
+      let j = i + 22;
+      while (j < expr.length && depth > 0) {
+        if (expr.slice(j, j + 22) === '__DICT_LITERAL_START__') {
+          depth++;
+          j += 22;
+        } else if (expr.slice(j, j + 20) === '__DICT_LITERAL_END__') {
+          depth--;
+          j += 20;
+        } else {
+          j++;
+        }
+      }
+      const inner = expr.slice(i + 22, j - 20);
+      result += '__DICT_LITERAL_START__' + transpileBinOps(inner) + '__DICT_LITERAL_END__';
+      i = j;
+    } else {
+      result += ch;
+      i++;
+    }
+  }
+  return result;
+}
+
+function transpileBinOps(expr: string): string {
+  expr = expr.trim();
+  if (!expr) return '';
+  const bin = findTranspileBinOp(expr);
+  if (bin) {
+    const [lhs, op, rhs] = bin;
+    const jsLhs = transpileBinOps(lhs);
+    const jsRhs = transpileBinOps(rhs);
+    if (op === 'in') return `pyIn(${jsLhs}, ${jsRhs})`;
+    if (op === 'not in') return `!pyIn(${jsLhs}, ${jsRhs})`;
+    if (op === '|') return `pyOr(${jsLhs}, ${jsRhs})`;
+    if (op === '&') return `pyAnd(${jsLhs}, ${jsRhs})`;
+    if (op === '-') return `pySub(${jsLhs}, ${jsRhs})`;
+    if (op === '//') return `Math.floor(${jsLhs} / ${jsRhs})`;
+    if (op === '**') return `Math.pow(${jsLhs}, ${jsRhs})`;
+    return `${jsLhs} ${op} ${jsRhs}`;
+  }
+  return transpileSubExprs(expr);
 }
 
 function translateExpr(expr: string, customFuncs: Set<string>): string {
@@ -236,8 +543,21 @@ function translateExpr(expr: string, customFuncs: Set<string>): string {
   js = js.replace(/\blen\s*\(([^)]*)\)/g, 'pyLen($1)');
 
   // Dict / List instantiations
-  js = js.replace(/\{\}/g, 'createDict({})');
+  js = js.replace(/\{\}/g, '__DICT_LITERAL_START____DICT_LITERAL_END__');
   js = js.replace(/\[\]/g, 'createList([])');
+
+  // Set & Dict literals (innermost first)
+  let prevSetJs = '';
+  while (js !== prevSetJs) {
+    prevSetJs = js;
+    js = js.replace(/\{([^{}]+)\}/g, (match, inner) => {
+      if (hasTopLevelColon(inner)) {
+        return `__DICT_LITERAL_START__${inner}__DICT_LITERAL_END__`;
+      } else {
+        return `createSet([${inner}])`;
+      }
+    });
+  }
 
   // Custom function yields
   for (let fn of customFuncs) {
@@ -257,6 +577,13 @@ function translateExpr(expr: string, customFuncs: Set<string>): string {
     prevJs = js;
     js = js.replace(/(?<!\b[a-zA-Z_]\w*)\(([^()]+,[^()]+)\)/g, '[$1]');
   }
+
+  // Transpile set and bitwise operations
+  js = transpileBinOps(js);
+
+  // Restore dict literals placeholders
+  js = js.replace(/__DICT_LITERAL_START__/g, 'createDict({')
+         .replace(/__DICT_LITERAL_END__/g, '})');
 
   // Restore string literals
   js = js.replace(/__STR_PLACEHOLDER_(\d+)__/g, (_, idx) => strings[parseInt(idx, 10)]);
@@ -558,6 +885,7 @@ export function* runInteractive(code: string): Generator<ExecEvent, ExecResult, 
 
   const sandboxFunc = new Function(
     'pyPrint', 'pyInput', 'pyOpen', 'pyLen', 'createDict', 'createList', 'pyVal',
+    'createSet', 'pyOr', 'pyAnd', 'pySub', 'pyIn',
     `
       if (!String.prototype.strip) String.prototype.strip = function() { return this.trim(); };
       if (!String.prototype.lower) String.prototype.lower = function() { return this.toLowerCase(); };
@@ -568,6 +896,18 @@ export function* runInteractive(code: string): Generator<ExecEvent, ExecResult, 
       const float = (x) => parseFloat(x);
       const str = (x) => String(x);
       
+      const set = (x) => {
+        if (x === undefined || x === null) return createSet([]);
+        if (x instanceof Set) return createSet(Array.from(x));
+        if (Array.isArray(x)) return createSet(x);
+        if (typeof x === 'object') {
+          if (typeof x.keys === 'function') return createSet(Array.from(x.keys()));
+          return createSet(Object.keys(x));
+        }
+        if (typeof x === 'string') return createSet(x.split(''));
+        return createSet(Array.from(x));
+      };
+
       const ValueError = Error;
       const TypeError = Error;
       const KeyError = Error;
@@ -590,7 +930,8 @@ export function* runInteractive(code: string): Generator<ExecEvent, ExecResult, 
   );
 
   const genCreator = sandboxFunc(
-    pyPrint, pyInput, pyOpen, pyLen, createDict, createList, pyVal
+    pyPrint, pyInput, pyOpen, pyLen, createDict, createList, pyVal,
+    createSet, pyOr, pyAnd, pySub, pyIn
   );
 
   const mainGen: Generator<ExecEvent, ExecResult, string> = genCreator();
