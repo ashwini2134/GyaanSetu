@@ -10,17 +10,13 @@ import {
   BookOpen,
   ChevronDown,
   ClipboardList,
-  Construction,
   FolderKanban,
   LayoutDashboard,
   Menu,
   Settings,
-  ShieldCheck,
   Trophy,
   User,
-  UserCheck,
   X,
-  Zap,
 } from "lucide-react";
 import { authApi } from "./authClient";
 
@@ -245,7 +241,7 @@ export default function Shell() {
               )}
             </div>
 
-            <NavLink to="/settings" className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all duration-200 border border-transparent hover:border-slate-700/50">
+            <NavLink to={user?.role === 'admin' ? '/admin/settings' : '/settings'} className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all duration-200 border border-transparent hover:border-slate-700/50">
               <Settings size={20} />
             </NavLink>
 
@@ -357,101 +353,32 @@ export default function Shell() {
             {/* ── Admin navigation ── */}
             {user?.role === "admin" && <>
               <div className="border-t border-slate-700/30 my-2" />
+              <div className={`px-3 py-1.5 text-[10px] font-semibold text-slate-500 uppercase tracking-wider transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0'}`}>
+                Admin
+              </div>
 
-              <NavLink to="/admin/review-queue" onClick={() => setSidebarOpen(false)}
+              <NavLink to="/admin/content-studio" onClick={() => setSidebarOpen(false)}
                 className={({ isActive }) => `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
-                title="Review Queue">
+                title="Content Studio">
+                <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><BookOpen size={18} /></span>
+                <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>Content Studio</span>
+              </NavLink>
+
+              <NavLink to="/admin/analytics" onClick={() => setSidebarOpen(false)}
+                className={({ isActive }) => `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
+                title="Analytics">
+                <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><BarChart3 size={18} /></span>
+                <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>Analytics</span>
+              </NavLink>
+
+              <NavLink to="/admin/operations-monitor" onClick={() => setSidebarOpen(false)}
+                className={({ isActive }) => `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
+                title="Operations Monitor">
                 <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><AlertTriangle size={18} /></span>
-                <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>Review Queue</span>
+                <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>Operations Monitor</span>
               </NavLink>
 
-              <NavLink to="/admin/students" onClick={() => setSidebarOpen(false)}
-                className={({ isActive }) => `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
-                title="Student Management">
-                <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><UserCheck size={18} /></span>
-                <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>Student Management</span>
-              </NavLink>
-
-              <NavLink to="/admin/courses" onClick={() => setSidebarOpen(false)}
-                className={({ isActive }) => `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
-                title="Courses">
-                <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><BookOpen size={18} /></span>
-                <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>Courses</span>
-              </NavLink>
-
-              <NavLink to="/admin" onClick={() => setSidebarOpen(false)}
-                className={({ isActive }) => `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
-                title="Admin Panel">
-                <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><ShieldCheck size={18} /></span>
-                <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>Admin Panel</span>
-              </NavLink>
-
-              <NavLink to="/admin/notifications" onClick={() => setSidebarOpen(false)}
-                className={({ isActive }) => `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
-                title="Notifications">
-                <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><Bell size={18} /></span>
-                <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>Notifications</span>
-              </NavLink>
-
-              <NavLink to="/admin/projects" onClick={() => setSidebarOpen(false)}
-                className={({ isActive }) => `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
-                title="Projects">
-                <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><FolderKanban size={18} /></span>
-                <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>Projects</span>
-              </NavLink>
-
-              <NavLink to="/admin/practice-exercises" onClick={() => setSidebarOpen(false)}
-                className={({ isActive }) => `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
-                title="Practice Exercises">
-                <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><BookOpen size={18} /></span>
-                <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>Practice</span>
-              </NavLink>
-
-              <NavLink to="/admin/assessments" onClick={() => setSidebarOpen(false)}
-                className={({ isActive }) => `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
-                title="Assessments">
-                <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><BarChart3 size={18} /></span>
-                <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>Assessments</span>
-              </NavLink>
-
-              <NavLink to="/admin/certifications" onClick={() => setSidebarOpen(false)}
-                className={({ isActive }) => `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
-                title="Certifications">
-                <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><Award size={18} /></span>
-                <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>Certifications</span>
-              </NavLink>
-
-              <NavLink to="/admin/content" onClick={() => setSidebarOpen(false)}
-                className={({ isActive }) => `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
-                title="Content">
-                <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><BookOpen size={18} /></span>
-                <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>Content</span>
-              </NavLink>
-
-              <NavLink to="/admin/reports" onClick={() => setSidebarOpen(false)}
-                className={({ isActive }) => `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
-                title="Reports">
-                <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><BarChart3 size={18} /></span>
-                <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>Reports</span>
-              </NavLink>
-
-              <NavLink to="/admin/automations" onClick={() => setSidebarOpen(false)}
-                className={({ isActive }) => `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
-                title="Automations">
-                <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><Zap size={18} /></span>
-                <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>Automations</span>
-              </NavLink>
-
-              <div className="border-t border-slate-700/30 my-2" />
-
-              <NavLink to="/qa" onClick={() => setSidebarOpen(false)}
-                className={({ isActive }) => `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
-                title="QA Center">
-                <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><Construction size={18} /></span>
-                <span className={`truncate flex-1 text-left transition-opacity duration-200 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden flex-grow-0'}`}>QA Center</span>
-              </NavLink>
-
-              <NavLink to="/settings" onClick={() => setSidebarOpen(false)}
+              <NavLink to="/admin/settings" onClick={() => setSidebarOpen(false)}
                 className={({ isActive }) => `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive} ${expanded ? '' : 'justify-center px-2 gap-0'}`}
                 title="Settings">
                 <span className="w-5 h-5 flex items-center justify-center flex-shrink-0"><Settings size={18} /></span>

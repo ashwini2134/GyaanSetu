@@ -109,6 +109,32 @@
       ]
     },
     {
+      "id": "deep-learning-cnn",
+      "label": "Deep Learning & CNNs",
+      "blocks": [
+        {
+          "type": "explanation",
+          "title": "How Neural Networks Enable Deep Learning",
+          "body": "Neural Networks are the foundation. Deep Learning scales them up. CNNs specialize them for images.",
+          "bullets": [
+            "Neural Networks — interconnected nodes that process information in layers",
+            "Deep Learning — neural networks with many layers that learn complex patterns",
+            "CNNs (Convolutional Neural Networks) — specialized for understanding images and visual patterns",
+            "This hierarchy powers everything from face unlock to medical scan analysis"
+          ],
+          "accentColor": "purple"
+        },
+        {
+          "type": "practice",
+          "title": "Inside the Vision System",
+          "instructions": "Discover how Neural Networks enable Deep Learning and how CNNs understand images.",
+          "starterCode": "# Explore the vision hierarchy\nprint(\"Tap Neural Network to begin your discovery\")",
+          "solution": "# Complete the interactive discovery",
+          "hint": "Neural Networks → Deep Learning → CNNs. Each level specializes further for vision."
+        }
+      ]
+    },
+    {
       "id": "getting-started",
       "label": "Getting Started",
       "blocks": [

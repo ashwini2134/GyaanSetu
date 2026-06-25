@@ -133,6 +133,49 @@ export interface ReflectionBlock {
   followupOutput?: string;
 }
 
+export interface DragDropZoneConfig {
+  id: string;
+  label: string;
+  description?: string;
+}
+
+export interface DragDropCardConfig {
+  id: string;
+  text: string;
+  correctZone: string;
+  description?: string;
+}
+
+export interface DragDropConfig {
+  zones: DragDropZoneConfig[];
+  cards: DragDropCardConfig[];
+}
+
+export interface HierarchyExpandStep {
+  id: string;
+  type: 'yes_no' | 'mcq' | 'multi_select' | 'visual_reveal' | 'tree';
+  question?: string;
+  options?: string[];
+  correctIndex?: number;
+  correctIndices?: number[];
+  items?: { label: string; icon: string; category?: string; explanation?: string }[];
+  visual?: {
+    nodes: { label: string; icon: string; depth: number; children?: { label: string; icon: string; depth: number }[] }[];
+  };
+}
+
+export interface HierarchyExpandConfig {
+  root: { label: string; icon: string };
+  child: { label: string; icon: string };
+  grandchild: { label: string; icon: string };
+  steps: HierarchyExpandStep[];
+  finalTree: { label: string; icon: string; children: { label: string; icon: string; children?: { label: string; icon: string }[] }[] }[];
+  nonAIExamples: string[];
+  theme?: "ai" | "vision";
+  onboarding?: string[];
+  completionMessage?: string;
+}
+
 export interface PracticeExerciseConfig {
   id?: string;
   title: string;
@@ -144,6 +187,8 @@ export interface PracticeExerciseConfig {
   type?: string;
   difficulty?: string;
   estimatedTime?: number | null;
+  dragDropConfig?: DragDropConfig;
+  hierarchyExpandConfig?: HierarchyExpandConfig;
 }
 
 export interface PracticeBlock {

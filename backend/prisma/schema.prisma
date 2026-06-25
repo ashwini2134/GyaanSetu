@@ -293,6 +293,29 @@ model PracticeSubmission {
   @@unique([userId, courseId, lectureId])
 }
 
+model PracticeExercise {
+  id                 String   @id @default(uuid())
+  courseId           String
+  lectureId          String
+  sectionId          String?
+  title              String
+  type               String
+  status             String   @default("published")
+  learningGoal       String
+  challenge          String
+  promptHint         String
+  validationRules    Json
+  completionCriteria Json
+  difficulty         String   @default("beginner")
+  estimatedTime      Int      @default(5)
+  aiWorkspaceEnabled Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([courseId, lectureId, sectionId, type])
+  @@map("practice_exercises")
+}
+
 model AssessmentQuestion {
   id            String   @id @default(cuid())
   category      String

@@ -9,7 +9,8 @@
     "build": "npx prisma generate && tsc",
     "test": "vitest run",
     "test:watch": "vitest",
-    "seed:assessments": "tsx src/seeds/assessmentQuestions.ts"
+    "seed:assessments": "tsx src/seeds/assessmentQuestions.ts",
+"seed:drag-drop": "tsx src/seeds/dragDropExercises.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",

@@ -130,6 +130,24 @@ router.get("/config/:courseId/:lectureId", requireAuth, async (req: Authenticate
     }
 
     // Map DB fields to the student-facing config shape
+    const dragDropConfig = exercise.type === 'drag_drop'
+      ? (exercise.validationRules as { zones: { id: string; label: string }[]; cards: { id: string; text: string; correctZone: string }[] } | null)
+      : null;
+
+    const hierarchyExpandConfig = exercise.type === 'hierarchy_expand'
+      ? (exercise.validationRules as {
+          root: { label: string; icon: string };
+          child: { label: string; icon: string };
+          grandchild: { label: string; icon: string };
+          theme?: string;
+          onboarding?: string[];
+          completionMessage?: string;
+          steps: { id: string; type: string; question?: string; options?: string[]; correctIndex?: number; correctIndices?: number[]; items?: { label: string; icon: string; category?: string; explanation?: string }[] }[];
+          finalTree: { label: string; icon: string; children: { label: string; icon: string; children?: { label: string; icon: string }[] }[] }[];
+          nonAIExamples: string[];
+        } | null)
+      : null;
+
     res.json({
       exercise: {
         id: exercise.id,
@@ -142,6 +160,8 @@ router.get("/config/:courseId/:lectureId", requireAuth, async (req: Authenticate
         type: exercise.type,
         difficulty: exercise.difficulty,
         estimatedTime: exercise.estimatedTime,
+        dragDropConfig: dragDropConfig ?? undefined,
+        hierarchyExpandConfig: hierarchyExpandConfig ?? undefined,
       },
     });
   } catch (error) {

@@ -7,6 +7,8 @@ import type { PracticeExerciseConfig } from '../../types/lesson';
 import { Target, Lightbulb, HelpCircle, ListChecks, Wand2, SendHorizonal, CheckCircle } from 'lucide-react';
 import { generateProgressiveHint } from '../../utils/logicValidation';
 import { scanForInput } from '../../utils/prescanner';
+import DragDropPracticeExercise from './DragDropPracticeExercise';
+import ExpandUniverse from './ExpandUniverse';
 
 interface PracticeCardProps {
   block: PracticeBlock;
@@ -85,6 +87,10 @@ function AIPracticeCard({ block, courseSlug, lectureNumber, sectionId, onAttempt
 
 
 
+  const isDragDrop = config?.type === 'drag_drop' && config?.dragDropConfig;
+  const isHierarchyExpand = config?.type === 'hierarchy_expand' && config?.hierarchyExpandConfig;
+
+  // All exercises show a "Start Practice" gate first (including drag-drop)
   if (!open) {
     return (
       <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-600/10 to-slate-800/40 backdrop-blur-sm p-5">
@@ -95,7 +101,9 @@ function AIPracticeCard({ block, courseSlug, lectureNumber, sectionId, onAttempt
             </svg>
           </div>
           <div className="flex-1">
-            <p className="text-xs font-semibold text-amber-300 uppercase tracking-wider mb-1">Practice Exercise</p>
+            <p className="text-xs font-semibold text-amber-300 uppercase tracking-wider mb-1">
+              {isHierarchyExpand ? 'Interactive Discovery' : isDragDrop ? 'Drag & Drop Exercise' : 'Practice Exercise'}
+            </p>
             <p className="text-sm font-medium text-slate-200 mb-1">{config?.title || block.title}</p>
             <button
               onClick={() => setOpen(true)}
@@ -107,6 +115,30 @@ function AIPracticeCard({ block, courseSlug, lectureNumber, sectionId, onAttempt
           </div>
         </div>
       </div>
+    );
+  }
+
+  // Hierarchy expand exercises render inline
+  if (config && isHierarchyExpand) {
+    return (
+      <ExpandUniverse
+        config={config.hierarchyExpandConfig!}
+        onComplete={() => { setOpen(false); onComplete?.(); }}
+      />
+    );
+  }
+
+  // Drag-drop exercises render inline
+  if (config && isDragDrop) {
+    return (
+      <DragDropPracticeExercise
+        config={config.dragDropConfig!}
+        challenge={config.challenge}
+        learningGoal={config.learningGoal}
+        promptHint={config.promptHint}
+        onComplete={() => { setOpen(false); onComplete?.(); }}
+        onAttempt={onAttempt}
+      />
     );
   }
 
@@ -132,107 +164,111 @@ function AIPracticeCard({ block, courseSlug, lectureNumber, sectionId, onAttempt
       </div>
 
       <div className="p-5 space-y-5">
-        {config && (
+        {(
           <>
-            <div className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-br from-blue-600/10 to-slate-800/40 border border-blue-500/20">
-              <div className="w-8 h-8 rounded-lg bg-blue-600/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <Target size={16} className="text-blue-400" />
-              </div>
-              <div>
-                <p className="text-[11px] font-semibold text-blue-400 uppercase tracking-wider mb-1">What You'll Learn</p>
-                <p className="text-sm text-slate-200 leading-relaxed">{config.learningGoal}</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-br from-amber-600/10 to-slate-800/40 border border-amber-500/20">
-              <div className="w-8 h-8 rounded-lg bg-amber-600/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <Lightbulb size={16} className="text-amber-400" />
-              </div>
-              <div>
-                <p className="text-[11px] font-semibold text-amber-400 uppercase tracking-wider mb-1">Your Challenge</p>
-                <p className="text-sm text-slate-200 leading-relaxed">{config.challenge}</p>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-xl bg-gradient-to-br from-violet-600/10 to-slate-800/40 border border-violet-500/20">
-              <div className="flex items-center gap-2 mb-2">
-                <HelpCircle size={14} className="text-violet-400" />
-                <p className="text-[11px] font-semibold text-violet-400 uppercase tracking-wider">Prompt Hint</p>
-              </div>
-              <p className="text-sm text-violet-300/90 leading-relaxed">{config.promptHint}</p>
-            </div>
-          </>
-        )}
-
-        <div>
-          <textarea
-            value={prompt}
-            onChange={e => setPrompt(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Type your question for the AI here..."
-            rows={2}
-            disabled={done}
-            className="w-full bg-slate-900/60 border border-slate-700/40 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
-          />
-        </div>
-
-        {!done && (
-          <button
-            onClick={handleGenerate}
-            disabled={generating || !prompt.trim()}
-            className="w-full inline-flex items-center justify-center gap-2 text-sm font-semibold text-white px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-amber-600/20"
-          >
-            {generating ? (
-              <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Generating...</>
-            ) : (
-              <><Wand2 size={16} /> Generate with AI</>
-            )}
-          </button>
-        )}
-
-        {response && (
-          <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">AI Response</p>
-            <div className="w-full bg-slate-900/60 border border-amber-500/20 rounded-xl px-4 py-3 text-sm text-slate-200 leading-relaxed whitespace-pre-wrap">
-              {response}
-            </div>
-          </div>
-        )}
-
-        {error && (
-          <div className="p-3 rounded-xl bg-red-900/20 border border-red-700/30 text-sm text-red-300">{error}</div>
-        )}
-
-        {response && (
-          <div className="space-y-4">
             {config && (
-              <div className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-br from-emerald-600/10 to-slate-800/40 border border-emerald-500/20">
-                <div className="w-8 h-8 rounded-lg bg-emerald-600/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <ListChecks size={16} className="text-emerald-400" />
+              <>
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-br from-blue-600/10 to-slate-800/40 border border-blue-500/20">
+                  <div className="w-8 h-8 rounded-lg bg-blue-600/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Target size={16} className="text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-semibold text-blue-400 uppercase tracking-wider mb-1">What You'll Learn</p>
+                    <p className="text-sm text-slate-200 leading-relaxed">{config.learningGoal}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider mb-1">Success Criteria</p>
-                  <ul className="space-y-1">
-                    {config.successCriteria.map((c, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-emerald-300/80">
-                        <span className="mt-0.5">•</span>
-                        <span>{c}</span>
-                      </li>
-                    ))}
-                  </ul>
+
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-br from-amber-600/10 to-slate-800/40 border border-amber-500/20">
+                  <div className="w-8 h-8 rounded-lg bg-amber-600/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Lightbulb size={16} className="text-amber-400" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-semibold text-amber-400 uppercase tracking-wider mb-1">Your Challenge</p>
+                    <p className="text-sm text-slate-200 leading-relaxed">{config.challenge}</p>
+                  </div>
                 </div>
-              </div>
+
+                <div className="p-4 rounded-xl bg-gradient-to-br from-violet-600/10 to-slate-800/40 border border-violet-500/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <HelpCircle size={14} className="text-violet-400" />
+                    <p className="text-[11px] font-semibold text-violet-400 uppercase tracking-wider">Prompt Hint</p>
+                  </div>
+                  <p className="text-sm text-violet-300/90 leading-relaxed">{config.promptHint}</p>
+                </div>
+              </>
             )}
+
+            <div>
+              <textarea
+                value={prompt}
+                onChange={e => setPrompt(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Type your question for the AI here..."
+                rows={2}
+                disabled={done}
+                className="w-full bg-slate-900/60 border border-slate-700/40 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+            </div>
 
             {!done && (
               <button
-                onClick={handleComplete}
-                className="w-full inline-flex items-center justify-center gap-2 text-sm font-semibold text-white px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 transition-all shadow-lg shadow-emerald-600/20"
+                onClick={handleGenerate}
+                disabled={generating || !prompt.trim()}
+                className="w-full inline-flex items-center justify-center gap-2 text-sm font-semibold text-white px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-amber-600/20"
               >
-                <SendHorizonal size={16} /> Mark Complete
+                {generating ? (
+                  <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Generating...</>
+                ) : (
+                  <><Wand2 size={16} /> Generate with AI</>
+                )}
               </button>
             )}
-          </div>
+
+            {response && (
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">AI Response</p>
+                <div className="w-full bg-slate-900/60 border border-amber-500/20 rounded-xl px-4 py-3 text-sm text-slate-200 leading-relaxed whitespace-pre-wrap">
+                  {response}
+                </div>
+              </div>
+            )}
+
+            {error && (
+              <div className="p-3 rounded-xl bg-red-900/20 border border-red-700/30 text-sm text-red-300">{error}</div>
+            )}
+
+            {response && (
+              <div className="space-y-4">
+                {config && (
+                  <div className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-br from-emerald-600/10 to-slate-800/40 border border-emerald-500/20">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-600/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <ListChecks size={16} className="text-emerald-400" />
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider mb-1">Success Criteria</p>
+                      <ul className="space-y-1">
+                        {config.successCriteria.map((c, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-emerald-300/80">
+                            <span className="mt-0.5">•</span>
+                            <span>{c}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+
+                {!done && (
+                  <button
+                    onClick={handleComplete}
+                    className="w-full inline-flex items-center justify-center gap-2 text-sm font-semibold text-white px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 transition-all shadow-lg shadow-emerald-600/20"
+                  >
+                    <SendHorizonal size={16} /> Mark Complete
+                  </button>
+                )}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

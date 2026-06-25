@@ -81,47 +81,14 @@ const ProfilePage = lazy(
   () => import("./pages/ProfilePage")
 );
 
-const QACenter = lazy(
-  () => import("./pages/QACenter")
-);
-const AdminPage = lazy(
-  () => import("./pages/AdminPage")
-);
-const ReviewQueuePage = lazy(
-  () => import("./pages/ReviewQueuePage")
-);
-const StudentDirectoryPage = lazy(
-  () => import("./pages/StudentDirectoryPage")
-);
-const StudentProfilePage = lazy(
-  () => import("./pages/StudentProfilePage")
-);
-const AdminCoursesPage = lazy(
-  () => import("./pages/AdminCoursesPage")
-);
-const AdminNotificationsPage = lazy(
-  () => import("./pages/AdminNotificationsPage")
-);
-const AdminProjectsPage = lazy(
-  () => import("./pages/AdminProjectsPage")
-);
-const AdminPracticeExercisesPage = lazy(
-  () => import("./pages/AdminPracticeExercisesPage")
-);
-const AdminAssessmentsPage = lazy(
-  () => import("./pages/AdminAssessmentsPage")
-);
-const AdminCertificationsPage = lazy(
-  () => import("./pages/AdminCertificationsPage")
-);
-const AdminContentPage = lazy(
-  () => import("./pages/AdminContentPage")
+const AdminContentStudioPage = lazy(
+  () => import("./pages/AdminContentStudioPage")
 );
 const AdminReportsPage = lazy(
   () => import("./pages/AdminReportsPage")
 );
-const AdminAutomationsPage = lazy(
-  () => import("./pages/AdminAutomationsPage")
+const AdminOperationsMonitorPage = lazy(
+  () => import("./pages/AdminOperationsMonitorPage")
 );
 const AdminSettingsPage = lazy(
   () => import("./pages/AdminSettingsPage")
@@ -355,119 +322,34 @@ export default function App() {
             element={<ProfilePage />}
           />
 
-          {/* Admin Panel (admin only) */}
+          {/* ── Admin: Redirects (legacy routes) ── */}
+          <Route path="admin" element={<Navigate to="/admin/content-studio" replace />} />
+          <Route path="admin/review-queue" element={<Navigate to="/admin/operations-monitor" replace />} />
+          <Route path="admin/students" element={<Navigate to="/admin/analytics" replace />} />
+          <Route path="admin/courses" element={<Navigate to="/admin/content-studio" replace />} />
+          <Route path="admin/notifications" element={<Navigate to="/admin/operations-monitor" replace />} />
+          <Route path="admin/projects" element={<Navigate to="/admin/content-studio" replace />} />
+          <Route path="admin/practice-exercises" element={<Navigate to="/admin/content-studio" replace />} />
+          <Route path="admin/assessments" element={<Navigate to="/admin/content-studio" replace />} />
+          <Route path="admin/certifications" element={<Navigate to="/admin/content-studio" replace />} />
+          <Route path="admin/content" element={<Navigate to="/admin/content-studio" replace />} />
+          <Route path="admin/reports" element={<Navigate to="/admin/analytics" replace />} />
+          <Route path="admin/automations" element={<Navigate to="/admin/operations-monitor" replace />} />
+          <Route path="qa" element={<Navigate to="/admin/operations-monitor" replace />} />
 
+          {/* ── Admin: Content Studio ── */}
           <Route
-            path="admin"
+            path="admin/content-studio"
             element={
               <RequireRole roles={["admin"]}>
-                <AdminPage />
+                <AdminContentStudioPage />
               </RequireRole>
             }
           />
 
-          {/* Review Queue (admin only) */}
-
+          {/* ── Admin: Analytics ── */}
           <Route
-            path="admin/review-queue"
-            element={
-              <RequireRole roles={["admin"]}>
-                <ReviewQueuePage />
-              </RequireRole>
-            }
-          />
-
-          {/* Student Directory (admin only) */}
-          <Route
-            path="admin/students"
-            element={
-              <RequireRole roles={["admin"]}>
-                <StudentDirectoryPage />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="admin/students/:userId"
-            element={
-              <RequireRole roles={["admin"]}>
-                <StudentProfilePage />
-              </RequireRole>
-            }
-          />
-
-          {/* Admin Courses (admin only) */}
-          <Route
-            path="admin/courses"
-            element={
-              <RequireRole roles={["admin"]}>
-                <AdminCoursesPage />
-              </RequireRole>
-            }
-          />
-
-          {/* Admin Notifications (admin only) */}
-          <Route
-            path="admin/notifications"
-            element={
-              <RequireRole roles={["admin"]}>
-                <AdminNotificationsPage />
-              </RequireRole>
-            }
-          />
-
-          {/* Admin Projects (admin only) */}
-          <Route
-            path="admin/projects"
-            element={
-              <RequireRole roles={["admin"]}>
-                <AdminProjectsPage />
-              </RequireRole>
-            }
-          />
-
-          {/* Admin Practice Exercises (admin only) */}
-          <Route
-            path="admin/practice-exercises"
-            element={
-              <RequireRole roles={["admin"]}>
-                <AdminPracticeExercisesPage />
-              </RequireRole>
-            }
-          />
-
-          {/* Admin Assessments (admin only) */}
-          <Route
-            path="admin/assessments"
-            element={
-              <RequireRole roles={["admin"]}>
-                <AdminAssessmentsPage />
-              </RequireRole>
-            }
-          />
-
-          {/* Admin Certifications (admin only) */}
-          <Route
-            path="admin/certifications"
-            element={
-              <RequireRole roles={["admin"]}>
-                <AdminCertificationsPage />
-              </RequireRole>
-            }
-          />
-
-          {/* Admin Content (admin only) */}
-          <Route
-            path="admin/content"
-            element={
-              <RequireRole roles={["admin"]}>
-                <AdminContentPage />
-              </RequireRole>
-            }
-          />
-
-          {/* Admin Reports (admin only) */}
-          <Route
-            path="admin/reports"
+            path="admin/analytics"
             element={
               <RequireRole roles={["admin"]}>
                 <AdminReportsPage />
@@ -475,17 +357,17 @@ export default function App() {
             }
           />
 
-          {/* Admin Automations (admin only) */}
+          {/* ── Admin: Operations Monitor ── */}
           <Route
-            path="admin/automations"
+            path="admin/operations-monitor"
             element={
               <RequireRole roles={["admin"]}>
-                <AdminAutomationsPage />
+                <AdminOperationsMonitorPage />
               </RequireRole>
             }
           />
 
-          {/* Admin Settings (admin only) */}
+          {/* ── Admin: Settings ── */}
           <Route
             path="admin/settings"
             element={
@@ -493,24 +375,6 @@ export default function App() {
                 <AdminSettingsPage />
               </RequireRole>
             }
-          />
-
-          {/* QA Center (admin only) */}
-
-          <Route
-            path="qa"
-            element={
-              <RequireRole roles={["admin", "instructor"]}>
-                <QACenter />
-              </RequireRole>
-            }
-          />
-
-          {/* Settings */}
-
-          <Route
-            path="settings"
-            element={<ProfilePage />}
           />
 
         </Route>
