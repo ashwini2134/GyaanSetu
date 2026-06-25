@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AdminBreadcrumb } from "../../components/admin/AdminBreadcrumb";
-import { UploadCloud, CheckCircle2, ChevronRight, Save } from "lucide-react";
+import { UploadCloud, CheckCircle2, ChevronRight, Save, Plus } from "lucide-react";
 import { authFetch } from "../../authClient";
 import { CourseEditorNav } from "../../components/admin/CourseEditorNav";
 
@@ -82,9 +82,21 @@ export default function BlueprintBuilder() {
           { label: courseId ? "Edit Course Blueprint" : "New Course Blueprint" }
         ]} />
 
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-100 tracking-tight">Course Blueprint</h1>
-        <p className="text-slate-400 mt-1">Design the foundation of your new learning experience.</p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-100 tracking-tight">Course Blueprint</h1>
+          <p className="text-slate-400 mt-1">Design the foundation of your new learning experience.</p>
+        </div>
+        <button 
+          onClick={() => {
+            navigate('/admin/content-studio/new');
+            if (!courseId) window.location.reload();
+          }}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium shadow-sm transition-colors flex items-center gap-2"
+        >
+          <Plus className="w-5 h-5" />
+          Create New Course
+        </button>
       </div>
 
       {/* Progress Bar */}

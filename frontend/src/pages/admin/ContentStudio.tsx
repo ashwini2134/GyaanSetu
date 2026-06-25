@@ -63,13 +63,6 @@ export default function ContentStudio() {
           <h1 className="text-3xl font-bold text-slate-100 tracking-tight">Content Studio</h1>
           <p className="text-slate-400 mt-1">Create and manage your courses</p>
         </div>
-        <button 
-          onClick={() => navigate('/admin/content-studio/new')}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium shadow-sm transition-colors flex items-center gap-2 w-fit"
-        >
-          <Plus className="w-5 h-5" />
-          Create New Course
-        </button>
       </div>
 
       {loading ? (

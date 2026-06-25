@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { AdminBreadcrumb } from "../../components/admin/AdminBreadcrumb";
 import { CourseEditorNav } from "../../components/admin/CourseEditorNav";
 import { RichTextEditor } from "../../components/admin/RichTextEditor";
+import { CourseSettingsModal } from "../../components/admin/CourseSettingsModal";
 import { GripVertical, Plus, Settings, PlayCircle, BookOpen, LayoutTemplate, Dumbbell, Save, Trash2 } from "lucide-react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
@@ -43,6 +44,7 @@ export default function LessonEditor() {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [activeLessonId, setActiveLessonId] = useState<string>('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
   useEffect(() => {
     if (!courseId) return;
@@ -135,7 +137,10 @@ export default function LessonEditor() {
         ]} />
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-slate-100">Course Editor</h1>
-          <button className="flex items-center gap-2 px-4 py-2 bg-[#0f172a] border border-white/10 rounded-lg text-sm font-medium text-slate-300 hover:bg-[#0a0f1e] transition-colors">
+          <button 
+            onClick={() => setIsSettingsModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-[#0f172a] border border-white/10 rounded-lg text-sm font-medium text-slate-300 hover:bg-[#0a0f1e] transition-colors"
+          >
             <Settings className="w-4 h-4" />
             Course Settings
           </button>
@@ -252,6 +257,12 @@ export default function LessonEditor() {
           )}
         </div>
       </div>
+
+      <CourseSettingsModal 
+        courseId={courseId || ""}
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+      />
     </div>
   );
 }
