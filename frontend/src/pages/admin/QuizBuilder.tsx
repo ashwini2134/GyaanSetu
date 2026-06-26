@@ -48,6 +48,10 @@ export default function QuizBuilder() {
 
   const addQuestion = async (qType: string) => {
     try {
+      await authFetch(`/admin/courses/${courseId}/quiz`, {
+        method: 'POST',
+        body: JSON.stringify({ passScore: Number(passScore), timeLimit: Number(timeLimit), maxAttempts: Number(maxAttempts), shuffle })
+      });
       let body: any = { type: qType, question: "New Question" };
       if (qType === "mcq") {
         body.options = ["Option 1", "Option 2"];

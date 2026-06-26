@@ -25,13 +25,12 @@ export default function ProjectBuilder() {
 
   useEffect(() => {
     if (!courseId) return;
-    authFetch<any[]>(`/admin/courses/${courseId}/projects`)
-      .then(data => {
-        if (data && data.length > 0) {
-          const p = data[0];
+    authFetch<any>(`/admin/courses/${courseId}/project`)
+      .then(p => {
+        if (p && p.id) {
           setProjectId(p.id);
           setTitle(p.title);
-          setContent(p.description || "");
+          setContent(p.requirements || "");
           setSubmissionType(p.submissionType || "GITHUB");
           setIsCapstone(p.isCapstone || false);
           if (p.rubric && Array.isArray(p.rubric) && p.rubric.length > 0) {
@@ -51,18 +50,11 @@ export default function ProjectBuilder() {
     setIsSaving(true);
     try {
       const validationRules = { maxFileSize, allowedFormats, requiredKeywords };
-      if (projectId) {
-        await authFetch(`/admin/projects/${projectId}`, {
-          method: 'PATCH',
-          body: JSON.stringify({ title, description: content, submissionType, isCapstone, rubric, validationRules })
-        });
-      } else {
-        const newProj = await authFetch<any>(`/admin/courses/${courseId}/projects`, {
-          method: 'POST',
-          body: JSON.stringify({ title, description: content, submissionType, isCapstone, rubric, validationRules })
-        });
-        setProjectId(newProj.id);
-      }
+      const newProj = await authFetch<any>(`/admin/courses/${courseId}/project`, {
+        method: 'POST',
+        body: JSON.stringify({ title, requirements: content, submissionType, isCapstone, rubric, validationRules })
+      });
+      setProjectId(newProj.id);
       alert('Project saved successfully!');
     } catch (err: any) {
       alert('Failed to save project: ' + err.message);

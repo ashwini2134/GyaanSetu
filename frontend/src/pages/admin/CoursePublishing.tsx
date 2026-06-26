@@ -17,15 +17,15 @@ export default function CoursePublishing() {
     if (!courseId) return;
     async function verify() {
       try {
-        const [lessons, quiz, projects] = await Promise.all([
+        const [lessons, quiz, project] = await Promise.all([
           authFetch<any[]>(`/admin/courses/${courseId}/lessons`).catch(() => []),
           authFetch<any>(`/admin/courses/${courseId}/quiz`).catch(() => null),
-          authFetch<any[]>(`/admin/courses/${courseId}/projects`).catch(() => [])
+          authFetch<any>(`/admin/courses/${courseId}/project`).catch(() => null)
         ]);
 
         const hasLessons = Array.isArray(lessons) && lessons.length > 0;
         const hasQuiz = quiz && Array.isArray(quiz.questions) && quiz.questions.length > 0;
-        const hasProject = Array.isArray(projects) && projects.length > 0;
+        const hasProject = project !== null && project.id !== undefined;
 
         setChecks([
           { label: "At least 1 lesson added", passed: hasLessons, required: true },
