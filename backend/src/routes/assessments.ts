@@ -25,7 +25,7 @@ router.get("/progress/:userId", requireAuth, async (req: AuthenticatedRequest, r
     const attempts = await prisma.quizAttempt.findMany({
       where: {
         userId,
-        quizId: { startsWith: "assessment::" }
+        lectureId: { startsWith: "assessment::" }
       },
       orderBy: { createdAt: "desc" }
     });
@@ -34,7 +34,7 @@ router.get("/progress/:userId", requireAuth, async (req: AuthenticatedRequest, r
     
     attempts.forEach(attempt => {
       if (attempt.passed) {
-        passedSubsections.add(attempt.quizId);
+        passedSubsections.add(attempt.lectureId);
       }
     });
 
@@ -48,8 +48,8 @@ router.get("/progress/:userId", requireAuth, async (req: AuthenticatedRequest, r
 
       let completedCount = 0;
       for (const sub of subsections) {
-        const quizId = `assessment::${category}::${sub}`;
-        if (passedSubsections.has(quizId)) {
+        const lectureId = `assessment::${category}::${sub}`;
+        if (passedSubsections.has(lectureId)) {
           completedCount++;
         }
       }
@@ -73,7 +73,7 @@ router.get("/subsection-status/:userId", requireAuth, async (req: AuthenticatedR
     const attempts = await prisma.quizAttempt.findMany({
       where: {
         userId,
-        quizId: { startsWith: "assessment::" }
+        lectureId: { startsWith: "assessment::" }
       },
       orderBy: { createdAt: "asc" }
     });
@@ -81,10 +81,10 @@ router.get("/subsection-status/:userId", requireAuth, async (req: AuthenticatedR
     const statusMap = new Map<string, string>();
     attempts.forEach(attempt => {
       if (attempt.passed) {
-        statusMap.set(attempt.quizId, "completed");
+        statusMap.set(attempt.lectureId, "completed");
       } else {
-        if (statusMap.get(attempt.quizId) !== "completed") {
-          statusMap.set(attempt.quizId, "in_progress");
+        if (statusMap.get(attempt.lectureId) !== "completed") {
+          statusMap.set(attempt.lectureId, "in_progress");
         }
       }
     });
@@ -94,8 +94,8 @@ router.get("/subsection-status/:userId", requireAuth, async (req: AuthenticatedR
     for (const [category, subsections] of Object.entries(CATEGORY_STRUCTURE)) {
       result[category] = {};
       for (const sub of subsections) {
-        const quizId = `assessment::${category}::${sub}`;
-        result[category][sub] = statusMap.get(quizId) || "not_started";
+        const lectureId = `assessment::${category}::${sub}`;
+        result[category][sub] = statusMap.get(lectureId) || "not_started";
       }
     }
 
@@ -226,7 +226,7 @@ router.get("/analytics/:userId", requireAuth, async (req: AuthenticatedRequest, 
     const attempts = await prisma.quizAttempt.findMany({
       where: {
         userId,
-        quizId: { startsWith: "assessment::" }
+        lectureId: { startsWith: "assessment::" }
       },
       orderBy: { createdAt: "desc" }
     });
@@ -253,19 +253,19 @@ router.get("/analytics/:userId", requireAuth, async (req: AuthenticatedRequest, 
     const historyMap: Record<string, number> = {};
 
     attempts.forEach(attempt => {
-      const percent = (attempt.score / attempt.total) * 100;
+      const percent = (attempt.score / 100) * 100;
       totalScorePercent += percent;
       
       const time = (attempt.answers as any)?.timeTaken || 0;
       totalTimeTaken += time;
 
-      if (attempt.passed && !passedSet.has(attempt.quizId)) {
-        passedSet.add(attempt.quizId);
+      if (attempt.passed && !passedSet.has(attempt.lectureId)) {
+        passedSet.add(attempt.lectureId);
         totalCompleted++;
       }
 
-      // Extract category from quizId "assessment::Category::Subsection"
-      const parts = attempt.quizId.split("::");
+      // Extract category from lectureId "assessment::Category::Subsection"
+      const parts = attempt.lectureId.split("::");
       const category = parts[1];
       if (category) {
         if (!categoryScores[category]) {
@@ -292,12 +292,12 @@ router.get("/analytics/:userId", requireAuth, async (req: AuthenticatedRequest, 
     }
 
     const recentAttempts = attempts.slice(0, 5).map(attempt => {
-      const parts = attempt.quizId.split("::");
+      const parts = attempt.lectureId.split("::");
       return {
         category: parts[1] || "Unknown",
         subsection: parts[2] || "Unknown",
-        score: Math.round((attempt.score / attempt.total) * 100),
-        totalQuestions: attempt.total,
+        score: Math.round((attempt.score / 100) * 100),
+        totalQuestions: 100,
         timeTaken: (attempt.answers as any)?.timeTaken || 0,
         lastAttemptAt: attempt.createdAt
       };

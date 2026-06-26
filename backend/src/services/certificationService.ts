@@ -24,7 +24,7 @@ export interface ConditionDetail {
   passed: boolean;
   details?: {
     lectureNumbers?: number[];
-    quizIds?: string[];
+    lectureIds?: string[];
     avgScore?: number | null;
   };
 }
@@ -69,8 +69,8 @@ export async function checkEligibility(userId: string, courseSlug: string): Prom
       select: { lectureId: true, status: true, practiceCompleted: true },
     }),
     prisma.quizAttempt.groupBy({
-      by: ['quizId'],
-      where: { userId, quizId: { startsWith: `${courseSlug}-` } },
+      by: ['lectureId'],
+      where: { userId, lectureId: { startsWith: `${courseSlug}-` } },
     }),
     // count PASSED submissions excluding auto-generated similar-question variants (_sim1, _sim2)
     prisma.submission.count({
@@ -85,8 +85,8 @@ export async function checkEligibility(userId: string, courseSlug: string): Prom
     }),
     prisma.project.count({ where: { userId, status: 'COMPLETED' } }),
     prisma.quizAttempt.findMany({
-      where: { userId, quizId: { startsWith: `${courseSlug}-` } },
-      select: { score: true, total: true, quizId: true },
+      where: { userId, lectureId: { startsWith: `${courseSlug}-` } },
+      select: { score: true, lectureId: true },
     }),
   ]);
 
@@ -98,7 +98,7 @@ export async function checkEligibility(userId: string, courseSlug: string): Prom
 
   const avgQuizScore =
     quizScores.length > 0
-      ? Math.round(quizScores.reduce((s, q) => s + (q.score / q.total) * 100, 0) / quizScores.length)
+      ? Math.round(quizScores.reduce((s, q) => s + q.score, 0) / quizScores.length)
       : null;
 
   const conditions: EligibilityConditions = {
@@ -117,7 +117,7 @@ export async function checkEligibility(userId: string, courseSlug: string): Prom
       done: quizLectures.length,
       required: totalLectures,
       passed: quizLectures.length >= totalLectures,
-      details: { quizIds: quizLectures.map(q => q.quizId), avgScore: avgQuizScore },
+      details: { lectureIds: quizLectures.map(q => q.lectureId), avgScore: avgQuizScore },
     },
     problemsSubmitted: {
       done: submissionsDone,

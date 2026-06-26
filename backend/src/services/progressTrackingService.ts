@@ -6,21 +6,14 @@ export async function recordQuizAttempt(
   userId: string,
   courseSlug: string,
   lectureId: string,
-  quizId: string,
   score: number,
-  total: number,
   answers: any
 ) {
-  const passed = score / total >= 0.7; // assuming 70% to pass
+  const passed = score >= 50; 
   
   const attempt = await prisma.quizAttempt.create({
     data: {
-      userId,
-      quizId,
-      score,
-      total,
-      passed,
-      answers: answers ?? {},
+      userId, lectureId, courseId: 'unknown', score, passed, answers: answers ?? {},
     },
   });
 
@@ -33,8 +26,8 @@ export async function recordQuizAttempt(
     "quiz_result",
     passed ? "✅ Quiz Passed!" : "📝 Quiz Attempted",
     passed
-      ? `You passed with ${score}/${total}!`
-      : `You scored ${score}/${total}. Keep trying!`,
+      ? `You passed with ${score}%!`
+      : `You scored ${score}%. Keep trying!`,
     `/course/${courseSlug}/lecture/${lectureId}`
   );
 

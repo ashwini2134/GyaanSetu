@@ -195,17 +195,15 @@ router.get("/profile/public/:userId", requireAuth, async (req: AuthenticatedRequ
 const quizSchema = z.object({
   courseSlug: z.string(),
   lectureId: z.string(),
-  quizId: z.string(),
   score: z.number(),
-  total: z.number(),
   answers: z.any().optional(),
 });
 
 router.post("/quiz", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
-    const { courseSlug, lectureId, quizId, score, total, answers } = quizSchema.parse(req.body);
-    const { attempt, passed } = await recordQuizAttempt(req.user!.id, courseSlug, lectureId, quizId, score, total, answers);
-    res.json({ progress: attempt, passed, score, total });
+    const { courseSlug, lectureId, score, answers } = quizSchema.parse(req.body);
+    const { attempt, passed } = await recordQuizAttempt(req.user!.id, courseSlug, lectureId, score, answers);
+    res.json({ progress: attempt, passed, score, total: 100 });
   } catch (error) {
     next(error);
   }
@@ -421,7 +419,7 @@ router.get("/lecture/:courseSlug/:lectureId", requireAuth, async (req: Authentic
         }
       }),
       prisma.quizAttempt.findMany({
-        where: { userId, quizId: `${courseSlug}-${lectureId}` },
+        where: { userId, lectureId: `${courseSlug}-${lectureId}` },
         orderBy: { createdAt: 'desc' },
         take: 1
       })

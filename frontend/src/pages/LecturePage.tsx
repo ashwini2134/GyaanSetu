@@ -409,12 +409,14 @@ export default function LecturePage() {
                     </div>
                   ) : (
                     <QuizEngine
-                      quizId={`${lessonData.id}-quiz`}
+                      lectureId={lessonData.id}
+                      courseId={slug ?? 'unknown'}
                       questions={quiz}
                       onComplete={(score, total) => {
                         setRetakingQuiz(false);
                         markQuizCompleted(score, total);
                         markSectionComplete(currentPageIdx + 1);
+                        refreshCourseProgress();
                       }}
                     />
                   )}

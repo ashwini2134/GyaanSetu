@@ -152,7 +152,7 @@ router.get("/students/:userId/activity", async (req: AuthenticatedRequest, res, 
 
     const activities: any[] = [];
     progress.forEach(p => activities.push({ type: "progress", action: `Completed lecture ${p.lectureId} in ${p.courseSlug}`, date: p.completedAt }));
-    quizAttempts.forEach(q => activities.push({ type: "quiz", action: `Quiz ${q.passed ? "passed" : "failed"} (${q.score}/${q.total})`, date: q.createdAt }));
+    quizAttempts.forEach(q => activities.push({ type: "quiz", action: `Quiz ${q.passed ? "passed" : "failed"} (${q.score}%)`, date: q.createdAt }));
     submissions.forEach(s => activities.push({ type: "submission", action: `Problem ${s.problemId} — ${s.status}`, date: s.updatedAt }));
     projects.forEach(p => activities.push({ type: "project", action: `Project ${p.projectId} — ${p.status}`, date: p.updatedAt }));
     xpHistory.forEach(x => activities.push({ type: "xp", action: `${x.reason} (+${x.amount} XP)`, date: x.createdAt }));

@@ -5,12 +5,12 @@ import { certificateQueue } from '../lib/queue.js';
 import { prisma } from "../prisma.js";
 
 export async function processQuizGrading(job: any) {
-  const { studentId, quizId, submissionAnswers } = job.data;
-  console.log(`[QuizGradingWorker] Processing quiz ${quizId} for student ${studentId}`);
+  const { studentId, lectureId, submissionAnswers } = job.data;
+  console.log(`[QuizGradingWorker] Processing quiz ${lectureId} for student ${studentId}`);
 
   // Fetch quiz and questions
   const quiz = await prisma.quiz.findUnique({
-    where: { id: quizId },
+    where: { id: lectureId },
     include: { questions: true }
   });
 
@@ -34,9 +34,9 @@ export async function processQuizGrading(job: any) {
   await prisma.quizAttempt.create({
     data: {
       userId: studentId,
-      quizId,
+      lectureId,
+      courseId: quiz.courseId,
       score,
-      total,
       passed,
       answers: submissionAnswers,
     }

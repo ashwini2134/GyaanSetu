@@ -98,15 +98,17 @@ model LectureProgress {
 }
 
 model QuizAttempt {
-  id        String   @id @default(uuid())
-  userId    String
-  quizId    String
-  score     Int
-  total     Int
-  passed    Boolean
-  answers   Json
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String   @id @default(cuid())
+  userId       String
+  lectureId    String
+  courseId     String
+  answers      Json
+  score        Float
+  passed       Boolean
+  timeTaken    Int?
+  feedback     Json?
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id])
 }
 
 model Submission {
