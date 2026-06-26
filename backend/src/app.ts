@@ -24,6 +24,10 @@ import practiceExercisesRoutes from "./routes/practiceExercises.js";
 import assessmentsRoutes from "./routes/assessments.js";
 import projectTasksRoutes from "./routes/projectTasks.js";
 import certificationsRoutes from "./routes/certifications.js";
+import portfolioRoutes from "./routes/portfolio.js";
+import resumeRoutes from "./routes/resume.js";
+import pushNotificationsRoutes from "./routes/pushNotifications.js";
+import emailDigestRoutes from "./routes/emailDigest.js";
 import adminRoutes from "./routes/admin.js";
 import adminContentRoutes from "./routes/adminContent.js";
 import adminPracticeExercisesRoutes from "./routes/adminPracticeExercises.js";
@@ -109,6 +113,10 @@ export function createApp() {
   app.use("/api/practice-exercises", practiceExercisesRoutes);
   app.use("/api/assessments", assessmentsRoutes);
   app.use("/api/certifications", certificationsRoutes);
+  app.use("/api/portfolio", portfolioRoutes);
+  app.use("/api/resume", resumeRoutes);
+  app.use("/api/push-notifications", pushNotificationsRoutes);
+  app.use("/api/email-digest", emailDigestRoutes);
   // Phase 2.5 & 3 Admin Routes Mount
   app.use("/api/admin/courses", phase3CoursesRoutes);
   app.use("/api/admin", phase3LessonsRoutes);

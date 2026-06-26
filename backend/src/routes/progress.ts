@@ -129,6 +129,8 @@ router.get("/profile/public/:userId", requireAuth, async (req: AuthenticatedRequ
         currentStreak: true,
         longestStreak: true,
         overallProgress: true,
+        profileVisibility: true,
+        profileTheme: true,
         _count: {
           select: {
             progress: { where: { status: "COMPLETED" } },
@@ -143,6 +145,11 @@ router.get("/profile/public/:userId", requireAuth, async (req: AuthenticatedRequ
 
     if (!targetUser) {
       return res.status(404).json({ error: "User not found" });
+    }
+
+    // Check profile visibility
+    if (targetUser.profileVisibility === "private" && targetUserId !== req.user!.id) {
+      return res.status(403).json({ error: "Profile is private" });
     }
 
     const projects = await prisma.project.findMany({
@@ -160,6 +167,11 @@ router.get("/profile/public/:userId", requireAuth, async (req: AuthenticatedRequ
       where: { userId: targetUserId }
     });
 
+    const certificates = await prisma.issuedCertificate.findMany({
+      where: { userId: targetUserId },
+      orderBy: { issuedAt: 'desc' }
+    });
+
     res.json({
       user: {
         id: targetUser.id,
@@ -172,6 +184,7 @@ router.get("/profile/public/:userId", requireAuth, async (req: AuthenticatedRequ
         portfolioUrl: targetUser.portfolioUrl,
         createdAt: targetUser.createdAt,
         role: "student",
+        profileTheme: targetUser.profileTheme,
       },
       stats: {
         coursesCompleted: targetUser._count.issuedCertificates,
@@ -185,7 +198,8 @@ router.get("/profile/public/:userId", requireAuth, async (req: AuthenticatedRequ
       projects,
       timeline,
       courseProgress,
-      overallProgress: targetUser.overallProgress
+      overallProgress: targetUser.overallProgress,
+      certificates
     });
   } catch (error) {
     next(error);

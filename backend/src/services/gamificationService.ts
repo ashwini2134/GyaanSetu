@@ -3,7 +3,21 @@ import { sendInAppNotification } from "./notificationService.js";
 
 const STREAK_MILESTONES = [3, 7, 14, 30, 60, 100, 365];
 
+// XP Multipliers
+const WEEKEND_MULTIPLIER = 1.5; // 1.5x XP on weekends
+const WEEKDAY_MULTIPLIER = 1.0; // 1.0x XP on weekdays
+
+function getXpMultiplier(): number {
+  const now = new Date();
+  const day = now.getDay(); // 0 = Sunday, 6 = Saturday
+  return (day === 0 || day === 6) ? WEEKEND_MULTIPLIER : WEEKDAY_MULTIPLIER;
+}
+
 export async function awardXp(userId: string, amount: number, reason: string, actionId?: string) {
+  // Apply XP multiplier based on day of week
+  const multiplier = getXpMultiplier();
+  const adjustedAmount = Math.round(amount * multiplier);
+  
   let newStreak = 0;
   await prisma.$transaction(async (tx) => {
     // 1. If actionId is provided, check if transaction already exists
@@ -18,12 +32,12 @@ export async function awardXp(userId: string, amount: number, reason: string, ac
       }
     }
 
-    // 2. Insert XpTransaction
+    // 2. Insert XpTransaction with adjusted amount
     await tx.xpTransaction.create({
       data: {
         userId,
-        amount,
-        reason,
+        amount: adjustedAmount,
+        reason: multiplier > 1 ? `${reason} (Weekend Bonus)` : reason,
         actionId,
       },
     });
@@ -160,16 +174,42 @@ const emailFilter = isTestEnv
   ? { NOT: [{ email: { endsWith: "@test.com" } }] }
   : { NOT: [{ email: { endsWith: "@test.com" } }, { email: { endsWith: "@example.com" } }] };
 
-export async function getLeaderboard(currentUserId?: string, timeframe: string = "all-time") {
+export async function getLeaderboard(
+  currentUserId?: string, 
+  timeframe: string = "all-time",
+  filters?: {
+    courseSlug?: string;
+    minStreak?: number;
+    region?: string;
+  }
+) {
   const dateLimit = timeframe !== "all-time"
     ? new Date(Date.now() - (timeframe === "weekly" ? 7 : 30) * 24 * 60 * 60 * 1000)
     : null;
 
+  const where: any = {
+    role: "student",
+    ...emailFilter
+  };
+
+  // Add course filter if specified
+  if (filters?.courseSlug) {
+    where.issuedCertificates = {
+      some: {
+        courseSlug: filters.courseSlug
+      }
+    };
+  }
+
+  // Add minimum streak filter if specified
+  if (filters?.minStreak) {
+    where.currentStreak = {
+      gte: filters.minStreak
+    };
+  }
+
   const users = await prisma.user.findMany({
-    where: {
-      role: "student",
-      ...emailFilter
-    },
+    where,
     select: {
       id: true,
       name: true,

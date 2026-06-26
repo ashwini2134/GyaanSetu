@@ -166,6 +166,8 @@ const profileSchema = z.object({
   linkedinUrl: z.string().max(255).trim().optional(),
   portfolioUrl: z.string().max(255).trim().optional(),
   notificationPrefs: z.record(z.boolean()).optional(),
+  profileVisibility: z.enum(["public", "private", "connections"]).optional(),
+  profileTheme: z.string().optional(),
   currentPassword: z.string().min(1).optional(),
   password: z.string().min(8).max(128).optional(),
 });
@@ -190,6 +192,20 @@ router.patch("/profile", requireAuth, async (req: AuthenticatedRequest, res, nex
       await prisma.user.update({
         where: { id: req.user.id },
         data: { notificationPrefs: body.notificationPrefs },
+      });
+    }
+
+    if (body.profileVisibility) {
+      await prisma.user.update({
+        where: { id: req.user.id },
+        data: { profileVisibility: body.profileVisibility },
+      });
+    }
+
+    if (body.profileTheme) {
+      await prisma.user.update({
+        where: { id: req.user.id },
+        data: { profileTheme: body.profileTheme },
       });
     }
     

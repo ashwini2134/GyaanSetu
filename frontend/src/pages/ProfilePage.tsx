@@ -129,6 +129,8 @@ export default function ProfilePage() {
   const [formDateJoined, setFormDateJoined] = useState(
     user?.createdAt ? new Date(user.createdAt).toISOString().split('T')[0] : ''
   );
+  const [formProfileVisibility, setFormProfileVisibility] = useState(user?.profileVisibility || 'public');
+  const [formProfileTheme, setFormProfileTheme] = useState(user?.profileTheme || 'default');
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
@@ -142,6 +144,8 @@ export default function ProfilePage() {
       setFormGithubUrl(user.githubUrl || '');
       setFormLinkedinUrl(user.linkedinUrl || '');
       setFormPortfolioUrl(user.portfolioUrl || '');
+      setFormProfileVisibility(user.profileVisibility || 'public');
+      setFormProfileTheme(user.profileTheme || 'default');
     }
   }, [user]);
 
@@ -184,13 +188,15 @@ export default function ProfilePage() {
     // ✅ Wired to real API — PATCH /api/auth/profile
     setSaving(true);
     try {
-      const payload: { name?: string; bio?: string; avatarUrl?: string; githubUrl?: string; linkedinUrl?: string; portfolioUrl?: string } = {};
+      const payload: { name?: string; bio?: string; avatarUrl?: string; githubUrl?: string; linkedinUrl?: string; portfolioUrl?: string; profileVisibility?: string; profileTheme?: string } = {};
       if (formName !== user?.name) payload.name = formName;
       if (formBio !== user?.bio) payload.bio = formBio;
       if (avatarPreview && avatarFile) payload.avatarUrl = avatarPreview;
       if (formGithubUrl !== user?.githubUrl) payload.githubUrl = formGithubUrl;
       if (formLinkedinUrl !== user?.linkedinUrl) payload.linkedinUrl = formLinkedinUrl;
       if (formPortfolioUrl !== user?.portfolioUrl) payload.portfolioUrl = formPortfolioUrl;
+      if (formProfileVisibility !== user?.profileVisibility) payload.profileVisibility = formProfileVisibility;
+      if (formProfileTheme !== user?.profileTheme) payload.profileTheme = formProfileTheme;
 
       await authApi.updateProfile(payload);
       await checkAuth();
@@ -254,6 +260,7 @@ export default function ProfilePage() {
   const [timelineEvents, setTimelineEvents] = useState<any[]>([]);
   const [timelineLoading, setTimelineLoading] = useState(true);
   const [courseProgress, setCourseProgress] = useState<any[]>([]);
+  const [certificates, setCertificates] = useState<any[]>([]);
 
   const completedCourses = courseProgress.filter((c: any) => c.status === 'completed');
   const derivedSkills = React.useMemo(() => {
@@ -345,10 +352,11 @@ export default function ProfilePage() {
         }
       } else {
         try {
-          const [projRes, timeRes, courseRes] = await Promise.all([
+          const [projRes, timeRes, courseRes, certRes] = await Promise.all([
             authFetch<any[]>('/profile/projects').catch(() => []),
             authFetch<any[]>('/profile/timeline').catch(() => []),
-            authFetch<any[]>('/courses/progress').catch(() => [])
+            authFetch<any[]>('/courses/progress').catch(() => []),
+            authFetch<{ certificates: any[] }>('/certifications').catch(() => ({ certificates: [] }))
           ]);
           
           const enrichedProjects = projRes.map(p => {
@@ -367,6 +375,7 @@ export default function ProfilePage() {
           setProjects(enrichedProjects);
           setTimelineEvents(timeRes);
           setCourseProgress(courseRes);
+          setCertificates(certRes.certificates || []);
         } catch (err) {
           console.error("Failed to fetch profile data", err);
         } finally {
@@ -594,6 +603,36 @@ export default function ProfilePage() {
                         onChange={(e) => setFormPortfolioUrl(e.target.value)}
                         className="w-full h-[44px] bg-[#0D1117] border border-[#2D3748] rounded-[8px] px-3 text-white text-sm focus:outline-none focus:border-blue-500 focus:shadow-[0_0_12px_rgba(59,130,246,0.2)] transition-shadow"
                       />
+                    </div>
+                  </div>
+
+                  {/* Row 6: Profile Visibility & Theme */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Profile Visibility</label>
+                      <select
+                        value={formProfileVisibility}
+                        onChange={(e) => setFormProfileVisibility(e.target.value)}
+                        className="w-full h-[44px] bg-[#0D1117] border border-[#2D3748] rounded-[8px] px-3 text-white text-sm focus:outline-none focus:border-blue-500 focus:shadow-[0_0_12px_rgba(59,130,246,0.2)] transition-shadow"
+                      >
+                        <option value="public">Public - Anyone can view</option>
+                        <option value="private">Private - Only you</option>
+                        <option value="connections">Connections only</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Profile Theme</label>
+                      <select
+                        value={formProfileTheme}
+                        onChange={(e) => setFormProfileTheme(e.target.value)}
+                        className="w-full h-[44px] bg-[#0D1117] border border-[#2D3748] rounded-[8px] px-3 text-white text-sm focus:outline-none focus:border-blue-500 focus:shadow-[0_0_12px_rgba(59,130,246,0.2)] transition-shadow"
+                      >
+                        <option value="default">Default Dark</option>
+                        <option value="ocean">Ocean Blue</option>
+                        <option value="forest">Forest Green</option>
+                        <option value="sunset">Sunset Orange</option>
+                        <option value="royal">Royal Purple</option>
+                      </select>
                     </div>
                   </div>
 
@@ -933,15 +972,22 @@ export default function ProfilePage() {
           {/* Certificates */}
           <div className="bg-[#161B22] rounded-[12px] border border-[#2D3748] p-6">
             <h2 className="text-[18px] font-bold text-white mb-5">Certificates Earned</h2>
-            {completedCourses.length === 0 ? (
+            {certificates.length === 0 ? (
               <div className="text-center py-8">
                 <Award size={32} className="text-slate-600 mx-auto mb-3" />
                 <p className="text-slate-400 text-sm">Complete a course to earn your first certificate!</p>
               </div>
             ) : (
               <div className="space-y-4">
-                {completedCourses.map((c: any, i: number) => {
-                  const certName = c.courseId === 'python' ? 'Python Fundamentals' : c.courseId === 'cs50ai' ? 'AI Foundations' : c.courseId;
+                {certificates.map((cert: any, i: number) => {
+                  const certName = cert.courseSlug === 'python' ? 'Python Fundamentals' : 
+                                   cert.courseSlug === 'cs50ai' ? 'AI Foundations' : 
+                                   cert.courseSlug.charAt(0).toUpperCase() + cert.courseSlug.slice(1);
+                  const issuedDate = new Date(cert.issuedAt).toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  });
                   return (
                     <div key={i} className="relative bg-[#0D1117] rounded-[8px] border border-[#2D3748] p-4 flex items-center justify-between group overflow-hidden">
                       <div className="absolute top-0 left-0 w-8 h-8 bg-amber-500/20 rounded-br-full" />
@@ -951,10 +997,17 @@ export default function ProfilePage() {
                         </div>
                         <div>
                           <h4 className="font-bold text-[14px] text-white">{certName}</h4>
-                          <p className="text-[12px] text-slate-400">Earned</p>
+                          <p className="text-[12px] text-slate-400">Issued: {issuedDate}</p>
+                          {cert.capstoneTitle && (
+                            <p className="text-[11px] text-slate-500 mt-1">Capstone: {cert.capstoneTitle}</p>
+                          )}
                         </div>
                       </div>
-                      <button className="p-2 border border-[#2D3748] rounded-[8px] text-slate-400 hover:text-white hover:border-slate-500 transition-colors" title="Download">
+                      <button 
+                        className="p-2 border border-[#2D3748] rounded-[8px] text-slate-400 hover:text-white hover:border-slate-500 transition-colors" 
+                        title="Download"
+                        onClick={() => window.open(`/verify/${cert.certNumber}`, '_blank')}
+                      >
                         <Download size={16} />
                       </button>
                     </div>

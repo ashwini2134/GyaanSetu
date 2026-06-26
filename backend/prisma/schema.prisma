@@ -29,6 +29,10 @@ model User {
   linkedinUrl         String                @default("")
   portfolioUrl        String                @default("")
   status              String                @default("active")
+  profileVisibility   String                @default("public")
+  profileTheme        String                @default("default")
+  streakFreezeCount   Int                   @default(0)
+  streakFreezeUsedAt  DateTime?
   achievements        Achievement[]
   chatMessages        ChatMessage[]
   codeDrafts          CodeDraft[]
@@ -62,9 +66,12 @@ model InAppNotification {
   link      String    @default("")
   readAt    DateTime?
   createdAt DateTime  @default(now())
+  category  String    @default("general")
+  priority  String    @default("normal")
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, readAt])
+  @@index([userId, createdAt])
   @@map("in_app_notifications")
 }
 
@@ -98,17 +105,15 @@ model LectureProgress {
 }
 
 model QuizAttempt {
-  id           String   @id @default(cuid())
-  userId       String
-  lectureId    String
-  courseId     String
-  answers      Json
-  score        Float
-  passed       Boolean
-  timeTaken    Int?
-  feedback     Json?
-  createdAt    DateTime @default(now())
-  user         User     @relation(fields: [userId], references: [id])
+  id        String   @id @default(cuid())
+  userId    String
+  quizId    String
+  score     Int
+  total     Int
+  passed    Boolean
+  answers   Json
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Submission {
@@ -205,6 +210,9 @@ model Achievement {
   userId        String
   achievementId String
   unlockedAt    DateTime @default(now())
+  custom        Boolean  @default(false)
+  icon          String?
+  description   String?
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, achievementId])
@@ -347,6 +355,9 @@ model IssuedCertificate {
   status       String    @default("active")
   revokeReason String?
   revokedAt    DateTime?
+  templateId   String    @default("default")
+  viewCount    Int       @default(0)
+  shareCount   Int       @default(0)
   user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseSlug])
@@ -462,6 +473,8 @@ model StudentPortfolio {
   courses      Json     @default("[]")
   certificates Json     @default("[]")
   projects     Json     @default("[]")
+  skills       Json     @default("[]")
+  screenshots  Json     @default("[]")
   updatedAt    DateTime @updatedAt
 
   @@map("student_portfolios")

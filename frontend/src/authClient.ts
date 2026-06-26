@@ -11,6 +11,8 @@ export type AuthUser = {
   githubUrl?: string;
   linkedinUrl?: string;
   portfolioUrl?: string;
+  profileVisibility?: string;
+  profileTheme?: string;
   createdAt?: string;
 };
 
@@ -163,6 +165,8 @@ export const authApi = {
     linkedinUrl?: string;
     portfolioUrl?: string;
     notificationPrefs?: Record<string, boolean>;
+    profileVisibility?: string;
+    profileTheme?: string;
   }) =>
     authFetch<{ user: AuthUser }>("/auth/profile", {
       method: "PATCH",

@@ -167,6 +167,7 @@ export async function issueCertForStudent(
   adminId: string,
   userId: string,
   courseSlug: string,
+  templateId?: string
 ): Promise<{ certNumber: string }> {
   const result = await checkEligibility(userId, courseSlug);
   if (result.alreadyIssued) throw new Error('Certificate already issued for this student and course');
@@ -223,7 +224,14 @@ export async function issueCertForStudent(
   if (!certNumber) throw new Error('Certs API did not return X-Cert-Number');
 
   await prisma.issuedCertificate.create({
-    data: { userId, courseSlug, certNumber, issuedBy: adminId, avgScore: result.avgQuizScore },
+    data: { 
+      userId, 
+      courseSlug, 
+      certNumber, 
+      issuedBy: adminId, 
+      avgScore: result.avgQuizScore,
+      templateId: templateId || 'default'
+    },
   });
 
   return { certNumber };
