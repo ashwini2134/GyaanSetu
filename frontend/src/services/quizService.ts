@@ -19,8 +19,8 @@ export async function submitQuiz(
   answers: Record<string, string>,
   questions: QuizQuestion[]
 ): Promise<QuizSubmissionResult> {
-  const formattedQuestions = questions.map(q => ({
-    id: q.id,
+  const formattedQuestions = questions.map((q, index) => ({
+    id: index.toString(),
     correctAnswer: q.answer, // mapped from QuizQuestion.answer
     explanation: q.explanation || "",
     points: q.points || 10

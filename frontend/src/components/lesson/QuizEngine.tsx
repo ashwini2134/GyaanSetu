@@ -36,7 +36,7 @@ export default function QuizEngine({ lectureId, courseId, questions, onComplete 
   const handleNext = async () => {
     if (!selected) return;
     
-    const newAnswers = { ...answers, [currentQ.id]: selected };
+    const newAnswers = { ...answers, [current.toString()]: selected };
     setAnswers(newAnswers);
     
     if (current < total - 1) {
