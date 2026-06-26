@@ -1,0 +1,29 @@
+[
+  {
+    "id": "even-odd",
+    "title": "Even or Odd",
+    "description": "Write a method that takes an int and prints whether it is Even or Odd.",
+    "difficulty": "Easy",
+    "common_mistakes": [
+      "Using / instead of %"
+    ]
+  },
+  {
+    "id": "grade-calculator",
+    "title": "Grade Calculator",
+    "description": "Write an if-else chain to return a letter grade (A, B, C, F) given a score out of 100.",
+    "difficulty": "Medium",
+    "common_mistakes": [
+      "Wrong order of conditions"
+    ]
+  },
+  {
+    "id": "day-of-week",
+    "title": "Day of Week",
+    "description": "Use a switch statement to return the name of the day given a number 1-7.",
+    "difficulty": "Medium",
+    "common_mistakes": [
+      "Missing break statements"
+    ]
+  }
+]

@@ -1,0 +1,31 @@
+[
+  {
+    "id": "print-multiplication-table",
+    "title": "Print Multiplication Table",
+    "description": "Write a method called printTable(int number) that prints the multiplication table for the given number from 1 to 10.",
+    "difficulty": "Easy",
+    "common_mistakes": [
+      "Off by one in loop",
+      "Not using parameters correctly"
+    ]
+  },
+  {
+    "id": "method-return-value",
+    "title": "Method with Return Value",
+    "description": "Write a method called multiply(int a, int b) that returns the product of two integers.",
+    "difficulty": "Easy",
+    "common_mistakes": [
+      "Forgetting return statement",
+      "Wrong return type"
+    ]
+  },
+  {
+    "id": "method-overloading",
+    "title": "Method Overloading",
+    "description": "Create two methods both named add — one that adds two integers and one that adds three integers.",
+    "difficulty": "Medium",
+    "common_mistakes": [
+      "Same parameter count causes compile error"
+    ]
+  }
+]

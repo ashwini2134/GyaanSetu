@@ -1,0 +1,52 @@
+[
+  {
+    "number": 0,
+    "label": "Week 0",
+    "title": "Introduction to Java & JShell"
+  },
+  {
+    "number": 1,
+    "label": "Week 1",
+    "title": "Methods & Multiplication Table"
+  },
+  {
+    "number": 2,
+    "label": "Week 2",
+    "title": "Java Platform Overview"
+  },
+  {
+    "number": 3,
+    "label": "Week 3",
+    "title": "Object Oriented Programming Basics"
+  },
+  {
+    "number": 4,
+    "label": "Week 4",
+    "title": "Primitive Data Types"
+  },
+  {
+    "number": 5,
+    "label": "Week 5",
+    "title": "Conditionals"
+  },
+  {
+    "number": 6,
+    "label": "Week 6",
+    "title": "Loops"
+  },
+  {
+    "number": 7,
+    "label": "Week 7",
+    "title": "Arrays and ArrayList"
+  },
+  {
+    "number": 8,
+    "label": "Week 8",
+    "title": "Collections"
+  },
+  {
+    "number": 9,
+    "label": "Week 9",
+    "title": "Final Project"
+  }
+]

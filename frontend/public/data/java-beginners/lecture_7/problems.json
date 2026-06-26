@@ -1,0 +1,29 @@
+[
+  {
+    "id": "array-sum",
+    "title": "Array Sum",
+    "description": "Write a method that takes an array of integers and returns their sum.",
+    "difficulty": "Easy",
+    "common_mistakes": [
+      "Index out of bounds"
+    ]
+  },
+  {
+    "id": "arraylist-ops",
+    "title": "ArrayList Operations",
+    "description": "Create an ArrayList of Strings, add 3 items, remove 1, and print the size.",
+    "difficulty": "Medium",
+    "common_mistakes": [
+      "Using length instead of size()"
+    ]
+  },
+  {
+    "id": "find-max",
+    "title": "Find Maximum",
+    "description": "Find the maximum value in an array of integers using an enhanced for loop.",
+    "difficulty": "Medium",
+    "common_mistakes": [
+      "Initializing max with 0 instead of Integer.MIN_VALUE"
+    ]
+  }
+]

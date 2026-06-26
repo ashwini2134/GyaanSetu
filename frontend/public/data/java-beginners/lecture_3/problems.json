@@ -1,0 +1,29 @@
+[
+  {
+    "id": "create-class",
+    "title": "Create a Class",
+    "description": "Create a class Book with title and author properties.",
+    "difficulty": "Easy",
+    "common_mistakes": [
+      "Missing class keyword"
+    ]
+  },
+  {
+    "id": "constructor-practice",
+    "title": "Constructor Practice",
+    "description": "Add a constructor to Book that takes title and author as parameters.",
+    "difficulty": "Medium",
+    "common_mistakes": [
+      "Return type on constructor"
+    ]
+  },
+  {
+    "id": "encapsulation-practice",
+    "title": "Encapsulation",
+    "description": "Make the fields of Book private and add getters and setters.",
+    "difficulty": "Medium",
+    "common_mistakes": [
+      "Not using this keyword"
+    ]
+  }
+]

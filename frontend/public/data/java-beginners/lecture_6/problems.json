@@ -1,0 +1,29 @@
+[
+  {
+    "id": "sum-of-n",
+    "title": "Sum of N",
+    "description": "Write a for loop to calculate the sum of numbers from 1 to N.",
+    "difficulty": "Easy",
+    "common_mistakes": [
+      "Loop bounds"
+    ]
+  },
+  {
+    "id": "print-evens",
+    "title": "Print Evens",
+    "description": "Use a while loop to print all even numbers between 1 and 20.",
+    "difficulty": "Medium",
+    "common_mistakes": [
+      "Infinite loop"
+    ]
+  },
+  {
+    "id": "do-while-prompt",
+    "title": "Do-While Prompt",
+    "description": "Simulate a prompt that keeps asking for input until the value is positive using a do-while loop.",
+    "difficulty": "Medium",
+    "common_mistakes": [
+      "Condition logic reversed"
+    ]
+  }
+]

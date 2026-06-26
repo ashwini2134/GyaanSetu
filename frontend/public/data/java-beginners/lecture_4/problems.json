@@ -1,0 +1,29 @@
+[
+  {
+    "id": "declare-primitives",
+    "title": "Declare Primitives",
+    "description": "Declare an int, double, boolean, and char variable and print them.",
+    "difficulty": "Easy",
+    "common_mistakes": [
+      "Wrong primitive size"
+    ]
+  },
+  {
+    "id": "type-casting",
+    "title": "Type Casting",
+    "description": "Cast a double value 9.78 to an int and print it.",
+    "difficulty": "Easy",
+    "common_mistakes": [
+      "Missing cast operator"
+    ]
+  },
+  {
+    "id": "char-math",
+    "title": "Char Math",
+    "description": "Add 1 to the char 'A' and print the resulting character.",
+    "difficulty": "Medium",
+    "common_mistakes": [
+      "Printing as integer instead of char"
+    ]
+  }
+]

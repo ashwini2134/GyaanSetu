@@ -1,0 +1,29 @@
+[
+  {
+    "id": "jvm-understanding",
+    "title": "JVM Understanding",
+    "description": "Write a simple Java program that prints 'JVM executes bytecode'.",
+    "difficulty": "Easy",
+    "common_mistakes": [
+      "Missing main method"
+    ]
+  },
+  {
+    "id": "jdk-tools",
+    "title": "JDK Tools",
+    "description": "Write a program that demonstrates usage of command line arguments by printing args[0].",
+    "difficulty": "Medium",
+    "common_mistakes": [
+      "Index out of bounds"
+    ]
+  },
+  {
+    "id": "compile-run",
+    "title": "Compile and Run",
+    "description": "Create a class 'Platform' with a method that prints the current Java version property 'java.version'.",
+    "difficulty": "Medium",
+    "common_mistakes": [
+      "Typo in property name"
+    ]
+  }
+]

@@ -1,0 +1,29 @@
+[
+  {
+    "id": "student-class",
+    "title": "Student Class",
+    "description": "Create the Student class with id, name, and grade. Provide constructors and getters.",
+    "difficulty": "Easy",
+    "common_mistakes": [
+      "Missing encapsulation"
+    ]
+  },
+  {
+    "id": "add-search-student",
+    "title": "Add and Search Student",
+    "description": "Implement a method to add a student to a list, and a method to find a student by ID.",
+    "difficulty": "Medium",
+    "common_mistakes": [
+      "Not handling student not found"
+    ]
+  },
+  {
+    "id": "student-manager-app",
+    "title": "Student Manager App",
+    "description": "Create a console menu using a while loop and switch statement to run the Student Management System.",
+    "difficulty": "Hard",
+    "common_mistakes": [
+      "Scanner input issues with nextLine"
+    ]
+  }
+]

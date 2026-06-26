@@ -1,0 +1,31 @@
+[
+  {
+    "id": "hello-java",
+    "title": "Hello Java",
+    "description": "Write a Java program that prints 'Hello, World!' to the console using System.out.println.",
+    "difficulty": "Easy",
+    "common_mistakes": [
+      "Forgetting semicolons",
+      "Using wrong method name - it's println not print"
+    ]
+  },
+  {
+    "id": "multiplication-expression",
+    "title": "Multiplication Expression",
+    "description": "Using JShell, evaluate the expression 5 * 3 and print the result. Then try 10 * 10.",
+    "difficulty": "Easy",
+    "common_mistakes": [
+      "Confusing * operator with x"
+    ]
+  },
+  {
+    "id": "variable-declaration",
+    "title": "Declare and Print Variables",
+    "description": "Declare an integer variable called age with value 25 and a String variable called name with value 'Java'. Print both.",
+    "difficulty": "Easy",
+    "common_mistakes": [
+      "Forgetting data type in declaration",
+      "Missing quotes around String value"
+    ]
+  }
+]

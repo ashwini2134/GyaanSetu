@@ -1,0 +1,29 @@
+[
+  {
+    "id": "remove-duplicates",
+    "title": "Remove Duplicates",
+    "description": "Given a List with duplicate values, use a Set to remove duplicates and return the unique values.",
+    "difficulty": "Medium",
+    "common_mistakes": [
+      "Not understanding Set properties"
+    ]
+  },
+  {
+    "id": "word-frequency",
+    "title": "Word Frequency",
+    "description": "Count the frequency of words in an array of strings using a Map.",
+    "difficulty": "Hard",
+    "common_mistakes": [
+      "Null pointer when adding new keys"
+    ]
+  },
+  {
+    "id": "sort-strings",
+    "title": "Sort Strings",
+    "description": "Sort an ArrayList of strings in alphabetical order.",
+    "difficulty": "Easy",
+    "common_mistakes": [
+      "Using Arrays.sort instead of Collections.sort"
+    ]
+  }
+]
