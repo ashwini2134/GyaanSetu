@@ -1,29 +1,47 @@
 [
   {
-    "id": "student-class",
-    "title": "Student Class",
-    "description": "Create the Student class with id, name, and grade. Provide constructors and getters.",
-    "difficulty": "Easy",
-    "common_mistakes": [
-      "Missing encapsulation"
+    "id": "problem_1_lecture_9",
+    "title": "Problem 1 - Functional Programming",
+    "description": "Solve this problem related to Functional Programming.",
+    "difficulty": "easy",
+    "starterCode": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "solution": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "testCases": [
+      {
+        "label": "Test case 1",
+        "input": "",
+        "expectedOutput": ""
+      }
     ]
   },
   {
-    "id": "add-search-student",
-    "title": "Add and Search Student",
-    "description": "Implement a method to add a student to a list, and a method to find a student by ID.",
-    "difficulty": "Medium",
-    "common_mistakes": [
-      "Not handling student not found"
+    "id": "problem_2_lecture_9",
+    "title": "Problem 2 - Functional Programming",
+    "description": "Solve this problem related to Functional Programming.",
+    "difficulty": "medium",
+    "starterCode": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "solution": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "testCases": [
+      {
+        "label": "Test case 1",
+        "input": "",
+        "expectedOutput": ""
+      }
     ]
   },
   {
-    "id": "student-manager-app",
-    "title": "Student Manager App",
-    "description": "Create a console menu using a while loop and switch statement to run the Student Management System.",
-    "difficulty": "Hard",
-    "common_mistakes": [
-      "Scanner input issues with nextLine"
+    "id": "problem_3_lecture_9",
+    "title": "Problem 3 - Functional Programming",
+    "description": "Solve this problem related to Functional Programming.",
+    "difficulty": "hard",
+    "starterCode": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "solution": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "testCases": [
+      {
+        "label": "Test case 1",
+        "input": "",
+        "expectedOutput": ""
+      }
     ]
   }
 ]

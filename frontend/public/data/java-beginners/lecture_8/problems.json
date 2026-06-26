@@ -1,29 +1,47 @@
 [
   {
-    "id": "remove-duplicates",
-    "title": "Remove Duplicates",
-    "description": "Given a List with duplicate values, use a Set to remove duplicates and return the unique values.",
-    "difficulty": "Medium",
-    "common_mistakes": [
-      "Not understanding Set properties"
+    "id": "problem_1_lecture_8",
+    "title": "Problem 1 - Collections",
+    "description": "Solve this problem related to Collections.",
+    "difficulty": "easy",
+    "starterCode": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "solution": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "testCases": [
+      {
+        "label": "Test case 1",
+        "input": "",
+        "expectedOutput": ""
+      }
     ]
   },
   {
-    "id": "word-frequency",
-    "title": "Word Frequency",
-    "description": "Count the frequency of words in an array of strings using a Map.",
-    "difficulty": "Hard",
-    "common_mistakes": [
-      "Null pointer when adding new keys"
+    "id": "problem_2_lecture_8",
+    "title": "Problem 2 - Collections",
+    "description": "Solve this problem related to Collections.",
+    "difficulty": "medium",
+    "starterCode": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "solution": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "testCases": [
+      {
+        "label": "Test case 1",
+        "input": "",
+        "expectedOutput": ""
+      }
     ]
   },
   {
-    "id": "sort-strings",
-    "title": "Sort Strings",
-    "description": "Sort an ArrayList of strings in alphabetical order.",
-    "difficulty": "Easy",
-    "common_mistakes": [
-      "Using Arrays.sort instead of Collections.sort"
+    "id": "problem_3_lecture_8",
+    "title": "Problem 3 - Collections",
+    "description": "Solve this problem related to Collections.",
+    "difficulty": "hard",
+    "starterCode": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "solution": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "testCases": [
+      {
+        "label": "Test case 1",
+        "input": "",
+        "expectedOutput": ""
+      }
     ]
   }
 ]

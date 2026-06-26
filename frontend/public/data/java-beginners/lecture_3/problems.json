@@ -1,29 +1,47 @@
 [
   {
-    "id": "create-class",
-    "title": "Create a Class",
-    "description": "Create a class Book with title and author properties.",
-    "difficulty": "Easy",
-    "common_mistakes": [
-      "Missing class keyword"
+    "id": "problem_1_lecture_3",
+    "title": "Problem 1 - Object Oriented Programming",
+    "description": "Solve this problem related to Object Oriented Programming.",
+    "difficulty": "easy",
+    "starterCode": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "solution": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "testCases": [
+      {
+        "label": "Test case 1",
+        "input": "",
+        "expectedOutput": ""
+      }
     ]
   },
   {
-    "id": "constructor-practice",
-    "title": "Constructor Practice",
-    "description": "Add a constructor to Book that takes title and author as parameters.",
-    "difficulty": "Medium",
-    "common_mistakes": [
-      "Return type on constructor"
+    "id": "problem_2_lecture_3",
+    "title": "Problem 2 - Object Oriented Programming",
+    "description": "Solve this problem related to Object Oriented Programming.",
+    "difficulty": "medium",
+    "starterCode": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "solution": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "testCases": [
+      {
+        "label": "Test case 1",
+        "input": "",
+        "expectedOutput": ""
+      }
     ]
   },
   {
-    "id": "encapsulation-practice",
-    "title": "Encapsulation",
-    "description": "Make the fields of Book private and add getters and setters.",
-    "difficulty": "Medium",
-    "common_mistakes": [
-      "Not using this keyword"
+    "id": "problem_3_lecture_3",
+    "title": "Problem 3 - Object Oriented Programming",
+    "description": "Solve this problem related to Object Oriented Programming.",
+    "difficulty": "hard",
+    "starterCode": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "solution": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "testCases": [
+      {
+        "label": "Test case 1",
+        "input": "",
+        "expectedOutput": ""
+      }
     ]
   }
 ]

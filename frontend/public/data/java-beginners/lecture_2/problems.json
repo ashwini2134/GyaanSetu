@@ -1,29 +1,47 @@
 [
   {
-    "id": "jvm-understanding",
-    "title": "JVM Understanding",
-    "description": "Write a simple Java program that prints 'JVM executes bytecode'.",
-    "difficulty": "Easy",
-    "common_mistakes": [
-      "Missing main method"
+    "id": "problem_1_lecture_2",
+    "title": "Problem 1 - Methods & Multiplication Table",
+    "description": "Solve this problem related to Methods & Multiplication Table.",
+    "difficulty": "easy",
+    "starterCode": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "solution": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "testCases": [
+      {
+        "label": "Test case 1",
+        "input": "",
+        "expectedOutput": ""
+      }
     ]
   },
   {
-    "id": "jdk-tools",
-    "title": "JDK Tools",
-    "description": "Write a program that demonstrates usage of command line arguments by printing args[0].",
-    "difficulty": "Medium",
-    "common_mistakes": [
-      "Index out of bounds"
+    "id": "problem_2_lecture_2",
+    "title": "Problem 2 - Methods & Multiplication Table",
+    "description": "Solve this problem related to Methods & Multiplication Table.",
+    "difficulty": "medium",
+    "starterCode": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "solution": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "testCases": [
+      {
+        "label": "Test case 1",
+        "input": "",
+        "expectedOutput": ""
+      }
     ]
   },
   {
-    "id": "compile-run",
-    "title": "Compile and Run",
-    "description": "Create a class 'Platform' with a method that prints the current Java version property 'java.version'.",
-    "difficulty": "Medium",
-    "common_mistakes": [
-      "Typo in property name"
+    "id": "problem_3_lecture_2",
+    "title": "Problem 3 - Methods & Multiplication Table",
+    "description": "Solve this problem related to Methods & Multiplication Table.",
+    "difficulty": "hard",
+    "starterCode": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "solution": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "testCases": [
+      {
+        "label": "Test case 1",
+        "input": "",
+        "expectedOutput": ""
+      }
     ]
   }
 ]

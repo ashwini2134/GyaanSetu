@@ -1,29 +1,47 @@
 [
   {
-    "id": "declare-primitives",
-    "title": "Declare Primitives",
-    "description": "Declare an int, double, boolean, and char variable and print them.",
-    "difficulty": "Easy",
-    "common_mistakes": [
-      "Wrong primitive size"
+    "id": "problem_1_lecture_4",
+    "title": "Problem 1 - Conditionals",
+    "description": "Solve this problem related to Conditionals.",
+    "difficulty": "easy",
+    "starterCode": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "solution": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "testCases": [
+      {
+        "label": "Test case 1",
+        "input": "",
+        "expectedOutput": ""
+      }
     ]
   },
   {
-    "id": "type-casting",
-    "title": "Type Casting",
-    "description": "Cast a double value 9.78 to an int and print it.",
-    "difficulty": "Easy",
-    "common_mistakes": [
-      "Missing cast operator"
+    "id": "problem_2_lecture_4",
+    "title": "Problem 2 - Conditionals",
+    "description": "Solve this problem related to Conditionals.",
+    "difficulty": "medium",
+    "starterCode": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "solution": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "testCases": [
+      {
+        "label": "Test case 1",
+        "input": "",
+        "expectedOutput": ""
+      }
     ]
   },
   {
-    "id": "char-math",
-    "title": "Char Math",
-    "description": "Add 1 to the char 'A' and print the resulting character.",
-    "difficulty": "Medium",
-    "common_mistakes": [
-      "Printing as integer instead of char"
+    "id": "problem_3_lecture_4",
+    "title": "Problem 3 - Conditionals",
+    "description": "Solve this problem related to Conditionals.",
+    "difficulty": "hard",
+    "starterCode": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "solution": "public class Main {\n  public static void main(String[] args) {\n    \n  }\n}",
+    "testCases": [
+      {
+        "label": "Test case 1",
+        "input": "",
+        "expectedOutput": ""
+      }
     ]
   }
 ]
