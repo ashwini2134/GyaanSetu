@@ -195,7 +195,12 @@ export const api = {
         category: (c.category || "Programming") as any,
         language: "English" as any,
       }));
-      return [...staticCourses, ...mappedDbCourses];
+      // Prioritize staticCourses for metadata (description, language, category) since DB might have defaults
+      const merged = [...staticCourses, ...mappedDbCourses];
+      const unique = merged.filter((c, i, arr) => 
+        arr.findIndex(x => x.slug === c.slug) === i
+      );
+      return unique;
     } catch {
       return staticCourses;
     }

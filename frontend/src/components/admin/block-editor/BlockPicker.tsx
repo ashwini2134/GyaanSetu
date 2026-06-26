@@ -13,6 +13,9 @@ export const BLOCK_TYPES = [
   { id: 'image', name: 'Image', icon: ImageIcon, desc: 'Picture with caption' },
   { id: 'quiz', name: 'Quiz', icon: CheckSquare, desc: 'Multiple choice question' },
   { id: 'list', name: 'List', icon: ListIcon, desc: 'Bullet or numbered list' },
+  { id: 'explanation', name: 'Explanation', icon: Lightbulb, desc: 'Detailed explanation with colored background' },
+  { id: 'think_of', name: 'Think Of', icon: Lightbulb, desc: 'Analogy card' },
+  { id: 'practice', name: 'Practice', icon: Code2, desc: 'Interactive coding practice block' },
 ];
 
 export default function BlockPicker({ onSelect, onClose }: { onSelect: (type: string) => void, onClose: () => void }) {

@@ -14,6 +14,9 @@ import VideoBlock from './blocks/VideoBlock';
 import ImageBlock from './blocks/ImageBlock';
 import QuizBlock from './blocks/QuizBlock';
 import ListBlock from './blocks/ListBlock';
+import ExplanationBlock from './blocks/ExplanationBlock';
+import ThinkOfBlock from './blocks/ThinkOfBlock';
+import PracticeBlock from './blocks/PracticeBlock';
 
 interface BlockCardProps {
   id: string;
@@ -38,17 +41,21 @@ export default function BlockCard({ id, type, data, onChange, onDelete }: BlockC
   const Icon = blockConfig?.icon || React.Fragment;
 
   const renderBlockEditor = () => {
+    const safeData = data || {};
     switch (type) {
-      case 'heading': return <HeadingBlock data={data} onChange={onChange} />;
-      case 'text': return <TextBlock data={data} onChange={onChange} />;
-      case 'analogy': return <AnalogyBlock data={data} onChange={onChange} />;
-      case 'code': return <CodeBlock data={data} onChange={onChange} />;
-      case 'callout': return <CalloutBlock data={data} onChange={onChange} />;
-      case 'exercise': return <ExerciseBlock data={data} onChange={onChange} />;
-      case 'video': return <VideoBlock data={data} onChange={onChange} />;
-      case 'image': return <ImageBlock data={data} onChange={onChange} />;
-      case 'quiz': return <QuizBlock data={data} onChange={onChange} />;
-      case 'list': return <ListBlock data={data} onChange={onChange} />;
+      case 'heading': return <HeadingBlock data={safeData} onChange={onChange} />;
+      case 'text': return <TextBlock data={safeData} onChange={onChange} />;
+      case 'analogy': return <AnalogyBlock data={safeData} onChange={onChange} />;
+      case 'code': return <CodeBlock data={safeData} onChange={onChange} />;
+      case 'callout': return <CalloutBlock data={safeData} onChange={onChange} />;
+      case 'exercise': return <ExerciseBlock data={safeData} onChange={onChange} />;
+      case 'video': return <VideoBlock data={safeData} onChange={onChange} />;
+      case 'image': return <ImageBlock data={safeData} onChange={onChange} />;
+      case 'quiz': return <QuizBlock data={safeData} onChange={onChange} />;
+      case 'list': return <ListBlock data={safeData} onChange={onChange} />;
+      case 'explanation': return <ExplanationBlock data={safeData} onChange={onChange} />;
+      case 'think_of': return <ThinkOfBlock data={safeData} onChange={onChange} />;
+      case 'practice': return <PracticeBlock data={safeData} onChange={onChange} />;
       default: return <div className="text-red-400">Unknown block type: {type}</div>;
     }
   };

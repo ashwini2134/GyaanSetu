@@ -62,7 +62,7 @@ export default function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                 key={block.id}
                 id={block.id}
                 type={block.type}
-                data={block.data}
+                data={block.data !== undefined ? block.data : block}
                 onChange={(data) => updateBlock(block.id, data)}
                 onDelete={() => deleteBlock(block.id)}
               />

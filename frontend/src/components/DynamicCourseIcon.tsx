@@ -24,6 +24,16 @@ export function getCourseIconDetails(courseName: string, category: string) {
     };
   }
 
+  // Java
+  if (nameLow.includes('java')) {
+    return {
+      type: 'java-image',
+      bgClass: 'bg-[#1a1a2e]',
+      borderClass: 'border-[#2D3748]',
+      subtitle: ''
+    };
+  }
+
   // Web Development
   if (catLow.includes('web development')) {
     return {
@@ -104,6 +114,18 @@ export function DynamicCourseIcon({ courseName, category }: { courseName: string
           AI
         </span>
         <Brain className="w-10 h-10 text-slate-300 z-10 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]" strokeWidth={1.5} />
+      </div>
+    );
+  }
+
+  if (details.type === 'java-image') {
+    return (
+      <div className="w-[160px] h-[120px] rounded-[12px] overflow-hidden relative flex items-center justify-center shrink-0 border border-[#2D3748] bg-[#ffffff]">
+        <img 
+          src="/images/java-logo.png" 
+          alt="Java"
+          className="w-[80px] h-[80px] object-contain z-10 drop-shadow-md"
+        />
       </div>
     );
   }
