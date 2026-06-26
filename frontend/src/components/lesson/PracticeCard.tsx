@@ -9,6 +9,9 @@ import { generateProgressiveHint } from '../../utils/logicValidation';
 import { scanForInput } from '../../utils/prescanner';
 import DragDropPracticeExercise from './DragDropPracticeExercise';
 import ExpandUniverse from './ExpandUniverse';
+import AIConversationExercise from './AIConversationExercise';
+import PathBuilderExercise from './PathBuilderExercise';
+import GraphTraversalExercise from './GraphTraversalExercise';
 
 interface PracticeCardProps {
   block: PracticeBlock;
@@ -89,6 +92,9 @@ function AIPracticeCard({ block, courseSlug, lectureNumber, sectionId, onAttempt
 
   const isDragDrop = config?.type === 'drag_drop' && config?.dragDropConfig;
   const isHierarchyExpand = config?.type === 'hierarchy_expand' && config?.hierarchyExpandConfig;
+  const isAIConversation = config?.type === 'ai_conversation' && config?.aiConversationConfig;
+  const isPathBuilder = config?.type === 'path_builder' && config?.pathBuilderConfig;
+  const isBFSDFS = config?.type === 'bfs_dfs' && config?.bfsdfsConfig;
 
   // All exercises show a "Start Practice" gate first (including drag-drop)
   if (!open) {
@@ -102,7 +108,7 @@ function AIPracticeCard({ block, courseSlug, lectureNumber, sectionId, onAttempt
           </div>
           <div className="flex-1">
             <p className="text-xs font-semibold text-amber-300 uppercase tracking-wider mb-1">
-              {isHierarchyExpand ? 'Interactive Discovery' : isDragDrop ? 'Drag & Drop Exercise' : 'Practice Exercise'}
+              {isHierarchyExpand ? 'Interactive Discovery' : isDragDrop ? 'Drag & Drop Exercise' : isAIConversation ? 'AI Conversation Exercise' : isPathBuilder ? 'Path Builder Exercise' : isBFSDFS ? 'BFS & DFS Exploration' : 'Practice Exercise'}
             </p>
             <p className="text-sm font-medium text-slate-200 mb-1">{config?.title || block.title}</p>
             <button
@@ -139,6 +145,40 @@ function AIPracticeCard({ block, courseSlug, lectureNumber, sectionId, onAttempt
         challenge={config.challenge}
         learningGoal={config.learningGoal}
         promptHint={config.promptHint}
+        onComplete={() => { setOpen(false); onComplete?.(); }}
+        onAttempt={onAttempt}
+      />
+    );
+  }
+
+  // AI Conversation exercises render inline
+  if (config && isAIConversation) {
+    return (
+      <AIConversationExercise
+        config={config.aiConversationConfig!}
+        title={config.title}
+        onComplete={() => { setOpen(false); onComplete?.(); }}
+        onAttempt={onAttempt}
+      />
+    );
+  }
+
+  // Path Builder exercises render inline
+  if (config && isPathBuilder) {
+    return (
+      <PathBuilderExercise
+        config={config.pathBuilderConfig!}
+        onComplete={() => { setOpen(false); onComplete?.(); }}
+        onAttempt={onAttempt}
+      />
+    );
+  }
+
+  // BFS/DFS graph traversal exercises render inline
+  if (config && isBFSDFS) {
+    return (
+      <GraphTraversalExercise
+        config={config.bfsdfsConfig!}
         onComplete={() => { setOpen(false); onComplete?.(); }}
         onAttempt={onAttempt}
       />

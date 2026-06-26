@@ -148,6 +148,45 @@ router.get("/config/:courseId/:lectureId", requireAuth, async (req: Authenticate
         } | null)
       : null;
 
+    const aiConversationConfig = exercise.type === 'ai_conversation'
+      ? (exercise.validationRules as {
+          slides: { title: string; body: string[]; button: string }[];
+          missions: { title: string; starter: string }[];
+          placeholder: string;
+          mentorHints: string[];
+          reflectionQuestion: string;
+          reflectionOptions: string[];
+          completionMessages: string[];
+        } | null)
+      : null;
+
+    const pathBuilderConfig = exercise.type === 'path_builder'
+      ? (exercise.validationRules as {
+          rounds: {
+            gridSize: number;
+            start: { row: number; col: number };
+            goal: { row: number; col: number };
+            walls: { row: number; col: number }[];
+            optimalPathLength?: number;
+            reveal: { startState: string; goalState: string; actions: string; path: string; pathCost: string };
+          }[];
+          completionMessages: string[];
+        } | null)
+      : null;
+
+    const bfsdfsConfig = exercise.type === 'bfs_dfs'
+      ? (exercise.validationRules as {
+          slides: { title: string; body: string[]; button: string }[];
+          scenario: string;
+          graph: { nodes: { id: string; label: string; x: number; y: number }[]; edges: { from: string; to: string }[]; startNode: string };
+          bfsOrder: string[];
+          dfsOrder: string[];
+          comparison: { bfs: string[]; dfs: string[] };
+          reflection: { question: string; options: string[]; correctIndex: number; explanation: string };
+          completionMessages: string[];
+        } | null)
+      : null;
+
     res.json({
       exercise: {
         id: exercise.id,
@@ -162,6 +201,9 @@ router.get("/config/:courseId/:lectureId", requireAuth, async (req: Authenticate
         estimatedTime: exercise.estimatedTime,
         dragDropConfig: dragDropConfig ?? undefined,
         hierarchyExpandConfig: hierarchyExpandConfig ?? undefined,
+        aiConversationConfig: aiConversationConfig ?? undefined,
+        pathBuilderConfig: pathBuilderConfig ?? undefined,
+        bfsdfsConfig: bfsdfsConfig ?? undefined,
       },
     });
   } catch (error) {
