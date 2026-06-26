@@ -123,6 +123,9 @@ function AIPracticeCard({ block, courseSlug, lectureNumber, sectionId, onAttempt
     return (
       <ExpandUniverse
         config={config.hierarchyExpandConfig!}
+        learningGoal={config.learningGoal}
+        challenge={config.challenge}
+        promptHint={config.promptHint}
         onComplete={() => { setOpen(false); onComplete?.(); }}
       />
     );

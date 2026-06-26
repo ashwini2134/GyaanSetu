@@ -294,6 +294,12 @@ const HIERARCHY_EXERCISES: Record<string, HierarchyExpandConfig> = {
       root: { label: "Artificial Intelligence", icon: "🤖" },
       child: { label: "Machine Learning", icon: "📊" },
       grandchild: { label: "Deep Learning", icon: "🧠" },
+      onboarding: [
+        "Tap the AI ring to discover what's inside",
+        "Machine Learning is a subset of AI — tap to see deeper",
+        "Deep Learning is a subset of Machine Learning — explore even further",
+        "Finally, classify real-world examples into the right category",
+      ],
       steps: [
         {
           id: "discover-ai",

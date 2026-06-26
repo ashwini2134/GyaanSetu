@@ -8,8 +8,9 @@ import {
   QuizEngine,
   ProblemCard,
   SummaryCard,
+  InteractiveBook,
 } from '../components/lesson';
-import type { CodingProblem, ProjectSummary } from '../types/lesson';
+import type { CodingProblem, InteractiveBookBlock, ProjectSummary } from '../types/lesson';
 import { ArrowLeft, ArrowRight, CheckCircle, Check, X } from 'lucide-react';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -97,7 +98,9 @@ export default function LecturePage() {
   const scrollRef = useRef<HTMLElement>(null);
   const [skippedSections, setSkippedSections] = useState<Set<number>>(new Set());
   const [completedProblems, setCompletedProblems] = useState<string[]>([]);
+  const [completedBooks, setCompletedBooks] = useState<Set<string>>(new Set());
   // Check if content fits without scrolling
+
   useEffect(() => {
     setScrolledToBottom(false);
     const timer = setTimeout(() => {
@@ -120,6 +123,7 @@ export default function LecturePage() {
     setShowAllCompleted(false);
     setScrolledToBottom(false);
     setCompletedProblems([]);
+    setCompletedBooks(new Set());
   }, [slug, lectureNumber]);
 
   // Load lecture list for prev/next lecture navigation
@@ -255,6 +259,17 @@ export default function LecturePage() {
   const isFirstPage = currentPageIdx === 0;
   const isLastPage = currentPageIdx === pages.length - 1;
 
+  // Book gating: detect uncompleted interactive_book blocks
+  const currentSection = currentPage?.type === 'section' && lessonData
+    ? lessonData.sections[currentPage.index]
+    : null;
+  const bookBlock = currentSection
+    ? (currentSection.blocks.find(
+        (b): b is InteractiveBookBlock => b.type === 'interactive_book'
+      ) ?? null)
+    : null;
+  const isBookCompleted = bookBlock ? completedBooks.has(currentSection!.id) : true;
+
   const goNext = () => {
     if (currentPage?.type === 'section') {
       if (scrolledToBottom) {
@@ -363,7 +378,18 @@ export default function LecturePage() {
           }}
         >
           <div className="p-6 max-w-4xl mx-auto">
-            {currentPage?.type === 'section' && (
+            {/* Full-screen book overlay — hides all other content until book completes */}
+            {bookBlock && !isBookCompleted && (
+              <InteractiveBook
+                spreads={bookBlock.spreads}
+                onComplete={() => {
+                  setCompletedBooks(prev => new Set(prev).add(currentSection!.id));
+                  markSectionComplete(currentPageIdx + 1);
+                }}
+              />
+            )}
+
+            {currentPage?.type === 'section' && isBookCompleted && (
               <LessonSection
                 section={lessonData.sections[currentPage.index]}
                 index={currentPage.index}

@@ -133,7 +133,7 @@ const IMAGE_MAP: Array<[RegExp, string]> = [
   [/book|phone book|library|shelf|catalog/i, 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=800&q=80'],
   [/vending/i, 'https://images.unsplash.com/photo-1618506557292-ec1862b3c506?w=800&q=80'],
   [/chain|string|beads|characters/i, 'https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=800&q=80'],
-  [/notebook|journal/i, 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=800&q=80'],
+  [/notebook|journal/i, 'https://images.unsplash.com/photo-1517842647576-c639042777db?w=800&q=80'],
   [/dog|puppy|tricks|training/i, 'https://images.unsplash.com/photo-1504826260979-242151ee45b7?w=800&q=80'],
   [/maze|labyrinth/i, 'https://images.unsplash.com/photo-1590278458425-6aa3912a48a5?w=800&q=80'],
   [/gps|map|direction|navigate|route/i, 'https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=80'],

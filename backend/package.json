@@ -2,6 +2,10 @@
   "name": "fraylon-academy-backend",
   "private": true,
   "version": "1.0.0",
+  "engines": {
+    "node": ">=20.11.0",
+    "npm": ">=10.0.0"
+  },
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",

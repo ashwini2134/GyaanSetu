@@ -111,7 +111,7 @@
     },
     {
       "id": "getting-started",
-      "label": "Getting Started",
+      "label": "Neural Networks Step by Step",
       "blocks": [
         {
           "type": "explanation",

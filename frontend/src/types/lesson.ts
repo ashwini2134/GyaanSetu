@@ -191,6 +191,23 @@ export interface PracticeExerciseConfig {
   hierarchyExpandConfig?: HierarchyExpandConfig;
 }
 
+export interface BookPageContent {
+  title?: string;
+  paragraphs?: string[];
+  image?: string;
+  imageAlt?: string;
+}
+
+export interface BookSpread {
+  left?: BookPageContent;
+  right?: BookPageContent;
+}
+
+export interface InteractiveBookBlock {
+  type: 'interactive_book';
+  spreads: BookSpread[];
+}
+
 export interface PracticeBlock {
   type: 'practice';
   title: string;
@@ -211,6 +228,7 @@ export type ContentBlock =
   | VisualAidBlock
   | CodeExampleBlock
   | ReflectionBlock
+  | InteractiveBookBlock
   | PracticeBlock;
 
 // ── Section ───────────────────────────────────────────────────────────────────

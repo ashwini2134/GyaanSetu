@@ -3,6 +3,10 @@
   "private": true,
   "homepage": "https://yuvaraj-dudukuru.github.io/LMS",
   "version": "1.0.0",
+  "engines": {
+    "node": ">=20.11.0",
+    "npm": ">=10.0.0"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",

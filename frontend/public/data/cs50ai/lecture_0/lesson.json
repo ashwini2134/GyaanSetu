@@ -11,14 +11,15 @@
       "blocks": [
         {
           "type": "explanation",
-          "title": "What is Artificial Intelligence?",
-          "body": "Artificial Intelligence (AI) is the field of computer science focused on building systems that perform tasks normally requiring human thinking — learning, reasoning, recognizing patterns, and making decisions.",
+          "title": "Why do we even need AI?",
+          "body": "Every day, humans generate **300 billion emails**, upload **500 hours of video per minute** to YouTube, and maintain **15,000 titles** on Netflix. No human can keep up. Traditional software follows fixed rules — but rules break when everything is unpredictable. This is why AI exists.",
           "bullets": [
-            "Computers performing tasks that need human intelligence",
-            "Examples: playing chess, recognizing faces, translating languages",
-            "AI powers spam filters, voice assistants, and recommendation systems",
-            "Not about robots — about intelligent problem-solving",
-            "This concept is fundamental to AI development."
+            "AI is the ability of a machine to learn patterns, reason, and make decisions",
+            "Spam filters learn which emails are junk from millions of examples",
+            "Netflix recommends shows using machine learning on your viewing history",
+            "Google Maps uses search and optimization to find the fastest route",
+            "ChatGPT understands language using NLP and massive language models",
+            "AI is already everywhere — and it is just getting started"
           ],
           "accentColor": "blue"
         },
@@ -117,7 +118,7 @@
     },
     {
       "id": "getting-started",
-      "label": "Getting Started",
+      "label": "AI in the Real World",
       "blocks": [
         {
           "type": "explanation",
