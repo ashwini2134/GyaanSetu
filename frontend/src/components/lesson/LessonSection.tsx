@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef, useEffect, useCallback } from 'react';
 import type { LessonSection, ContentBlock } from '../../types/lesson';
 import ConceptVisualizationCard from './ConceptVisualizationCard';
 import ThinkOfSection from './ThinkOfSection';
@@ -256,6 +256,150 @@ interface SectionProps {
 
 const SECTION_COLORS = ['blue', 'blue', 'purple', 'green', 'orange', 'amber'] as const;
 
+// ── Progressive reveal helpers ─────────────────────────────────────────────────
+
+function blockProducesContent(block: ContentBlock, courseSlug: string): boolean {
+  if (block.type === 'code_example' && ['cs50ai', 'ai', 'cs50-ai'].includes(courseSlug)) return false;
+  return true;
+}
+
+function splitParagraphs(text: string): string[] {
+  return text.split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
+}
+
+interface FlattenedItem {
+  key: string;
+  block: ContentBlock;
+}
+
+function flattenSectionBlocks(blocks: ContentBlock[], courseSlug: string): {
+  readingItems: FlattenedItem[];
+  thinkOfBlock: ContentBlock | null;
+  practiceBlock: ContentBlock | null;
+} {
+  const readingItems: FlattenedItem[] = [];
+  let thinkOfBlock: ContentBlock | null = null;
+  let practiceBlock: ContentBlock | null = null;
+
+  for (const block of blocks) {
+    if (!blockProducesContent(block, courseSlug)) continue;
+
+    if (block.type === 'think_of') {
+      thinkOfBlock = block;
+      continue;
+    }
+    if (block.type === 'practice') {
+      practiceBlock = block;
+      continue;
+    }
+
+    if (block.type === 'text') {
+      const paragraphs = splitParagraphs(block.content);
+      if (paragraphs.length <= 1) {
+        readingItems.push({ key: `text`, block });
+      } else {
+        paragraphs.forEach((para, i) => {
+          readingItems.push({
+            key: `text-p${i}`,
+            block: { ...block, content: para } as ContentBlock,
+          });
+        });
+      }
+    } else {
+      readingItems.push({ key: block.type, block });
+    }
+  }
+
+  return { readingItems, thinkOfBlock, practiceBlock };
+}
+
+// ── Individual reveal item ─────────────────────────────────────────────────────
+
+function RevealItem({
+  index: _idx,
+  onRevealed,
+  children,
+}: {
+  index: number;
+  onRevealed: (idx: number) => void;
+  children: React.ReactNode;
+}) {
+  const [visible, setVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setVisible(true);
+            onRevealed(_idx);
+            observer.unobserve(el);
+            break;
+          }
+        }
+      },
+      { threshold: 0.12, rootMargin: '-32px 0px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [_idx, onRevealed]);
+
+  return (
+    <div
+      ref={ref}
+      className={`transition-all duration-700 ease-out ${
+        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
+      }`}
+    >
+      {children}
+    </div>
+  );
+}
+
+// ── Content that fades in automatically after mount ────────────────────────────
+
+function StaggerFadeIn({
+  show,
+  delay = 0,
+  children,
+}: {
+  show: boolean;
+  delay?: number;
+  children: React.ReactNode;
+}) {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (!show) {
+      setVisible(false);
+      return;
+    }
+    const timer = setTimeout(() => {
+      requestAnimationFrame(() => {
+        setVisible(true);
+      });
+    }, delay);
+    return () => clearTimeout(timer);
+  }, [show, delay]);
+
+  if (!show) return null;
+
+  return (
+    <div
+      className={`transition-all duration-700 ease-out ${
+        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
+      }`}
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function LessonSection({
   section,
   index,
@@ -274,6 +418,67 @@ export default function LessonSection({
     amber: 'bg-amber-600/20 text-amber-400',
   };
 
+  const { readingItems, thinkOfBlock, practiceBlock } = useMemo(
+    () => flattenSectionBlocks(section.blocks, courseSlug),
+    [section.blocks, courseSlug]
+  );
+
+  const totalReading = readingItems.length;
+  const [revealedCount, setRevealedCount] = useState(0);
+  const [showThinkOf, setShowThinkOf] = useState(false);
+  const [showPractice, setShowPractice] = useState(false);
+  const thinkOfRef = useRef<HTMLDivElement>(null);
+
+  const allReadingRevealed = revealedCount >= totalReading;
+
+  const handleRevealed = useCallback(
+    (idx: number) => {
+      setRevealedCount((prev) => Math.max(prev, idx + 1));
+    },
+    []
+  );
+
+  // After all reading items are revealed, show Think Of
+  useEffect(() => {
+    if (allReadingRevealed && totalReading > 0) {
+      const timer = setTimeout(() => setShowThinkOf(true), 500);
+      return () => clearTimeout(timer);
+    }
+    // If there are no reading items, show Think Of immediately
+    if (totalReading === 0 && thinkOfBlock) {
+      setShowThinkOf(true);
+    }
+  }, [allReadingRevealed, totalReading, thinkOfBlock]);
+
+  // After Think Of becomes visible, wait and show Practice
+  useEffect(() => {
+    if (!showThinkOf || !thinkOfRef.current) return;
+
+    const el = thinkOfRef.current;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setTimeout(() => setShowPractice(true), 2000);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.25 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [showThinkOf]);
+
+  // If no think_of block exists, show practice after reading is done
+  useEffect(() => {
+    if (allReadingRevealed && !thinkOfBlock && practiceBlock && totalReading > 0) {
+      const timer = setTimeout(() => setShowPractice(true), 800);
+      return () => clearTimeout(timer);
+    }
+    if (totalReading === 0 && !thinkOfBlock && practiceBlock) {
+      setShowPractice(true);
+    }
+  }, [allReadingRevealed, thinkOfBlock, practiceBlock, totalReading]);
+
   return (
     <section
       id={`section-${section.id}`}
@@ -287,18 +492,49 @@ export default function LessonSection({
           {section.label}
         </h2>
 
-            {section.blocks.map((block, bi) => (
-              <div key={bi}>
-                {renderBlock(
-                  block,
-                  section.id,
-                  courseSlug,
-                  lectureNumber,
-                  () => onPracticeAttempt?.(section.id),
-                  () => onPracticeComplete?.(section.id),
-                )}
-              </div>
-            ))}
+        {/* Reading items — each reveals on scroll */}
+        {readingItems.map((item, i) => (
+          <RevealItem key={item.key} index={i} onRevealed={handleRevealed}>
+            {renderBlock(
+              item.block,
+              section.id,
+              courseSlug,
+              lectureNumber,
+              () => onPracticeAttempt?.(section.id),
+              () => onPracticeComplete?.(section.id),
+            )}
+          </RevealItem>
+        ))}
+
+        {/* Think Of — appears after all reading content is revealed */}
+        {thinkOfBlock && (
+          <StaggerFadeIn show={showThinkOf} delay={200}>
+            <div ref={thinkOfRef}>
+              {renderBlock(
+                thinkOfBlock,
+                section.id,
+                courseSlug,
+                lectureNumber,
+                () => onPracticeAttempt?.(section.id),
+                () => onPracticeComplete?.(section.id),
+              )}
+            </div>
+          </StaggerFadeIn>
+        )}
+
+        {/* Practice — appears after Think Of has been visible */}
+        {practiceBlock && (
+          <StaggerFadeIn show={showPractice} delay={300}>
+            {renderBlock(
+              practiceBlock,
+              section.id,
+              courseSlug,
+              lectureNumber,
+              () => onPracticeAttempt?.(section.id),
+              () => onPracticeComplete?.(section.id),
+            )}
+          </StaggerFadeIn>
+        )}
       </div>
     </section>
   );
