@@ -11,11 +11,13 @@ export type User = {
   githubUrl: string;
   linkedinUrl: string;
   portfolioUrl: string;
+  profileVisibility: string;
+  profileTheme: string;
   createdAt: string;
   updatedAt: string;
 };
 
-export type SafeUser = Pick<User, "id" | "email" | "name" | "role" | "emailVerified" | "bio" | "avatarUrl" | "githubUrl" | "linkedinUrl" | "portfolioUrl" | "createdAt">;
+export type SafeUser = Pick<User, "id" | "email" | "name" | "role" | "emailVerified" | "bio" | "avatarUrl" | "githubUrl" | "linkedinUrl" | "portfolioUrl" | "profileVisibility" | "profileTheme" | "createdAt">;
 
 export type OAuthProvider = "github" | "linkedin" | "google";
 

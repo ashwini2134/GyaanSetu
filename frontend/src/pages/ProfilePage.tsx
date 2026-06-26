@@ -295,12 +295,9 @@ export default function ProfilePage() {
   }, [courseProgress, projects]);
 
   React.useEffect(() => {
-    if (userId) {
-      setView('profile');
-    } else {
-      setView(location.pathname === '/settings' ? 'settings' : 'profile');
-    }
-  }, [location.pathname, userId]);
+    // Only update view based on URL path, don't force profile when logged in
+    setView(location.pathname === '/settings' ? 'settings' : 'profile');
+  }, [location.pathname]);
 
   React.useEffect(() => {
     if (view === 'settings' && settingsTab === 'notifications') {

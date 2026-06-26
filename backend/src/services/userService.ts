@@ -15,6 +15,8 @@ function toSafeUser(user: any): SafeUser {
     githubUrl: user.githubUrl ?? '',
     linkedinUrl: user.linkedinUrl ?? '',
     portfolioUrl: user.portfolioUrl ?? '',
+    profileVisibility: user.profileVisibility ?? 'public',
+    profileTheme: user.profileTheme ?? 'default',
     createdAt: user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt,
   };
 }

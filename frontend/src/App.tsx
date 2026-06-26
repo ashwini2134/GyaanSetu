@@ -335,13 +335,16 @@ export default function App() {
           />
 
           {/* Profile */}
-
           <Route
             path="profile"
             element={<ProfilePage />}
           />
           <Route
             path="profile/:userId"
+            element={<ProfilePage />}
+          />
+          <Route
+            path="settings"
             element={<ProfilePage />}
           />
 
