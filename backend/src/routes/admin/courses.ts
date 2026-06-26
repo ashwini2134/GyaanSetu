@@ -63,7 +63,7 @@ router.patch("/:id/publish", async (req, res) => {
 
   if (!course) return res.status(404).json({ error: "Not found" });
 
-  const missing = [];
+  const missing: string[] = [];
   if (course.lessons.length === 0) missing.push("lessons");
   if (!course.quiz) missing.push("quiz");
   if (!course.project) missing.push("project");

@@ -261,7 +261,22 @@ export async function getLeaderboard(currentUserId?: string, timeframe: string =
 
   const totalLearners = entriesWithRank.length;
 
-  let currentUserObj = null;
+  let currentUserObj: {
+    rank: number;
+    totalLearners: number;
+    score: number;
+    allTimeXp: number;
+    streak: number;
+    longestStreak: number;
+    problemsSolved: number;
+    coursesCompleted: number;
+    projectsCompleted: number;
+    rankTitle: string;
+    currentTitle: string;
+    nextTitle: string | null;
+    nextThreshold: number;
+    progressPercent: number;
+  } | null = null;
   if (currentUserId) {
     const userIndex = entriesWithRank.findIndex((e) => e.id === currentUserId);
     if (userIndex !== -1) {
