@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { AdminBreadcrumb } from "../../components/admin/AdminBreadcrumb";
 import { CourseEditorNav } from "../../components/admin/CourseEditorNav";
-import { RichTextEditor } from "../../components/admin/RichTextEditor";
+import BlockEditor from "../../components/admin/block-editor/BlockEditor";
 import { CourseSettingsModal } from "../../components/admin/CourseSettingsModal";
 import { GripVertical, Plus, Settings, PlayCircle, BookOpen, LayoutTemplate, Dumbbell, Save, Trash2 } from "lucide-react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
@@ -240,11 +240,17 @@ export default function LessonEditor() {
                   </div>
                 )}
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Lesson Content</label>
-                  <RichTextEditor 
-                    content={activeLesson.content} 
-                    onChange={(content) => updateActiveLesson({ content })}
+                <div className="mt-8">
+                  <label className="block text-sm font-medium text-slate-300 mb-4">Lesson Content Blocks</label>
+                  <BlockEditor
+                    blocks={(() => {
+                      try {
+                        return JSON.parse(activeLesson.content || '[]');
+                      } catch {
+                        return activeLesson.content ? [{ id: '1', type: 'text', data: { body: activeLesson.content } }] : [];
+                      }
+                    })()}
+                    onChange={(blocks) => updateActiveLesson({ content: JSON.stringify(blocks) })}
                   />
                 </div>
               </div>

@@ -113,7 +113,7 @@
     },
     {
       "id": "getting-started",
-      "label": "Getting Started",
+      "label": "Project Workflow",
       "blocks": [
         {
           "type": "explanation",

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { RotateCcw, Sparkles } from "lucide-react";
+import { RotateCcw, Sparkles, ArrowLeft, ArrowRight } from "lucide-react";
 import type { HierarchyExpandConfig } from "../../types/lesson";
 
 interface ExpandUniverseProps {
@@ -7,10 +7,11 @@ interface ExpandUniverseProps {
   title?: string;
   learningGoal?: string;
   challenge?: string;
+  promptHint?: string;
   onComplete: () => void;
 }
 
-type Phase = "start" | "ai_revealed" | "ml_revealed" | "dl_revealed" | "populate" | "complete";
+type Phase = "start" | "instructions" | "ai_revealed" | "ml_revealed" | "dl_revealed" | "populate" | "complete";
 
 interface ExampleItem {
   label: string;
@@ -107,10 +108,17 @@ const AI_R = 200;
 const ML_R = 130;
 const DL_R = 74;
 
-export default function ExpandUniverse({ config, onComplete }: ExpandUniverseProps) {
+export default function ExpandUniverse({ config, learningGoal, challenge, promptHint, onComplete }: ExpandUniverseProps) {
   const theme = getTheme(config);
   const placedRef = useRef(0);
-  const [phase, setPhase] = useState<Phase>("start");
+
+  const onboarding = config.onboarding?.length ? config.onboarding : [];
+  const instructionCount = onboarding.length ? onboarding.length + 1 : 0;
+
+  const [phase, setPhase] = useState<Phase>(onboarding.length ? "instructions" : "start");
+  const [stage, setStage] = useState(0);
+  const [exitingStage, setExitingStage] = useState<number | null>(null);
+  const [exitDir, setExitDir] = useState<"left" | "right">("left");
   const [examples, setExamples] = useState<ExampleItem[]>([]);
   const [wrongFlash, setWrongFlash] = useState<string | null>(null);
   const [placedFlash, setPlacedFlash] = useState<string | null>(null);
@@ -128,7 +136,7 @@ export default function ExpandUniverse({ config, onComplete }: ExpandUniversePro
 
   const levelColors = (level: "ai" | "ml" | "dl"): LevelColors => {
     if (level === "ai") return theme.root;
-    if (level === "ml") return theme.child;
+    if (level === "ml") return theme.root;
     return theme.grandchild;
   };
 
@@ -196,6 +204,64 @@ export default function ExpandUniverse({ config, onComplete }: ExpandUniversePro
     setPlacedFlash(null);
     setPlacing(false);
     setBelongsMsg(null);
+  };
+
+  const goNext = () => {
+    const lastInstructionIdx = onboarding.length;
+    if (stage + 1 > lastInstructionIdx) return;
+    if (stage + 1 === lastInstructionIdx) {
+      setExitingStage(stage);
+      setExitDir("left");
+      setTimeout(() => {
+        setPhase("start");
+        setExitingStage(null);
+      }, 300);
+      return;
+    }
+    setExitDir("left");
+    setExitingStage(stage);
+    setTimeout(() => {
+      setStage((s) => s + 1);
+      setExitingStage(null);
+    }, 300);
+  };
+
+  const goPrev = () => {
+    if (stage === 0) return;
+    setExitDir("right");
+    setExitingStage(stage);
+    setTimeout(() => {
+      setStage((s) => s - 1);
+      setExitingStage(null);
+    }, 300);
+  };
+
+  const renderInstructionStage = (stageIdx: number) => {
+    if (stageIdx < onboarding.length) {
+      return (
+        <div className="flex flex-col items-center justify-center py-8 px-6">
+          <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-[0.2em] mb-3">Step {stageIdx + 1}</p>
+          <p className="text-base text-slate-100 text-center leading-relaxed max-w-md">{onboarding[stageIdx]}</p>
+        </div>
+      );
+    }
+    const totalExamples = config.steps.find(s => s.id === "real-world")?.items?.length || 0;
+    return (
+      <div className="flex flex-col items-center justify-center py-8 px-6">
+        <p className="text-[10px] font-semibold text-emerald-400 uppercase tracking-[0.2em] mb-3">Ready to Explore?</p>
+        {learningGoal && (
+          <p className="text-sm text-slate-300 text-center mb-4 max-w-md">{learningGoal}</p>
+        )}
+        <button
+          onClick={() => {
+            setPhase("start");
+          }}
+          className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-sm font-bold shadow-lg shadow-blue-600/20 transition-all"
+        >
+          Start Exploration
+        </button>
+      </div>
+    );
   };
 
   const NodeRing = ({ level }: { level: "ai" | "ml" | "dl" }) => {
@@ -277,6 +343,31 @@ export default function ExpandUniverse({ config, onComplete }: ExpandUniversePro
 
   return (
     <div className="rounded-2xl border border-slate-700/30 bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm overflow-hidden">
+      {/* ── INSTRUCTION CAROUSEL ── */}
+      {phase === "instructions" && (
+        <div className="relative overflow-hidden" style={{ minHeight: "200px" }}>
+          <div className={`transition-all duration-300 ease-in-out ${exitingStage === stage ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}>
+            {renderInstructionStage(stage)}
+          </div>
+          {exitingStage !== null && exitingStage !== stage && (
+            <div className={`absolute inset-0 transition-all duration-300 ease-in-out ${exitDir === "left" ? "opacity-0 -translate-x-8" : "opacity-0 translate-x-8"}`}>
+              {renderInstructionStage(exitingStage)}
+            </div>
+          )}
+          <div className="flex items-center justify-between px-6 pb-5">
+            <button onClick={goPrev} disabled={stage === 0} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-slate-800/60 hover:bg-slate-700/60 disabled:opacity-30 disabled:cursor-not-allowed text-slate-300 text-xs font-semibold border border-slate-700/40 transition-all">
+              <ArrowLeft size={13} /> Previous
+            </button>
+            <span className="text-[10px] text-slate-600 font-mono">{stage + 1} / {instructionCount}</span>
+            {stage < instructionCount - 1 && (
+              <button onClick={goNext} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-all">
+                Next <ArrowRight size={13} />
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+      {phase !== "instructions" && (
       <div className="relative" style={{ aspectRatio: "560/440" }}>
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute rounded-full" style={{ width: "380px", height: "380px", left: "50%", top: "45%", transform: "translate(-50%,-50%)", filter: "blur(80px)", backgroundColor: theme.bgGlow1 }} />
@@ -342,6 +433,7 @@ export default function ExpandUniverse({ config, onComplete }: ExpandUniversePro
           </div>
         )}
       </div>
+      )}
 
       {phase === "complete" && (
         <div className="border-t border-slate-700/30">

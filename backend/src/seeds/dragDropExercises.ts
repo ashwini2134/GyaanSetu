@@ -294,6 +294,12 @@ const HIERARCHY_EXERCISES: Record<string, HierarchyExpandConfig> = {
       root: { label: "Artificial Intelligence", icon: "🤖" },
       child: { label: "Machine Learning", icon: "📊" },
       grandchild: { label: "Deep Learning", icon: "🧠" },
+      onboarding: [
+        "Tap the AI ring to discover what's inside",
+        "Machine Learning is a subset of AI — tap to see deeper",
+        "Deep Learning is a subset of Machine Learning — explore even further",
+        "Finally, classify real-world examples into the right category",
+      ],
       steps: [
         {
           id: "discover-ai",
@@ -507,12 +513,443 @@ export async function seedHierarchyExercises() {
   console.log(`  Created ${created} new, updated ${updated} existing hierarchy exercises.`);
 }
 
+// ── AI Conversation Exercises ────────────────────────────────────────────────────
+
+interface AIConversationSeedConfig {
+  title: string;
+  learningGoal: string;
+  challenge: string;
+  promptHint: string;
+  validationRules: {
+    slides: { title: string; body: string[]; button: string }[];
+    missions: { title: string; starter: string }[];
+    placeholder: string;
+    mentorHints: string[];
+    reflectionQuestion: string;
+    reflectionOptions: string[];
+    completionMessages: string[];
+  };
+}
+
+const AI_CONVERSATION_EXERCISES: Record<string, AIConversationSeedConfig> = {
+  "cs50ai_0_getting-started": {
+    title: "AI Conversation Practice",
+    learningGoal: "Practice communicating with an AI by crafting clear, specific prompts.",
+    challenge: "Ask the AI a thoughtful question about how AI learns, then improve your prompt to get an even better answer.",
+    promptHint: "A great prompt is specific, asks one question at a time, and provides context.",
+    validationRules: {
+      slides: [
+        {
+          title: "Before You Begin",
+          body: [
+            "You've already learned:",
+            "✓ What Artificial Intelligence is",
+            "✓ The difference between AI, ML and Deep Learning",
+            "✓ Where AI is used in everyday life",
+          ],
+          button: "Next →",
+        },
+        {
+          title: "Your Mission",
+          body: [
+            "You will be given one mission.",
+            "Follow the prompt starter below.",
+            "After the AI responds, reflect on how you could improve your question.",
+            "Then rewrite it and compare.",
+          ],
+          button: "Next →",
+        },
+        {
+          title: "Discover Something New",
+          body: [
+            "Ask your question.",
+            "Read the answer.",
+            "Then improve your question and ask again.",
+            "Compare both responses.",
+            "Notice how better prompts create better AI answers.",
+          ],
+          button: "Start Asking →",
+        },
+      ],
+      missions: [
+        { title: "Explain Artificial Intelligence to a 10-year-old child.", starter: "Explain AI to a 10-year-old child so that " },
+        { title: "Explain Artificial Intelligence using a real-life example.", starter: "Explain AI using a real-life example. For instance, " },
+        { title: "Explain Artificial Intelligence in under 100 words.", starter: "Explain AI in under 100 words: " },
+        { title: "Explain Artificial Intelligence without using technical words.", starter: "Explain AI without technical jargon. Instead, " },
+        { title: "Explain why Netflix recommendations are an example of AI.", starter: "Netflix recommendations are AI because " },
+        { title: "Explain how a spam filter learns to identify junk emails.", starter: "A spam filter learns to identify junk emails by " },
+        { title: "Explain how Google Maps finds the fastest route.", starter: "Google Maps finds the fastest route by " },
+      ],
+      placeholder: "Continue writing from where the starter left off...",
+      mentorHints: [
+        "Good start. Can you make your question more specific?",
+        "You never mentioned who the answer is for.",
+        "Try asking for a real-world example.",
+        "Imagine explaining this to your younger sibling.",
+      ],
+      reflectionQuestion: "How could your prompt be improved?",
+      reflectionOptions: [
+        "Add a real-world example",
+        "Mention the audience",
+        "Ask for simpler language",
+        "Limit the answer length",
+      ],
+      completionMessages: [
+        "AI follows instructions.",
+        "Better prompts produce better answers.",
+        "Small changes in your prompt can greatly improve the result.",
+      ],
+    },
+  },
+};
+
+export async function seedAIConversationExercises() {
+  console.log("Seeding AI conversation exercises...");
+
+  let created = 0;
+  let updated = 0;
+
+  for (const [key, config] of Object.entries(AI_CONVERSATION_EXERCISES)) {
+    const { courseId, lectureId, sectionId } = parseKey(key);
+
+    const existing = await prisma.practiceExercise.findFirst({
+      where: { courseId, lectureId, sectionId, type: "ai_conversation" },
+    });
+
+    if (existing) {
+      await prisma.practiceExercise.update({
+        where: { id: existing.id },
+        data: {
+          title: config.title,
+          learningGoal: config.learningGoal,
+          challenge: config.challenge,
+          promptHint: config.promptHint,
+          validationRules: JSON.parse(JSON.stringify(config.validationRules)),
+        },
+      });
+      updated++;
+    } else {
+      await prisma.practiceExercise.create({
+        data: {
+          courseId,
+          lectureId,
+          sectionId,
+          title: config.title,
+          type: "ai_conversation",
+          status: "published",
+          learningGoal: config.learningGoal,
+          challenge: config.challenge,
+          promptHint: config.promptHint,
+          validationRules: JSON.parse(JSON.stringify(config.validationRules)),
+          completionCriteria: ["Prompt submitted", "Reflection completed"],
+          difficulty: "beginner",
+          estimatedTime: 10,
+          aiWorkspaceEnabled: false,
+        },
+      });
+      created++;
+    }
+  }
+
+  console.log(`  Created ${created} new, updated ${updated} existing AI conversation exercises.`);
+}
+
+// ── Path Builder Exercises ────────────────────────────────────────────────────
+
+interface PathBuilderSeedConfig {
+  title: string;
+  learningGoal: string;
+  challenge: string;
+  promptHint: string;
+  validationRules: {
+    rounds: {
+      gridSize: number;
+      start: { row: number; col: number };
+      goal: { row: number; col: number };
+      walls: { row: number; col: number }[];
+      optimalPathLength?: number;
+      reveal: { startState: string; goalState: string; actions: string; path: string; pathCost: string };
+    }[];
+    completionMessages: string[];
+  };
+}
+
+const PATH_BUILDER_EXERCISES: Record<string, PathBuilderSeedConfig> = {
+  "cs50ai_1_search-problem": {
+    title: "Practice Exercise",
+    learningGoal: "Guide a cat to its food by finding a path through a room. Learn what a search problem is.",
+    challenge: "Help the cat reach the food bowl. Walls are furniture that cannot be crossed. Find a shorter path on the second round.",
+    promptHint: "Click adjacent cells to move the cat. Each click is one step.",
+    validationRules: {
+      rounds: [
+        {
+          gridSize: 5,
+          start: { row: 0, col: 0 },
+          goal: { row: 4, col: 4 },
+          walls: [
+            { row: 1, col: 1 }, { row: 2, col: 1 },
+            { row: 3, col: 2 }, { row: 3, col: 3 },
+          ],
+          reveal: {
+            startState: "Where the cat started.",
+            goalState: "Where the food is.",
+            actions: "Every step the cat took.",
+            path: "The route the cat followed.",
+            pathCost: "Number of steps taken.",
+          },
+        },
+        {
+          gridSize: 5,
+          start: { row: 0, col: 0 },
+          goal: { row: 4, col: 4 },
+          walls: [
+            { row: 1, col: 2 }, { row: 2, col: 1 },
+            { row: 2, col: 3 }, { row: 3, col: 4 },
+          ],
+          optimalPathLength: 8,
+          reveal: {
+            startState: "Where the cat started.",
+            goalState: "Where the food is.",
+            actions: "Every step the cat took.",
+            path: "The route the cat followed.",
+            pathCost: "Number of steps taken.",
+          },
+        },
+      ],
+      completionMessages: [
+        "Every search begins somewhere.",
+        "The destination is the Goal.",
+        "Each move is an Action.",
+        "Actions together form a Path.",
+        "AI prefers shorter paths.",
+      ],
+    },
+  },
+};
+
+export async function seedPathBuilderExercises() {
+  console.log("Seeding path builder exercises...");
+
+  let created = 0;
+  let updated = 0;
+
+  for (const [key, config] of Object.entries(PATH_BUILDER_EXERCISES)) {
+    const { courseId, lectureId, sectionId } = parseKey(key);
+
+    const existing = await prisma.practiceExercise.findFirst({
+      where: { courseId, lectureId, sectionId, type: "path_builder" },
+    });
+
+    if (existing) {
+      await prisma.practiceExercise.update({
+        where: { id: existing.id },
+        data: {
+          title: config.title,
+          learningGoal: config.learningGoal,
+          challenge: config.challenge,
+          promptHint: config.promptHint,
+          validationRules: JSON.parse(JSON.stringify(config.validationRules)),
+        },
+      });
+      updated++;
+    } else {
+      await prisma.practiceExercise.create({
+        data: {
+          courseId,
+          lectureId,
+          sectionId,
+          title: config.title,
+          type: "path_builder",
+          status: "published",
+          learningGoal: config.learningGoal,
+          challenge: config.challenge,
+          promptHint: config.promptHint,
+          validationRules: JSON.parse(JSON.stringify(config.validationRules)),
+          completionCriteria: ["All rounds completed", "Search concepts understood"],
+          difficulty: "beginner",
+          estimatedTime: 8,
+          aiWorkspaceEnabled: false,
+        },
+      });
+      created++;
+    }
+  }
+
+  console.log(`  Created ${created} new, updated ${updated} existing path builder exercises.`);
+}
+
+// ── BFS/DFS Graph Traversal Exercises ─────────────────────────────────────────
+
+interface BFSDFSSeedConfig {
+  title: string;
+  learningGoal: string;
+  challenge: string;
+  promptHint: string;
+  validationRules: {
+    slides: { title: string; body: string[]; button: string }[];
+    scenario: string;
+    graph: { nodes: { id: string; label: string; x: number; y: number }[]; edges: { from: string; to: string }[]; startNode: string };
+    bfsOrder: string[];
+    dfsOrder: string[];
+    comparison: { bfs: string[]; dfs: string[] };
+    reflection: { question: string; options: string[]; correctIndex: number; explanation: string };
+    completionMessages: string[];
+  };
+}
+
+const BFSDFS_EXERCISES: Record<string, BFSDFSSeedConfig> = {
+  "cs50ai_1_bfs-dfs": {
+    title: "BFS & DFS Exploration",
+    learningGoal: "Understand how BFS and DFS explore a graph differently by becoming the algorithm yourself.",
+    challenge: "Click nodes in the order each search algorithm would choose.",
+    promptHint: "BFS visits every neighbor before going deeper. DFS follows one path to the end.",
+    validationRules: {
+      slides: [
+        {
+          title: "Mission",
+          body: [
+            "Today you will become a search algorithm.",
+            "Instead of reading how BFS and DFS work, you will make the same decisions they make.",
+            "By the end of this exercise you will understand:",
+            "- Why BFS finds the shortest path.",
+            "- Why DFS goes deep before backtracking.",
+          ],
+          button: "Next \u2192",
+        },
+        {
+          title: "How to Play",
+          body: [
+            "You will see a graph.",
+            "Your job is to click the nodes in the order that the algorithm would visit them.",
+            "Click only one node at a time.",
+            "If your choice is correct, the algorithm continues.",
+            "If your choice is incorrect, the exercise pauses and explains why before letting you try again.",
+          ],
+          button: "Next \u2192",
+        },
+        {
+          title: "Think Like the Algorithm",
+          body: [
+            "Before every challenge ask yourself:",
+            '"What would BFS do next?"',
+            'or',
+            '"What would DFS do next?"',
+            "Don't guess.",
+            "Think about the rule each algorithm follows.",
+          ],
+          button: "Start Challenge \u2192",
+        },
+      ],
+      scenario: "A rescue robot enters a building. It must inspect every room.",
+      graph: {
+        nodes: [
+          { id: "A", label: "A", x: 170, y: 40 },
+          { id: "B", label: "B", x: 80, y: 120 },
+          { id: "C", label: "C", x: 260, y: 120 },
+          { id: "D", label: "D", x: 40, y: 200 },
+          { id: "E", label: "E", x: 120, y: 200 },
+          { id: "F", label: "F", x: 260, y: 200 },
+        ],
+        edges: [
+          { from: "A", to: "B" },
+          { from: "A", to: "C" },
+          { from: "B", to: "D" },
+          { from: "B", to: "E" },
+          { from: "C", to: "F" },
+        ],
+        startNode: "A",
+      },
+      bfsOrder: ["A", "B", "C", "D", "E", "F"],
+      dfsOrder: ["A", "B", "D", "E", "C", "F"],
+      comparison: {
+        bfs: [
+          "Visits neighbors first",
+          "Uses Queue",
+          "Finds shortest path",
+          "Uses more memory",
+        ],
+        dfs: [
+          "Goes deep first",
+          "Uses Stack",
+          "May not find shortest path",
+          "Uses less memory",
+        ],
+      },
+      reflection: {
+        question: "Imagine Google Maps needs the shortest route between two places. Which algorithm is the better choice?",
+        options: ["BFS", "DFS"],
+        correctIndex: 0,
+        explanation: "BFS guarantees finding the shortest path in an unweighted graph because it explores all nearby routes before going deeper.",
+      },
+      completionMessages: [
+        "Today you discovered that different search algorithms think differently.",
+        "BFS explores widely. DFS explores deeply.",
+        "In the next lesson you will learn how AI makes smarter choices than simply exploring every path.",
+      ],
+    },
+  },
+};
+
+export async function seedBFSDFSExercises() {
+  console.log("Seeding BFS/DFS graph traversal exercises...");
+
+  let created = 0;
+  let updated = 0;
+
+  for (const [key, config] of Object.entries(BFSDFS_EXERCISES)) {
+    const { courseId, lectureId, sectionId } = parseKey(key);
+
+    const existing = await prisma.practiceExercise.findFirst({
+      where: { courseId, lectureId, sectionId, type: "bfs_dfs" },
+    });
+
+    if (existing) {
+      await prisma.practiceExercise.update({
+        where: { id: existing.id },
+        data: {
+          title: config.title,
+          learningGoal: config.learningGoal,
+          challenge: config.challenge,
+          promptHint: config.promptHint,
+          validationRules: JSON.parse(JSON.stringify(config.validationRules)),
+        },
+      });
+      updated++;
+    } else {
+      await prisma.practiceExercise.create({
+        data: {
+          courseId,
+          lectureId,
+          sectionId,
+          title: config.title,
+          type: "bfs_dfs",
+          status: "published",
+          learningGoal: config.learningGoal,
+          challenge: config.challenge,
+          promptHint: config.promptHint,
+          validationRules: JSON.parse(JSON.stringify(config.validationRules)),
+          completionCriteria: ["BFS completed", "DFS completed", "Reflection answered"],
+          difficulty: "beginner",
+          estimatedTime: 10,
+          aiWorkspaceEnabled: false,
+        },
+      });
+      created++;
+    }
+  }
+
+  console.log(`  Created ${created} new, updated ${updated} existing BFS/DFS exercises.`);
+}
+
 // Run directly
 const isMain = process.argv[1]?.includes("dragDropExercises");
 if (isMain) {
   (async () => {
     await seedDragDropExercises();
     await seedHierarchyExercises();
+    await seedAIConversationExercises();
+    await seedPathBuilderExercises();
+    await seedBFSDFSExercises();
     console.log("Done.");
     process.exit(0);
   })().catch((err) => { console.error(err); process.exit(1); });

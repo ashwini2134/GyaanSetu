@@ -1,7 +1,7 @@
 // Fraylon Admin - Phase 2
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Plus, BookOpen, MoreVertical, Archive, CheckCircle2, Clock } from "lucide-react";
+import { Search, Plus, BookOpen, MoreVertical, Archive, CheckCircle2, Clock, Trash2 } from "lucide-react";
 import { PublishChecklist } from "../../components/admin/PublishChecklist";
 import { authFetch } from "../../authClient";
 
@@ -12,6 +12,8 @@ export default function ContentStudio() {
   const [filter, setFilter] = useState("All");
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [courseToRemove, setCourseToRemove] = useState<any>(null);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -53,6 +55,18 @@ export default function ContentStudio() {
       } catch (e: any) {
         alert("Error archiving course: " + e.message);
       }
+    }
+  };
+
+  const handleRemove = async () => {
+    if (!courseToRemove) return;
+    try {
+      await authFetch(`/admin/courses/${courseToRemove.id}`, { method: "DELETE" });
+      setCourses(courses.filter(c => c.id !== courseToRemove.id));
+      setCourseToRemove(null);
+      // alert("Course removed"); // Instead of alert, we just remove it
+    } catch (err: any) {
+      alert("Error removing course: " + err.message);
     }
   };
 
@@ -182,9 +196,28 @@ export default function ContentStudio() {
                             Archive
                           </button>
                         )}
-                        <button className="text-slate-400 hover:text-slate-300 transition-colors">
-                          <MoreVertical className="w-5 h-5" />
-                        </button>
+                        <div className="relative">
+                          <button 
+                            onClick={() => setActiveDropdown(activeDropdown === course.id ? null : course.id)}
+                            className="text-slate-400 hover:text-slate-300 transition-colors p-1"
+                          >
+                            <MoreVertical className="w-5 h-5" />
+                          </button>
+                          {activeDropdown === course.id && (
+                            <div className="absolute right-0 mt-2 w-36 bg-slate-800 border border-slate-700/50 rounded-lg shadow-xl overflow-hidden z-20">
+                              <button
+                                onClick={() => {
+                                  setActiveDropdown(null);
+                                  setCourseToRemove(course);
+                                }}
+                                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors text-left"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                                Remove
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </td>
                   </tr>
@@ -202,10 +235,43 @@ export default function ContentStudio() {
       )}
 
       {showPublishChecklist && (
-        <PublishChecklist 
-          onClose={() => setShowPublishChecklist(null)} 
-          onPublish={() => handlePublish(showPublishChecklist)} 
+        <PublishChecklist
+          courseId={showPublishChecklist}
+          onClose={() => setShowPublishChecklist(null)}
+          onPublish={() => handlePublish(showPublishChecklist)}
         />
+      )}
+
+      {courseToRemove && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-slate-900 border border-slate-700/50 rounded-2xl w-full max-w-md p-6 shadow-2xl">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
+                <Trash2 className="w-6 h-6 text-red-500" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-slate-100">Remove Course?</h2>
+                <p className="text-sm text-slate-400 mt-1">
+                  This will remove the course from the student dashboard immediately. You can restore it later.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-8">
+              <button
+                onClick={() => setCourseToRemove(null)}
+                className="px-4 py-2 text-sm font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRemove}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow-sm shadow-red-900/20"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

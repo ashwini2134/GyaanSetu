@@ -13,7 +13,11 @@ router.get("/", requireAuth, async (_req, res, next) => {
   try {
     const courses = await prisma.course.findMany({
       where: {
-        status: { equals: "PUBLISHED", mode: "insensitive" }
+        status: { 
+          equals: "PUBLISHED", 
+          notIn: ["REMOVED", "DRAFT"],
+          mode: "insensitive" 
+        }
       },
       select: {
         id: true,
@@ -108,6 +112,26 @@ router.get("/progress", requireAuth, async (req: AuthenticatedRequest, res, next
     }
 
     res.json(Object.values(courseStatsMap));
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/:slug/lessons/:num", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const slug = req.params.slug as string;
+    const num = req.params.num as string;
+    const order = parseInt(num);
+    const lesson = await prisma.lesson.findFirst({
+      where: {
+        courseId: slug,
+        order: order
+      }
+    });
+    if (!lesson) {
+      return res.status(404).json({ error: "Lesson not found" });
+    }
+    res.json(lesson);
   } catch (error) {
     next(error);
   }

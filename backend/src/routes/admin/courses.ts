@@ -26,7 +26,11 @@ router.get("/", async (req, res) => {
 
   const where: any = {};
   if (search) where.title = { contains: search, mode: 'insensitive' };
-  if (status && status !== 'All') where.status = status.toUpperCase();
+  if (status && status !== 'All') {
+    where.status = status.toUpperCase();
+  } else {
+    where.status = { not: 'REMOVED' };
+  }
 
   const courses = await prisma.course.findMany({
     where,
@@ -93,6 +97,14 @@ router.patch("/:id/archive", async (req, res) => {
     data: { status: "ARCHIVED" }
   });
   res.json(updated);
+});
+
+router.delete("/:id", async (req, res) => {
+  await prisma.course.update({
+    where: { id: req.params.id },
+    data: { status: "REMOVED" }
+  });
+  res.json({ success: true, message: "Course removed" });
 });
 
 router.get("/:id/publish-readiness", async (req, res) => {

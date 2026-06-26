@@ -176,6 +176,95 @@ export interface HierarchyExpandConfig {
   completionMessage?: string;
 }
 
+export interface AIConversationSlide {
+  title: string;
+  body: string[];
+  button: string;
+}
+
+export interface AIConversationMission {
+  title: string;
+  starter: string;
+}
+
+export interface AIConversationConfig {
+  slides: AIConversationSlide[];
+  missions: AIConversationMission[];
+  placeholder: string;
+  mentorHints: string[];
+  reflectionQuestion: string;
+  reflectionOptions: string[];
+  completionMessages: string[];
+}
+
+export interface PathBuilderCell {
+  row: number;
+  col: number;
+}
+
+export interface PathBuilderReveal {
+  startState: string;
+  goalState: string;
+  actions: string;
+  path: string;
+  pathCost: string;
+}
+
+export interface PathBuilderRound {
+  gridSize: number;
+  start: PathBuilderCell;
+  goal: PathBuilderCell;
+  walls: PathBuilderCell[];
+  optimalPathLength?: number;
+  reveal: PathBuilderReveal;
+}
+
+export interface PathBuilderConfig {
+  rounds: PathBuilderRound[];
+  completionMessages: string[];
+}
+
+export interface BFSDFSGraphNode {
+  id: string;
+  label: string;
+  x: number;
+  y: number;
+}
+
+export interface BFSDFSGraphEdge {
+  from: string;
+  to: string;
+}
+
+export interface BFSDFSGraphStructure {
+  nodes: BFSDFSGraphNode[];
+  edges: BFSDFSGraphEdge[];
+  startNode: string;
+}
+
+export interface BFSDFSComparison {
+  bfs: string[];
+  dfs: string[];
+}
+
+export interface BFSDFSReflection {
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+}
+
+export interface BFSDFSConfig {
+  slides: AIConversationSlide[];
+  scenario: string;
+  graph: BFSDFSGraphStructure;
+  bfsOrder: string[];
+  dfsOrder: string[];
+  comparison: BFSDFSComparison;
+  reflection: BFSDFSReflection;
+  completionMessages: string[];
+}
+
 export interface PracticeExerciseConfig {
   id?: string;
   title: string;
@@ -189,6 +278,26 @@ export interface PracticeExerciseConfig {
   estimatedTime?: number | null;
   dragDropConfig?: DragDropConfig;
   hierarchyExpandConfig?: HierarchyExpandConfig;
+  aiConversationConfig?: AIConversationConfig;
+  pathBuilderConfig?: PathBuilderConfig;
+  bfsdfsConfig?: BFSDFSConfig;
+}
+
+export interface BookPageContent {
+  title?: string;
+  paragraphs?: string[];
+  image?: string;
+  imageAlt?: string;
+}
+
+export interface BookSpread {
+  left?: BookPageContent;
+  right?: BookPageContent;
+}
+
+export interface InteractiveBookBlock {
+  type: 'interactive_book';
+  spreads: BookSpread[];
 }
 
 export interface PracticeBlock {
@@ -211,6 +320,7 @@ export type ContentBlock =
   | VisualAidBlock
   | CodeExampleBlock
   | ReflectionBlock
+  | InteractiveBookBlock
   | PracticeBlock;
 
 // ── Section ───────────────────────────────────────────────────────────────────

@@ -56,10 +56,29 @@ export function useLessonData(
 
     (async () => {
       try {
-        // Try rich lesson.json first
-        const lesson = await fetchJson<LessonData>(
+        let lesson: LessonData | null = null;
+        // 1. Try rich lesson.json first
+        lesson = await fetchJson<LessonData>(
           `data/${courseSlug}/lecture_${num}/lesson.json`
         );
+
+        // 2. Try DB if static JSON fails
+        if (!lesson) {
+          try {
+            const { authFetch } = await import('../api');
+            const dbRes = await authFetch<any>(`/courses/${courseSlug}/lessons/${num}`);
+            if (dbRes && dbRes.content) {
+              const parsedBlocks = JSON.parse(dbRes.content);
+              lesson = {
+                title: dbRes.title,
+                description: "",
+                sections: [ { title: dbRes.title, blocks: parsedBlocks } ],
+              } as LessonData;
+            }
+          } catch (dbErr) {
+            // fallback
+          }
+        }
 
         if (lesson) {
           // Merge quiz if not embedded

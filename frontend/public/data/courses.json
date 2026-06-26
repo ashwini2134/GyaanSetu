@@ -14,13 +14,5 @@
     "level": "Advanced",
     "category": "Artificial Intelligence",
     "language": "Python"
-  },
-  {
-    "slug": "java-beginners",
-    "title": "Java for Beginners",
-    "description": "Learn Java Programming in 250 steps. Covers OOP, Collections, Functional Programming, Multithreading and more.",
-    "level": "Beginner",
-    "category": "Programming",
-    "language": "Java"
   }
 ]
