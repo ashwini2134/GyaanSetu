@@ -56,10 +56,36 @@ export function useLessonData(
 
     (async () => {
       try {
-        // Try rich lesson.json first
-        const lesson = await fetchJson<LessonData>(
-          `data/${courseSlug}/lecture_${num}/lesson.json`
-        );
+        let lesson: LessonData | null = null;
+        
+        // 1. Try DB first
+        try {
+          // In api.ts, authFetch is exported. We'll import it if needed.
+          // Since useLessonData doesn't import authFetch, we will use it directly.
+          // Wait, we need to import authFetch at the top. Let's assume it's imported or we'll fetch it manually.
+          const { authFetch } = await import('../api');
+          const dbRes = await authFetch<any>(`/courses/${courseSlug}/lessons/${num}`);
+          if (dbRes && dbRes.content) {
+            const parsedBlocks = JSON.parse(dbRes.content);
+            // Transform legacy or new blocks into LessonData structure
+            // LessonData expects { sections: [ { title: "", blocks: [] } ] }
+            // For now, wrap all blocks in one section
+            lesson = {
+              title: dbRes.title,
+              description: "",
+              sections: [ { title: dbRes.title, blocks: parsedBlocks } ],
+            } as LessonData;
+          }
+        } catch (dbErr) {
+          // fallback
+        }
+
+        // 2. Try rich lesson.json if DB fails
+        if (!lesson) {
+          lesson = await fetchJson<LessonData>(
+            `data/${courseSlug}/lecture_${num}/lesson.json`
+          );
+        }
 
         if (lesson) {
           // Merge quiz if not embedded

@@ -113,4 +113,23 @@ router.get("/progress", requireAuth, async (req: AuthenticatedRequest, res, next
   }
 });
 
+router.get("/:slug/lessons/:num", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const { slug, num } = req.params;
+    const order = parseInt(num);
+    const lesson = await prisma.lesson.findFirst({
+      where: {
+        courseId: slug,
+        order: order
+      }
+    });
+    if (!lesson) {
+      return res.status(404).json({ error: "Lesson not found" });
+    }
+    res.json(lesson);
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default router;

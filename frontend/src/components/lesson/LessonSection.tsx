@@ -101,7 +101,115 @@ function AnalogyBlock({ block }: { block: Extract<ContentBlock, { type: 'analogy
   );
 }
 
-function renderBlock(block: ContentBlock, _sectionId: string, courseSlug: string, lectureNumber: number, onAttempt?: () => void, onComplete?: () => void) {
+function renderBlock(block: any, _sectionId: string, courseSlug: string, lectureNumber: number, onAttempt?: () => void, onComplete?: () => void) {
+  // --- NEW ADMIN BLOCK TYPES ---
+  if (block.type === 'heading') {
+    const Component = block.data.level || 'h2';
+    return <Component className="text-xl font-bold text-slate-100 mt-6 mb-3">{block.data.text}</Component>;
+  }
+  if (block.type === 'text' && block.data) {
+    return <p className="text-sm text-slate-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(block.data.body || '') }} />;
+  }
+  if (block.type === 'callout') {
+    const bgColors: Record<string, string> = {
+      blue: 'bg-blue-500/10 border-blue-500/30',
+      yellow: 'bg-yellow-500/10 border-yellow-500/30',
+      green: 'bg-green-500/10 border-green-500/30',
+      red: 'bg-red-500/10 border-red-500/30',
+    };
+    const c = bgColors[block.data.color || 'blue'] || bgColors.blue;
+    return (
+      <div className={`mt-2 p-4 rounded-xl border ${c} flex gap-3`}>
+        {block.data.icon && <span className="text-xl leading-none">{block.data.icon}</span>}
+        <p className="text-sm leading-relaxed text-slate-200">{block.data.text}</p>
+      </div>
+    );
+  }
+  if (block.type === 'analogy' && block.data) {
+    return (
+      <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-600/8 to-slate-800/40 p-5">
+        <p className="text-xs font-semibold text-amber-300 uppercase tracking-wider mb-2">{block.data.title}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-slate-900/50 p-4 rounded-lg">
+            <p className="text-xs text-slate-400 mb-1">Real Life</p>
+            <p className="text-sm text-slate-300">{block.data.real}</p>
+          </div>
+          <div className="bg-slate-900/50 p-4 rounded-lg">
+            <p className="text-xs text-slate-400 mb-1">In Code</p>
+            <p className="text-sm text-slate-300">{block.data.concept}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (block.type === 'code' && block.data) {
+    return (
+      <div className="rounded-xl overflow-hidden border border-white/10 my-4">
+        <div className="bg-[#1e1e1e] p-4 text-sm font-mono text-slate-300 overflow-x-auto whitespace-pre">
+          {block.data.code}
+        </div>
+        {block.data.output && (
+          <div className="bg-black/50 p-3 text-xs font-mono text-slate-400 border-t border-white/5">
+            Output: {block.data.output}
+          </div>
+        )}
+      </div>
+    );
+  }
+  if (block.type === 'exercise' && block.data) {
+    return (
+      <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-5 my-4">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded uppercase font-bold">{block.data.difficulty || 'Exercise'}</span>
+        </div>
+        <p className="font-semibold text-slate-200 mb-2">{block.data.question}</p>
+        <p className="text-sm text-slate-400 mb-4">{block.data.description}</p>
+        <button onClick={onAttempt} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-colors">
+          Solve Exercise
+        </button>
+      </div>
+    );
+  }
+  if (block.type === 'image' && block.data) {
+    return (
+      <div className="my-4">
+        <img src={block.data.url} alt={block.data.alt} className="rounded-lg max-h-[400px] object-cover" />
+        {block.data.caption && <p className="text-xs text-slate-400 mt-2 text-center">{block.data.caption}</p>}
+      </div>
+    );
+  }
+  if (block.type === 'video' && block.data) {
+    return (
+      <div className="my-4 aspect-video bg-black rounded-lg overflow-hidden border border-white/10">
+        <iframe src={block.data.url} className="w-full h-full" allowFullScreen />
+      </div>
+    );
+  }
+  if (block.type === 'list' && block.data) {
+    const Tag = block.data.style === 'numbered' ? 'ol' : 'ul';
+    const markerCls = block.data.style === 'numbered' ? 'list-decimal pl-5' : 'list-disc pl-5';
+    return (
+      <Tag className={`space-y-2 text-sm text-slate-300 ${markerCls}`}>
+        {(block.data.items || []).map((item: string, i: number) => <li key={i}>{item}</li>)}
+      </Tag>
+    );
+  }
+  if (block.type === 'quiz' && block.data) {
+    return (
+      <div className="rounded-xl border border-purple-500/20 bg-purple-500/5 p-5 my-4">
+        <p className="font-semibold text-slate-200 mb-4">{block.data.question}</p>
+        <div className="space-y-2">
+          {(block.data.options || []).map((opt: string, i: number) => (
+            <div key={i} className="p-3 rounded-lg border border-white/5 bg-slate-800/50 text-sm text-slate-300">
+              {opt}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // --- OLD JSON BLOCK TYPES (Fallback) ---
   switch (block.type) {
     case 'text':
       return <TextBlock block={block} />;
