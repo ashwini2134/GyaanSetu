@@ -174,15 +174,31 @@ export const api = {
   // ── Courses ───────────────────────────────────────────────────────────────
   courses: async (): Promise<Course[]> => {
     const index = await loadCourseIndex();
-    return index.map((c, i) => ({
+    const staticCourses = index.map((c, i) => ({
       id: i + 1,
       slug: c.slug,
       title: c.title,
       description: c.description,
-      level: c.level,
-      category: c.category,
-      language: c.language,
+      level: c.level as any,
+      category: c.category as any,
+      language: c.language as any,
     }));
+
+    try {
+      const dbCourses = await authFetch<any[]>("/courses");
+      const mappedDbCourses = dbCourses.map((c: any, i: number) => ({
+        id: staticCourses.length + i + 1,
+        slug: c.slug || c.id,
+        title: c.title,
+        description: c.description || "",
+        level: (c.difficulty || "Beginner") as any,
+        category: (c.category || "Programming") as any,
+        language: "English" as any,
+      }));
+      return [...staticCourses, ...mappedDbCourses];
+    } catch {
+      return staticCourses;
+    }
   },
 
   courseProblems: (slug: string) => loadProblems(slug),

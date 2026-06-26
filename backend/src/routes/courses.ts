@@ -9,6 +9,25 @@ export const COURSE_LECTURE_COUNTS: Record<string, number> = {
   "python": 14,
   "cs50ai": 10,
 };
+router.get("/", requireAuth, async (_req, res, next) => {
+  try {
+    const courses = await prisma.course.findMany({
+      where: {
+        status: { equals: "PUBLISHED", mode: "insensitive" }
+      },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        category: true,
+        difficulty: true
+      }
+    });
+    res.json(courses);
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.get("/progress", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
