@@ -438,7 +438,7 @@ function findTranspileBinOp(expr: string): [string, string, string] | null {
   return null;
 }
 
-function transpileSubExprs(expr: string): string {
+function transpileSubExprs(expr: string, customFuncs: Set<string>): string {
   let result = '';
   let i = 0;
   while (i < expr.length) {
@@ -452,7 +452,7 @@ function transpileSubExprs(expr: string): string {
         j++;
       }
       const inner = expr.slice(i + 1, j - 1);
-      result += '(' + transpileBinOps(inner) + ')';
+      result += '(' + translateExpr(inner, customFuncs, false) + ')';
       i = j;
     } else if (ch === '[') {
       let depth = 1;
@@ -463,7 +463,7 @@ function transpileSubExprs(expr: string): string {
         j++;
       }
       const inner = expr.slice(i + 1, j - 1);
-      result += '[' + transpileBinOps(inner) + ']';
+      result += '[' + translateExpr(inner, customFuncs, false) + ']';
       i = j;
     } else if (expr.slice(i, i + 22) === '__DICT_LITERAL_START__') {
       let depth = 1;
@@ -480,7 +480,7 @@ function transpileSubExprs(expr: string): string {
         }
       }
       const inner = expr.slice(i + 22, j - 20);
-      result += '__DICT_LITERAL_START__' + transpileBinOps(inner) + '__DICT_LITERAL_END__';
+      result += '__DICT_LITERAL_START__' + translateExpr(inner, customFuncs, false) + '__DICT_LITERAL_END__';
       i = j;
     } else {
       result += ch;
@@ -490,14 +490,14 @@ function transpileSubExprs(expr: string): string {
   return result;
 }
 
-function transpileBinOps(expr: string): string {
+function transpileBinOps(expr: string, customFuncs: Set<string>): string {
   expr = expr.trim();
   if (!expr) return '';
   const bin = findTranspileBinOp(expr);
   if (bin) {
     const [lhs, op, rhs] = bin;
-    const jsLhs = transpileBinOps(lhs);
-    const jsRhs = transpileBinOps(rhs);
+    const jsLhs = transpileBinOps(lhs, customFuncs);
+    const jsRhs = transpileBinOps(rhs, customFuncs);
     if (op === 'in') return `pyIn(${jsLhs}, ${jsRhs})`;
     if (op === 'not in') return `!pyIn(${jsLhs}, ${jsRhs})`;
     if (op === '|') return `pyOr(${jsLhs}, ${jsRhs})`;
@@ -507,20 +507,22 @@ function transpileBinOps(expr: string): string {
     if (op === '**') return `Math.pow(${jsLhs}, ${jsRhs})`;
     return `${jsLhs} ${op} ${jsRhs}`;
   }
-  return transpileSubExprs(expr);
+  return transpileSubExprs(expr, customFuncs);
 }
 
-function translateExpr(expr: string, customFuncs: Set<string>): string {
+function translateExpr(expr: string, customFuncs: Set<string>, isOuter: boolean = true): string {
   let js = expr.trim();
   if (!js) return '';
 
   // Extract string literals to avoid translating keywords inside strings
   const strings: string[] = [];
-  const stringRegex = /("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')/g;
-  js = js.replace(stringRegex, (match) => {
-    strings.push(match);
-    return `__STR_PLACEHOLDER_${strings.length - 1}__`;
-  });
+  if (isOuter) {
+    const stringRegex = /("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')/g;
+    js = js.replace(stringRegex, (match) => {
+      strings.push(match);
+      return `__STR_PLACEHOLDER_${strings.length - 1}__`;
+    });
+  }
 
   // Keywords translation
   js = js.replace(/\band\b/g, ' && ')
@@ -531,62 +533,71 @@ function translateExpr(expr: string, customFuncs: Set<string>): string {
          .replace(/\bNone\b/g, 'null');
 
   // Python inline conditional expressions
-  const conditionalMatch = js.match(/^(.*?)\s+if\s+(.*?)\s+else\s+(.*)$/);
-  if (conditionalMatch) {
-    const [, trueExpr, condExpr, falseExpr] = conditionalMatch;
-    return `(${translateExpr(condExpr, customFuncs)} ? ${translateExpr(trueExpr, customFuncs)} : ${translateExpr(falseExpr, customFuncs)})`;
+  const ifIdx = findWordOutsideBrackets(js, ' if ');
+  if (ifIdx > 0) {
+    const elseIdx = findWordOutsideBrackets(js, ' else ');
+    if (elseIdx > ifIdx) {
+      const trueExpr = js.slice(0, ifIdx).trim();
+      const condExpr = js.slice(ifIdx + 4, elseIdx).trim();
+      const falseExpr = js.slice(elseIdx + 6).trim();
+      return `(${translateExpr(condExpr, customFuncs, false)} ? ${translateExpr(trueExpr, customFuncs, false)} : ${translateExpr(falseExpr, customFuncs, false)})`;
+    }
   }
 
-  // Input & Print
-  js = js.replace(/\binput\s*\(([^)]*)\)/g, '(yield* pyInput($1))');
-  js = js.replace(/\bprint\s*\(([^)]*)\)/g, 'yield* pyPrint($1)');
-  js = js.replace(/\blen\s*\(([^)]*)\)/g, 'pyLen($1)');
+  if (isOuter) {
+    // Input & Print
+    js = js.replace(/\binput\s*\(([^)]*)\)/g, '(yield* pyInput($1))');
+    js = js.replace(/\bprint\s*\(([^)]*)\)/g, 'yield* pyPrint($1)');
+    js = js.replace(/\blen\s*\(([^)]*)\)/g, 'pyLen($1)');
 
-  // Dict / List instantiations
-  js = js.replace(/\{\}/g, '__DICT_LITERAL_START____DICT_LITERAL_END__');
-  js = js.replace(/\[\]/g, 'createList([])');
+    // Dict / List instantiations
+    js = js.replace(/\{\}/g, '__DICT_LITERAL_START____DICT_LITERAL_END__');
+    js = js.replace(/\[\]/g, 'createList([])');
 
-  // Set & Dict literals (innermost first)
-  let prevSetJs = '';
-  while (js !== prevSetJs) {
-    prevSetJs = js;
-    js = js.replace(/\{([^{}]+)\}/g, (match, inner) => {
-      if (hasTopLevelColon(inner)) {
-        return `__DICT_LITERAL_START__${inner}__DICT_LITERAL_END__`;
-      } else {
-        return `createSet([${inner}])`;
-      }
-    });
-  }
+    // Set & Dict literals (innermost first)
+    let prevSetJs = '';
+    while (js !== prevSetJs) {
+      prevSetJs = js;
+      js = js.replace(/\{([^{}]+)\}/g, (match, inner) => {
+        if (hasTopLevelColon(inner)) {
+          return `__DICT_LITERAL_START__${inner}__DICT_LITERAL_END__`;
+        } else {
+          return `createSet([${inner}])`;
+        }
+      });
+    }
 
-  // Custom function yields
-  for (let fn of customFuncs) {
-    const regex = new RegExp(`\\b${fn}\\s*\\(([^)]*)\\)`, 'g');
-    js = js.replace(regex, (match, args) => {
-      if (match.startsWith('yield*') || match.startsWith('function*')) return match;
-      return `yield* ${fn}(${args})`;
-    });
-  }
+    // Custom function yields
+    for (let fn of customFuncs) {
+      const regex = new RegExp(`\\b${fn}\\s*\\(([^)]*)\\)`, 'g');
+      js = js.replace(regex, (match, args) => {
+        if (match.startsWith('yield*') || match.startsWith('function*')) return match;
+        return `yield* ${fn}(${args})`;
+      });
+    }
 
-  // List append method replacement
-  js = js.replace(/\.append\s*\(/g, '.push(');
+    // List append method replacement
+    js = js.replace(/\.append\s*\(/g, '.push(');
 
-  // Tuple literals translation
-  let prevJs = '';
-  while (js !== prevJs) {
-    prevJs = js;
-    js = js.replace(/(?<!\b[a-zA-Z_]\w*)\(([^()]+,[^()]+)\)/g, '[$1]');
+    // Tuple literals translation
+    let prevJs = '';
+    while (js !== prevJs) {
+      prevJs = js;
+      js = js.replace(/(?<!\b[a-zA-Z_]\w*)\(([^()]+,[^()]+)\)/g, '[$1]');
+    }
   }
 
   // Transpile set and bitwise operations
-  js = transpileBinOps(js);
+  js = transpileBinOps(js, customFuncs);
 
-  // Restore dict literals placeholders
-  js = js.replace(/__DICT_LITERAL_START__/g, 'createDict({')
-         .replace(/__DICT_LITERAL_END__/g, '})');
+  if (isOuter) {
+    // Restore dict literals placeholders
+    js = js.replace(/__DICT_LITERAL_START__/g, 'createDict({')
+           .replace(/__DICT_LITERAL_END__/g, '})');
 
-  // Restore string literals
-  js = js.replace(/__STR_PLACEHOLDER_(\d+)__/g, (_, idx) => strings[parseInt(idx, 10)]);
+    // Restore string literals
+    js = js.replace(/__STR_PLACEHOLDER_(\d+)__/g, (_, idx) => strings[parseInt(idx, 10)]);
+  }
 
   return js;
 }
@@ -913,12 +924,21 @@ export function* runInteractive(code: string): Generator<ExecEvent, ExecResult, 
       const KeyError = Error;
       const FileNotFoundError = Error;
       const ZeroDivisionError = Error;
+      const __name__ = "__main__";
       
       return function*() {
+        let __main_called__ = false;
+        if (typeof main === 'function') {
+          const _orig_main = main;
+          main = function* (...args) {
+            __main_called__ = true;
+            return yield* _orig_main(...args);
+          };
+        }
         try {
           ${jsCode}
           
-          if (typeof main === 'function') {
+          if (typeof main === 'function' && !__main_called__) {
             yield* main();
           }
         } catch (err) {
@@ -996,4 +1016,38 @@ export function runValidationTest(code: string, inputs: string[]): { stdout: str
   } catch (err) {
     return { stdout: '', error: String(err) };
   }
+}
+
+function findWordOutsideBrackets(expr: string, word: string): number {
+  let depth = 0, bracketDepth = 0, braceDepth = 0;
+  let inStr = false, strCh = '';
+  const startsWithSpace = word.startsWith(' ');
+  const endsWithSpace = word.endsWith(' ');
+  for (let i = 0; i < expr.length; i++) {
+    const ch = expr[i];
+    if (!inStr && (ch === '"' || ch === "'")) {
+      inStr = true;
+      strCh = ch;
+    } else if (inStr && ch === strCh) {
+      inStr = false;
+    } else if (!inStr) {
+      if (ch === '(') depth++;
+      else if (ch === ')') depth--;
+      else if (ch === '[') bracketDepth++;
+      else if (ch === ']') bracketDepth--;
+      else if (ch === '{') braceDepth++;
+      else if (ch === '}') braceDepth--;
+      else if (depth === 0 && bracketDepth === 0 && braceDepth === 0 && i <= expr.length - word.length) {
+        if (expr.slice(i, i + word.length) === word) {
+          if (startsWithSpace || endsWithSpace) return i;
+          const before = expr[i - 1];
+          const after = expr[i + word.length];
+          const isBoundaryBefore = i === 0 || !/[a-zA-Z0-9_]/.test(before);
+          const isBoundaryAfter = (i + word.length) >= expr.length || !/[a-zA-Z0-9_]/.test(after);
+          if (isBoundaryBefore && isBoundaryAfter) return i;
+        }
+      }
+    }
+  }
+  return -1;
 }

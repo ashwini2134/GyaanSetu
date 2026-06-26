@@ -520,6 +520,7 @@ export default function CapstonePage() {
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>('Choose Project');
   const [selected, setSelected] = useState<CapstoneProject | null>(null);
+  const [completedProjectId, setCompletedProjectId] = useState<string | null>(null);
   const [code, setCode] = useState('# Write your Python project here\n');
   const [lastLectureNumber, setLastLectureNumber] = useState<number | null>(null);
   const [consoleEntries, setConsoleEntries] = useState<{ type: 'stdout' | 'stderr' | 'stdin-prompt' | 'stdin-value'; text: string }[]>([]);
@@ -563,7 +564,23 @@ export default function CapstonePage() {
     api.courseLectures(slug)
       .then((lectures) => {
         if (lectures.length > 0) {
-          setLastLectureNumber(lectures[lectures.length - 1].number);
+          const lastNum = lectures[lectures.length - 1].number;
+          setLastLectureNumber(lastNum);
+          
+          // Fetch capstone project completion status
+          authFetch<{ projectCompleted: boolean; projectId: string | null }>(`/progress/lecture/${slug}/${lastNum}`)
+            .then((res) => {
+              if (res.projectCompleted && res.projectId) {
+                setCompletedProjectId(res.projectId);
+                const compProj = PROJECTS.find(p => p.id === res.projectId);
+                if (compProj) {
+                  setSelected(compProj);
+                }
+              }
+            })
+            .catch((err) => {
+              console.error('Failed to load capstone progress', err);
+            });
         }
       })
       .catch((err) => {
@@ -889,6 +906,17 @@ export default function CapstonePage() {
       {step === 'Choose Project' && (
         <div className="flex-1 overflow-y-auto bg-gradient-to-b from-slate-950 to-slate-900">
           <div className="max-w-5xl mx-auto px-6 py-12">
+            {completedProjectId && (
+              <div className="mb-8 bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-start gap-3">
+                <ShieldAlert className="text-amber-500 shrink-0 mt-0.5" size={18} />
+                <div>
+                  <h4 className="text-sm font-bold text-amber-200">Capstone Project Locked</h4>
+                  <p className="text-xs text-amber-200/80 leading-relaxed mt-1">
+                    You have already completed your capstone project. Only one capstone project can be submitted per course.
+                  </p>
+                </div>
+              </div>
+            )}
             <div className="text-center mb-12">
               <span className="text-blue-500 font-semibold tracking-widest text-[10px] uppercase bg-blue-500/10 px-3 py-1.5 rounded-full border border-blue-500/25">
                 Capstone Challenge
@@ -913,12 +941,15 @@ export default function CapstonePage() {
             <div className="grid gap-6 md:grid-cols-2">
               {PROJECTS.map(p => {
                 const isSelected = selected?.id === p.id;
+                const isLocked = completedProjectId !== null && completedProjectId !== p.id;
                 return (
                   <div
                     key={p.id}
                     className={`rounded-2xl border transition-all duration-300 p-6 flex flex-col justify-between ${
                       isSelected
                         ? 'border-blue-500 bg-blue-950/20 shadow-[0_0_30px_rgba(59,130,246,0.15)]'
+                        : isLocked
+                        ? 'border-slate-900 bg-slate-950/50 opacity-40'
                         : 'border-slate-800 bg-slate-900/40 hover:border-slate-700/60 hover:bg-slate-900/60'
                     }`}
                   >
@@ -943,13 +974,16 @@ export default function CapstonePage() {
 
                     <button
                       onClick={() => setSelected(p)}
+                      disabled={isLocked}
                       className={`w-full text-xs font-bold py-3 rounded-xl transition-all border ${
-                        isSelected
+                        isLocked
+                          ? 'bg-slate-900 text-slate-500 border-slate-800/80 cursor-not-allowed'
+                          : isSelected
                           ? 'bg-blue-600 hover:bg-blue-500 text-white border-blue-600 shadow-lg shadow-blue-500/20'
                           : 'bg-transparent text-slate-300 border-slate-700 hover:border-slate-500 hover:text-white'
                       }`}
                     >
-                      {isSelected ? 'Selected' : 'Select Project'}
+                      {isLocked ? 'Locked' : (isSelected ? 'Selected' : 'Select Project')}
                     </button>
                   </div>
                 );
@@ -1227,6 +1261,14 @@ export default function CapstonePage() {
 
           {/* Right Panel: Code Workspace */}
           <div ref={containerRef} className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-950">
+            {completedProjectId !== null && selected?.id !== completedProjectId && (
+              <div className="bg-amber-500/10 border-b border-amber-500/25 px-4 py-3 flex items-start gap-2.5 flex-shrink-0">
+                <ShieldAlert size={15} className="text-amber-500 shrink-0 mt-0.5" />
+                <p className="text-[11px] text-amber-200/90 leading-relaxed font-medium">
+                  You have already completed your capstone project. Only one capstone project can be submitted per course.
+                </p>
+              </div>
+            )}
             {/* Workspace Header toolbar */}
             <div className="h-12 flex items-center justify-between px-4 bg-slate-900 border-b border-slate-850 flex-shrink-0">
               <div className="flex items-center gap-2">
@@ -1236,16 +1278,21 @@ export default function CapstonePage() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleRun}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-600/30 transition-all"
+                  disabled={completedProjectId !== null && selected?.id !== completedProjectId}
+                  className={`inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-1.5 rounded-lg border transition-all ${
+                    completedProjectId !== null && selected?.id !== completedProjectId
+                      ? 'bg-slate-900 text-slate-650 border-slate-800/80 cursor-not-allowed'
+                      : 'bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border-emerald-600/30'
+                  }`}
                 >
-                  <Play size={12} className="fill-emerald-400/20" />
+                  <Play size={12} className={completedProjectId !== null && selected?.id !== completedProjectId ? 'fill-slate-600/20' : 'fill-emerald-400/20'} />
                   Run Code
                 </button>
                 <button
                   onClick={() => selected && runTestSuiteAsync(selected)}
-                  disabled={submitted || isRunningTests}
+                  disabled={submitted || isRunningTests || (completedProjectId !== null && selected?.id !== completedProjectId)}
                   className={`inline-flex items-center gap-1.5 text-xs font-bold px-4 py-1.5 rounded-lg transition-all border ${
-                    submitted 
+                    submitted || (completedProjectId !== null && selected?.id !== completedProjectId)
                       ? 'bg-slate-800 text-slate-500 border-slate-700/30 cursor-not-allowed' 
                       : 'bg-blue-600 hover:bg-blue-500 text-white border-blue-500 shadow-lg shadow-blue-500/15'
                   }`}

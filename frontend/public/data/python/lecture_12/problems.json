@@ -28,11 +28,5 @@
         "expectedOutput": "1: Line A\n2: Line B\n3: Line C"
       }
     ]
-  },
-  {
-    "id": "personal_diary",
-    "title": "Personal Diary",
-    "description": "Build a journal app that saves entries to a file with search and delete features.",
-    "difficulty": "hard"
   }
 ]

@@ -19,16 +19,16 @@ model User {
   lastActiveAt        DateTime              @default(now())
   emailVerified       Boolean               @default(false)
   role                String                @default("student")
-  status              String                @default("active")
   statsData           Json?
   overallProgress     Int                   @default(0)
   updatedAt           DateTime              @updatedAt
   bio                 String                @default("")
   avatarUrl           String                @default("")
+  notificationPrefs   Json?
   githubUrl           String                @default("")
   linkedinUrl         String                @default("")
   portfolioUrl        String                @default("")
-  notificationPrefs   Json?
+  status              String                @default("active")
   achievements        Achievement[]
   chatMessages        ChatMessage[]
   codeDrafts          CodeDraft[]
@@ -49,8 +49,8 @@ model User {
   xpHistory           XpTransaction[]
   assessmentProgress  AssessmentProgress[]
   notifications       InAppNotification[]
-  reviewQueue         ReviewQueue[]
   practiceAttempts    PracticeAttempt[]
+  reviewQueue         ReviewQueue[]
 }
 
 model InAppNotification {
@@ -343,10 +343,10 @@ model IssuedCertificate {
   certNumber   String    @unique
   issuedAt     DateTime  @default(now())
   issuedBy     String
-  status       String    @default("active")
-  revokedAt    DateTime?
-  revokeReason String?
   avgScore     Float?
+  status       String    @default("active")
+  revokeReason String?
+  revokedAt    DateTime?
   user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseSlug])
@@ -429,17 +429,17 @@ model PracticeAttempt {
 }
 
 model ProjectSubmission {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   studentId   String
   projectId   String
   content     String?
   fileUrl     String?
   githubUrl   String?
-  status      String   @default("PENDING")
+  status      String    @default("PENDING")
   score       Float?
   feedback    String?
   aiReview    Json?
-  submittedAt DateTime @default(now())
+  submittedAt DateTime  @default(now())
   reviewedAt  DateTime?
 
   @@map("project_submissions")
@@ -478,34 +478,33 @@ model Course {
   status            String          @default("DRAFT")
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
-  lessons           Lesson[]
-  quiz              Quiz?
+  betaFeedback      BetaFeedback[]
+  betaTesters       BetaTester[]
   project           CourseProject?
   versions          CourseVersion[]
-  betaTesters       BetaTester[]
-  betaFeedback      BetaFeedback[]
-  prerequisites     Course[]        @relation("CoursePrerequisites")
-  requiredBy        Course[]        @relation("CoursePrerequisites")
+  lessons           Lesson[]
+  quiz              Quiz?
+  Course_A          Course[]        @relation("CoursePrerequisites")
+  Course_B          Course[]        @relation("CoursePrerequisites")
 }
 
 model Lesson {
   id        String     @id @default(cuid())
   courseId  String
-  course    Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
   title     String
   content   String?
   videoUrl  String?
   order     Int
   type      String     @default("content")
-  exercises Exercise[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
+  exercises Exercise[]
+  course    Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
 
 model Exercise {
   id              String   @id @default(cuid())
   lessonId        String
-  lesson          Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   type            String
   question        String
   options         Json?
@@ -514,79 +513,81 @@ model Exercise {
   attemptsAllowed Int      @default(3)
   points          Int      @default(10)
   createdAt       DateTime @default(now())
+  lesson          Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 }
 
 model Quiz {
   id          String         @id @default(cuid())
   courseId    String         @unique
-  course      Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
   passScore   Int            @default(70)
   timeLimit   Int            @default(0)
   maxAttempts Int            @default(3)
   shuffle     Boolean        @default(false)
+  course      Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
   questions   QuizQuestion[]
 }
 
 model QuizQuestion {
-  id            String   @id @default(cuid())
+  id            String  @id @default(cuid())
   quizId        String
-  quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
   type          String
   question      String
   options       Json?
   correctAnswer String?
-  points        Int      @default(10)
+  points        Int     @default(10)
   order         Int
+  quiz          Quiz    @relation(fields: [quizId], references: [id], onDelete: Cascade)
 }
 
 model CourseProject {
-  id                 String   @id @default(cuid())
-  courseId           String   @unique
-  course             Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  id                 String  @id @default(cuid())
+  courseId           String  @unique
   title              String
   requirements       String
   submissionType     String
   rubric             Json?
   validationRules    Json?
-  isCapstone         Boolean  @default(false)
+  isCapstone         Boolean @default(false)
   learningObjectives Json?
+  course             Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
 
 model CourseVersion {
   id            String   @id @default(cuid())
   courseId      String
-  course        Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   versionNumber Int
   snapshot      Json
   changelog     String?
   createdAt     DateTime @default(now())
+  course        Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
 
 model BetaTester {
   courseId String
   userId   String
   course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
   @@id([courseId, userId])
 }
 
 model BetaFeedback {
   id           String   @id @default(cuid())
   courseId     String
-  course       Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   userId       String
   lessonId     String?
   feedbackText String
   isReviewed   Boolean  @default(false)
   createdAt    DateTime @default(now())
+  course       Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
 
 model StudentProgress {
-  id              String    @id @default(cuid())
-  studentId       String
-  courseId        String
-  lessonId        String
-  completed       Boolean   @default(false)
-  completedAt     DateTime?
+  id          String    @id @default(cuid())
+  studentId   String
+  courseId    String
+  lessonId    String
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+
   @@unique([studentId, lessonId])
 }
-

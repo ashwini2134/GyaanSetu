@@ -42,6 +42,7 @@ interface IssuedCert {
   certNumber: string;
   issuedAt: string;
   avgScore: number | null;
+  capstoneTitle?: string | null;
 }
 
 interface ConditionRow {
@@ -343,6 +344,9 @@ function CertBlock({
   const issueDate = cert
     ? new Date(cert.issuedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
     : null;
+  const courseTitleWithCapstone = cert?.capstoneTitle
+    ? `${course.fullName} (Capstone: ${cert.capstoneTitle})`
+    : course.fullName;
 
   return (
     <div className="rounded-3xl overflow-hidden border border-slate-800/60" style={{ background: '#111827' }}>
@@ -406,7 +410,7 @@ function CertBlock({
               </p>
 
               <p className="text-sm font-semibold leading-snug mb-4" style={{ color: accent }}>
-                {course.fullName}
+                {courseTitleWithCapstone}
               </p>
 
               <div className="w-24 h-px mb-3" style={{ background: `${accent}40` }} />
@@ -477,7 +481,7 @@ function CertBlock({
             </div>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => downloadCertificateAsSvg(studentName, course.fullName, cert!.certNumber, issueDate || '', accent)}
+                onClick={() => downloadCertificateAsSvg(studentName, courseTitleWithCapstone, cert!.certNumber, issueDate || '', accent)}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all hover:opacity-90 hover:-translate-y-0.5"
                 style={{ background: `${accent}20`, border: `1px solid ${accent}40`, color: accent }}
               >

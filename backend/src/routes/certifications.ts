@@ -21,6 +21,7 @@ router.get('/verify/:certNumber', async (req, res, next) => {
       include: {
         user: {
           select: {
+            id: true,
             name: true,
             email: true,
           }
@@ -33,6 +34,28 @@ router.get('/verify/:certNumber', async (req, res, next) => {
       return;
     }
 
+    const capstoneLectureId = String(COURSE_LECTURE_COUNTS[cert.courseSlug] - 1);
+    const capstoneProgress = await prisma.progress.findFirst({
+      where: {
+        userId: cert.userId,
+        courseSlug: cert.courseSlug,
+        lectureId: capstoneLectureId,
+        projectCompleted: true,
+      },
+      select: { projectId: true },
+    });
+
+    const CAPSTONE_PROJECT_NAMES: Record<string, string> = {
+      student_management: 'Student Management System',
+      expense_tracker: 'Expense Tracker',
+      quiz_app: 'Quiz Application',
+      todo_list: 'To-Do List',
+    };
+
+    const capstoneTitle = capstoneProgress?.projectId
+      ? (CAPSTONE_PROJECT_NAMES[capstoneProgress.projectId] ?? capstoneProgress.projectId)
+      : null;
+
     res.json({
       valid: true,
       certNumber: cert.certNumber,
@@ -40,6 +63,7 @@ router.get('/verify/:certNumber', async (req, res, next) => {
       courseSlug: cert.courseSlug,
       issuedAt: cert.issuedAt.toISOString(),
       avgScore: cert.avgScore,
+      capstoneTitle,
     });
   } catch (err) { next(err); }
 });
@@ -51,7 +75,35 @@ router.get('/', requireAuth, async (req: AuthenticatedRequest, res, next) => {
       where: { userId: req.user!.id },
       orderBy: { issuedAt: 'desc' },
     });
-    res.json({ certificates: certs });
+
+    const CAPSTONE_PROJECT_NAMES: Record<string, string> = {
+      student_management: 'Student Management System',
+      expense_tracker: 'Expense Tracker',
+      quiz_app: 'Quiz Application',
+      todo_list: 'To-Do List',
+    };
+
+    const enrichedCerts = await Promise.all(certs.map(async cert => {
+      const capstoneLectureId = String(COURSE_LECTURE_COUNTS[cert.courseSlug] - 1);
+      const capstoneProgress = await prisma.progress.findFirst({
+        where: {
+          userId: cert.userId,
+          courseSlug: cert.courseSlug,
+          lectureId: capstoneLectureId,
+          projectCompleted: true,
+        },
+        select: { projectId: true },
+      });
+      const capstoneTitle = capstoneProgress?.projectId
+        ? (CAPSTONE_PROJECT_NAMES[capstoneProgress.projectId] ?? capstoneProgress.projectId)
+        : null;
+      return {
+        ...cert,
+        capstoneTitle,
+      };
+    }));
+
+    res.json({ certificates: enrichedCerts });
   } catch (err) { next(err); }
 });
 

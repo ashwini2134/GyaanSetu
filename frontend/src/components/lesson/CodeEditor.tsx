@@ -133,8 +133,10 @@ export default function CodeEditor({
   const doRun = useCallback((notify: 'run' | 'submit') => {
     if (running) return;
 
+    const currentCode = editorRef.current ? editorRef.current.getValue() : code;
+
     // If we already have injected code AND the raw code hasn't changed, reuse it
-    if (lastInjectedRef.current && lastRawCodeRef.current === code) {
+    if (lastInjectedRef.current && lastRawCodeRef.current === currentCode) {
       executeCode(lastInjectedRef.current, notify);
       return;
     }
@@ -142,7 +144,7 @@ export default function CodeEditor({
     lastInjectedRef.current = '';
     lastRawCodeRef.current = '';
 
-    const scanned = scanForInput(code);
+    const scanned = scanForInput(currentCode);
     if (scanned.hasInput && !showInputPanel) {
       setInputFields(scanned.fields);
       pendingAction.current = notify;
@@ -154,7 +156,7 @@ export default function CodeEditor({
       const values = inputFields.map(f => f.value);
       const injected = injectInputs(pendingCodeRef.current, values);
       lastInjectedRef.current = injected;
-      lastRawCodeRef.current = code;
+      lastRawCodeRef.current = currentCode;
       setShowInputPanel(false);
       pendingAction.current = null;
       pendingCodeRef.current = '';
@@ -172,7 +174,7 @@ export default function CodeEditor({
       executeCode(injected, notify, dynamicExpected);
       return;
     }
-    executeCode(code, notify);
+    executeCode(currentCode, notify);
   }, [code, running, showInputPanel, inputFields, executeCode, solution]);
 
   const handleInputChange = (id: number, value: string) => {

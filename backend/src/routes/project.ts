@@ -5,6 +5,7 @@ import type { AuthenticatedRequest } from "../middleware/auth.js";
 import { z } from "zod";
 import { awardXp } from "../services/gamificationService.js";
 import { sendNotification } from "../services/notificationService.js";
+import { COURSE_LECTURE_COUNTS } from "./courses.js";
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const archiver: (...args: any[]) => any = require("archiver");
@@ -21,6 +22,28 @@ router.post("/complete", requireAuth, async (req: AuthenticatedRequest, res, nex
   try {
     const userId = req.user!.id;
     const { courseSlug, lectureId, projectId } = projectCompleteSchema.parse(req.body);
+
+    const capstoneLectureId = String(COURSE_LECTURE_COUNTS[courseSlug] - 1);
+    if (lectureId === capstoneLectureId) {
+      const existingCompletedCapstone = await prisma.progress.findFirst({
+        where: {
+          userId,
+          courseSlug,
+          lectureId: capstoneLectureId,
+          projectCompleted: true,
+          projectId: {
+            not: projectId,
+          },
+        },
+      });
+
+      if (existingCompletedCapstone) {
+        res.status(400).json({
+          error: "You have already completed your capstone project. Only one capstone project can be submitted per course.",
+        });
+        return;
+      }
+    }
 
     const progress = await prisma.progress.upsert({
       where: {

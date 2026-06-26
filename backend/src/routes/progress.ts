@@ -428,6 +428,7 @@ router.get("/lecture/:courseSlug/:lectureId", requireAuth, async (req: Authentic
       sections,
       lectureCompleted: lectureProgress?.status === "COMPLETED",
       projectCompleted: lectureProgress?.projectCompleted || false,
+      projectId: lectureProgress?.projectId || null,
       quizAttempt: quizAttempts[0] || null,
     });
   } catch (error) { next(error); }

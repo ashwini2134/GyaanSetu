@@ -18,6 +18,13 @@ const COURSE_QUIZ_COUNTS: Record<string, number> = {
   cs50ai: 10,
 };
 
+const CAPSTONE_PROJECT_NAMES: Record<string, string> = {
+  student_management: 'Student Management System',
+  expense_tracker: 'Expense Tracker',
+  quiz_app: 'Quiz Application',
+  todo_list: 'To-Do List',
+};
+
 export interface ConditionDetail {
   done: number;
   required: number;
@@ -42,6 +49,7 @@ export interface EligibilityResult {
   alreadyIssued: boolean;
   conditions:    EligibilityConditions;
   avgQuizScore:  number | null;
+  capstoneTitle?: string | null;
   lectureDetails?: {
     total: number;
     completed: number[];
@@ -60,7 +68,7 @@ export async function checkEligibility(userId: string, courseSlug: string): Prom
     progressRecords,
     quizLectures,
     submissionsDone,
-    projectsDone,
+    capstoneProgress,
     quizScores,
   ] = await Promise.all([
     prisma.issuedCertificate.findUnique({ where: { userId_courseSlug: { userId, courseSlug } } }),
@@ -83,7 +91,15 @@ export async function checkEligibility(userId: string, courseSlug: string): Prom
         ],
       },
     }),
-    prisma.project.count({ where: { userId, status: 'COMPLETED' } }),
+    prisma.progress.findFirst({
+      where: {
+        userId,
+        courseSlug,
+        lectureId: String(totalLectures - 1),
+        projectCompleted: true,
+      },
+      select: { projectId: true },
+    }),
     prisma.quizAttempt.findMany({
       where: { userId, lectureId: { startsWith: `${courseSlug}-` } },
       select: { score: true, lectureId: true },
@@ -100,6 +116,11 @@ export async function checkEligibility(userId: string, courseSlug: string): Prom
     quizScores.length > 0
       ? Math.round(quizScores.reduce((s, q) => s + q.score, 0) / quizScores.length)
       : null;
+
+  const hasCompletedCapstone = !!capstoneProgress;
+  const capstoneTitle = capstoneProgress?.projectId
+    ? (CAPSTONE_PROJECT_NAMES[capstoneProgress.projectId] ?? capstoneProgress.projectId)
+    : null;
 
   const conditions: EligibilityConditions = {
     lecturesCompleted: {
@@ -124,7 +145,7 @@ export async function checkEligibility(userId: string, courseSlug: string): Prom
       required: totalProblems,
       passed: submissionsDone >= totalProblems,
     },
-    projectCompleted: { done: projectsDone, passed: projectsDone > 0 },
+    projectCompleted: { done: hasCompletedCapstone ? 1 : 0, passed: hasCompletedCapstone },
   };
 
   const eligible = Object.values(conditions).every(c => c.passed);
@@ -133,6 +154,7 @@ export async function checkEligibility(userId: string, courseSlug: string): Prom
     alreadyIssued: !!existing,
     conditions,
     avgQuizScore,
+    capstoneTitle,
     lectureDetails: {
       total: totalLectures,
       completed: completedLectureIds,
@@ -170,6 +192,9 @@ export async function issueCertForStudent(
   if (!certsUrl || !bearerToken) throw new Error('CERTS_APP_URL or CERTS_BEARER_TOKEN not set in env');
 
   const scoreNote = result.avgQuizScore !== null ? `Average quiz score: ${result.avgQuizScore}%` : '';
+  const programName = result.capstoneTitle
+    ? `${COURSE_NAMES[courseSlug] ?? courseSlug} (Capstone: ${result.capstoneTitle})`
+    : (COURSE_NAMES[courseSlug] ?? courseSlug);
 
   const response = await fetch(`${certsUrl}/api/issue`, {
     method: 'POST',
@@ -181,7 +206,7 @@ export async function issueCertForStudent(
       type:           'CRS',
       recipientName:  student.name,
       recipientEmail: student.email,
-      program:        COURSE_NAMES[courseSlug] ?? courseSlug,
+      program:        programName,
       duration:       'Self-Paced Course',
       startDate,
       endDate,

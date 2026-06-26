@@ -10,6 +10,7 @@ interface VerifyResult {
   courseSlug?: string;
   issuedAt?: string;
   avgScore?: number | null;
+  capstoneTitle?: string | null;
   error?: string;
 }
 
@@ -90,7 +91,7 @@ export default function VerifyCertificatePage() {
                 <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider block">Program / Course</span>
                 <span className="text-sm font-semibold text-slate-200 mt-1 flex items-center gap-2">
                   <Award size={16} className="text-blue-400 shrink-0" />
-                  {COURSE_NAMES[result.courseSlug || ""] || result.courseSlug}
+                  {(COURSE_NAMES[result.courseSlug || ""] || result.courseSlug) + (result.capstoneTitle ? ` (Capstone: ${result.capstoneTitle})` : '')}
                 </span>
               </div>
 

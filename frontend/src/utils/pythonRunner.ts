@@ -1076,6 +1076,19 @@ class MiniPython {
     if (expr === 'True') return true;
     if (expr === 'False') return false;
 
+    // Python inline conditional expressions: val1 if cond else val2
+    const ifIdx = this.findWordOutsideStrings(expr, ' if ');
+    if (ifIdx > 0) {
+      const elseIdx = this.findWordOutsideStrings(expr, ' else ');
+      if (elseIdx > ifIdx) {
+        const lhs = expr.slice(0, ifIdx).trim();
+        const condStr = expr.slice(ifIdx + 4, elseIdx).trim();
+        const rhs = expr.slice(elseIdx + 6).trim();
+        const condVal = this.eval(condStr, env);
+        return condVal ? this.eval(lhs, env) : this.eval(rhs, env);
+      }
+    }
+
     // Numbers
     if (/^-?\d+$/.test(expr)) return parseInt(expr, 10);
     if (/^-?\d*\.\d+$/.test(expr)) return parseFloat(expr);
