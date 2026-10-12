@@ -1,7 +1,9 @@
 import { prisma } from "../prisma.js";
 import { sendInAppNotification } from "./notificationService.js";
+import { getCurrentWeekXp, getWeekBounds } from "./weeklyXpService.js";
 
 const STREAK_MILESTONES = [3, 7, 14, 30, 60, 100, 365];
+const WEEKLY_XP_MILESTONES = [500, 1000, 2500, 5000];
 
 // XP Multipliers
 const WEEKEND_MULTIPLIER = 1.5; // 1.5x XP on weekends
@@ -14,87 +16,95 @@ function getXpMultiplier(): number {
 }
 
 export async function awardXp(userId: string, amount: number, reason: string, actionId?: string) {
-  // Apply XP multiplier based on day of week
   const multiplier = getXpMultiplier();
   const adjustedAmount = Math.round(amount * multiplier);
-  
-  let newStreak = 0;
-  await prisma.$transaction(async (tx) => {
-    // 1. If actionId is provided, check if transaction already exists
-    if (actionId) {
-      const existing = await tx.xpTransaction.findUnique({
-        where: {
-          userId_actionId: { userId, actionId },
-        },
-      });
-      if (existing) {
-        return; // XP already awarded for this action
-      }
-    }
 
-    // 2. Insert XpTransaction with adjusted amount
-    await tx.xpTransaction.create({
-      data: {
-        userId,
-        amount: adjustedAmount,
-        reason: multiplier > 1 ? `${reason} (Weekend Bonus)` : reason,
-        actionId,
-      },
+  if (actionId) {
+    const existing = await prisma.xpTransaction.findUnique({
+      where: { userId_actionId: { userId, actionId } },
     });
+    if (existing) return;
+  }
 
-    // 3. Update User stats (XP and Streaks)
-    const user = await tx.user.findUnique({ where: { id: userId } });
-    if (!user) return;
-
-    const now = new Date();
-    const todayStr = now.toISOString().split("T")[0];
-    const lastActiveStr = user.lastActiveAt.toISOString().split("T")[0];
-
-    let newCurrentStreak = user.currentStreak;
-    let newLongestStreak = user.longestStreak;
-
-    if (lastActiveStr !== todayStr) {
-      const yesterday = new Date(now);
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split("T")[0];
-
-      if (lastActiveStr === yesterdayStr) {
-        newCurrentStreak += 1;
-      } else {
-        newCurrentStreak = 1;
-      }
-
-      if (newCurrentStreak > newLongestStreak) {
-        newLongestStreak = newCurrentStreak;
-      }
-    } else if (newCurrentStreak === 0) {
-      newCurrentStreak = 1;
-      if (newCurrentStreak > newLongestStreak) {
-        newLongestStreak = newCurrentStreak;
-      }
-    }
-
-    newStreak = newCurrentStreak;
-
-    await tx.user.update({
-      where: { id: userId },
-      data: {
-        totalXp: { increment: amount },
-        currentStreak: newCurrentStreak,
-        longestStreak: newLongestStreak,
-        lastActiveAt: now,
-      },
-    });
+  await prisma.xpTransaction.create({
+    data: {
+      userId,
+      amount: adjustedAmount,
+      reason: multiplier > 1 ? `${reason} (Weekend Bonus)` : reason,
+      actionId,
+    },
   });
 
-  // Notify on streak milestones (outside transaction)
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) return;
+
+  const now = new Date();
+  const todayStr = now.toISOString().split("T")[0];
+  const lastActiveStr = user.lastActiveAt.toISOString().split("T")[0];
+
+  let newCurrentStreak = user.currentStreak;
+  let newLongestStreak = user.longestStreak;
+
+  if (lastActiveStr !== todayStr) {
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+    if (lastActiveStr === yesterdayStr) {
+      newCurrentStreak += 1;
+    } else {
+      newCurrentStreak = 1;
+    }
+
+    if (newCurrentStreak > newLongestStreak) {
+      newLongestStreak = newCurrentStreak;
+    }
+  } else if (newCurrentStreak === 0) {
+    newCurrentStreak = 1;
+    if (newCurrentStreak > newLongestStreak) {
+      newLongestStreak = newCurrentStreak;
+    }
+  }
+
+  const newStreak = newCurrentStreak;
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      totalXp: { increment: amount },
+      currentStreak: newCurrentStreak,
+      longestStreak: newLongestStreak,
+      lastActiveAt: now,
+    },
+  });
+
   if (STREAK_MILESTONES.includes(newStreak)) {
     await sendInAppNotification(
       userId,
       "streak",
-      `🔥 ${newStreak}-Day Streak!`,
-      `You've reached a ${newStreak}-day streak! Keep it going!`
+      `${newStreak}-Day Streak`,
+      `You've reached a ${newStreak}-day streak. Keep it going!`,
+      "",
+      "medium",
+      `streak_${userId}_${newStreak}`
     );
+  }
+
+  if (adjustedAmount > 0) {
+    const weeklyXp = await getCurrentWeekXp(userId);
+    const crossed = WEEKLY_XP_MILESTONES.find((m) => weeklyXp >= m && weeklyXp - adjustedAmount < m);
+    if (crossed) {
+      const { weekStart } = getWeekBounds();
+      await sendInAppNotification(
+        userId,
+        "weekly_xp_milestone",
+        "Weekly XP Milestone",
+        `You've earned ${crossed}+ XP this week.`,
+        "",
+        "medium",
+        `weekly_xp_${userId}_${weekStart.toISOString().slice(0, 10)}_${crossed}`
+      );
+    }
   }
 }
 

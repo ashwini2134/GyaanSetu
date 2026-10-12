@@ -1,0 +1,147 @@
+.logout-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  background: radial-gradient(ellipse 120% 80% at 50% 0%, #0a0d16, #05060b);
+  color: #edeff5;
+  font-family: inherit;
+}
+
+.logout-overlay__frame {
+  position: relative;
+  width: 10.5rem;
+  height: 15.5rem;
+  padding: 0.55rem;
+  border-radius: 0.4rem;
+  background: linear-gradient(155deg, #6b503a, #241a12);
+  box-shadow: 0 18px 30px -12px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  perspective: 1400px;
+}
+
+/* Light spilling through while the door is still open, cut off as it closes —
+   same beam treatment as the lamp and the sign-up door. */
+.logout-overlay__beam {
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  width: 190%;
+  height: 85%;
+  transform: translateX(-50%);
+  clip-path: polygon(40% 0%, 60% 0%, 94% 100%, 6% 100%);
+  background: linear-gradient(to bottom, rgba(255, 227, 173, 0.38), rgba(255, 179, 71, 0.1) 55%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(3px);
+}
+
+.logout-overlay__jamb {
+  position: absolute;
+  inset: 0.55rem;
+  border-radius: 0.25rem;
+  background: linear-gradient(155deg, #4a3626, #2c2015);
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.5);
+}
+
+.logout-overlay__doorway {
+  position: absolute;
+  inset: 0.85rem;
+  border-radius: 0.15rem;
+  background: radial-gradient(ellipse 90% 100% at 50% 20%, #ffcf8a, #7a5326 70%);
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.logout-overlay__door {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform-origin: left center;
+  border-radius: 0.15rem;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 10px 24px -8px rgba(0, 0, 0, 0.6);
+  background-image:
+    repeating-linear-gradient(100deg, rgba(0, 0, 0, 0.05) 0px, rgba(0, 0, 0, 0.05) 1px, transparent 1px, transparent 5px),
+    linear-gradient(155deg, #5a4130, #3c2b1e 45%, #241a12);
+}
+
+.logout-overlay__door-panel {
+  position: absolute;
+  left: 0.55rem;
+  right: 0.55rem;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  border-radius: 0.2rem;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4), inset 0 -1px 2px rgba(255, 255, 255, 0.08);
+}
+
+.logout-overlay__door-panel--top {
+  top: 0.6rem;
+  height: 42%;
+}
+
+.logout-overlay__door-panel--bottom {
+  bottom: 0.6rem;
+  height: 42%;
+}
+
+.logout-overlay__hinge {
+  position: absolute;
+  left: 0.05rem;
+  width: 0.45rem;
+  height: 0.85rem;
+  border-radius: 0.1rem;
+  background: linear-gradient(90deg, #d8c090, #8a6a3a);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.logout-overlay__hinge--top {
+  top: 0.9rem;
+}
+
+.logout-overlay__hinge--mid {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.logout-overlay__hinge--bottom {
+  bottom: 0.9rem;
+}
+
+.logout-overlay__knob-plate {
+  position: absolute;
+  right: 0.45rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0.85rem;
+  height: 1.6rem;
+  border-radius: 0.5rem;
+  background: linear-gradient(155deg, #d8c090, #8a6a3a);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logout-overlay__knob {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #f6e6bf, #a67c3d);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
+.logout-overlay__text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #8890a6;
+  letter-spacing: 0.02em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logout-overlay__door {
+    transition: none;
+  }
+}

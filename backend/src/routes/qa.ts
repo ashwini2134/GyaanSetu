@@ -75,7 +75,7 @@ function saveQAData(data: CourseQAData): void {
 
 const COURSE_LIST = [
   { slug: "python", title: "Python Programming" },
-  { slug: "cs50ai", title: "AI" },
+  { slug: "fundamentals-of-ai", title: "Fundamentals of AI" },
 ];
 
 router.get(

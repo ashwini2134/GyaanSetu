@@ -8,6 +8,8 @@ interface AuthLayoutProps {
   footerLink: React.ReactNode;
 }
 
+import { useBranding } from "../context/BrandingContext";
+
 export const AuthLayout: React.FC<AuthLayoutProps> = ({
   title,
   subtitle,
@@ -15,6 +17,8 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
   footerText,
   footerLink,
 }) => {
+  const { branding } = useBranding();
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4 py-8 bg-slate-900 relative overflow-hidden">
       {/* Dynamic Theme-Adaptive Background Glows */}
@@ -24,13 +28,14 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
       </div>
 
       <div className="relative z-10 w-full max-w-md">
-        {/* Logo */}
-        <div className="mb-6 flex justify-center">
+        {/* Logo and Tagline */}
+        <div className="mb-6 flex flex-col items-center">
           <img
-            src={`${import.meta.env.BASE_URL}logo.svg`}
-            alt="Fraylon Academy"
-            className="h-14 w-auto object-contain drop-shadow-lg"
+            src={branding?.logoUrl || `${import.meta.env.BASE_URL}logo.svg`}
+            alt={branding?.platformName || "GyanSetu"}
+            className="h-14 w-auto object-contain drop-shadow-lg mb-2"
           />
+          <p className="text-white/60 font-medium text-center text-sm">{branding?.tagline || "Learn. Build. Grow."}</p>
         </div>
 
         {/* Card */}

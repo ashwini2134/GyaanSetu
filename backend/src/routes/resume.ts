@@ -2,6 +2,7 @@ import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
 import { prisma } from "../prisma.js";
 import type { AuthenticatedRequest } from "../middleware/auth.js";
+import { COURSE_FULL_NAMES } from "../lib/courseNames.js";
 
 const router = Router();
 
@@ -44,15 +45,15 @@ router.get("/", requireAuth, async (req: AuthenticatedRequest, res, next) => {
     // Calculate skills based on completed courses and projects
     const skills = new Set<string>();
     courses.forEach(c => {
-      if (c.courseSlug === 'python') skills.add('Python');
-      if (c.courseSlug === 'cs50ai') skills.add('AI/ML');
+      if (c.courseSlug === 'python20') skills.add('Python');
+      if (c.courseSlug === 'fundamentals-of-ai') skills.add('AI/ML');
     });
     projects.forEach(p => {
       const techMap: Record<string, string[]> = {
-        'student_management': ['Python', 'SQLite', 'CLI'],
-        'expense_tracker': ['Python', 'Data Analysis', 'Pandas'],
-        'quiz_app': ['Python', 'Web Development', 'Flask'],
-        'todo_list': ['Python', 'Data Structures', 'OOP']
+        'search_trace': ['Search Algorithms', 'BFS', 'DFS', 'A*', 'Heuristics'],
+        'logic_puzzle': ['Propositional Logic', 'Inference', 'Model Checking'],
+        'ml_classifier_intro': ['Machine Learning', 'NLP', 'TF-IDF', 'k-NN'],
+        'csp_formulation': ['CSP', 'Backtracking', 'AC-3', 'Constraint Propagation']
       };
       (techMap[p.projectId] || []).forEach(s => skills.add(s));
     });
@@ -68,14 +69,13 @@ router.get("/", requireAuth, async (req: AuthenticatedRequest, res, next) => {
         joinedDate: user?.createdAt || new Date()
       },
       education: courses.map(c => ({
-        course: c.courseSlug === 'python' ? 'CS50P: Introduction to Python' : 
-                 c.courseSlug === 'cs50ai' ? 'CS50 AI with Python' : c.courseSlug,
+        course: COURSE_FULL_NAMES[c.courseSlug] ?? c.courseSlug,
         completedAt: c.completedAt,
         certificate: certificates.find(cert => cert.courseSlug === c.courseSlug)?.certNumber
       })),
       certifications: certificates.map(c => ({
-        name: c.courseSlug === 'python' ? 'Python Fundamentals' : 
-              c.courseSlug === 'cs50ai' ? 'AI Foundations' : c.courseSlug,
+        name: c.courseSlug === 'python20' ? 'Python Fundamentals' :
+              c.courseSlug === 'fundamentals-of-ai' ? 'AI Foundations' : c.courseSlug,
         issuedAt: c.issuedAt,
         certNumber: c.certNumber,
         avgScore: c.avgScore

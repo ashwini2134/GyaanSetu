@@ -1,7 +1,7 @@
 import { config } from "../config.js";
 import type { OAuthProvider } from "../types.js";
 
-type OAuthProfile = { providerUserId: string; email: string; name: string };
+type OAuthProfile = { providerUserId: string; email: string; name: string; githubUrl?: string };
 
 const OAUTH_STATE_COOKIE = "oauth_state";
 
@@ -93,7 +93,7 @@ async function exchangeGitHubCode(code: string): Promise<OAuthProfile> {
   const userRes = await fetch("https://api.github.com/user", {
     headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
   });
-  const user = (await userRes.json()) as { id: number; login: string; name?: string; email?: string };
+  const user = (await userRes.json()) as { id: number; login: string; name?: string; email?: string; html_url?: string };
 
   let email = user.email;
   if (!email) {
@@ -110,6 +110,7 @@ async function exchangeGitHubCode(code: string): Promise<OAuthProfile> {
     providerUserId: String(user.id),
     email,
     name: user.name ?? user.login,
+    githubUrl: user.html_url ?? `https://github.com/${user.login}`,
   };
 }
 

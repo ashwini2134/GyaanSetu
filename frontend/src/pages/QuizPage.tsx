@@ -28,7 +28,7 @@ export default function QuizPage() {
       .catch(e => { setError(e.message); setLoading(false); });
   }, [slug, number]);
 
-  const courseTitle = slug === 'cs50ai' ? 'AI' : (slug ?? '').toUpperCase();
+  const courseTitle = slug === 'fundamentals-of-ai' ? 'AI' : (slug ?? '').toUpperCase();
 
   return (
     <div className="min-h-screen bg-slate-900 p-6 md:p-10">
@@ -64,7 +64,7 @@ export default function QuizPage() {
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            Previously scored {quizScore}/{questions.length}
+            Previously scored {quizScore}%
           </div>
         )}
       </div>

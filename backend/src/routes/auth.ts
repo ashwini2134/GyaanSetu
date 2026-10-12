@@ -52,6 +52,7 @@ const registerSchema = z.object({
   email: z.string().email().max(255),
   password: z.string().min(8).max(128),
   name: z.string().min(1).max(100).trim(),
+  githubUrl: z.string().max(255).trim().optional(),
 });
 
 const loginSchema = z.object({
@@ -74,14 +75,18 @@ function setRefreshCookie(res: import("express").Response, token: string): void 
   res.cookie(REFRESH_COOKIE, token, {
     httpOnly: true,
     secure: !config.isDev,
-    sameSite: "lax",
+    sameSite: config.isDev ? "lax" : "none",
     maxAge: 30 * 24 * 60 * 60 * 1000,
     path: "/api/auth",
   });
 }
 
 function clearRefreshCookie(res: import("express").Response): void {
-  res.clearCookie(REFRESH_COOKIE, { path: "/api/auth" });
+  res.clearCookie(REFRESH_COOKIE, { 
+    path: "/api/auth",
+    secure: !config.isDev,
+    sameSite: config.isDev ? "lax" : "none",
+  });
 }
 
 function tokenResponse(res: import("express").Response, tokens: { accessToken: string; refreshToken: string }) {
@@ -168,6 +173,7 @@ const profileSchema = z.object({
   notificationPrefs: z.record(z.boolean()).optional(),
   profileVisibility: z.enum(["public", "private", "connections"]).optional(),
   profileTheme: z.string().optional(),
+  portfolioTemplate: z.string().optional(),
   currentPassword: z.string().min(1).optional(),
   password: z.string().min(8).max(128).optional(),
 });
@@ -206,6 +212,13 @@ router.patch("/profile", requireAuth, async (req: AuthenticatedRequest, res, nex
       await prisma.user.update({
         where: { id: req.user.id },
         data: { profileTheme: body.profileTheme },
+      });
+    }
+
+    if (body.portfolioTemplate) {
+      await prisma.user.update({
+        where: { id: req.user.id },
+        data: { portfolioTemplate: body.portfolioTemplate },
       });
     }
     
@@ -327,6 +340,7 @@ router.get("/oauth/:provider/callback", async (req, res) => {
       providerUserId: profile.providerUserId,
       email: profile.email,
       name: profile.name,
+      githubUrl: profile.githubUrl,
     });
     console.log(`[oauth] ${provider} user: id=${user.id}, email=${user.email}`);
 

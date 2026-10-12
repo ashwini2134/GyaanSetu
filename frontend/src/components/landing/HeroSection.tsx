@@ -1,57 +1,163 @@
+import { useRef } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ArrowRight, Sparkles } from "lucide-react";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useReducedMotion,
+  useMotionValue,
+  useSpring,
+  useMotionTemplate,
+  type Variants,
+} from "framer-motion";
+import type { MouseEvent as ReactMouseEvent } from "react";
+import Reveal from "./Reveal";
+import { useParallax } from "./hooks/useParallax";
+import FraylonHeroLogo from "./FraylonHeroLogo";
+import MagneticButton from "./MagneticButton";
 
-export default function HeroSection({ scrollToSection }: { scrollToSection: (id: string) => void }) {
+const HEADLINE_LINE_1 = ["Don't", "Just", "Watch."];
+const HEADLINE_LINE_2 = [
+  { text: "Build.", accent: true },
+  { text: "Ship.", accent: false },
+  { text: "Get", accent: false },
+  { text: "Hired.", accent: false },
+];
+
+const headlineContainer: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.09, delayChildren: 0.15 } },
+};
+
+const headlineWord: Variants = {
+  hidden: { opacity: 0, y: 46, rotateX: -50, filter: "blur(10px)" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    rotateX: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.65, ease: [0.16, 1, 0.3, 1] },
+  },
+};
+
+export default function HeroSection() {
+  const containerRef = useRef<HTMLElement>(null);
+  const prefersReducedMotion = useReducedMotion();
+
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"]
+  });
+
+  const bgY = useParallax(containerRef, 100, ["start start", "end start"]);
+
+  const contentOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.8],
+    prefersReducedMotion ? [1, 1] : [1, 0]
+  );
+
+  // Cursor-follow spotlight, spring-smoothed so it drifts rather than snaps.
+  const spotlightX = useMotionValue(400);
+  const spotlightY = useMotionValue(300);
+  const spotlightXSpring = useSpring(spotlightX, { stiffness: 60, damping: 22 });
+  const spotlightYSpring = useSpring(spotlightY, { stiffness: 60, damping: 22 });
+  const spotlightBg = useMotionTemplate`radial-gradient(560px circle at ${spotlightXSpring}px ${spotlightYSpring}px, rgba(0,191,179,0.12), transparent 70%)`;
+
+  const handleMouseMove = (e: ReactMouseEvent<HTMLElement>) => {
+    if (prefersReducedMotion || !containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    spotlightX.set(e.clientX - rect.left);
+    spotlightY.set(e.clientY - rect.top);
+  };
+
   return (
-    <section className="relative w-full min-h-screen flex flex-col items-center justify-center text-center px-6 bg-[#05050a] overflow-hidden py-24">
-      {/* Background Subtle Glow */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-[#3b82f6]/10 blur-[150px] rounded-[100%] pointer-events-none -z-10" />
+    <motion.section
+      ref={containerRef}
+      onMouseMove={handleMouseMove}
+      style={{ opacity: contentOpacity }}
+      className="relative w-full min-h-[90vh] flex flex-col lg:flex-row items-center justify-between px-6 py-20 max-w-7xl mx-auto overflow-hidden bg-[var(--bg-main)]"
+    >
+      {/* Cursor-follow spotlight — dormant until the pointer moves, purely additive light */}
+      {!prefersReducedMotion && (
+        <motion.div className="pointer-events-none absolute inset-0 z-0" style={{ background: spotlightBg }} />
+      )}
 
-      <motion.div 
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="max-w-5xl mx-auto flex flex-col items-center z-10 pt-16"
+      {/* Fraylon Scene — contained to a panel on the right, like fraylontech.com's
+          split layout, instead of a full-bleed dark background. Logo/animation itself untouched. */}
+      <div
+        className="hidden lg:block absolute top-6 bottom-6 right-0 w-[58%] rounded-3xl overflow-hidden z-0"
+        style={{
+          WebkitMaskImage: "linear-gradient(to right, transparent, black 8%)",
+          maskImage: "linear-gradient(to right, transparent, black 8%)",
+        }}
       >
-        {/* Top Badge */}
-        <div className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#3b82f6]/30 bg-[#0d0d16] mb-8">
-          <Sparkles className="w-3.5 h-3.5 text-[#3b82f6]" />
-          <span className="text-xs font-bold text-[#3b82f6] tracking-wide">✦ Python & AI Courses — Free to Start</span>
-        </div>
+        <FraylonHeroLogo />
+      </div>
 
-        {/* Headline */}
-        <h1 className="text-6xl md:text-7xl font-black text-white tracking-tight leading-[1.1] md:leading-[1.1]">
-          Build Skills That<br />
-          <span className="bg-gradient-to-r from-[#3b82f6] to-blue-400 bg-clip-text text-transparent">Actually Get You Hired.</span>
-        </h1>
+      {/* Left Content — sits on the white page background */}
+      <div className="w-full lg:w-5/12 flex flex-col items-start text-left z-10 pt-10 lg:pt-0 pr-0 lg:pr-12">
+        <Reveal delay={0.05}>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[var(--border-primary)] bg-[var(--bg-surface)] text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00BFB3]" />
+            Project-Based Curriculum &bull; AI Code Review
+          </div>
+        </Reveal>
 
-        {/* Subtext */}
-        <p className="mt-8 text-lg text-[#6b7280] max-w-2xl mx-auto leading-relaxed">
-          Fraylon Academy is a structured, distraction-free learning platform for Python and AI. Real lectures. Real code. Real certificates.
-        </p>
+        <motion.h1
+          variants={headlineContainer}
+          initial="hidden"
+          animate="visible"
+          style={{ perspective: 800 }}
+          className="mt-5 text-5xl md:text-6xl lg:text-7xl font-extrabold text-[var(--text-primary)] tracking-tight leading-[1.1]"
+        >
+          <span className="block">
+            {HEADLINE_LINE_1.map((word) => (
+              <motion.span key={word} variants={headlineWord} className="inline-block mr-[0.22em]">
+                {word}
+              </motion.span>
+            ))}
+          </span>
+          <span className="block">
+            {HEADLINE_LINE_2.map(({ text, accent }) => (
+              <motion.span
+                key={text}
+                variants={headlineWord}
+                className={`inline-block mr-[0.22em] ${accent ? "text-[#00BFB3]" : ""}`}
+              >
+                {text}
+              </motion.span>
+            ))}
+          </span>
+        </motion.h1>
 
-        {/* Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12 w-full sm:w-auto">
-          <Link to="/register" className="w-full sm:w-auto px-8 py-4 bg-[#3b82f6] hover:bg-blue-500 text-white rounded-full font-bold flex items-center justify-center gap-2 transition-all duration-300 shadow-[0_0_30px_-5px_rgba(59,130,246,0.4)] hover:shadow-[0_0_40px_0px_rgba(59,130,246,0.6)] hover:scale-105">
-            Start Learning Free
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-          <button onClick={() => scrollToSection("courses")} className="w-full sm:w-auto px-8 py-4 border border-white/20 bg-transparent hover:bg-white/5 text-white rounded-full font-bold transition-all duration-300 hover:scale-105 cursor-pointer">
-            Explore Courses
-          </button>
-        </div>
+        <Reveal delay={0.2}>
+          <p className="mt-6 text-base md:text-lg text-[var(--text-secondary)] leading-relaxed max-w-lg">
+            GyanSetu replaces passive video lectures with real projects, line-by-line AI code review, and a portfolio employers actually trust.
+          </p>
+        </Reveal>
 
-        {/* Trust Stats */}
-        <div className="mt-20 flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-sm font-semibold text-[#6b7280] tracking-wide">
-          <span>2 Courses</span>
-          <span className="hidden sm:block text-white/20">|</span>
-          <span>24 Lectures</span>
-          <span className="hidden sm:block text-white/20">|</span>
-          <span>Built-in Code Editor</span>
-        </div>
-      </motion.div>
-    </section>
+        <Reveal delay={0.3}>
+          <div className="flex flex-col sm:flex-row items-center gap-4 mt-10 w-full sm:w-auto">
+            <MagneticButton className="w-full sm:w-auto">
+              <Link to="/register" className="block w-full sm:w-auto px-8 py-3.5 bg-[var(--text-primary)] hover:bg-[#00BFB3] text-[var(--bg-main)] hover:text-white rounded-lg font-bold text-sm transition-colors duration-300 text-center shadow-md focus:outline-none focus:ring-2 focus:ring-[#00BFB3] focus:ring-offset-2 focus:ring-offset-[var(--bg-main)]">
+                Start Learning
+              </Link>
+            </MagneticButton>
+            <a href="/#courses" className="w-full sm:w-auto px-8 py-3.5 border border-[var(--border-primary)] hover:border-[#00BFB3] bg-transparent hover:bg-[var(--bg-surface)] text-[var(--text-primary)] rounded-lg font-bold text-sm transition-all duration-300 text-center focus:outline-none focus:ring-2 focus:ring-[#00BFB3] focus:ring-offset-2 focus:ring-offset-[var(--bg-main)]">
+              Explore Courses
+            </a>
+          </div>
+        </Reveal>
+
+        <Reveal delay={0.4}>
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mt-8 text-xs text-[var(--text-muted)]">
+            <Link to="/about" className="font-semibold text-[var(--text-secondary)] hover:text-[#3B82F6] transition-colors">
+              Learn About GyanSetu &rarr;
+            </Link>
+          </div>
+        </Reveal>
+      </div>
+    </motion.section>
   );
 }

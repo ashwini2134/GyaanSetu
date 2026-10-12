@@ -160,7 +160,11 @@ async function loadLectures(courseSlug: string): Promise<Lecture[]> {
     try {
       const url = BASE.replace(/\/$/, "") + `/data/${courseSlug}/lecture_${lm.number}/notes.md`;
       const res = await fetch(url);
-      if (res.ok) content = await res.text();
+      // A missing file can still come back 200 (SPA fallback serving
+      // index.html) — only trust it if it's actually not HTML.
+      if (res.ok && !(res.headers.get('content-type') ?? '').includes('text/html')) {
+        content = await res.text();
+      }
     } catch { /* no notes */ }
     lectures.push({ number: lm.number, title: lm.title, content });
   }
@@ -243,7 +247,7 @@ export const api = {
     
     // Get problem details to extract course and lecture
     const problemDetail = _problemDetailCache.get(Number(problemId));
-    const courseSlug = problemDetail?.course_slug ?? 'python';
+    const courseSlug = problemDetail?.course_slug ?? 'python20';
     
     // Extract lecture number from problem (stored in common_mistakes or derived from slug)
     // For now, use a simple heuristic: problems are numbered sequentially

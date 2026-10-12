@@ -16,12 +16,32 @@ const projectCompleteSchema = z.object({
   courseSlug: z.string(),
   lectureId: z.string(),
   projectId: z.string(),
+  githubUrl: z.string().optional(),
+});
+
+router.get("/templates/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
+  try {
+    const { id } = req.params;
+    const template = await prisma.projectTemplate.findUnique({
+      where: { id: id as string },
+    });
+    
+    if (!template) {
+      res.status(404).json({ error: "Project template not found" });
+      return;
+    }
+    
+    res.json(template);
+  } catch (error) {
+    console.error("Error fetching project template:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 router.post("/complete", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
     const userId = req.user!.id;
-    const { courseSlug, lectureId, projectId } = projectCompleteSchema.parse(req.body);
+    const { courseSlug, lectureId, projectId, githubUrl } = projectCompleteSchema.parse(req.body);
 
     const capstoneLectureId = String(COURSE_LECTURE_COUNTS[courseSlug] - 1);
     if (lectureId === capstoneLectureId) {
@@ -80,14 +100,16 @@ router.post("/complete", requireAuth, async (req: AuthenticatedRequest, res, nex
       },
       update: {
         status: "COMPLETED",
-        completedAt: new Date()
+        completedAt: new Date(),
+        ...(githubUrl ? { githubUrl } : {})
       },
       create: {
         userId,
         projectId,
         code: "",
         status: "COMPLETED",
-        completedAt: new Date()
+        completedAt: new Date(),
+        ...(githubUrl ? { githubUrl } : {})
       }
     });
 
@@ -95,10 +117,11 @@ router.post("/complete", requireAuth, async (req: AuthenticatedRequest, res, nex
 
     await sendNotification(
       userId,
-      "project_review",
-      "Project Completed!",
+      "milestone_submitted",
+      "Milestone Submitted",
       `You completed the project "${projectId}" in ${courseSlug}.`,
-      `/course/${courseSlug}`
+      `/course/${courseSlug}`,
+      "medium"
     );
 
     res.json(progress);
@@ -226,10 +249,11 @@ router.post("/admin/approve/:projectId", requireAuth, requireRole("admin"), asyn
 
     await sendNotification(
       userId,
-      "project_approved",
-      "Project Approved!",
-      `Your project "${projectId}" has been approved${notes ? ` — ${notes}` : ""}. Great work!`,
-      "/projects"
+      "milestone_approved",
+      "Milestone Approved",
+      `Your project "${projectId}" has been approved${notes ? ` — ${notes}` : ""}.`,
+      "/projects",
+      "high"
     );
 
     // Resolve review queue item
@@ -264,7 +288,8 @@ router.post("/admin/reject/:projectId", requireAuth, requireRole("admin"), async
       "project_rejected",
       "Project Needs Revision",
       `Your project "${projectId}" needs changes${notes ? ` — ${notes}` : ""}. Please review and resubmit.`,
-      "/projects"
+      "/projects",
+      "high"
     );
 
     // Reject review queue item
@@ -416,10 +441,11 @@ router.patch("/:projectId/complete", requireAuth, async (req: AuthenticatedReque
 
     await sendNotification(
       userId,
-      "project_review",
-      "Project Submitted for Review!",
+      "milestone_submitted",
+      "Milestone Submitted",
       `Your project "${projectId}" has been submitted and is pending admin review.`,
-      "/projects"
+      "/projects",
+      "medium"
     );
 
     // Insert into review queue

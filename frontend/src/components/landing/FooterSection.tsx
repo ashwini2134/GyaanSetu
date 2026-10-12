@@ -1,55 +1,65 @@
 import { Link } from "react-router-dom";
+import { Mail, MessageSquare } from "lucide-react";
 
 export default function FooterSection() {
   return (
-    <footer className="bg-[#05050a] border-t border-white/5 pt-16 pb-8 px-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16 text-sm">
+    <footer className="bg-[var(--bg-surface)] border-t border-[var(--border-primary)] pt-16 pb-8">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-16">
           
-          {/* Left: Logo + Tagline */}
-          <div className="flex flex-col items-start gap-4">
-            <div className="flex items-center gap-2">
-              <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="Fraylon Academy" className="h-6 w-auto object-contain opacity-80" />
-              <span className="font-bold text-white tracking-wide">Fraylon Academy</span>
+          {/* Logo & Tagline */}
+          <div className="md:col-span-1">
+            <div className="flex items-center gap-2 mb-4">
+              <img src="/logo.svg" alt="GyanSetu" className="w-8 h-8 object-contain" />
+              <span className="font-bold text-[var(--text-primary)] text-lg tracking-wide">GyanSetu</span>
             </div>
-            <p className="text-[#6b7280] leading-relaxed">
-              Structured learning for real outcomes.
+            <p className="text-[var(--text-muted)] text-xs leading-relaxed">
+              Bridge Your Learning. Build Your Future.
             </p>
           </div>
 
-          {/* Center: Courses */}
-          <div className="flex flex-col gap-4">
-            <h4 className="text-white font-bold tracking-widest uppercase">Courses</h4>
-            <div className="flex flex-col gap-3 text-[#6b7280]">
-              <span className="cursor-default hover:text-white transition-colors">Python Programming</span>
-              <span className="cursor-default hover:text-white transition-colors">Artificial Intelligence</span>
-            </div>
+          {/* Quick Links */}
+          <div>
+            <h4 className="text-[var(--text-primary)] font-bold text-sm mb-4">Platform</h4>
+            <ul className="space-y-3 text-sm text-[var(--text-secondary)]">
+              <li><Link to="/" className="hover:text-[var(--accent-indigo)] transition-colors">Home</Link></li>
+              <li><Link to="/register" className="hover:text-[var(--accent-indigo)] transition-colors">Courses</Link></li>
+              <li><Link to="/" className="hover:text-[var(--accent-indigo)] transition-colors">Dashboard</Link></li>
+              <li><Link to="/about" className="hover:text-[var(--accent-indigo)] transition-colors">About Us</Link></li>
+            </ul>
           </div>
 
-          {/* Right: Platform */}
-          <div className="flex flex-col gap-4">
-            <h4 className="text-white font-bold tracking-widest uppercase">Platform</h4>
-            <div className="flex flex-col gap-3 text-[#6b7280]">
-              <Link to="/dashboard" className="hover:text-white transition-colors">Dashboard</Link>
-              <Link to="/login" className="hover:text-white transition-colors">Sign In</Link>
-              <Link to="/register" className="hover:text-white transition-colors">Get Started</Link>
-            </div>
+          {/* Courses */}
+          <div>
+            <h4 className="text-[var(--text-primary)] font-bold text-sm mb-4">Curriculum</h4>
+            <ul className="space-y-3 text-sm text-[var(--text-secondary)]">
+              <li><Link to="/register" className="hover:text-[var(--accent-indigo)] transition-colors">Python</Link></li>
+              <li><Link to="/register" className="hover:text-[var(--accent-indigo)] transition-colors">Artificial Intelligence</Link></li>
+              <li><Link to="/register" className="hover:text-[var(--accent-indigo)] transition-colors">Data Structures (Coming Soon)</Link></li>
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h4 className="text-[var(--text-primary)] font-bold text-sm mb-4">Legal</h4>
+            <ul className="space-y-3 text-sm text-[var(--text-secondary)]">
+              <li><Link to="/privacy" className="hover:text-[var(--accent-indigo)] transition-colors">Privacy Policy</Link></li>
+              <li><Link to="/terms" className="hover:text-[var(--accent-indigo)] transition-colors">Terms of Service</Link></li>
+              <li><Link to="/cookies" className="hover:text-[var(--accent-indigo)] transition-colors">Cookie Policy</Link></li>
+            </ul>
           </div>
 
         </div>
-        
-        {/* Bottom Row */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-t border-white/5 pt-8 text-sm text-[#6b7280]">
-          <div>
-            © {new Date().getFullYear()} Fraylon Academy. All rights reserved.
-          </div>
-          <div className="flex items-center gap-6 font-medium">
-            <a href="#" className="hover:text-white transition-colors">
-              GitHub
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
-              LinkedIn
-            </a>
+
+        {/* Bottom Bar */}
+        <div className="pt-8 border-t border-[var(--border-primary)] flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-[var(--text-muted)] text-xs">
+            © 2026 GyanSetu. All Rights Reserved.
+          </p>
+          <div className="flex items-center gap-4">
+            <a href="#" className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"><MessageSquare className="w-4 h-4" /></a>
+            <a href="#" className="opacity-70 hover:opacity-100 transition-opacity"><img src="/logo.svg" alt="GyanSetu" className="w-4 h-4 object-contain" /></a>
+            <a href="#" className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"><Mail className="w-4 h-4" /></a>
           </div>
         </div>
       </div>

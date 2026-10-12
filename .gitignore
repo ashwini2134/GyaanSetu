@@ -53,3 +53,36 @@ CLAUDE.md
 LMS/
 
 /generated/prisma
+
+# Local database backups
+backups/
+*.sql
+*.dump
+*.backup
+
+# Uploaded/generated user files
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Local temporary files
+frontend/tmp_*
+frontend/spotlight_final.tmp.mjs
+
+# All environment configuration files
+.env*
+!.env.example
+backend/.env*
+frontend/.env*
+
+# Database backups and exports
+backups/
+*.sql
+*.dump
+*.backup
+
+# Uploaded certificates and user files
+backend/uploads/
+
+# Temporary build/debug files
+frontend/tmp_*
+frontend/spotlight_final.tmp.mjs

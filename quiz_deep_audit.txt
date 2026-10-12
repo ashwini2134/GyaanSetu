@@ -1,0 +1,180 @@
+L1 Q1: What does AI stand for?
+Options: Advanced Internet | Automated Input | Analog Interface | Artificial Intelligence
+Answer: Artificial Intelligence
+
+L1 Q2: Which is the broadest term?
+Options: Machine Learning | None of the above | Deep Learning | AI
+Answer: AI
+
+L1 Q3: What type of AI do we have today?
+Options: General AI | Narrow AI | Human AI | Super AI
+Answer: Narrow AI
+
+L1 Q4: Which AI technology uses brain-like networks?
+Options: Deep Learning | Artificial Intelligence | Machine Learning | Programming
+Answer: Deep Learning
+
+L1 Q5: Which of the following is NOT an AI application?
+Options: A voice assistant like Alexa | Netflix movie recommendations | A spam filter in email | A calculator performing basic arithmetic
+Answer: A calculator performing basic arithmetic
+
+L2 Q1: What does BFS stand for?
+Options: Bidirectional Search | Bottom-First Search | Breadth-First Search | Best-First Search
+Answer: Breadth-First Search
+
+L2 Q2: Which search explores the deepest path first?
+Options: Greedy Search | Depth-First Search | A* Search | Breadth-First Search
+Answer: Depth-First Search
+
+L2 Q3: Which search guarantees finding the shortest path?
+Options: DFS | A* | BFS | Greedy Best-First
+Answer: BFS
+
+L2 Q4: What does A* search use that Greedy Best-First does not?
+Options: Only estimated cost to goal | Only actual cost from start | Both cost so far AND estimated cost to goal | Random exploration
+Answer: Both cost so far AND estimated cost to goal
+
+L2 Q5: In a search problem, the destination is called?
+Options: Initial state | Goal state | Path cost | Action
+Answer: Goal state
+
+L3 Q1: What is propositional logic?
+Options: Statements that are numbers | Statements that are True or False | Statements about probability | Statements about search
+Answer: Statements that are True or False
+
+L3 Q2: AND returns True when?
+Options: Neither side is True | One side is True | Both sides are True | Always
+Answer: Both sides are True
+
+L3 Q3: NOT True equals?
+Options: Maybe | True | False | Zero
+Answer: False
+
+L3 Q4: What is a Knowledge Base?
+Options: A collection of facts and rules | A neural network | A list of search results | A database of images
+Answer: A collection of facts and rules
+
+L3 Q5: Inference means?
+Options: Training on data | Predicting a number | Deriving new facts from existing facts | Searching for a path
+Answer: Deriving new facts from existing facts
+
+L4 Q1: Probability of 0 means?
+Options: Impossible | Likely | Unknown | Certain
+Answer: Impossible
+
+L4 Q2: Probability of 1 means?
+Options: Unknown | Certain | 50/50 | Impossible
+Answer: Certain
+
+L4 Q3: P(A|B) means?
+Options: A minus B | A plus B | Probability of A given B | A divided by B
+Answer: Probability of A given B
+
+L4 Q4: Bayes Theorem helps with?
+Options: Finding shortest path | Training neural networks | Updating belief with new evidence | Sorting data
+Answer: Updating belief with new evidence
+
+L4 Q5: A spam filter uses which concept?
+Options: Optimization | Search | Logic | Probability
+Answer: Probability
+
+L5 Q1: Optimization means?
+Options: Finding a random solution | Finding the first solution | Finding the best solution | Finding any solution
+Answer: Finding the best solution
+
+L5 Q2: Hill Climbing always moves?
+Options: Randomly | To the start | Toward a better neighbor | Downward
+Answer: Toward a better neighbor
+
+L5 Q3: Hill Climbing's main problem?
+Options: Gets stuck at local best | Uses too much memory | Too slow | Cannot start
+Answer: Gets stuck at local best
+
+L5 Q4: Simulated Annealing fixes this by?
+Options: Always accepting worse | Never accepting worse | Restarting | Sometimes accepting a worse option
+Answer: Sometimes accepting a worse option
+
+L5 Q5: Sudoku is an example of?
+Options: Neural Network | Search | Probability | CSP
+Answer: CSP
+
+L6 Q1: ML learns rules from?
+Options: Examples and data | Random guessing | A programmer writing rules | Search algorithms
+Answer: Examples and data
+
+L6 Q2: Supervised learning requires?
+Options: Unlabeled data | No data | Labeled data | Rewards
+Answer: Labeled data
+
+L6 Q3: Unsupervised learning finds?
+Options: Shortest paths | Labeled patterns | Rewards | Patterns without labels
+Answer: Patterns without labels
+
+L6 Q4: Reinforcement learning uses?
+Options: Rules | Probability only | Labels | Rewards and penalties
+Answer: Rewards and penalties
+
+L6 Q5: Overfitting means?
+Options: Model learns too slowly | Model has too little data | Model is too simple | Model memorizes training data and fails on new data
+Answer: Model memorizes training data and fails on new data
+
+L7 Q1: Neural networks are inspired by?
+Options: Logic rules | Probability | Search algorithms | The human brain
+Answer: The human brain
+
+L7 Q2: What does the input layer do?
+Options: Adjusts weights | Produces the answer | Receives the data | Stores rules
+Answer: Receives the data
+
+L7 Q3: Weights control?
+Options: How much each input matters | The training speed | The number of layers | The data size
+Answer: How much each input matters
+
+L7 Q4: Deep Learning uses?
+Options: Search trees | Many hidden layers | One layer only | No layers
+Answer: Many hidden layers
+
+L7 Q5: CNNs are best for?
+Options: Text generation | Image recognition | Route planning | Logic problems
+Answer: Image recognition
+
+L8 Q1: NLP stands for?
+Options: Network Language Program | Neural Layer Processing | None | Natural Language Processing
+Answer: Natural Language Processing
+
+L8 Q2: Tokenization means?
+Options: Encrypting text | Summarizing text | Splitting text into smaller units | Translating text
+Answer: Splitting text into smaller units
+
+L8 Q3: Word embeddings represent words as?
+Options: Images | Rules | Probabilities only | Numbers/Vectors
+Answer: Numbers/Vectors
+
+L8 Q4: LLM stands for?
+Options: Linear Layer Model | Logical Learning Machine | Large Language Model | None
+Answer: Large Language Model
+
+L8 Q5: Transformers process words?
+Options: Backwards only | One at a time | Randomly | All at once in parallel
+Answer: All at once in parallel
+
+L9 Q1: AI bias comes from?
+Options: Fast computers | Unfair or unrepresentative training data | Too much data | Large models
+Answer: Unfair or unrepresentative training data
+
+L9 Q2: AI hallucination means?
+Options: AI states wrong facts confidently | AI slows down | AI forgets data | AI crashes
+Answer: AI states wrong facts confidently
+
+L9 Q3: Deepfakes use AI to?
+Options: Store videos | Speed up videos | Generate fake videos and audio | Translate videos
+Answer: Generate fake videos and audio
+
+L9 Q4: Transparency in AI means?
+Options: AI should be invisible | AI should be fast | AI should be free | People should know when interacting with AI
+Answer: People should know when interacting with AI
+
+L9 Q5: Who is responsible when AI causes harm?
+Options: No one | Developers, companies, and users share responsibility | Only the company | Only the user
+Answer: Developers, companies, and users share responsibility
+

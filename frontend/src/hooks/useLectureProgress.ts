@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { authFetch, getToken } from '../authClient';
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3001';
+import { authFetch } from '../authClient';
+import { updateOverallProgress } from '../progress';
 
 export interface SectionProgress {
   sectionIndex: number;
@@ -13,17 +12,6 @@ interface LectureData {
   lectureCompleted: boolean;
   projectCompleted: boolean;
   quizAttempt: { score: number; total: number; passed: boolean } | null;
-}
-
-async function apiCall<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const token = getToken();
-  const headers = new Headers(init.headers ?? {});
-  if (token) headers.set('Authorization', `Bearer ${token}`);
-  if (init.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
-  const res = await fetch(`${BACKEND_URL}/api${path}`, { ...init, headers });
-  const data = await res.json().catch(() => ({})) as T;
-  if (!res.ok) throw new Error("API Call Failed");
-  return data as T;
 }
 
 export function useLectureProgress(courseSlug: string | undefined, lectureId: string | undefined) {
@@ -43,7 +31,7 @@ export function useLectureProgress(courseSlug: string | undefined, lectureId: st
     setQuizScore(null);
     setQuizTotal(null);
     try {
-      const data = await apiCall<LectureData>(`/progress/lecture/${courseSlug}/${lectureId}`);
+      const data = await authFetch<LectureData>(`/progress/lecture/${courseSlug}/${lectureId}`);
       const map: Record<number, boolean> = {};
       data.sections.forEach(p => {
         map[p.sectionIndex] = p.isCompleted;
@@ -72,7 +60,7 @@ export function useLectureProgress(courseSlug: string | undefined, lectureId: st
     setSections(prev => ({ ...prev, [index]: true }));
     try {
       console.log(`Sending PATCH request to /api/progress/lecture/${courseSlug}/${lectureId} for sectionIndex ${index}`);
-      await apiCall(`/progress/lecture/${courseSlug}/${lectureId}`, {
+      await authFetch(`/progress/lecture/${courseSlug}/${lectureId}`, {
         method: 'PATCH',
         body: JSON.stringify({ sectionIndex: index, isCompleted: true })
       });
@@ -83,12 +71,15 @@ export function useLectureProgress(courseSlug: string | undefined, lectureId: st
     }
   }, [courseSlug, lectureId]);
 
-  const completeAction = useCallback(async (actionType: string, actionId: string) => {
+  const completeAction = useCallback(async (actionType: string, actionId: string, difficulty?: string) => {
     try {
-      await authFetch('/progress/action', {
+      const res = await authFetch<{ ok: boolean; unlockedAchievements?: unknown[] }>('/progress/action', {
         method: 'POST',
-        body: JSON.stringify({ actionType, actionId }),
+        body: JSON.stringify({ actionType, actionId, ...(difficulty && { difficulty }) }),
       });
+      if (res.unlockedAchievements && res.unlockedAchievements.length > 0) {
+        window.dispatchEvent(new CustomEvent('fraylon:achievement:unlocked', { detail: res.unlockedAchievements }));
+      }
     } catch (e) {
       console.error(`[progress] action ${actionType} failed`, e);
     }
@@ -117,9 +108,9 @@ export function useLectureProgress(courseSlug: string | undefined, lectureId: st
     }
   }, [courseSlug, lectureId, completeAction]);
 
-  const markProblemCompleted = useCallback(async (problemId: string) => {
+  const markProblemCompleted = useCallback(async (problemId: string, difficulty?: string) => {
     if (!courseSlug || !lectureId) return;
-    await completeAction('problem', problemId);
+    await completeAction('problem', problemId, difficulty);
   }, [courseSlug, lectureId, completeAction]);
 
   const markLectureCompleted = useCallback(async (sectionCount: number) => {
@@ -133,11 +124,12 @@ export function useLectureProgress(courseSlug: string | undefined, lectureId: st
     if (!allDone) return;
     setLectureCompleted(true);
     try {
-      await apiCall('/progress/lecture', {
+      await authFetch('/progress/lecture', {
         method: 'POST',
         body: JSON.stringify({ courseSlug, lectureId, hasProject: false })
       });
       await completeAction('lecture', `${courseSlug}:${lectureId}`);
+      await updateOverallProgress();
     } catch (e) {
       console.error('[progress] save lecture completion failed', e);
     }
@@ -167,12 +159,19 @@ export function useLectureProgress(courseSlug: string | undefined, lectureId: st
 
 export function useCourseProgress(courseSlug: string | undefined) {
   const [lectureCompletions, setLectureCompletions] = useState<Record<string, { lectureCompleted: boolean; completedSections: number }>>({});
+  const [fullyCompletedLectures, setFullyCompletedLectures] = useState<Set<number>>(new Set());
+  // Lets callers (e.g. LecturePage's lock-enforcement redirect) wait for
+  // real data before deciding a lecture is locked — otherwise the first
+  // render (before this fetch resolves) would see an empty completed-set
+  // and wrongly redirect away from a lecture the student already unlocked.
+  const [loaded, setLoaded] = useState(false);
 
   const fetchCourseProgress = useCallback(async () => {
     if (!courseSlug) return;
     try {
-      const data = await apiCall<{ sections: any[]; lectureCompletions: { lectureId: string }[] }>(`/progress/course/${courseSlug}`);
+      const data = await authFetch<{ sections: any[]; lectureCompletions: { lectureId: string }[]; fullyCompletedLectures?: number[] }>(`/progress/course/${courseSlug}`);
       const completedLectureIds = new Set(data.lectureCompletions.map((l: any) => l.lectureId));
+      setFullyCompletedLectures(new Set(data.fullyCompletedLectures ?? []));
 
       const sectionMap: Record<string, number> = {};
       data.sections.forEach((p: any) => {
@@ -198,6 +197,8 @@ export function useCourseProgress(courseSlug: string | undefined) {
       setLectureCompletions(result);
     } catch (e) {
       console.error("Failed to fetch course progress", e);
+    } finally {
+      setLoaded(true);
     }
   }, [courseSlug]);
 
@@ -205,9 +206,22 @@ export function useCourseProgress(courseSlug: string | undefined) {
     fetchCourseProgress();
   }, [fetchCourseProgress]);
 
+  // A lecture is unlocked once the one before it is FULLY complete —
+  // sections watched, practice done, quiz passed, and every real problem
+  // solved (not just "watched the sections"). The caller is responsible
+  // for treating the course's actual first lecture as always unlocked,
+  // since this hook doesn't know the course's lecture list. Memoized so
+  // callers can safely put it in a useEffect dependency array without
+  // that effect re-firing on every render.
+  const isLectureUnlocked = useCallback(
+    (lectureNumber: number) => fullyCompletedLectures.has(lectureNumber - 1),
+    [fullyCompletedLectures]
+  );
+
   return {
     lectureCompletions,
     refreshCourseProgress: fetchCourseProgress,
-    isLectureUnlocked: (_lectureNumber: number) => true,
+    isLectureUnlocked,
+    loaded,
   };
 }

@@ -1,16 +1,17 @@
 [
   {
-    "slug": "python",
-    "title": "Python Programming",
-    "description": "Learn the fundamentals of Python — variables, conditionals, loops, functions, data structures, file handling, and a mini project.",
+    "slug": "python20",
+    "title": "Python Beginner Course",
+    "description": "An interactive, story-driven journey through every core concept — variables, loops, functions, data structures, and beyond. Built for the modern learner.",
     "level": "Beginner",
     "category": "Programming",
-    "language": "Python"
+    "language": "Python",
+    "badge": "Premium"
   },
   {
-    "slug": "cs50ai",
+    "slug": "fundamentals-of-ai",
     "title": "AI",
-    "description": "Harvard's introduction to artificial intelligence covering search algorithms, knowledge representation, optimization, machine learning, and natural language processing.",
+    "description": "A rigorous introduction to artificial intelligence covering search algorithms, knowledge representation, optimization, machine learning, and natural language processing.",
     "level": "Advanced",
     "category": "Artificial Intelligence",
     "language": "Python"

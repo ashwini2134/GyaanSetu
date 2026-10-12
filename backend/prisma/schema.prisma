@@ -31,6 +31,7 @@ model User {
   status              String                @default("active")
   profileVisibility   String                @default("public")
   profileTheme        String                @default("default")
+  portfolioTemplate   String                @default("bento")
   streakFreezeCount   Int                   @default(0)
   streakFreezeUsedAt  DateTime?
   achievements        Achievement[]
@@ -44,6 +45,7 @@ model User {
   passwordResetTokens PasswordResetToken[]
   practiceSubmissions PracticeSubmission[]
   progress            Progress[]
+  tryItEngagements    TryItEngagement[]
   projects            Project[]
   projectFiles        ProjectFile[]
   taskProgress        ProjectTaskProgress[]
@@ -51,10 +53,16 @@ model User {
   refreshTokens       RefreshToken[]
   submissions         Submission[]
   xpHistory           XpTransaction[]
+  weeklyXp            WeeklyXp[]
   assessmentProgress  AssessmentProgress[]
+  certificates        Certificate[]
   notifications       InAppNotification[]
   practiceAttempts    PracticeAttempt[]
+  projectSubmissions  ProjectSubmission[]
   reviewQueue         ReviewQueue[]
+  createdCodes        InviteCode[]          @relation("CreatedCodes")
+  redeemedCodes       RedeemedCode[]
+  omiMappings         OmiUserMapping[]
 }
 
 model InAppNotification {
@@ -68,6 +76,7 @@ model InAppNotification {
   createdAt DateTime  @default(now())
   category  String    @default("general")
   priority  String    @default("normal")
+  dedupeKey String?   @unique
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, readAt])
@@ -104,26 +113,48 @@ model LectureProgress {
   @@unique([userId, courseSlug, lectureId, sectionIndex])
 }
 
+// Cumulative time spent with a "Try It Yourself" code block expanded —
+// feeds the certification-grading engagement check (a block counts as
+// "done" once secondsSpent crosses a threshold, see certificationService.ts).
+model TryItEngagement {
+  id           String   @id @default(cuid())
+  userId       String
+  courseSlug   String
+  lectureId    String
+  blockId      String
+  secondsSpent Int      @default(0)
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseSlug, lectureId, blockId])
+}
+
 model QuizAttempt {
-  id        String   @id @default(cuid())
-  userId    String
-  quizId    String
-  score     Int
-  total     Int
-  passed    Boolean
-  answers   Json
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            String   @id @default(cuid())
+  userId        String
+  score         Float
+  passed        Boolean
+  answers       Json
+  createdAt     DateTime @default(now())
+  courseId      String?
+  lectureId     String?
+  feedback      Json?
+  timeTaken     Int?
+  attemptNumber Int?     @default(1)
+  quizId        String?
+  total         Int?
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Submission {
-  id        String   @id @default(uuid())
-  userId    String
-  problemId String
-  code      String
-  status    String
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id         String   @id @default(uuid())
+  userId     String
+  problemId  String
+  code       String
+  status     String
+  difficulty String?
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, problemId])
 }
@@ -139,19 +170,20 @@ model ChatMessage {
 }
 
 model Project {
-  id           String                @id @default(uuid())
-  userId       String
-  projectId    String
-  code         String
-  status       String
-  completedAt  DateTime?
-  updatedAt    DateTime              @updatedAt
-  description  String?
-  githubUrl    String?
-  liveDemoUrl  String?
-  startedAt    DateTime?
-  user         User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  taskProgress ProjectTaskProgress[]
+  id                 String                @id @default(uuid())
+  userId             String
+  projectId          String
+  code               String
+  status             String
+  completedAt        DateTime?
+  updatedAt          DateTime              @updatedAt
+  description        String?
+  githubUrl          String?
+  liveDemoUrl        String?
+  startedAt          DateTime?
+  user               User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  taskProgress       ProjectTaskProgress[]
+  projectSubmissions ProjectSubmission[]
 
   @@unique([userId, projectId])
 }
@@ -201,6 +233,9 @@ model ProjectTemplate {
   image             String?
   githubLink        String?
   demoLink          String?
+  downloadUrl       String?
+  guidelines        Json?
+  evaluationChecklist Json?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }
@@ -228,6 +263,24 @@ model XpTransaction {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, actionId])
+}
+
+model WeeklyXp {
+  id          String   @id @default(uuid())
+  userId      String
+  weekStart   DateTime
+  weekEnd     DateTime
+  weekNumber  Int
+  totalXp     Int      @default(0)
+  rank        Int?
+  activities  Int      @default(0)
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, weekStart])
+  @@index([userId])
+  @@index([weekStart])
+  @@map("weekly_xp")
 }
 
 model OAuthAccount {
@@ -310,7 +363,8 @@ model PracticeSubmission {
 }
 
 model AssessmentQuestion {
-  id            String   @id @default(cuid())
+  id            String      @id @default(cuid())
+  assessmentId  String?
   category      String
   subsection    String
   type          String
@@ -319,10 +373,25 @@ model AssessmentQuestion {
   correctAnswer String
   starterCode   String?
   language      String?
-  difficulty    String   @default("medium")
-  createdAt     DateTime @default(now())
+  difficulty    String      @default("medium")
+  createdAt     DateTime    @default(now())
+  assessment    Assessment? @relation(fields: [assessmentId], references: [id])
 
   @@map("assessment_questions")
+}
+
+model Assessment {
+  id          String               @id @default(cuid())
+  title       String
+  category    String
+  subsection  String
+  description String?
+  isPublished Boolean              @default(false)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  questions   AssessmentQuestion[]
+
+  @@map("assessments")
 }
 
 model AssessmentProgress {
@@ -440,18 +509,32 @@ model PracticeAttempt {
 }
 
 model ProjectSubmission {
-  id          String    @id @default(cuid())
-  studentId   String
-  projectId   String
-  content     String?
-  fileUrl     String?
-  githubUrl   String?
-  status      String    @default("PENDING")
-  score       Float?
-  feedback    String?
-  aiReview    Json?
-  submittedAt DateTime  @default(now())
-  reviewedAt  DateTime?
+  id              String        @id @default(cuid())
+  projectId       String
+  content         String?
+  githubUrl       String
+  score           Int?
+  feedback        String?
+  createdAt       DateTime      @default(now())
+  reviewSteps     Json?
+  updatedAt       DateTime      @updatedAt
+  userId          String
+  status          ProjectStatus @default(PENDING)
+  aiReview        Json?
+  attemptNumber   Int           @default(1)
+  courseId        String?
+  maxScore        Int?
+  securityCheck   Json?
+  studentId       String?
+  submissionType  String        @default("text")
+  validationCheck Json?
+  isFlagged       Boolean       @default(false)
+  isOverridden    Boolean       @default(false)
+  overriddenAt    DateTime?
+  overriddenBy    String?
+  overrideReason  String?
+  project         Project       @relation(fields: [projectId], references: [id])
+  user            User          @relation(fields: [userId], references: [id])
 
   @@map("project_submissions")
 }
@@ -463,6 +546,9 @@ model Certificate {
   verificationId String   @unique @default(cuid())
   pdfUrl         String
   issuedAt       DateTime @default(now())
+  enrolledAt     DateTime @default(now())
+  course         Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@map("certificates")
 }
@@ -475,6 +561,10 @@ model StudentPortfolio {
   projects     Json     @default("[]")
   skills       Json     @default("[]")
   screenshots  Json     @default("[]")
+  experience   Json     @default("[]")
+  education    Json     @default("[]")
+  services     Json     @default("[]")
+  testimonials Json     @default("[]")
   updatedAt    DateTime @updatedAt
 
   @@map("student_portfolios")
@@ -497,6 +587,7 @@ model Course {
   versions          CourseVersion[]
   lessons           Lesson[]
   quiz              Quiz?
+  certificates      Certificate[]
   Course_A          Course[]        @relation("CoursePrerequisites")
   Course_B          Course[]        @relation("CoursePrerequisites")
 }
@@ -603,4 +694,125 @@ model StudentProgress {
   completedAt DateTime?
 
   @@unique([studentId, lessonId])
+}
+
+model BrandingSettings {
+  id             String   @id @default(cuid())
+  platformName   String   @default("Fraylon Academy")
+  tagline        String   @default("Learn. Build. Grow.")
+  primaryColor   String   @default("#4F46E5")
+  secondaryColor String   @default("#0F1117")
+  logoUrl        String?
+  faviconUrl     String?
+  updatedAt      DateTime @updatedAt
+}
+
+model AIConfiguration {
+  id                   String   @id @default(cuid())
+  provider             String   @default("google")
+  apiKey               String?
+  model                String   @default("gemini-2.0-flash")
+  strictnessLevel      String   @default("balanced")
+  passScoreRegular     Int      @default(70)
+  passScoreCapstone    Int      @default(80)
+  maxAttemptsRegular   Int      @default(3)
+  maxAttemptsCapstone  Int      @default(2)
+  securityCheckEnabled Boolean  @default(true)
+  validationEnabled    Boolean  @default(true)
+  aiReviewEnabled      Boolean  @default(true)
+  updatedAt            DateTime @updatedAt
+}
+
+model EmailTemplate {
+  id           String   @id @default(cuid())
+  templateKey  String   @unique
+  name         String
+  trigger      String
+  subject      String
+  body         String
+  variables    Json
+  isCustomized Boolean  @default(false)
+  updatedAt    DateTime @updatedAt
+}
+
+model RoleChangeHistory {
+  id          String   @id @default(cuid())
+  userId      String
+  changedById String
+  fromRole    String
+  toRole      String
+  createdAt   DateTime @default(now())
+}
+
+model WebhookEndpoint {
+  id         String            @id @default(cuid())
+  url        String
+  events     Json
+  secretKey  String?
+  isActive   Boolean           @default(true)
+  createdAt  DateTime          @default(now())
+  deliveries WebhookDelivery[]
+}
+
+model WebhookDelivery {
+  id           String          @id @default(cuid())
+  webhookId    String
+  event        String
+  payload      Json
+  status       String
+  responseCode Int?
+  createdAt    DateTime        @default(now())
+  webhook      WebhookEndpoint @relation(fields: [webhookId], references: [id])
+}
+
+enum ProjectStatus {
+  PENDING
+  REVIEWING
+  APPROVED
+  REJECTED
+  ERROR
+  CANCELLED
+  NEEDS_REVIEW
+}
+
+model InviteCode {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  createdBy   String
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime?
+  maxUses     Int?
+  
+  creator     User     @relation("CreatedCodes", fields: [createdBy], references: [id], onDelete: Cascade)
+  redemptions RedeemedCode[]
+  
+  @@map("invite_codes")
+}
+
+model RedeemedCode {
+  id           String     @id @default(cuid())
+  userId       String
+  inviteCodeId String
+  redeemedAt   DateTime   @default(now())
+  
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  inviteCode   InviteCode @relation(fields: [inviteCodeId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, inviteCodeId])
+  @@map("redeemed_codes")
+}
+
+model OmiUserMapping {
+  id        String   @id @default(uuid())
+  userId    String
+  omiUid    String   @unique
+  linkedAt  DateTime @default(now())
+  isActive  Boolean  @default(true)
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, omiUid])
+  @@index([omiUid])
+  @@index([userId])
+  @@map("omi_user_mappings")
 }

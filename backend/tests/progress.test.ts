@@ -27,7 +27,7 @@ describe("Progress API", () => {
     const section = await request(app)
       .post("/api/progress/section")
       .set("Authorization", `Bearer ${token}`)
-      .send({ courseSlug: "cs50ai", lectureId: "lecture_0", practiceAttempted: true });
+      .send({ courseSlug: "fundamentals-of-ai", lectureId: "lecture_1", practiceAttempted: true });
 
     expect(section.status).toBe(200);
     expect(section.body.practiceAttempted).toBe(true);
@@ -35,7 +35,7 @@ describe("Progress API", () => {
     const quiz = await request(app)
       .post("/api/progress/quiz")
       .set("Authorization", `Bearer ${token}`)
-      .send({ courseSlug: "cs50ai", lectureId: "lecture_0", quizId: "quiz_0", score: 4, total: 5, answers: {} });
+      .send({ courseSlug: "fundamentals-of-ai", lectureId: "lecture_1", score: 80, answers: {} });
 
     expect(quiz.status).toBe(200);
     expect(quiz.body.passed).toBe(true);
@@ -51,13 +51,13 @@ describe("Progress API", () => {
     const complete = await request(app)
       .post("/api/progress/lecture")
       .set("Authorization", `Bearer ${token}`)
-      .send({ courseSlug: "cs50ai", lectureId: "lecture_0", hasProject: false });
+      .send({ courseSlug: "fundamentals-of-ai", lectureId: "lecture_1", hasProject: false });
 
     expect(complete.status).toBe(200);
     expect(complete.body.status).toBe("COMPLETED");
 
     const me = await request(app)
-      .get("/api/progress/me?courseSlug=cs50ai")
+      .get("/api/progress/me?courseSlug=fundamentals-of-ai")
       .set("Authorization", `Bearer ${token}`);
 
     expect(me.status).toBe(200);

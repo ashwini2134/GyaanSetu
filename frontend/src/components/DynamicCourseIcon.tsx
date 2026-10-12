@@ -8,8 +8,8 @@ export function getCourseIconDetails(courseName: string, category: string) {
   if (nameLow.includes('python')) {
     return {
       type: 'py-image',
-      bgClass: 'bg-[#1a1a2e]',
-      borderClass: 'border-[#2D3748]',
+      bgClass: 'bg-[var(--bg-editor)]',
+      borderClass: 'border-[var(--border-primary)]',
       subtitle: ''
     };
   }
@@ -18,8 +18,8 @@ export function getCourseIconDetails(courseName: string, category: string) {
   if (catLow.includes('artificial intelligence') || nameLow === 'ai' || nameLow.includes(' ai ') || nameLow.endsWith(' ai') || nameLow.startsWith('ai ')) {
     return {
       type: 'ai-image',
-      bgClass: 'bg-[#0d1117]',
-      borderClass: 'border-[#2D3748]',
+      bgClass: 'bg-[var(--bg-editor)]',
+      borderClass: 'border-[var(--border-primary)]',
       subtitle: ''
     };
   }
@@ -28,8 +28,8 @@ export function getCourseIconDetails(courseName: string, category: string) {
   if (nameLow.includes('java')) {
     return {
       type: 'java-image',
-      bgClass: 'bg-[#1a1a2e]',
-      borderClass: 'border-[#2D3748]',
+      bgClass: 'bg-[var(--bg-editor)]',
+      borderClass: 'border-[var(--border-primary)]',
       subtitle: ''
     };
   }
@@ -74,9 +74,9 @@ export function DynamicCourseIcon({ courseName, category }: { courseName: string
   
   if (details.type === 'py-image') {
     return (
-      <div className="w-[160px] h-[120px] rounded-[12px] overflow-hidden relative flex items-center justify-center shrink-0 border border-[#2D3748] bg-[#1a1a2e]">
+      <div className={`w-[160px] h-[120px] rounded-[12px] overflow-hidden relative flex items-center justify-center shrink-0 border ${details.borderClass} ${details.bgClass}`}>
         {/* Faint code editor background graphic */}
-        <div className="absolute right-2 top-2 bottom-2 w-1/2 bg-[#0d1117]/50 rounded-lg border border-white/5 flex flex-col p-2 gap-1.5 opacity-60">
+        <div className="absolute right-2 top-2 bottom-2 w-1/2 bg-[var(--bg-main)]/50 rounded-lg border border-[var(--border-primary)] flex flex-col p-2 gap-1.5 opacity-60">
           <div className="flex gap-1 mb-1">
             <div className="w-1.5 h-1.5 rounded-full bg-red-500/50"></div>
             <div className="w-1.5 h-1.5 rounded-full bg-yellow-500/50"></div>
@@ -103,14 +103,14 @@ export function DynamicCourseIcon({ courseName, category }: { courseName: string
 
   if (details.type === 'ai-image') {
     return (
-      <div className="w-[160px] h-[120px] rounded-[12px] overflow-hidden relative flex items-center px-6 justify-between shrink-0 border border-[#2D3748] bg-[#0d1117]">
-        {/* Glowing brain network background */}
-        <div className="absolute right-0 top-0 bottom-0 w-3/4 opacity-40 mix-blend-screen pointer-events-none">
+      <div className={`w-[160px] h-[120px] rounded-[12px] overflow-hidden relative flex items-center justify-center shrink-0 border ${details.borderClass} ${details.bgClass}`}>
+        {/* Abstract Neural Network nodes background */}
+        <div className="absolute inset-0 opacity-30 flex items-center justify-center mix-blend-screen pointer-events-none">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.3)_0%,transparent_70%)]"></div>
           <Brain className="absolute right-2 top-1/2 -translate-y-1/2 w-24 h-24 text-blue-500/20 stroke-[1px]" />
         </div>
         
-        <span className="text-white font-extrabold text-[32px] z-10 tracking-tight drop-shadow-md">
+        <span className="text-[var(--text-primary)] font-extrabold text-[32px] z-10 tracking-tight drop-shadow-md">
           AI
         </span>
         <Brain className="w-10 h-10 text-slate-300 z-10 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]" strokeWidth={1.5} />

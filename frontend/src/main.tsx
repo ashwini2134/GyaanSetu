@@ -11,6 +11,8 @@ import { ErrorBoundary } from "./components";
 
 import "./index.css";
 
+import { BrandingProvider } from "./context/BrandingContext";
+
 createRoot(
   document.getElementById("root")!
 ).render(
@@ -18,7 +20,9 @@ createRoot(
     <ErrorBoundary>
       <HashRouter>
         <AuthProvider>
-          <App />
+          <BrandingProvider>
+            <App />
+          </BrandingProvider>
         </AuthProvider>
       </HashRouter>
     </ErrorBoundary>

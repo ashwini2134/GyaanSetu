@@ -1,17 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { api, authFetch, getProjectMetadata } from '../api';
+import { api, getProjectMetadata } from '../api';
+import { useAuth } from '../auth';
 import { useLessonData } from '../hooks/useLessonData';
 import { useLectureProgress, useCourseProgress } from '../hooks/useLectureProgress';
 import {
   LessonSection,
   QuizEngine,
+  QuizReviewCard,
   ProblemCard,
   SummaryCard,
   InteractiveBook,
 } from '../components/lesson';
 import type { CodingProblem, InteractiveBookBlock, ProjectSummary } from '../types/lesson';
-import { ArrowLeft, ArrowRight, CheckCircle, Check, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Check } from 'lucide-react';
+import { ScrollContext } from '../components/lesson/ScrollContext';
+import { COURSE_SHORT_LABELS } from '../data/courseNames';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -39,15 +43,29 @@ type PageStatus = 'completed' | 'current' | 'upcoming';
 
 // ── Fallback legacy renderer (notes.md) ──────────────────────────────────────
 
+const COURSE_TITLES: Record<string, string> = {
+  'python20': COURSE_SHORT_LABELS.python20,
+  'fundamentals-of-ai': COURSE_SHORT_LABELS['fundamentals-of-ai'],
+  'java-beginners': 'Java',
+};
+
 function LegacyLecturePage({ slug, lectureNumber }: { slug: string; lectureNumber: number }) {
   const navigate = useNavigate();
   const [content, setContent] = useState('');
-  const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
+  const courseTitle = COURSE_TITLES[slug] ?? slug.toUpperCase();
 
   useEffect(() => {
     const base = import.meta.env.BASE_URL ?? '/';
     const url = base.replace(/\/$/, '') + `/data/${slug}/lecture_${lectureNumber}/notes.md`;
-    fetch(url).then(r => r.ok ? r.text() : '').then(setContent).catch(err => console.error('[lecture] load notes failed', err));
+    fetch(url)
+      .then(r => {
+        // A missing file can still come back 200 (SPA fallback serving
+        // index.html) — only trust it if it's actually not HTML.
+        if (r.ok && !(r.headers.get('content-type') ?? '').includes('text/html')) return r.text();
+        return '';
+      })
+      .then(setContent)
+      .catch(err => console.error('[lecture] load notes failed', err));
   }, [slug, lectureNumber]);
 
   return (
@@ -73,6 +91,8 @@ function LegacyLecturePage({ slug, lectureNumber }: { slug: string; lectureNumbe
 export default function LecturePage() {
   const { slug, number } = useParams<{ slug: string; number: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   const lectureNumber = parseInt(number ?? '0', 10);
   const [retakingQuiz, setRetakingQuiz] = useState(false);
   const [openProblemIndex, setOpenProblemIndex] = useState<number>(-1);
@@ -87,8 +107,9 @@ export default function LecturePage() {
     isSectionCompleted,
     quizScore,
     projectCompleted,
+    lectureCompleted,
   } = useLectureProgress(slug, !isNaN(lectureNumber) ? String(lectureNumber) : undefined);
-  const { refreshCourseProgress } = useCourseProgress(slug);
+  const { isLectureUnlocked, loaded: courseProgressLoaded, refreshCourseProgress } = useCourseProgress(slug);
 
   const [currentPageIdx, setCurrentPageIdx] = useState(0);
   const [allLectures, setAllLectures] = useState<Array<{ number: number; title: string }>>([]);
@@ -96,7 +117,7 @@ export default function LecturePage() {
   const [showAllCompleted, setShowAllCompleted] = useState(false);
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
   const scrollRef = useRef<HTMLElement>(null);
-  const [skippedSections, setSkippedSections] = useState<Set<number>>(new Set());
+  
   const [completedProblems, setCompletedProblems] = useState<string[]>([]);
   const [completedBooks, setCompletedBooks] = useState<Set<string>>(new Set());
   // Check if content fits without scrolling
@@ -118,12 +139,13 @@ export default function LecturePage() {
   useEffect(() => {
     setCurrentPageIdx(0);
     setHasResumed(false);
-    setSkippedSections(new Set());
     setRetakingQuiz(false);
     setShowAllCompleted(false);
     setScrolledToBottom(false);
     setCompletedProblems([]);
     setCompletedBooks(new Set());
+    setOpenProblemIndex(-1);
+    setOpenSimilarIndex(-1);
   }, [slug, lectureNumber]);
 
   // Load lecture list for prev/next lecture navigation
@@ -131,13 +153,46 @@ export default function LecturePage() {
     if (!slug) return;
     api.courseLectures(slug).then(lectures => {
       setAllLectures(lectures.map(l => ({ number: l.number, title: l.title })));
-      // Redirect to capstone page for the last lecture
       const last = lectures[lectures.length - 1];
-      if (last && lectureNumber >= last.number) {
-        navigate(`/course/${slug}/capstone`, { replace: true });
+      const first = lectures[0];
+
+      if (last && lectureNumber > last.number) {
+        // Past the end of the curriculum entirely (e.g. a bookmarked link to
+        // a lecture that's since been removed) — there is no content to
+        // show here at all, so redirect unconditionally. Not gated on
+        // lectureCompleted since that only makes sense for a lecture that
+        // actually exists.
+        navigate(`/course/${slug}/certification-readiness`, { replace: true });
+        return;
+      }
+
+      if (last && lectureNumber === last.number && lectureCompleted) {
+        // Once the last lecture has actually been completed, revisiting its
+        // URL sends the student onward to the readiness checklist instead of
+        // replaying it. Gated on lectureCompleted (not just the lecture
+        // number) so a first-time visit can still be watched and finished.
+        navigate(`/course/${slug}/certification-readiness`, { replace: true });
+        return;
+      }
+
+      // Direct-navigation lock enforcement — the course page already hides
+      // the click for a locked lecture, but nothing stopped someone from
+      // just typing the URL (or an old "Next Lecture" link) straight into
+      // this route. Wait for real completion data before deciding (an
+      // empty completed-set on the very first render would otherwise look
+      // like everything is locked). Skipped for admins, matching the
+      // "Review Mode: All lectures unlocked" promise elsewhere.
+      if (
+        !isAdmin &&
+        courseProgressLoaded &&
+        first &&
+        lectureNumber !== first.number &&
+        !isLectureUnlocked(lectureNumber)
+      ) {
+        navigate(`/course/${slug}`, { replace: true });
       }
     }).catch(err => console.error('[lecture] load lectures failed', err));
-  }, [slug, lectureNumber, navigate]);
+  }, [slug, lectureNumber, navigate, lectureCompleted, isAdmin, courseProgressLoaded, isLectureUnlocked]);
 
   // Build ordered page list
   const pages: Page[] = useMemo(() => {
@@ -161,6 +216,14 @@ export default function LecturePage() {
       setCurrentPageIdx(Math.max(0, pages.length - 1));
     }
   }, [pages.length, currentPageIdx]);
+
+  // Reset scroll state on page change
+  useEffect(() => {
+    setScrolledToBottom(false);
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo(0, 0);
+    }
+  }, [currentPageIdx]);
 
   // Resume logic
   useEffect(() => {
@@ -249,9 +312,11 @@ export default function LecturePage() {
   if (!lessonData) return null;
 
   const nextLecture = allLectures.find(l => l.number === lectureNumber + 1);
-  const courseTitle = slug === 'cs50ai' ? 'AI' : slug.toUpperCase();
+  const courseTitle = COURSE_TITLES[slug ?? ''] ?? (slug ?? '').toUpperCase();
   const quiz = lessonData.quiz ?? [];
-  const problems: CodingProblem[] = lessonData.problems ?? [];
+  const allProblems: CodingProblem[] = lessonData.problems ?? [];
+  const mainProblems = allProblems.slice(0, 2);
+  const similarProblems = allProblems.slice(2);
   const projects: ProjectSummary[] = lessonData.projects ?? [];
   const summary = lessonData.summary;
 
@@ -270,58 +335,58 @@ export default function LecturePage() {
     : null;
   const isBookCompleted = bookBlock ? completedBooks.has(currentSection!.id) : true;
 
+  const scrollToTop = () => {
+    scrollRef.current?.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
   const goNext = () => {
     if (currentPage?.type === 'section') {
       if (scrolledToBottom) {
         markSectionComplete(currentPageIdx + 1);
-      } else {
-        setSkippedSections(prev => new Set(prev).add(currentPageIdx));
       }
     } else if (currentPage?.type === 'quiz' || currentPage?.type === 'problems') {
-      if (!isSectionCompleted(currentPageIdx + 1)) {
-        setSkippedSections(prev => new Set(prev).add(currentPageIdx));
-      }
+      // skip tracking removed
     }
-    
-    if (!isLastPage) setCurrentPageIdx(c => c + 1);
+
+    if (!isLastPage) { setCurrentPageIdx(c => c + 1); scrollToTop(); }
   };
   const goPrev = () => {
-    if (!isFirstPage) setCurrentPageIdx(c => c - 1);
+    if (!isFirstPage) { setCurrentPageIdx(c => c - 1); scrollToTop(); }
   };
 
   return (
-    <div className="w-full flex flex-col" style={{ height: 'calc(100vh - 64px)' }}>
+    <div className="w-full flex flex-col bg-[var(--surface-page)]" style={{ height: 'calc(100vh - 64px)' }}>
       {/* ── Top Bar ── */}
-      <div className="flex-shrink-0 flex items-center justify-between border-b border-slate-700/20 px-4 py-2 bg-slate-900/40 backdrop-blur-sm">
-        <nav className="flex items-center gap-2 text-sm text-slate-400">
-          <button onClick={() => navigate('/')} className="text-blue-400 hover:text-blue-300 transition-colors">Dashboard</button>
-          <span className="text-slate-600">/</span>
-          <button onClick={() => navigate('/courses')} className="text-blue-400 hover:text-blue-300 transition-colors">Courses</button>
-          <span className="text-slate-600">/</span>
-          <button onClick={() => navigate(`/course/${slug}`)} className="text-blue-400 hover:text-blue-300 transition-colors">{courseTitle}</button>
-          <span className="text-slate-600">/</span>
-          <span className="text-white font-medium">{lessonData.title}</span>
+      <div className="flex-shrink-0 flex items-center justify-between border-b border-[var(--border-light)] bg-[var(--surface-card)]/60 backdrop-blur-sm px-4 py-2">
+        <nav className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+          <button onClick={() => navigate('/')} className="text-[var(--brand-primary)] hover:text-[var(--brand-primary-dark)] transition-colors">Dashboard</button>
+          <span className="text-[var(--text-muted)]">/</span>
+          <button onClick={() => navigate('/courses')} className="text-[var(--brand-primary)] hover:text-[var(--brand-primary-dark)] transition-colors">Courses</button>
+          <span className="text-[var(--text-muted)]">/</span>
+          <button onClick={() => navigate(`/course/${slug}`)} className="text-[var(--brand-primary)] hover:text-[var(--brand-primary-dark)] transition-colors">{courseTitle}</button>
+          <span className="text-[var(--text-muted)]">/</span>
+          <span className="text-[var(--text-primary)] font-medium">{lessonData.title}</span>
         </nav>
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(`/course/${slug}`)}
-            className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition-colors"
+            className="flex items-center gap-1 text-xs text-[var(--brand-primary)] hover:text-[var(--brand-primary-dark)] transition-colors"
           >
             <ArrowLeft size={14} />
             Back to Course
           </button>
-          <span className="text-xs text-slate-500">{currentPageIdx + 1} / {pages.length}</span>
+          <span className="text-xs text-[var(--text-muted)]">{currentPageIdx + 1} / {pages.length}</span>
         </div>
       </div>
 
       {/* ── Body: nav panel + content ── */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left nav panel */}
-        <aside className="hidden md:flex self-start flex-shrink-0 w-56 flex-col border-r border-slate-700/30 bg-slate-900/60 rounded-br-xl">
+        <aside className="hidden md:flex self-start flex-shrink-0 w-56 flex-col border-r border-[var(--border-light)] bg-[var(--lesson-nav-bg)] rounded-br-xl">
           <div className="p-3 space-y-0.5">
             <button
               onClick={() => navigate(`/course/${slug}`)}
-              className="w-full mb-4 px-3 py-2 flex items-center gap-2 text-sm font-medium text-slate-300 bg-slate-800/50 hover:bg-slate-700/50 hover:text-white rounded-lg transition-colors border border-slate-700/50"
+              className="w-full mb-4 px-3 py-2 flex items-center gap-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--surface-container)] hover:bg-[var(--surface-card-hover)] rounded-lg transition-colors border border-[var(--border-light)]"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -336,27 +401,27 @@ export default function LecturePage() {
               return (
                 <button
                   key={id}
-                  onClick={() => setCurrentPageIdx(idx)}
-                  className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium transition-all duration-200 text-left ${
+                  onClick={() => { setCurrentPageIdx(idx); scrollToTop(); }}
+                  className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium transition-all duration-200 text-left border ${
                     status === 'current'
-                      ? 'bg-blue-600/15 text-blue-300 border border-blue-500/25'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border border-transparent'
+                      ? 'bg-[var(--sidebar-active)] text-[var(--sidebar-active-text)] border-[var(--sidebar-active-text)]/20'
+                      : 'text-[var(--lesson-nav-text)] hover:text-[var(--lesson-nav-text-active)] hover:bg-[var(--lesson-nav-hover-bg)] border-transparent hover:border-[var(--lesson-nav-hover-border)]'
                   }`}
                 >
                   {/* Status indicator */}
                   <span className="w-4 h-4 flex items-center justify-center flex-shrink-0">
                     {id === 'project' && projectCompleted ? (
-                      <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
+                      <div className="w-4 h-4 rounded-full bg-[var(--lesson-nav-icon-completed)] flex items-center justify-center">
                         <Check size={10} className="text-white" strokeWidth={3} />
                       </div>
                     ) : isSectionCompleted(idx + 1) ? (
-                      <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
+                      <div className="w-4 h-4 rounded-full bg-[var(--lesson-nav-icon-completed)] flex items-center justify-center">
                         <Check size={10} className="text-white" strokeWidth={3} />
                       </div>
                     ) : status === 'current' ? (
-                      <div className="w-4 h-4 rounded-full bg-blue-500" />
+                      <div className="w-4 h-4 rounded-full bg-[var(--lesson-nav-icon-active)]" />
                     ) : (
-                      <div className="w-4 h-4 rounded-full border-2 border-slate-500" />
+                      <div className="w-4 h-4 rounded-full border-2 border-[var(--lesson-nav-icon)]" />
                     )}
                   </span>
                   <span className="truncate">{label}</span>
@@ -367,7 +432,9 @@ export default function LecturePage() {
         </aside>
 
         {/* Right: lecture content */}
+        <style>{`#lecture-scroll-container::-webkit-scrollbar { width: 6px; } #lecture-scroll-container::-webkit-scrollbar-track { background: transparent; } #lecture-scroll-container::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; } #lecture-scroll-container { scrollbar-width: thin; scrollbar-color: #CBD5E1 transparent; }`}</style>
         <main 
+          id="lecture-scroll-container"
           ref={scrollRef}
           className="flex-1 overflow-y-auto"
           onScroll={(e) => {
@@ -377,7 +444,8 @@ export default function LecturePage() {
             }
           }}
         >
-          <div className="p-6 max-w-4xl mx-auto">
+          <ScrollContext.Provider value={scrollRef}>
+            <div className="px-8 py-8 max-w-4xl mx-auto">
             {/* Full-screen book overlay — hides all other content until book completes */}
             {bookBlock && !isBookCompleted && (
               <InteractiveBook
@@ -391,47 +459,46 @@ export default function LecturePage() {
 
             {currentPage?.type === 'section' && isBookCompleted && (
               <LessonSection
+                key={`${slug}-${lectureNumber}-${currentPage.index}`}
                 section={lessonData.sections[currentPage.index]}
                 index={currentPage.index}
                 courseSlug={slug}
                 lectureNumber={lectureNumber}
                 onPracticeAttempt={() => {}}
                 onPracticeComplete={() => {}}
+                isFirstSection={currentPageIdx === 0}
               />
             )}
 
             {currentPage?.type === 'quiz' && (
               <section id="section-quiz">
                 <div className="space-y-5">
-                  <h2 className="text-xl font-bold text-white flex items-center gap-3">
-                    <span className="w-8 h-8 rounded-xl bg-blue-600/20 flex items-center justify-center text-sm font-bold text-blue-400">
-                      {lessonData.sections.length + 1}
-                    </span>
+                  <h2 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-3">
                     Quiz
                   </h2>
                   
-                  {quizScore !== null && quizScore === quiz.length ? (
-                    <div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-600/10 to-slate-800/40 p-8 text-center space-y-4">
-                      <div className="w-16 h-16 rounded-2xl bg-emerald-600/20 flex items-center justify-center mx-auto">
-                        <CheckCircle size={32} className="text-emerald-400" />
+                  {quizScore !== null && !retakingQuiz ? (
+                    <div className="space-y-5">
+                      <div className="rounded-2xl border border-[var(--border-medium)] bg-[var(--surface-card)] p-8 text-center space-y-4 shadow-sm">
+                        <div>
+                          <p className="text-xl font-bold text-[var(--text-primary)]">Quiz Completed</p>
+                          <p className="text-[var(--text-secondary)] mt-2">You scored {quizScore}%.</p>
+                        </div>
+                        <button
+                          onClick={() => setRetakingQuiz(true)}
+                          className="inline-flex items-center gap-2 text-sm font-semibold text-white px-6 min-h-[44px] rounded-xl bg-[var(--button-primary-bg)] hover:bg-[var(--button-primary-hover)] transition-all"
+                        >
+                          Retake Quiz
+                        </button>
                       </div>
                       <div>
-                        <p className="text-2xl font-bold text-white">Yay! You got a perfect score! 🎉</p>
-                        <p className="text-slate-400 mt-2">You have completely mastered this section.</p>
+                        <h3 className="text-sm font-bold text-[var(--text-primary)] mb-3">Your Answers</h3>
+                        <QuizReviewCard
+                          courseId={slug ?? 'unknown'}
+                          lectureId={lessonData.id}
+                          questions={quiz}
+                        />
                       </div>
-                    </div>
-                  ) : quizScore !== null && !retakingQuiz ? (
-                    <div className="rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-600/10 to-slate-800/40 p-8 text-center space-y-4">
-                      <div>
-                        <p className="text-xl font-bold text-white">Quiz Completed</p>
-                        <p className="text-slate-400 mt-2">You scored {quizScore} out of {quiz.length}.</p>
-                      </div>
-                      <button
-                        onClick={() => setRetakingQuiz(true)}
-                        className="inline-flex items-center gap-2 text-sm font-semibold text-white px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 transition-all"
-                      >
-                        Retake Quiz
-                      </button>
                     </div>
                   ) : (
                     <QuizEngine
@@ -453,26 +520,23 @@ export default function LecturePage() {
             {currentPage?.type === 'problems' && (
               <section id="section-problems">
                 <div className="space-y-4">
-                  <h2 className="text-xl font-bold text-white flex items-center gap-3">
-                    <span className="w-8 h-8 rounded-xl bg-orange-600/20 flex items-center justify-center text-sm font-bold text-orange-400">
-                      {lessonData.sections.length + (quiz.length > 0 ? 2 : 1)}
-                    </span>
+                  <h2 className="text-xl font-bold text-[var(--text-primary)]">
                     Problems to Solve
                   </h2>
-                  <p className="text-sm text-slate-400">
+                  <p className="text-sm text-[var(--text-secondary)]">
                     Apply what you've learned by solving these coding challenges.
                     {completedProblems.length > 0 && (
-                      <span className="ml-2 text-orange-400 font-medium">
-                        {completedProblems.length}/{problems.length} solved
+                      <span className="ml-2 text-orange-500 font-medium">
+                        {completedProblems.length}/{mainProblems.length} solved
                       </span>
                     )}
                   </p>
                   <div className="space-y-3">
-                    {problems.length === 0 ? (
-                      <div className="p-8 text-center bg-slate-900/30 border border-slate-800 rounded-2xl">
-                        <p className="text-slate-400">No problems available yet for this module.</p>
+                    {mainProblems.length === 0 ? (
+                      <div className="p-8 text-center bg-[var(--surface-card)] border border-[var(--border-medium)] rounded-2xl shadow-sm">
+                        <p className="text-[var(--text-secondary)]">No problems available yet for this module.</p>
                       </div>
-                    ) : problems.map((problem, i) => (
+                    ) : mainProblems.map((problem, i) => (
                       <ProblemCard
                         key={problem.id}
                         problem={problem}
@@ -485,16 +549,16 @@ export default function LecturePage() {
                           if (!alreadySolved) {
                             setCompletedProblems(prev => [...prev, id]);
                           }
-                          markProblemCompleted(id);
+                          markProblemCompleted(id, problem.difficulty);
                           
                           const newTotal = alreadySolved ? completedProblems.length : completedProblems.length + 1;
-                          if (newTotal >= Math.min(2, problems.length)) {
+                          if (newTotal >= Math.min(2, mainProblems.length)) {
                               markSectionComplete(currentPageIdx + 1);
                               setTimeout(() => {
                                 setOpenProblemIndex(-1);
                                 setShowAllCompleted(true);
                               }, 1500);
-                            } else if (i + 1 < problems.length) {
+                            } else if (i + 1 < mainProblems.length) {
                               setTimeout(() => setOpenProblemIndex(i + 1), 1500);
                             }
                           }
@@ -503,16 +567,10 @@ export default function LecturePage() {
                     ))}
                   </div>
 
-                  {problems.length > 0 && (() => {
-                    const similarProblems = [
-                      { ...problems[0], id: `${problems[0].id}_sim1`, title: problems[0].title.replace('Basic ', 'Advanced ').replace('Simple ', 'Complex ') + ' (Similar A)' },
-                      { ...problems[0], id: `${problems[0].id}_sim2`, title: problems[0].title + ' (Similar B)' }
-                    ];
-
-                    return (
-                      <div className="mt-8 pt-6 border-t border-slate-700/30" id="similar-questions">
-                        <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-                          <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  {similarProblems.length > 0 && (
+                      <div className="mt-8 pt-6 border-t border-[var(--border-medium)]" id="similar-questions">
+                        <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
+                          <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                           </svg>
                           Similar Questions
@@ -535,8 +593,7 @@ export default function LecturePage() {
                           ))}
                         </div>
                       </div>
-                    );
-                  })()}
+                    )}
                 </div>
               </section>
             )}
@@ -551,8 +608,8 @@ export default function LecturePage() {
                       </svg>
                     </div>
                     <div>
-                      <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">Milestone Project</span>
-                      <h2 className="text-lg font-bold text-white">Apply what you've learned</h2>
+                      <span className="text-[10px] font-bold text-purple-500 uppercase tracking-widest">Milestone Project</span>
+                      <h2 className="text-lg font-bold text-[var(--text-primary)]">Apply what you've learned</h2>
                     </div>
                   </div>
 
@@ -576,50 +633,50 @@ export default function LecturePage() {
                       return (
                         <div
                           key={project.id}
-                          className="rounded-2xl border border-slate-700/30 bg-gradient-to-br from-slate-800/60 via-slate-900/60 to-purple-900/20 backdrop-blur-sm p-6 transition-all duration-200 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-600/5 group"
+                          className="rounded-2xl border border-[var(--border-medium)] bg-[var(--surface-card)] shadow-sm p-6 transition-all duration-200 hover:border-[var(--brand-primary)]/30 hover:shadow-lg hover:shadow-[var(--brand-primary)]/5 group"
                         >
                           <div className="flex items-start gap-5">
-                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-600/20 to-violet-600/10 flex items-center justify-center flex-shrink-0 border border-purple-500/10 group-hover:border-purple-400/30 transition-all">
-                              <svg className="w-7 h-7 text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[var(--brand-primary)]/20 to-[var(--brand-primary-dark)]/10 flex items-center justify-center flex-shrink-0 border border-[var(--brand-primary)]/10 group-hover:border-[var(--brand-primary)]/30 transition-all">
+                              <svg className="w-7 h-7 text-[var(--brand-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d={projectIcon} />
                               </svg>
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start justify-between gap-4">
                                 <div>
-                                  <h3 className="text-base font-bold text-slate-100">{project.title}</h3>
-                                  <p className="text-xs text-slate-400 mt-1.5 leading-relaxed line-clamp-2">{project.description}</p>
+                                  <h3 className="text-base font-bold text-[var(--text-primary)]">{project.title}</h3>
+                                  <p className="text-xs text-[var(--text-secondary)] mt-1.5 leading-relaxed line-clamp-2">{project.description}</p>
                                 </div>
                                 <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border whitespace-nowrap ${
                                   project.difficulty === 'easy'
-                                    ? 'bg-green-500/10 text-green-400 border-green-500/20'
+                                    ? 'bg-green-500/10 text-green-500 border-green-500/20'
                                     : project.difficulty === 'medium'
-                                    ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                                    : 'bg-red-500/10 text-red-400 border-red-500/20'
+                                    ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                                    : 'bg-red-500/10 text-red-500 border-red-500/20'
                                 }`}>
                                   {project.difficulty === 'easy' ? 'Beginner' : project.difficulty === 'medium' ? 'Intermediate' : 'Advanced'}
                                 </span>
                               </div>
-                              <div className="flex items-center gap-4 mt-3 text-[10px] text-slate-500">
+                              <div className="flex items-center gap-4 mt-3 text-[10px] text-[var(--text-muted)]">
                                 <span>{meta.xp} XP</span>
-                                <span className="text-slate-700">·</span>
+                                <span className="text-[var(--text-secondary)]">·</span>
                                 <span>{meta.estimatedTime}</span>
-                                <span className="text-slate-700">·</span>
+                                <span className="text-[var(--text-secondary)]">·</span>
                                 <span className="flex gap-1.5">
                                   {meta.tags.slice(0, 3).map(t => (
-                                    <span key={t} className="text-[9px] text-slate-400 bg-slate-800/60 px-1.5 py-0.5 rounded">{t}</span>
+                                    <span key={t} className="text-[9px] text-[var(--text-secondary)] bg-[var(--surface-container)] px-1.5 py-0.5 rounded border border-[var(--border-medium)]">{t}</span>
                                   ))}
                                 </span>
                               </div>
                             </div>
                           </div>
-                          <div className="mt-4 pt-4 border-t border-slate-700/20 flex items-center justify-between">
+                          <div className="mt-4 pt-4 border-t border-[var(--border-medium)] flex items-center justify-between">
                             {projectCompleted ? (
-                              <span className="text-[11px] text-emerald-400 flex items-center gap-1.5 font-medium">
+                              <span className="text-[11px] text-emerald-500 flex items-center gap-1.5 font-medium">
                                 <CheckCircle size={12} /> Completed — review your workspace or continue
                               </span>
                             ) : (
-                              <span className="text-[10px] text-slate-500">Build a real mini-application using your new skills</span>
+                              <span className="text-[10px] text-[var(--text-muted)]">Build a real mini-application using your new skills</span>
                             )}
                             <button
                               onClick={() => navigate(`/course/${slug}/lecture/${lectureNumber}/project/${project.id}`)}
@@ -639,16 +696,16 @@ export default function LecturePage() {
               </section>
             )}
                   {showAllCompleted && (
-              <div className="fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-300">
-                <div className="max-w-md w-full mx-4 p-8 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-emerald-500/30 text-center space-y-6 animate-in zoom-in duration-500">
-                  <div className="w-20 h-20 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center mx-auto">
-                    <svg className="w-10 h-10 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <div className="fixed inset-0 z-50 bg-white/80 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-300">
+                <div className="max-w-md w-full mx-4 p-8 rounded-2xl bg-white border border-[var(--border-medium)] shadow-lg text-center space-y-6 animate-in zoom-in duration-500">
+                  <div className="w-20 h-20 rounded-full bg-[var(--success)]/10 border-2 border-[var(--success)]/30 flex items-center justify-center mx-auto">
+                    <svg className="w-10 h-10 text-[var(--success)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-white">🎉 All Problems Completed</p>
-                    <p className="text-sm text-slate-400 mt-2">You successfully completed all practice problems in this lecture.</p>
+                    <p className="text-2xl font-bold text-[var(--text-primary)]">All Problems Completed</p>
+                    <p className="text-sm text-[var(--text-secondary)] mt-2">You successfully completed all practice problems in this lecture.</p>
                   </div>
                   <div className="flex gap-3 justify-center">
                     <button
@@ -658,7 +715,7 @@ export default function LecturePage() {
                           document.getElementById('similar-questions')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         }, 100);
                       }}
-                      className="text-sm font-medium px-5 py-2.5 rounded-xl border border-slate-600/50 text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all"
+                      className="text-sm font-medium px-5 py-2.5 rounded-xl border border-[var(--border-medium)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-card-hover)] transition-all"
                     >
                       View Similar Questions
                     </button>
@@ -668,7 +725,7 @@ export default function LecturePage() {
                         const summaryIdx = pages.findIndex(p => p.type === 'summary');
                         if (summaryIdx >= 0) setCurrentPageIdx(summaryIdx);
                       }}
-                      className="text-sm font-medium px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-all"
+                      className="text-sm font-medium px-5 py-2.5 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] text-white transition-all"
                     >
                       Continue to Summary
                     </button>
@@ -683,14 +740,23 @@ export default function LecturePage() {
                   summary={summary!}
                   lectureTitle={lessonData.title}
                   nextLectureTitle={nextLecture?.title}
+                  customButtonLabel={
+                    slug === 'fundamentals-of-ai' && (number === '1' || number === '2' || number === '3' || number === '4' || number === '5' || number === '6')
+                      ? 'Next: Milestone Project'
+                      : !nextLecture
+                      ? 'See Your Certification Readiness'
+                      : undefined
+                  }
                   onNext={() => {
                     markSectionComplete(currentPageIdx + 1);
                     markLectureCompleted(pages.filter(p => p.type === 'section').length);
                     
-                    if (nextLecture) {
+                    if (slug === 'fundamentals-of-ai' && (number === '1' || number === '2' || number === '3' || number === '4' || number === '5' || number === '6')) {
+                      navigate(`/course/${slug}/lecture/${number}/milestone`);
+                    } else if (nextLecture) {
                       navigate(`/course/${slug}/lecture/${nextLecture.number}`);
                     } else {
-                      navigate(`/course/${slug}`);
+                      navigate(`/course/${slug}/certification-readiness`);
                     }
                   }}
                 />
@@ -698,28 +764,33 @@ export default function LecturePage() {
             )}
 
             {/* ── Navigation — Previous / Next ── */}
-            <div className="flex items-center justify-between mt-10 pt-6 border-t border-slate-700/20">
+            <div className="flex items-center justify-between mt-10 pt-6 border-t border-[var(--border-light)]">
               <div>
                 {!isFirstPage && (
                   <button
                     onClick={goPrev}
-                    className="inline-flex items-center gap-2 text-sm font-medium text-slate-300 hover:text-white px-4 py-2.5 rounded-xl bg-slate-800/50 hover:bg-slate-800/80 border border-slate-700/40 transition-all"
+                    className="inline-flex items-center gap-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-4 py-2.5 rounded-xl bg-white hover:bg-[var(--surface-card-hover)] border border-[var(--border-medium)] transition-all"
                   >
                     <ArrowLeft size={16} />
                     Previous
                   </button>
                 )}
               </div>
-              <div className="text-xs text-slate-500">
+              <div className="text-xs text-[var(--text-muted)]">
                 {currentPageIdx + 1} / {pages.length}
               </div>
               <div>
                 {!isLastPage && (
                   <button
                     onClick={goNext}
-                    className="inline-flex items-center gap-2 text-sm font-semibold text-white px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 transition-all"
+                    disabled={currentPage?.type === 'section' && !scrolledToBottom}
+                    className={`inline-flex items-center gap-2 text-sm font-semibold text-white px-5 py-2.5 rounded-xl transition-all ${
+                      currentPage?.type === 'section' && !scrolledToBottom
+                        ? 'bg-[var(--surface-container)] text-[var(--text-muted)] border border-[var(--border-light)] cursor-not-allowed'
+                        : 'bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] shadow-md shadow-[var(--brand-primary)]/20'
+                    }`}
                   >
-                    Next
+                    {currentPage?.type === 'section' && !scrolledToBottom ? 'Scroll to continue' : 'Next'}
                     <ArrowRight size={16} />
                   </button>
                 )}
@@ -728,6 +799,7 @@ export default function LecturePage() {
 
             <div className="h-8" />
           </div>
+          </ScrollContext.Provider>
         </main>
       </div>
     </div>

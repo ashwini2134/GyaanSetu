@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef, useEffect, useCallback } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import type { LessonSection, ContentBlock } from '../../types/lesson';
 import ConceptVisualizationCard from './ConceptVisualizationCard';
 import ThinkOfSection from './ThinkOfSection';
@@ -6,48 +6,139 @@ import VisualAidCard from './VisualAidCard';
 import InteractiveTryIt from './InteractiveTryIt';
 import ReflectionCard from './ReflectionCard';
 import PracticeCard from './PracticeCard';
+import AILearnSection from './AILearnSection';
+import AIThinkOfSection from './AIThinkOfSection';
+import { SearchProblemSVG, BfsDfsSVG, HeuristicSearchSVG, AdversarialSearchSVG } from './SearchAlgorithmsSVGs';
+import { PropositionalLogicSVG, KnowledgeBasesSVG, FirstOrderLogicSVG, KnowledgeEngineeringSVG } from './KnowledgeLogicSVGs';
+import { ProbabilityBasicsSVG, RandomVariablesSVG, BayesTheoremSVG, BayesianNetworksSVG, MarkovModelsSVG } from './ProbabilityUncertaintySVGs';
+import { WhatIsOptimizationSVG, LocalSearchSVG, LinearProgrammingSVG } from './OptimizationSVGs';
+import { SupervisedLearningSVG, OverfittingSVG, LossFunctionsSVG, PerceptronLearningSVG, SupportVectorMachinesSVG, UnsupervisedLearningSVG, ReinforcementLearningSVG } from './MachineLearningSVGs';
+import { NeuronsArchitectureSVG, ActivationFunctionsSVG, TrainingBackpropagationSVG } from './NeuralNetworksSVGs';
+import { AlgorithmicBiasSVG, HallucinationsDeepfakesSVG, ResponsibleAISVG } from './EthicsSVGs';
+import InfographicBlock from './InfographicBlock';
+import AIChallengeSet from './AIChallengeSet';
 import { renderMarkdown } from '../../utils/renderContent';
+
+// ── Auto-cycling SVG wrapper for svg_placeholder blocks ─────────────────────
+
+const SVG_STYLES = `
+@keyframes tof-pop { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes tof-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes tof-conn { from { stroke-dashoffset: 220; opacity: 0; } to { stroke-dashoffset: 0; opacity: 0.55; } }
+@keyframes tof-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes tof-pulse-ring { 0% { r: 18; opacity: 0.8; } 100% { r: 30; opacity: 0; } }
+@keyframes tof-flow { from { stroke-dashoffset: 40; } to { stroke-dashoffset: 0; } }
+`;
+
+const SVG_MAP: Record<string, (p: { scene: number }) => React.ReactElement> = {
+  'search-problem': SearchProblemSVG,
+  'bfs-dfs': BfsDfsSVG,
+  'heuristic-search': HeuristicSearchSVG,
+  'adversarial-search': AdversarialSearchSVG,
+  'propositional-logic': PropositionalLogicSVG,
+  'knowledge-bases': KnowledgeBasesSVG,
+  'first-order-logic': FirstOrderLogicSVG,
+  'knowledge-engineering': KnowledgeEngineeringSVG,
+  'probability-basics': ProbabilityBasicsSVG,
+  'random-variables': RandomVariablesSVG,
+  'bayes-theorem': BayesTheoremSVG,
+  'bayesian-networks': BayesianNetworksSVG,
+  'markov-models': MarkovModelsSVG,
+  'what-is-optimization': WhatIsOptimizationSVG,
+  'local-search': LocalSearchSVG,
+  'linear-programming': LinearProgrammingSVG,
+  'supervised-learning': SupervisedLearningSVG,
+  'overfitting': OverfittingSVG,
+  'loss-functions': LossFunctionsSVG,
+  'perceptron-learning': PerceptronLearningSVG,
+  'support-vector-machines': SupportVectorMachinesSVG,
+  'unsupervised-learning': UnsupervisedLearningSVG,
+  'reinforcement-learning': ReinforcementLearningSVG,
+  'neurons-architecture': NeuronsArchitectureSVG,
+  'activation-functions': ActivationFunctionsSVG,
+  'training-backpropagation': TrainingBackpropagationSVG,
+  'algorithmic-bias': AlgorithmicBiasSVG,
+  'hallucinations-deepfakes': HallucinationsDeepfakesSVG,
+  'responsible-ai': ResponsibleAISVG,
+};
+
+const MAX_SCENES: Record<string, number> = {
+  'ai-learning': 3,
+  'ai-subsets': 5,
+  'ai-everyday': 6,
+  'search-problem': 4,
+  'bfs-dfs': 4,
+  'heuristic-search': 4,
+  'adversarial-search': 4,
+  'propositional-logic': 4,
+  'knowledge-bases': 4,
+  'first-order-logic': 4,
+  'knowledge-engineering': 4,
+  'probability-basics': 4,
+  'random-variables': 4,
+  'bayes-theorem': 4,
+  'bayesian-networks': 4,
+  'markov-models': 4,
+  'what-is-optimization': 4,
+  'local-search': 4,
+  'linear-programming': 4,
+  'supervised-learning': 4,
+  'overfitting': 4,
+  'loss-functions': 4,
+  'perceptron-learning': 4,
+  'support-vector-machines': 4,
+  'unsupervised-learning': 4,
+  'reinforcement-learning': 4,
+  'neurons-architecture': 4,
+  'activation-functions': 4,
+  'training-backpropagation': 4,
+  'algorithmic-bias': 4,
+  'hallucinations-deepfakes': 4,
+  'responsible-ai': 4,
+};
+
+function SVGPlaceholderRenderer({ svgId }: { svgId: string }) {
+  const SVG = SVG_MAP[svgId];
+  const max = MAX_SCENES[svgId] ?? 3;
+  const [scene, setScene] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => setScene(s => (s + 1) % max), 5000);
+    return () => clearInterval(t);
+  }, [max]);
+
+  if (!SVG) return null;
+
+  return (
+    <>
+      <style>{SVG_STYLES}</style>
+      <SVG scene={scene} />
+    </>
+  );
+}
 
 function TextBlock({ block }: { block: Extract<ContentBlock, { type: 'text' }> }) {
   return (
-    <p className="text-sm text-slate-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(block.content) }} />
+    <p className="text-sm text-[var(--text-secondary)] leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(block.content) }} />
   );
 }
 
 function ExplanationBlock({ block }: { block: Extract<ContentBlock, { type: 'explanation' }> }) {
-  const ACCENT: Record<string, string> = {
-    blue:   'border-blue-500/20 from-blue-600/10',
-    purple: 'border-purple-500/20 from-purple-600/10',
-    green:  'border-green-500/20 from-green-600/10',
-    orange: 'border-orange-500/20 from-orange-600/10',
-    amber:  'border-amber-500/20 from-amber-600/10',
-  };
-  const ICON_COLOR: Record<string, string> = {
-    blue: 'text-blue-400', purple: 'text-purple-400', green: 'text-green-400',
-    orange: 'text-orange-400', amber: 'text-amber-400',
-  };
-  const color = block.accentColor ?? 'blue';
-  const accentCls = ACCENT[color] ?? ACCENT.blue;
-  const iconCls = ICON_COLOR[color] ?? ICON_COLOR.blue;
-
   return (
-    <div className={`rounded-2xl border ${accentCls} bg-gradient-to-br to-slate-800/40 backdrop-blur-sm p-5`}>
-      <div className="flex items-start gap-3 mb-3">
-        <svg className={`w-5 h-5 ${iconCls} mt-0.5 flex-shrink-0`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-        </svg>
-        <div className="flex-1">
-          {block.title && <p className="text-sm font-semibold text-slate-200 mb-1">{block.title}</p>}
-          <p className="text-sm text-slate-300 leading-relaxed"
+    <div className="pl-5 border-l-2 border-[var(--brand-primary)]/20">
+      <div className="flex items-start gap-3">
+        <div className="flex-1 min-w-0">
+          {block.title && <p className="text-sm font-semibold text-[var(--text-primary)] mb-1">{block.title}</p>}
+          <p className="text-sm text-[var(--text-secondary)] leading-relaxed"
             dangerouslySetInnerHTML={{ __html: renderMarkdown(block.body) }}
           />
         </div>
       </div>
       {block.bullets && (
-        <ul className="space-y-2 ml-8">
+        <ul className="space-y-2 mt-3">
           {block.bullets.map((b, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm text-slate-300">
-              <svg className={`w-4 h-4 ${iconCls} mt-0.5 flex-shrink-0`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <li key={i} className="flex items-start gap-2 text-sm text-[var(--text-secondary)]">
+              <svg className="w-4 h-4 text-[var(--brand-primary)] mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span dangerouslySetInnerHTML={{ __html: renderMarkdown(b) }} />
@@ -79,36 +170,59 @@ function AnalogyBlock({ block }: { block: Extract<ContentBlock, { type: 'analogy
   const showImg = !!imgSrc && !imgError;
 
   return (
-    <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-600/8 to-slate-800/40 overflow-hidden">
+    <div className="pl-5 border-l-2 border-[var(--brand-primary)]/20">
       <div className="flex items-stretch">
         {showImg && (
-          <div className="relative w-28 min-h-[100px] flex-shrink-0 overflow-hidden">
+          <div className="relative w-28 min-h-[100px] flex-shrink-0 overflow-hidden rounded-lg">
             <img
               src={imgSrc!}
               alt={block.title}
               className="absolute inset-0 w-full h-full object-cover"
               onError={() => setImgError(true)}
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-900/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-white/60 to-transparent" />
           </div>
         )}
-        <div className="p-5 flex-1">
-          <p className="text-xs font-semibold text-amber-300 uppercase tracking-wider mb-1">{block.title}</p>
-          <p className="text-sm text-slate-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(block.text) }} />
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-semibold text-[var(--brand-primary)] uppercase tracking-wider mb-1">{block.title}</p>
+          <p className="text-sm text-[var(--text-secondary)] leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(block.text) }} />
         </div>
       </div>
     </div>
   );
 }
 
-function renderBlock(block: any, _sectionId: string, courseSlug: string, lectureNumber: number, onAttempt?: () => void, onComplete?: () => void) {
+function renderBlock(block: any, _sectionId: string, courseSlug: string, lectureNumber: number, onAttempt?: () => void, onComplete?: () => void, itemIndex?: number) {
   // --- NEW ADMIN BLOCK TYPES ---
+  if (block.type === 'svg_placeholder') {
+    const svgId = block.data?.svgId;
+    if (svgId && SVG_MAP[svgId]) {
+      return (
+        <div className="my-2 rounded-2xl overflow-hidden bg-[var(--surface-container)]/40">
+          <SVGPlaceholderRenderer svgId={svgId} />
+        </div>
+      );
+    }
+    return (
+      <div
+        className="my-2 rounded-2xl border-2 border-dashed border-[var(--border-medium)] bg-[var(--surface-container)]/40 flex items-center justify-center"
+        style={{ minHeight: block.data?.height || '260px' }}
+      >
+        <div className="text-center text-[var(--text-muted)] px-4">
+          <svg className="w-8 h-8 mx-auto mb-2 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M14 8h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <p className="text-xs font-medium">{block.data?.label || 'SVG placeholder'}</p>
+        </div>
+      </div>
+    );
+  }
   if (block.type === 'heading') {
     const Component = block.data.level || 'h2';
-    return <Component className="text-xl font-bold text-slate-100 mt-6 mb-3">{block.data.text}</Component>;
+    return <Component className="text-xl font-bold text-[var(--text-primary)] mt-6 mb-3">{block.data.text}</Component>;
   }
   if (block.type === 'text' && block.data) {
-    return <p className="text-sm text-slate-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(block.data.body || '') }} />;
+    return <p className="text-sm text-[var(--text-secondary)] leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(block.data.body || '') }} />;
   }
   if (block.type === 'callout') {
     const bgColors: Record<string, string> = {
@@ -116,40 +230,49 @@ function renderBlock(block: any, _sectionId: string, courseSlug: string, lecture
       yellow: 'bg-yellow-500/10 border-yellow-500/30',
       green: 'bg-green-500/10 border-green-500/30',
       red: 'bg-red-500/10 border-red-500/30',
+      teal: 'bg-[var(--brand-primary)]/10 border-[var(--brand-primary)]/30',
     };
     const c = bgColors[block.data.color || 'blue'] || bgColors.blue;
     return (
       <div className={`mt-2 p-4 rounded-xl border ${c} flex gap-3`}>
         {block.data.icon && <span className="text-xl leading-none">{block.data.icon}</span>}
-        <p className="text-sm leading-relaxed text-slate-200">{block.data.text}</p>
+        <p className="text-sm leading-relaxed text-[var(--text-primary)]">{block.data.text}</p>
       </div>
     );
   }
   if (block.type === 'analogy' && block.data) {
     return (
-      <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-600/8 to-slate-800/40 p-5">
-        <p className="text-xs font-semibold text-amber-300 uppercase tracking-wider mb-2">{block.data.title}</p>
+      <div className="pl-5 border-l-2 border-[var(--brand-primary)]/20">
+        <p className="text-xs font-semibold text-[var(--brand-primary)] uppercase tracking-wider mb-2">{block.data.title}</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-slate-900/50 p-4 rounded-lg">
-            <p className="text-xs text-slate-400 mb-1">Real Life</p>
-            <p className="text-sm text-slate-300">{block.data.real}</p>
+          <div className="bg-[var(--surface-container)] border border-[var(--border-light)] p-4 rounded-lg">
+            <p className="text-xs text-[var(--text-muted)] mb-1">Real Life</p>
+            <p className="text-sm text-[var(--text-primary)]">{block.data.real}</p>
           </div>
-          <div className="bg-slate-900/50 p-4 rounded-lg">
-            <p className="text-xs text-slate-400 mb-1">In Code</p>
-            <p className="text-sm text-slate-300">{block.data.concept}</p>
+          <div className="bg-[var(--surface-container)] border border-[var(--border-light)] p-4 rounded-lg">
+            <p className="text-xs text-[var(--text-muted)] mb-1">In Code</p>
+            <p className="text-sm text-[var(--text-primary)]">{block.data.concept}</p>
           </div>
         </div>
       </div>
     );
   }
+  if (block.type === 'reasoning' && block.data) {
+    return (
+      <div className="pl-5 border-l-2 border-[var(--brand-primary)]/20">
+        <p className="text-xs font-semibold text-[var(--brand-primary)] uppercase tracking-wider mb-2">{block.data.title}</p>
+        <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{block.data.body}</p>
+      </div>
+    );
+  }
   if (block.type === 'code' && block.data) {
     return (
-      <div className="rounded-xl overflow-hidden border border-white/10 my-4">
-        <div className="bg-[#1e1e1e] p-4 text-sm font-mono text-slate-300 overflow-x-auto whitespace-pre">
+      <div className="rounded-xl overflow-hidden border border-[var(--border-medium)] my-4 shadow-sm">
+        <div className="bg-[var(--surface-container)] p-4 text-sm font-mono text-[var(--text-primary)] overflow-x-auto whitespace-pre">
           {block.data.code}
         </div>
         {block.data.output && (
-          <div className="bg-black/50 p-3 text-xs font-mono text-slate-400 border-t border-white/5">
+          <div className="bg-[var(--surface-container)] p-3 text-xs font-mono text-[var(--text-secondary)] border-t border-[var(--border-medium)]">
             Output: {block.data.output}
           </div>
         )}
@@ -158,29 +281,30 @@ function renderBlock(block: any, _sectionId: string, courseSlug: string, lecture
   }
   if (block.type === 'exercise' && block.data) {
     return (
-      <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-5 my-4">
+      <div className="rounded-xl border border-[var(--brand-primary)]/20 bg-[var(--brand-primary)]/5 p-5 my-4">
         <div className="flex items-center gap-2 mb-3">
-          <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded uppercase font-bold">{block.data.difficulty || 'Exercise'}</span>
+          <span className="px-2 py-1 bg-[var(--brand-primary)]/20 text-[var(--brand-primary)] text-xs rounded uppercase font-bold">{block.data.difficulty || 'Exercise'}</span>
         </div>
-        <p className="font-semibold text-slate-200 mb-2">{block.data.question}</p>
-        <p className="text-sm text-slate-400 mb-4">{block.data.description}</p>
-        <button onClick={onAttempt} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-colors">
+        <p className="font-semibold text-[var(--text-primary)] mb-2">{block.data.question}</p>
+        <p className="text-sm text-[var(--text-secondary)] mb-4">{block.data.description}</p>
+        <button onClick={onAttempt} className="px-4 py-2 bg-[var(--button-primary-bg)] hover:bg-[var(--button-primary-hover)] text-white rounded-lg text-sm font-medium transition-colors">
           Solve Exercise
         </button>
       </div>
     );
   }
   if (block.type === 'image' && block.data) {
+    const isSvg = block.data.url?.endsWith('.svg');
     return (
       <div className="my-4">
-        <img src={block.data.url} alt={block.data.alt} className="rounded-lg max-h-[400px] object-cover" />
-        {block.data.caption && <p className="text-xs text-slate-400 mt-2 text-center">{block.data.caption}</p>}
+        <img src={block.data.url} alt={block.data.alt} className={`rounded-lg w-full ${isSvg ? 'max-h-[420px] object-contain bg-[var(--bg-main)] border border-[var(--border-light)]' : 'max-h-[400px] object-cover'}`} />
+        {block.data.caption && <p className="text-xs text-[var(--text-secondary)] mt-2 text-center">{block.data.caption}</p>}
       </div>
     );
   }
   if (block.type === 'video' && block.data) {
     return (
-      <div className="my-4 aspect-video bg-black rounded-lg overflow-hidden border border-white/10">
+      <div className="my-4 aspect-video bg-black rounded-lg overflow-hidden border border-[var(--border-medium)] shadow-sm">
         <iframe src={block.data.url} className="w-full h-full" allowFullScreen />
       </div>
     );
@@ -189,18 +313,18 @@ function renderBlock(block: any, _sectionId: string, courseSlug: string, lecture
     const Tag = block.data.style === 'numbered' ? 'ol' : 'ul';
     const markerCls = block.data.style === 'numbered' ? 'list-decimal pl-5' : 'list-disc pl-5';
     return (
-      <Tag className={`space-y-2 text-sm text-slate-300 ${markerCls}`}>
+      <Tag className={`space-y-2 text-sm text-[var(--text-secondary)] ${markerCls}`}>
         {(block.data.items || []).map((item: string, i: number) => <li key={i}>{item}</li>)}
       </Tag>
     );
   }
   if (block.type === 'quiz' && block.data) {
     return (
-      <div className="rounded-xl border border-purple-500/20 bg-purple-500/5 p-5 my-4">
-        <p className="font-semibold text-slate-200 mb-4">{block.data.question}</p>
+      <div className="rounded-xl border border-[var(--brand-primary)]/20 bg-[var(--brand-primary)]/5 p-5 my-4">
+        <p className="font-semibold text-[var(--text-primary)] mb-4">{block.data.question}</p>
         <div className="space-y-2">
           {(block.data.options || []).map((opt: string, i: number) => (
-            <div key={i} className="p-3 rounded-lg border border-white/5 bg-slate-800/50 text-sm text-slate-300">
+            <div key={i} className="p-3 rounded-lg border border-[var(--border-medium)] bg-[var(--surface-card)] text-sm text-[var(--text-secondary)]">
               {opt}
             </div>
           ))}
@@ -212,26 +336,40 @@ function renderBlock(block: any, _sectionId: string, courseSlug: string, lecture
   // --- OLD JSON BLOCK TYPES (Fallback) ---
   switch (block.type) {
     case 'text':
-      return <TextBlock block={block} />;
+      return <TextBlock block={block as any} />;
     case 'explanation':
-      return <ExplanationBlock block={block} />;
+      return <ExplanationBlock block={block as any} />;
     case 'analogy':
-      return <AnalogyBlock block={block} />;
+      return <AnalogyBlock block={block as any} />;
     case 'concept_visualization':
-      return <ConceptVisualizationCard block={block} />;
+      return <ConceptVisualizationCard block={block as any} />;
+    case 'ai_section':
+      return <AILearnSection block={block} />;
+    case 'ai_think_of':
+      return <AIThinkOfSection block={block} />;
+    case 'infographic':
+      return <InfographicBlock block={block as any} />;
     case 'think_of':
-      return <ThinkOfSection block={block} />;
+      return <ThinkOfSection block={block as any} />;
     case 'visual_aid':
-      return <VisualAidCard block={block} />;
+      return <VisualAidCard block={block as any} />;
     case 'code_example':
-      if (['cs50ai', 'ai', 'cs50-ai'].includes(courseSlug)) return null;
-      return <InteractiveTryIt block={block} />;
+      if (['fundamentals-of-ai', 'ai', 'fundamentals-of-ai'].includes(courseSlug)) return null;
+      return (
+        <InteractiveTryIt
+          block={block as any}
+          courseSlug={courseSlug}
+          lectureNumber={lectureNumber}
+          blockId={`${_sectionId}-${itemIndex ?? 0}`}
+        />
+      );
     case 'reflection':
-      return <ReflectionCard block={block} />;
+      return <ReflectionCard block={block as any} />;
     case 'practice':
       return (
         <PracticeCard
-          block={block}
+          key={`practice-${courseSlug}-${lectureNumber}-${_sectionId}-${(block as any).title}`}
+          block={block as any}
           courseSlug={courseSlug}
           lectureNumber={lectureNumber}
           sectionId={_sectionId}
@@ -239,6 +377,8 @@ function renderBlock(block: any, _sectionId: string, courseSlug: string, lecture
           onComplete={onComplete}
         />
       );
+    case 'ai_challenge_set':
+      return <AIChallengeSet block={block as any} />;
     default:
       return null;
   }
@@ -252,289 +392,112 @@ interface SectionProps {
   innerRef?: (el: HTMLElement | null) => void;
   onPracticeAttempt?: (sectionId: string) => void;
   onPracticeComplete?: (sectionId: string) => void;
+  isFirstSection?: boolean;
 }
 
-const SECTION_COLORS = ['blue', 'blue', 'purple', 'green', 'orange', 'amber'] as const;
-
-// ── Progressive reveal helpers ─────────────────────────────────────────────────
-
 function blockProducesContent(block: ContentBlock, courseSlug: string): boolean {
-  if (block.type === 'code_example' && ['cs50ai', 'ai', 'cs50-ai'].includes(courseSlug)) return false;
+  if (block.type === 'code_example' && ['fundamentals-of-ai', 'ai', 'fundamentals-of-ai'].includes(courseSlug)) return false;
   return true;
 }
 
 function splitParagraphs(text: string): string[] {
-  return text.split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
+  return (text || '').split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
 }
 
-interface FlattenedItem {
+interface RevealItem {
   key: string;
   block: ContentBlock;
 }
 
-function flattenSectionBlocks(blocks: ContentBlock[], courseSlug: string): {
-  readingItems: FlattenedItem[];
-  thinkOfBlock: ContentBlock | null;
-  practiceBlock: ContentBlock | null;
-} {
-  const readingItems: FlattenedItem[] = [];
-  let thinkOfBlock: ContentBlock | null = null;
-  let practiceBlock: ContentBlock | null = null;
+function buildRevealSequence(blocks: ContentBlock[], courseSlug: string): RevealItem[] {
+  const items: RevealItem[] = [];
 
   for (const block of blocks) {
     if (!blockProducesContent(block, courseSlug)) continue;
 
-    if (block.type === 'think_of') {
-      thinkOfBlock = block;
-      continue;
-    }
-    if (block.type === 'practice') {
-      practiceBlock = block;
-      continue;
-    }
-
     if (block.type === 'text') {
-      const paragraphs = splitParagraphs(block.content);
+      const raw = (block as any).content || (block as any).data?.body || '';
+      const paragraphs = splitParagraphs(raw);
       if (paragraphs.length <= 1) {
-        readingItems.push({ key: `text`, block });
+        items.push({ key: `text-${items.length}`, block });
       } else {
-        paragraphs.forEach((para, i) => {
-          readingItems.push({
-            key: `text-p${i}`,
+        paragraphs.forEach((para) => {
+          items.push({
+            key: `text-p${items.length}`,
             block: { ...block, content: para } as ContentBlock,
           });
         });
       }
+    } else if (block.type === 'think_of') {
+      items.push({ key: `think_of-${items.length}`, block });
+    } else if (block.type === 'practice') {
+      items.push({ key: `practice-${items.length}`, block });
     } else {
-      readingItems.push({ key: block.type, block });
+      items.push({ key: `${block.type}-${items.length}`, block });
     }
   }
 
-  return { readingItems, thinkOfBlock, practiceBlock };
+  return items;
 }
 
-// ── Individual reveal item ─────────────────────────────────────────────────────
-
-function RevealItem({
-  index: _idx,
-  onRevealed,
-  children,
-}: {
-  index: number;
-  onRevealed: (idx: number) => void;
-  children: React.ReactNode;
-}) {
-  const [visible, setVisible] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setVisible(true);
-            onRevealed(_idx);
-            observer.unobserve(el);
-            break;
-          }
-        }
-      },
-      { threshold: 0.12, rootMargin: '-32px 0px' }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [_idx, onRevealed]);
-
-  return (
-    <div
-      ref={ref}
-      className={`transition-all duration-700 ease-out ${
-        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
-      }`}
-    >
-      {children}
-    </div>
-  );
-}
-
-// ── Content that fades in automatically after mount ────────────────────────────
-
-function StaggerFadeIn({
-  show,
-  delay = 0,
-  children,
-}: {
-  show: boolean;
-  delay?: number;
-  children: React.ReactNode;
-}) {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    if (!show) {
-      setVisible(false);
-      return;
-    }
-    const timer = setTimeout(() => {
-      requestAnimationFrame(() => {
-        setVisible(true);
-      });
-    }, delay);
-    return () => clearTimeout(timer);
-  }, [show, delay]);
-
-  if (!show) return null;
-
-  return (
-    <div
-      className={`transition-all duration-700 ease-out ${
-        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
-      }`}
-    >
-      {children}
-    </div>
-  );
-}
+import ScrollReveal from '../ScrollReveal';
 
 export default function LessonSection({
   section,
-  index,
+  index: _index,
   courseSlug,
   lectureNumber,
   innerRef,
   onPracticeAttempt,
   onPracticeComplete,
+  isFirstSection,
 }: SectionProps) {
-  const color = SECTION_COLORS[index % SECTION_COLORS.length];
-  const COLOR_MAP: Record<string, string> = {
-    blue: 'bg-blue-600/20 text-blue-400',
-    purple: 'bg-purple-600/20 text-purple-400',
-    green: 'bg-green-600/20 text-green-400',
-    orange: 'bg-orange-600/20 text-orange-400',
-    amber: 'bg-amber-600/20 text-amber-400',
-  };
-
-  const { readingItems, thinkOfBlock, practiceBlock } = useMemo(
-    () => flattenSectionBlocks(section.blocks, courseSlug),
+  const revealItems = useMemo(
+    () => buildRevealSequence(section.blocks, courseSlug),
     [section.blocks, courseSlug]
   );
-
-  const totalReading = readingItems.length;
-  const [revealedCount, setRevealedCount] = useState(0);
-  const [showThinkOf, setShowThinkOf] = useState(false);
-  const [showPractice, setShowPractice] = useState(false);
-  const thinkOfRef = useRef<HTMLDivElement>(null);
-
-  const allReadingRevealed = revealedCount >= totalReading;
-
-  const handleRevealed = useCallback(
-    (idx: number) => {
-      setRevealedCount((prev) => Math.max(prev, idx + 1));
-    },
-    []
-  );
-
-  // After all reading items are revealed, show Think Of
-  useEffect(() => {
-    if (allReadingRevealed && totalReading > 0) {
-      const timer = setTimeout(() => setShowThinkOf(true), 500);
-      return () => clearTimeout(timer);
-    }
-    // If there are no reading items, show Think Of immediately
-    if (totalReading === 0 && thinkOfBlock) {
-      setShowThinkOf(true);
-    }
-  }, [allReadingRevealed, totalReading, thinkOfBlock]);
-
-  // After Think Of becomes visible, wait and show Practice
-  useEffect(() => {
-    if (!showThinkOf || !thinkOfRef.current) return;
-
-    const el = thinkOfRef.current;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setTimeout(() => setShowPractice(true), 2000);
-          observer.unobserve(el);
-        }
-      },
-      { threshold: 0.25 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [showThinkOf]);
-
-  // If no think_of block exists, show practice after reading is done
-  useEffect(() => {
-    if (allReadingRevealed && !thinkOfBlock && practiceBlock && totalReading > 0) {
-      const timer = setTimeout(() => setShowPractice(true), 800);
-      return () => clearTimeout(timer);
-    }
-    if (totalReading === 0 && !thinkOfBlock && practiceBlock) {
-      setShowPractice(true);
-    }
-  }, [allReadingRevealed, thinkOfBlock, practiceBlock, totalReading]);
 
   return (
     <section
       id={`section-${section.id}`}
       ref={innerRef as any}
     >
-      <div className="space-y-5">
-        <h2 className="text-xl font-bold text-white flex items-center gap-3">
-          <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold ${COLOR_MAP[color]}`}>
-            {index + 1}
-          </span>
-          {section.label}
-        </h2>
+      <div className={`space-y-4 ${isFirstSection ? 'bg-gradient-to-b from-[#F8FCFD] to-[var(--surface-page)] rounded-2xl p-6 -mx-2 px-2' : ''}`}>
+        {isFirstSection ? (
+          <h2 className="sr-only">{section.label}</h2>
+        ) : (
+          <>
+            <div className="border-t border-[var(--border-light)] mb-2" />
+            <h2 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
+              {section.label}
+            </h2>
+          </>
+        )}
 
-        {/* Reading items — each reveals on scroll */}
-        {readingItems.map((item, i) => (
-          <RevealItem key={item.key} index={i} onRevealed={handleRevealed}>
-            {renderBlock(
-              item.block,
-              section.id,
-              courseSlug,
-              lectureNumber,
-              () => onPracticeAttempt?.(section.id),
-              () => onPracticeComplete?.(section.id),
-            )}
-          </RevealItem>
-        ))}
+        {revealItems.map((item, itemIndex) => {
+          const content = renderBlock(
+            item.block,
+            section.id,
+            courseSlug,
+            lectureNumber,
+            () => onPracticeAttempt?.(section.id),
+            () => onPracticeComplete?.(section.id),
+            itemIndex
+          );
 
-        {/* Think Of — appears after all reading content is revealed */}
-        {thinkOfBlock && (
-          <StaggerFadeIn show={showThinkOf} delay={200}>
-            <div ref={thinkOfRef}>
-              {renderBlock(
-                thinkOfBlock,
-                section.id,
-                courseSlug,
-                lectureNumber,
-                () => onPracticeAttempt?.(section.id),
-                () => onPracticeComplete?.(section.id),
-              )}
+          const contentElement = (
+            <div key={item.key}>
+              {/* Capped so long sections don't accumulate multi-second delays —
+                  each block only staggers relative to its nearby siblings,
+                  not the section's entire block count. */}
+              <ScrollReveal delay={Math.min(itemIndex * 0.1, 0.5)}>
+                {content}
+              </ScrollReveal>
             </div>
-          </StaggerFadeIn>
-        )}
+          );
 
-        {/* Practice — appears after Think Of has been visible */}
-        {practiceBlock && (
-          <StaggerFadeIn show={showPractice} delay={300}>
-            {renderBlock(
-              practiceBlock,
-              section.id,
-              courseSlug,
-              lectureNumber,
-              () => onPracticeAttempt?.(section.id),
-              () => onPracticeComplete?.(section.id),
-            )}
-          </StaggerFadeIn>
-        )}
+          return contentElement;
+        })}
       </div>
     </section>
   );

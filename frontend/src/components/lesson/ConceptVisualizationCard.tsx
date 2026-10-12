@@ -86,7 +86,7 @@ const MISSING_CODE = { language: 'python', code: '', output: undefined };
 export default function ConceptVisualizationCard({ block }: { block: ConceptVisualizationBlock }) {
   const accent = ACCENT[block?.accentColor as keyof typeof ACCENT] ?? ACCENT.blue;
 
-  // Normalize data: support both cs50ai schema (analogy/visual/code) and python/cs50p schema (leftPanel/centerPanel/rightPanel)
+  // Normalize data: support both fundamentals-of-ai schema (analogy/visual/code) and python/cs50p schema (leftPanel/centerPanel/rightPanel)
   const panel = block as unknown as Record<string, unknown>;
   const analogyData = (block.analogy ?? panel.leftPanel) as Record<string, unknown> | undefined;
   const visualData = (block.visual ?? panel.centerPanel ?? MISSING_VISUAL) as Record<string, unknown>;
@@ -122,8 +122,8 @@ export default function ConceptVisualizationCard({ block }: { block: ConceptVisu
   };
 
   return (
-    <div className="rounded-2xl border border-slate-700/30 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm overflow-hidden">
-      <div className={`p-4 bg-gradient-to-r ${accent.gradFrom} ${accent.gradTo} border-b border-slate-700/30`}>
+    <div className="rounded-2xl border border-[var(--ai-card-border)] bg-[var(--ai-card-bg)] shadow-[var(--ai-card-shadow)] overflow-hidden">
+      <div className="p-4 bg-[var(--brand-navy)] border-b border-[var(--ai-card-border)]">
         <p className="text-xs text-white font-bold uppercase tracking-wider text-center">
           {block?.title ?? ''}
         </p>
@@ -131,10 +131,10 @@ export default function ConceptVisualizationCard({ block }: { block: ConceptVisu
       <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Panel 1: Analogy */}
         <div className="flex flex-col gap-4">
-          <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider">
+          <p className="text-[11px] text-[var(--ai-card-text-secondary)] font-semibold uppercase tracking-wider">
             Real-Life Analogy
           </p>
-          <div className="rounded-xl overflow-hidden border border-slate-700/30 aspect-video relative">
+          <div className="rounded-xl overflow-hidden border border-[var(--ai-card-border)] aspect-video relative">
             {analogyImage ? (
               <>
                 <img src={analogyImage} alt={analogyTitle} className="absolute inset-0 w-full h-full object-cover" />
@@ -146,9 +146,9 @@ export default function ConceptVisualizationCard({ block }: { block: ConceptVisu
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent" />
               </>
             ) : (
-              <div className="absolute inset-0 bg-gradient-to-br from-slate-800/50 to-slate-900/50 flex items-center justify-center">
+              <div className="absolute inset-0 bg-[var(--ai-card-bg)] flex items-center justify-center">
                 <div className="text-center p-4">
-                  <svg className="w-8 h-8 text-slate-600 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <svg className="w-8 h-8 text-[var(--ai-card-text-secondary)] mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
                   </svg>
                 </div>
@@ -156,14 +156,14 @@ export default function ConceptVisualizationCard({ block }: { block: ConceptVisu
             )}
             <div className="absolute bottom-0 left-0 right-0 p-3">
               <p className="text-sm font-bold text-white mb-1">{analogyTitle || 'Concept'}</p>
-              <p className="text-xs text-slate-300">{analogyDescription}</p>
+              <p className="text-xs text-[var(--ai-card-text-secondary)]">{analogyDescription}</p>
             </div>
           </div>
         </div>
 
         {/* Panel 2: Visual */}
         <div className="flex flex-col gap-4">
-          <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider">
+          <p className="text-[11px] text-[var(--ai-card-text-secondary)] font-semibold uppercase tracking-wider">
             Programming Concept
           </p>
           <div className={`flex-1 rounded-xl bg-gradient-to-br ${accent.bg} border ${accent.border} flex flex-col items-center justify-center p-4`}>
@@ -176,30 +176,27 @@ export default function ConceptVisualizationCard({ block }: { block: ConceptVisu
 
         {/* Panel 3: Code */}
         <div className="flex flex-col gap-4">
-          <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider">
+          <p className="text-[11px] text-[var(--ai-card-text-secondary)] font-semibold uppercase tracking-wider">
             Code Example
           </p>
-          <div className="flex-1 rounded-xl bg-[#0d1117] border border-slate-700/40 flex flex-col overflow-hidden">
-            <div className="flex items-center gap-1.5 px-3 py-2 bg-slate-800/40 border-b border-slate-700/30">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
-              <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
-              <span className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
-              <span className="ml-2 text-[10px] text-slate-500 font-medium uppercase">
+          <div className="flex-1 rounded-xl bg-[#0d1117] border border-[var(--ai-card-border)] flex flex-col overflow-hidden">
+            <div className="flex items-center gap-1.5 px-3 py-2 bg-[var(--brand-navy)] border-b border-[var(--ai-card-border)]">
+              <span className="ml-2 text-[10px] text-[var(--ai-card-text-secondary)] font-medium uppercase">
                 {codeLanguage}
               </span>
             </div>
             <div className="p-4 flex-1 overflow-y-auto">
               <pre className="text-sm leading-relaxed font-mono">
-                <code className="text-slate-200">{codeText}</code>
+                <code className="text-[var(--ai-section-text)]">{codeText}</code>
               </pre>
             </div>
             {codeOutput && (
-              <div className="mt-auto border-t border-slate-700/30 bg-slate-900/80">
-                <div className="px-3 py-1 bg-slate-800/40 border-b border-slate-700/30">
-                  <span className="text-[10px] text-slate-500 font-medium uppercase">Output</span>
+              <div className="mt-auto border-t border-[var(--ai-card-border)] bg-[var(--ai-section-bg)]">
+                <div className="px-3 py-1 bg-[var(--brand-navy)] border-b border-[var(--ai-card-border)]">
+                  <span className="text-[10px] text-[var(--ai-card-text-secondary)] font-medium uppercase">Output</span>
                 </div>
                 <div className="p-3">
-                  <pre className="text-xs text-green-400 font-mono">{codeOutput}</pre>
+                  <pre className="text-xs text-[var(--ai-card-accent)] font-mono">{codeOutput}</pre>
                 </div>
               </div>
             )}

@@ -8,6 +8,7 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { api, type ChatMsg, getProjectMetadata, type FailureAnalysisResult, type CodeReviewResult } from "../api";
 import { authFetch } from "../authClient";
 import { runPythonMock, type DebugStep } from "../interpreter";
+import { COURSE_SHORT_LABELS } from "../data/courseNames";
 import {
   Check, CheckCircle, X, XCircle, AlertTriangle, Gem, Clock,
   FolderUp, Download, Monitor, Bot, Pencil, MessageSquare,
@@ -471,7 +472,7 @@ export default function CodingProjectPage() {
         <div className="flex-shrink-0 p-5 border-b border-slate-800/80 bg-[#0c1015]/60">
           <div className="flex items-center justify-between gap-4 mb-3">
             <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">
-              {slug === "cs50p" ? "CS50 Python" : "AI"} • Lecture {number}
+              {(slug && COURSE_SHORT_LABELS[slug]) ?? "Course"} • Lecture {number}
             </span>
             
             {/* Problem Navigation Links */}
@@ -790,7 +791,7 @@ export default function CodingProjectPage() {
                     <CheckCircle className="w-4 h-4 text-green-400" />
                     <div>
                       <h4 className="font-bold text-xs text-green-400">Success! All tests passed</h4>
-                      <p className="text-[11px] text-slate-350 mt-1 whitespace-pre-wrap">{output}</p>
+                      <p className="text-[11px] text-slate-300 mt-1 whitespace-pre-wrap">{output}</p>
                     </div>
                   </div>
                 )}
@@ -799,7 +800,7 @@ export default function CodingProjectPage() {
                     <XCircle className="w-4 h-4 text-red-400" />
                     <div>
                       <h4 className="font-bold text-xs text-red-400">Test Run Failed</h4>
-                      <p className="text-[11px] text-slate-350 mt-1 whitespace-pre-wrap font-mono">{output}</p>
+                      <p className="text-[11px] text-slate-300 mt-1 whitespace-pre-wrap font-mono">{output}</p>
                     </div>
                   </div>
                 )}
@@ -874,7 +875,7 @@ export default function CodingProjectPage() {
                       </div>
 
                       <div className="bg-[#0c1015]/80 border border-slate-800/80 p-2.5 rounded-lg text-xs leading-relaxed text-slate-200">
-                        <span className="font-bold text-slate-350 block mb-0.5">Why It Failed:</span>
+                        <span className="font-bold text-slate-300 block mb-0.5">Why It Failed:</span>
                         {failureAnalysis.whyFailed}
                       </div>
                     </div>
@@ -979,7 +980,7 @@ export default function CodingProjectPage() {
                             ) : (
                               <ul className="space-y-2 list-none p-0 m-0">
                                 {codeReview.issues.map((issue: string, idx: number) => (
-                                  <li key={idx} className="text-xs text-slate-350 flex items-start gap-2">
+                                  <li key={idx} className="text-xs text-slate-300 flex items-start gap-2">
                                     <AlertTriangle className="w-3 h-3 text-amber-500 mt-0.5" />
                                     <span>{issue}</span>
                                   </li>
@@ -1211,7 +1212,7 @@ export default function CodingProjectPage() {
                           {/* Debug Terminal Output */}
                           <div className="bg-[#10141b] border border-slate-800/80 rounded-xl p-3.5">
                             <h5 className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-2">Debug Console Output</h5>
-                            <div className="bg-[#090d12] border border-slate-850 p-3 rounded-lg font-mono text-[11px] text-slate-350 min-h-[50px] max-h-[80px] overflow-y-auto whitespace-pre-wrap">
+                            <div className="bg-[#090d12] border border-slate-850 p-3 rounded-lg font-mono text-[11px] text-slate-300 min-h-[50px] max-h-[80px] overflow-y-auto whitespace-pre-wrap">
                               {debugSteps[currentDebugIndex].outputs.length === 0
                                 ? "[Console stdout is empty]"
                                 : debugSteps[currentDebugIndex].outputs.join("\n")}
@@ -1255,7 +1256,7 @@ export default function CodingProjectPage() {
             {activeTab === "input" && (
               <div className="p-4 h-full flex flex-col gap-2 bg-[#0b0f14]">
                 <div className="flex items-center justify-between">
-                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-350 cursor-pointer select-none">
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-300 cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={useCustomInput}

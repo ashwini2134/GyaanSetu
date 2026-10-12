@@ -1,6 +1,6 @@
-import { Navigate, Route, Routes, useLocation, Outlet } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation, useParams, Outlet } from "react-router-dom";
 import type { ReactNode } from "react";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
 
 import { useAuth } from "./auth";
 import type { UserRole } from "./authClient";
@@ -53,12 +53,23 @@ const Shell = lazy(
 const LeaderboardPage = lazy(
   () => import("./pages/LeaderboardPage")
 );
+const AllAchievementsPage = lazy(
+  () => import("./pages/AllAchievementsPage")
+);
 const CertificationsPage = lazy(
   () => import("./pages/CertificationsPage")
 );
 
 const CapstonePage = lazy(
   () => import("./pages/CapstonePage")
+);
+
+const CertificationReadinessPage = lazy(
+  () => import("./pages/CertificationReadinessPage")
+);
+
+const MilestonePage = lazy(
+  () => import("./pages/MilestonePage")
 );
 
 const Projects = lazy(
@@ -77,8 +88,11 @@ const InteractiveProjectPage = lazy(
   () => import("./pages/InteractiveProjectPage")
 );
 
-const ProfilePage = lazy(
-  () => import("./pages/ProfilePage")
+const PortfolioPage = lazy(
+  () => import("./pages/PortfolioPage")
+);
+const PortfolioSpotlightPage = lazy(
+  () => import("./pages/PortfolioSpotlightPage")
 );
 const VerifyCertificatePage = lazy(
   () => import("./pages/VerifyCertificatePage")
@@ -110,10 +124,39 @@ const BetaTesting = lazy(() => import("./pages/admin/BetaTesting"));
 const OperationsMonitor = lazy(() => import("./pages/admin/OperationsMonitor"));
 const Analytics = lazy(() => import("./pages/admin/Analytics"));
 const Settings = lazy(() => import("./pages/admin/Settings"));
+const TestCenter = lazy(() => import("./pages/admin/TestCenter"));
+const AssessmentBuilder = lazy(() => import("./pages/admin/AssessmentBuilder"));
+const CourseTestCenter = lazy(() => import("./pages/admin/CourseTestCenter"));
+const PythonCourseTestCenter = lazy(() => import("./pages/admin/PythonCourseTestCenter"));
+const LMSCoreTestCenter = lazy(() => import("./pages/admin/LMSCoreTestCenter"));
 import { AdminRoute } from "./components/admin/AdminRoute";
 
 const LandingPage = lazy(
   () => import("./pages/LandingPage")
+);
+
+const AboutPage = lazy(
+  () => import("./pages/AboutPage")
+);
+
+const PrivacyPolicy = lazy(
+  () => import("./pages/PrivacyPolicy")
+);
+
+const AiMentorPage = lazy(
+  () => import("./pages/AiMentorPage")
+);
+
+const TermsOfService = lazy(
+  () => import("./pages/TermsOfService")
+);
+
+const CookiePolicy = lazy(
+  () => import("./pages/CookiePolicy")
+);
+
+const NotFoundPage = lazy(
+  () => import("./pages/NotFoundPage")
 );
 
 // Loading Spinner
@@ -166,6 +209,12 @@ function LoadingSpinner() {
 }
 
 
+// Legacy /profile/:userId links now point at /portfolio/:userId
+function ProfileRedirect() {
+  const { userId } = useParams<{ userId: string }>();
+  return <Navigate to={`/portfolio/${userId}`} replace />;
+}
+
 // Landing or Dashboard Guard
 function LandingOrDashboardGuard() {
   const { user, ready } = useAuth();
@@ -209,6 +258,31 @@ export function RequireRole({
 
 // Main App
 export default function App() {
+  useEffect(() => {
+    fetch("/api/admin/branding")
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to load branding");
+        return res.json();
+      })
+      .then(data => {
+        if (data.platformName) document.title = data.platformName;
+        if (data.primaryColor) document.documentElement.style.setProperty('--color-primary', data.primaryColor);
+        if (data.secondaryColor) document.documentElement.style.setProperty('--color-secondary', data.secondaryColor);
+        
+        // Dynamic favicon injection
+        if (data.faviconUrl) {
+          let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
+          if (!link) {
+            link = document.createElement('link');
+            link.rel = 'icon';
+            document.head.appendChild(link);
+          }
+          link.href = data.faviconUrl;
+        }
+      })
+      .catch(console.error);
+  }, []);
+
 
   return (
 
@@ -221,6 +295,25 @@ export default function App() {
         <Route
           path="/login"
           element={<Login />}
+        />
+        <Route
+          path="/about"
+          element={<AboutPage />}
+        />
+
+        <Route
+          path="/privacy"
+          element={<PrivacyPolicy />}
+        />
+
+        <Route
+          path="/terms"
+          element={<TermsOfService />}
+        />
+
+        <Route
+          path="/cookies"
+          element={<CookiePolicy />}
         />
 
         <Route
@@ -300,6 +393,16 @@ export default function App() {
           {/* Capstone */}
 
           <Route
+            path="course/:slug/lecture/:number/milestone"
+            element={<MilestonePage />}
+          />
+
+          <Route
+            path="course/:slug/certification-readiness"
+            element={<CertificationReadinessPage />}
+          />
+
+          <Route
             path="course/:slug/capstone"
             element={<CapstonePage />}
           />
@@ -314,6 +417,12 @@ export default function App() {
           <Route
             path="leaderboard"
             element={<LeaderboardPage />}
+          />
+
+          {/* All Achievements */}
+          <Route
+            path="achievements"
+            element={<AllAchievementsPage />}
           />
 
           {/* Projects */}
@@ -334,19 +443,33 @@ export default function App() {
             element={<AssessmentsSection />}
           />
 
-          {/* Profile */}
+          {/* Portfolio — single page for identity, settings, and showcase */}
           <Route
-            path="profile"
-            element={<ProfilePage />}
+            path="portfolio"
+            element={<PortfolioPage />}
           />
           <Route
-            path="profile/:userId"
-            element={<ProfilePage />}
+            path="portfolio/:userId"
+            element={<PortfolioPage />}
+          />
+          <Route
+            path="spotlight"
+            element={<PortfolioSpotlightPage />}
           />
           <Route
             path="settings"
-            element={<ProfilePage />}
+            element={<PortfolioPage />}
           />
+
+          {/* AI Mentor */}
+          <Route
+            path="ai-mentor"
+            element={<AiMentorPage />}
+          />
+
+          {/* Legacy links */}
+          <Route path="profile" element={<Navigate to="/portfolio" replace />} />
+          <Route path="profile/:userId" element={<ProfileRedirect />} />
 
           {/* ── Admin: Redirects (legacy routes) ── */}
           <Route path="qa" element={<Navigate to="/admin/operations" replace />} />
@@ -367,6 +490,12 @@ export default function App() {
             <Route path="operations" element={<OperationsMonitor />} />
             <Route path="analytics" element={<Analytics />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="testing" element={<TestCenter />} />
+            <Route path="content-assessments" element={<AssessmentBuilder />} />
+            <Route path="content-assessments/:id" element={<AssessmentBuilder />} />
+            <Route path="course-testing" element={<CourseTestCenter />} />
+            <Route path="course-testing/python" element={<PythonCourseTestCenter />} />
+            <Route path="lms-testing" element={<LMSCoreTestCenter />} />
           </Route>
 
         </Route>
@@ -375,7 +504,7 @@ export default function App() {
 
         <Route
           path="*"
-          element={<Navigate to="/" replace />}
+          element={<NotFoundPage />}
         />
 
       </Routes>

@@ -2,6 +2,13 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import puppeteer, { type Browser, type LaunchOptions } from 'puppeteer';
 import { buildCertHtml, CANVAS_WIDTH, CANVAS_HEIGHT } from './template';
+import {
+  buildCourseCertHtml,
+  type CourseCertTemplateInput,
+  CANVAS_WIDTH as COURSE_CANVAS_WIDTH,
+  CANVAS_HEIGHT as COURSE_CANVAS_HEIGHT,
+} from './course-cert-template';
+import { buildPortfolioHtml, type PortfolioTemplateInput } from './portfolio-template';
 
 // Resolve assets inside the container. Copied from the source repo at
 // docker build time (see Dockerfile `COPY assets ./assets`). We base64-inline
@@ -131,6 +138,62 @@ export async function renderCertPdf(input: RenderInput): Promise<Buffer> {
     const pdf = await page.pdf({
       width: `${CANVAS_WIDTH}px`,
       height: `${CANVAS_HEIGHT}px`,
+      printBackground: true,
+      margin: { top: 0, right: 0, bottom: 0, left: 0 },
+      preferCSSPageSize: true,
+    });
+    return Buffer.from(pdf);
+  } finally {
+    await page.close();
+  }
+}
+
+export type PortfolioRenderInput = Omit<PortfolioTemplateInput, 'fontFaceCss'>;
+
+// Unlike the cert renders (fixed-size single card), this is a normal
+// flowing A4 document — pagination is handled by page.pdf({ format: 'A4' })
+// rather than a fixed canvas, since content length varies a lot per student.
+export async function renderPortfolioPdf(input: PortfolioRenderInput): Promise<Buffer> {
+  const fontFaceCss = await loadFontFaceCss();
+  const html = buildPortfolioHtml({ ...input, fontFaceCss });
+
+  const browser = await getBrowser();
+  const page = await browser.newPage();
+  try {
+    await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 30_000 });
+    await page.evaluate('document.fonts && document.fonts.ready');
+
+    const pdf = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+      margin: { top: '16mm', right: '16mm', bottom: '16mm', left: '16mm' },
+    });
+    return Buffer.from(pdf);
+  } finally {
+    await page.close();
+  }
+}
+
+export type CourseRenderInput = Omit<CourseCertTemplateInput, 'fontFaceCss'>;
+
+export async function renderCourseCertPdf(input: CourseRenderInput): Promise<Buffer> {
+  const fontFaceCss = await loadFontFaceCss();
+  const html = buildCourseCertHtml({ ...input, fontFaceCss });
+
+  const browser = await getBrowser();
+  const page = await browser.newPage();
+  try {
+    await page.setViewport({
+      width: COURSE_CANVAS_WIDTH,
+      height: COURSE_CANVAS_HEIGHT,
+      deviceScaleFactor: 1,
+    });
+    await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 30_000 });
+    await page.evaluate('document.fonts && document.fonts.ready');
+
+    const pdf = await page.pdf({
+      width: `${COURSE_CANVAS_WIDTH}px`,
+      height: `${COURSE_CANVAS_HEIGHT}px`,
       printBackground: true,
       margin: { top: 0, right: 0, bottom: 0, left: 0 },
       preferCSSPageSize: true,

@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
-import { authApi, clearToken, getToken, setToken, type AuthUser, type UserRole } from "./authClient";
+import { authApi, clearToken, getToken, isTokenExpired, setToken, type AuthUser, type UserRole } from "./authClient";
 
 type User = AuthUser | null;
 
@@ -7,7 +7,7 @@ const Ctx = createContext<{
   user: User;
   ready: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
+  register: (email: string, password: string, name: string, githubUrl?: string) => Promise<void>;
   logout: () => Promise<void>;
   completeOAuth: (code: string) => Promise<void>;
   hasRole: (...roles: UserRole[]) => boolean;
@@ -19,7 +19,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
 
   const loadMe = useCallback(async () => {
-    if (!getToken()) {
+    const token = getToken();
+    if (!token) {
+      setUser(null);
+      setReady(true);
+      return;
+    }
+    if (isTokenExpired(token)) {
+      clearToken();
       setUser(null);
       setReady(true);
       return;
@@ -69,8 +76,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(me);
   };
 
-  const register = async (email: string, password: string, name: string) => {
-    const { access_token, user: me } = await authApi.register(email, password, name);
+  const register = async (email: string, password: string, name: string, githubUrl?: string) => {
+    const { access_token, user: me } = await authApi.register(email, password, name, githubUrl);
     setToken(access_token);
     setUser(me);
   };
@@ -85,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.clear();
     sessionStorage.clear();
     setUser(null);
-    window.location.href = "/#/login";
+    window.location.href = "/#/";
   };
 
   const completeOAuth = async (code: string) => {

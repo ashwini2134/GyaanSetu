@@ -356,7 +356,7 @@ export default function GraphTraversalExercise({ config, onComplete, onAttempt }
             {renderGraph(visited, currentPhase, "normal")}
           </div>
 
-          <div className="flex items-center justify-between mt-4 text-xs text-slate-500">
+          <div className="flex items-center justify-between mt-4 text-xs text-slate-300">
             <span>
               Visited: {totalCorrect}/{totalExpected}
             </span>
@@ -485,10 +485,10 @@ export default function GraphTraversalExercise({ config, onComplete, onAttempt }
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-slate-800/60">
-                  <th className="px-4 py-2 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                  <th className="px-4 py-2 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
                     BFS
                   </th>
-                  <th className="px-4 py-2 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                  <th className="px-4 py-2 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
                     DFS
                   </th>
                 </tr>
@@ -575,7 +575,7 @@ export default function GraphTraversalExercise({ config, onComplete, onAttempt }
             <button
               onClick={handleReflectionSubmit}
               disabled={reflectionChoice === null}
-              className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-white px-4 py-2 rounded-lg bg-amber-600/80 hover:bg-amber-600 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-white px-4 min-h-[44px] rounded-xl bg-[var(--button-primary-bg)] hover:bg-[var(--button-primary-hover)] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Submit Answer
             </button>

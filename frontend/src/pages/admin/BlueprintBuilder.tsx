@@ -70,11 +70,11 @@ export default function BlueprintBuilder() {
   };
 
   if (isLoading) {
-    return <div className="p-8 text-slate-400">Loading blueprint...</div>;
+    return <div className="p-8 text-[var(--text-muted)]">Loading blueprint...</div>;
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#0a0f1e] overflow-auto">
+    <div className="flex flex-col h-full bg-[var(--bg-body)] overflow-auto">
       {courseId && <CourseEditorNav courseId={courseId} />}
       <div className="p-8 max-w-4xl mx-auto pb-24 w-full">
         <AdminBreadcrumb items={[
@@ -84,15 +84,15 @@ export default function BlueprintBuilder() {
 
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-100 tracking-tight">Course Blueprint</h1>
-          <p className="text-slate-400 mt-1">Design the foundation of your new learning experience.</p>
+          <h1 className="text-3xl font-bold text-[var(--text-main)] tracking-tight">Course Blueprint</h1>
+          <p className="text-[var(--text-secondary)] mt-1">Design the foundation of your new learning experience.</p>
         </div>
         <button 
           onClick={() => {
             navigate('/admin/content-studio/new');
             if (!courseId) window.location.reload();
           }}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium shadow-sm transition-colors flex items-center gap-2"
+          className="bg-[var(--color-brand-navy)] hover:bg-[var(--color-primary)] text-[var(--bg-body)] px-5 py-2.5 rounded-lg font-medium shadow-sm transition-colors duration-200 flex items-center gap-2"
         >
           <Plus className="w-5 h-5" />
           Create New Course
@@ -104,13 +104,13 @@ export default function BlueprintBuilder() {
         {[1, 2, 3].map((s) => (
           <div key={s} className="flex items-center flex-1 last:flex-none">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors ${
-              step >= s ? "bg-blue-600 text-white" : "bg-slate-200 text-slate-400"
+              step >= s ? "bg-[var(--color-brand-navy)] text-white" : "bg-[var(--bg-dark-surface)] text-[var(--text-muted)]"
             }`}>
               {step > s ? <CheckCircle2 className="w-5 h-5" /> : s}
             </div>
             {s < 3 && (
               <div className={`h-1 flex-1 mx-4 rounded-full transition-colors ${
-                step > s ? "bg-blue-600" : "bg-slate-200"
+                step > s ? "bg-[var(--color-brand-navy)]" : "bg-[var(--bg-dark-surface)]"
               }`} />
             )}
           </div>
@@ -119,53 +119,53 @@ export default function BlueprintBuilder() {
 
       {/* Step 1: Basic Info */}
       {step === 1 && (
-        <div className="space-y-6 bg-[#0f172a] p-8 rounded-xl shadow-sm border border-white/10">
+        <div className="space-y-6 bg-[var(--bg-surface)] p-8 rounded-xl shadow-sm border border-[var(--border-light)]">
           <div>
-            <label className="block text-sm font-medium text-slate-100 mb-2">Course Title <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium text-[var(--text-main)] mb-2">Course Title <span className="text-red-500">*</span></label>
             <input 
               type="text" 
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Advanced Full-Stack React"
-              className="w-full border border-white/10 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+              className="w-full border border-[var(--border-light)] rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none transition-all text-[var(--text-main)] bg-[var(--bg-body)]"
             />
             {title.length > 0 && title.length < 5 && <p className="text-red-500 text-xs mt-1">Title must be at least 5 characters.</p>}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-100 mb-2">Description <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium text-[var(--text-main)] mb-2">Description <span className="text-red-500">*</span></label>
             <textarea 
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="What will students learn in this course?"
               rows={4}
               maxLength={500}
-              className="w-full border border-white/10 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none"
+              className="w-full border border-[var(--border-light)] rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none transition-all resize-none text-[var(--text-main)] bg-[var(--bg-body)]"
             />
             <div className="flex justify-between items-center mt-1">
               {description.length > 0 && description.length < 20 ? (
                 <p className="text-red-500 text-xs">Description must be at least 20 characters.</p>
               ) : <div/>}
-              <p className="text-xs text-slate-400">{description.length}/500</p>
+              <p className="text-xs text-[var(--text-muted)]">{description.length}/500</p>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-100 mb-2">Thumbnail Upload</label>
-            <div className="border-2 border-dashed border-white/10 rounded-xl p-8 flex flex-col items-center justify-center bg-[#0a0f1e] hover:bg-white/10 transition-colors cursor-pointer">
-              <UploadCloud className="w-10 h-10 text-slate-400 mb-3" />
-              <p className="text-sm font-medium text-slate-300">Click to upload or drag and drop</p>
-              <p className="text-xs text-slate-400 mt-1">PNG, JPG or WEBP (Max 2MB)</p>
+            <label className="block text-sm font-medium text-[var(--text-main)] mb-2">Thumbnail Upload</label>
+            <div className="border-2 border-dashed border-[var(--border-light)] rounded-xl p-8 flex flex-col items-center justify-center bg-[var(--bg-body)] hover:bg-[var(--bg-dark-surface)] transition-colors cursor-pointer">
+              <UploadCloud className="w-10 h-10 text-[var(--text-muted)] mb-3" />
+              <p className="text-sm font-medium text-[var(--text-secondary)]">Click to upload or drag and drop</p>
+              <p className="text-xs text-[var(--text-muted)] mt-1">PNG, JPG or WEBP (Max 2MB)</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-slate-100 mb-2">Category <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-medium text-[var(--text-main)] mb-2">Category <span className="text-red-500">*</span></label>
               <select 
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full border border-white/10 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-[#0f172a]"
+                className="w-full border border-[var(--border-light)] rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none transition-all bg-[var(--bg-body)] text-[var(--text-main)]"
               >
                 <option>Web Development</option>
                 <option>Data Science</option>
@@ -177,27 +177,27 @@ export default function BlueprintBuilder() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-100 mb-2">Estimated Duration (hours)</label>
+              <label className="block text-sm font-medium text-[var(--text-main)] mb-2">Estimated Duration (hours)</label>
               <input 
                 type="number" 
                 value={estimatedDuration}
                 onChange={(e) => setEstimatedDuration(e.target.value)}
                 placeholder="e.g. 15"
                 min="1"
-                className="w-full border border-white/10 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                className="w-full border border-[var(--border-light)] rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none transition-all text-[var(--text-main)] bg-[var(--bg-body)]"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-100 mb-3">Difficulty Level <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium text-[var(--text-main)] mb-3">Difficulty Level <span className="text-red-500">*</span></label>
             <div className="grid grid-cols-3 gap-4">
               {['Beginner', 'Intermediate', 'Advanced'].map(level => (
                 <div 
                   key={level}
                   onClick={() => setDifficulty(level)}
-                  className={`border rounded-lg p-4 cursor-pointer flex flex-col items-center justify-center transition-all ${
-                    difficulty === level ? "border-blue-600 bg-blue-900/30/50 text-blue-400 shadow-sm" : "border-white/10 hover:border-white/10 bg-[#0f172a] text-slate-300"
+                  className={`border rounded-lg p-4 cursor-pointer flex flex-col items-center justify-center transition-all duration-200 ${
+                    difficulty === level ? "border-[var(--color-brand-navy)] bg-[var(--color-brand-navy)] hover:bg-[var(--color-primary)] text-[var(--bg-body)] shadow-sm" : "border-[var(--border-light)] bg-[var(--bg-body)] text-[var(--text-secondary)] hover:bg-[var(--color-primary)] hover:border-[var(--color-primary)] hover:text-[var(--bg-body)]"
                   }`}
                 >
                   <span className="font-medium text-sm">{level}</span>
@@ -210,10 +210,10 @@ export default function BlueprintBuilder() {
 
       {/* Step 2: Structure */}
       {step === 2 && (
-        <div className="space-y-6 bg-[#0f172a] p-8 rounded-xl shadow-sm border border-white/10">
+        <div className="space-y-6 bg-[var(--bg-surface)] p-8 rounded-xl shadow-sm border border-[var(--border-light)]">
           <div>
-            <label className="block text-sm font-medium text-slate-100 mb-2">Prerequisites</label>
-            <p className="text-sm text-slate-400 mb-4">Select courses students should complete before starting this one.</p>
+            <label className="block text-sm font-medium text-[var(--text-main)] mb-2">Prerequisites</label>
+            <p className="text-sm text-[var(--text-muted)] mb-4">Select courses students should complete before starting this one.</p>
             
             <div className="flex items-center gap-3 mb-4">
               <input 
@@ -221,9 +221,9 @@ export default function BlueprintBuilder() {
                 id="noPre" 
                 checked={noPrerequisites}
                 onChange={(e) => setNoPrerequisites(e.target.checked)}
-                className="w-4 h-4 text-blue-400 rounded border-white/10 focus:ring-blue-500"
+                className="w-4 h-4 text-[var(--color-primary)] rounded border-[var(--border-light)] focus:ring-[var(--color-primary)]"
               />
-              <label htmlFor="noPre" className="text-sm text-slate-300 font-medium">No prerequisites required</label>
+              <label htmlFor="noPre" className="text-sm text-[var(--text-secondary)] font-medium">No prerequisites required</label>
             </div>
 
             {!noPrerequisites && (
@@ -231,13 +231,13 @@ export default function BlueprintBuilder() {
                 <input 
                   type="text" 
                   placeholder="Search existing published courses..."
-                  className="w-full border border-white/10 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  className="w-full border border-[var(--border-light)] rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none transition-all text-[var(--text-main)] bg-[var(--bg-body)]"
                 />
                 {/* Placeholder for selected tags */}
                 <div className="flex flex-wrap gap-2 pt-2">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[var(--bg-dark-surface)] text-[var(--text-main)] border border-[var(--border-light)]">
                     Intro to HTML & CSS
-                    <button className="hover:text-blue-900 font-bold">&times;</button>
+                    <button className="hover:text-[var(--color-primary)] font-bold">&times;</button>
                   </span>
                 </div>
               </div>
@@ -248,30 +248,30 @@ export default function BlueprintBuilder() {
 
       {/* Step 3: Review */}
       {step === 3 && (
-        <div className="space-y-6 bg-[#0f172a] p-8 rounded-xl shadow-sm border border-white/10">
+        <div className="space-y-6 bg-[var(--bg-surface)] p-8 rounded-xl shadow-sm border border-[var(--border-light)]">
           <div>
-            <h3 className="text-lg font-bold text-slate-100 border-b border-white/10 pb-2 mb-4">Review Course Blueprint</h3>
+            <h3 className="text-lg font-bold text-[var(--text-main)] border-b border-[var(--border-light)] pb-2 mb-4">Review Course Blueprint</h3>
             
             <div className="grid grid-cols-2 gap-y-4 text-sm">
-              <div className="text-slate-400">Title</div>
-              <div className="font-medium text-slate-100">{title || "Untitled Course"}</div>
+              <div className="text-[var(--text-muted)]">Title</div>
+              <div className="font-medium text-[var(--text-main)]">{title || "Untitled Course"}</div>
               
-              <div className="text-slate-400">Category</div>
-              <div className="font-medium text-slate-100">{category}</div>
+              <div className="text-[var(--text-muted)]">Category</div>
+              <div className="font-medium text-[var(--text-main)]">{category}</div>
               
-              <div className="text-slate-400">Difficulty</div>
-              <div className="font-medium text-slate-100">{difficulty}</div>
+              <div className="text-[var(--text-muted)]">Difficulty</div>
+              <div className="font-medium text-[var(--text-main)]">{difficulty}</div>
               
-              <div className="text-slate-400">Duration</div>
-              <div className="font-medium text-slate-100">{estimatedDuration ? `${estimatedDuration} hours` : "Not specified"}</div>
+              <div className="text-[var(--text-muted)]">Duration</div>
+              <div className="font-medium text-[var(--text-main)]">{estimatedDuration ? `${estimatedDuration} hours` : "Not specified"}</div>
               
-              <div className="text-slate-400">Prerequisites</div>
-              <div className="font-medium text-slate-100">{noPrerequisites ? "None" : "1 selected"}</div>
+              <div className="text-[var(--text-muted)]">Prerequisites</div>
+              <div className="font-medium text-[var(--text-main)]">{noPrerequisites ? "None" : "1 selected"}</div>
             </div>
 
-            <div className="mt-6 pt-6 border-t border-white/10">
-              <div className="text-slate-400 text-sm mb-2">Description</div>
-              <p className="text-slate-100 text-sm whitespace-pre-wrap">{description || "No description provided."}</p>
+            <div className="mt-6 pt-6 border-t border-[var(--border-light)]">
+              <div className="text-[var(--text-muted)] text-sm mb-2">Description</div>
+              <p className="text-[var(--text-main)] text-sm whitespace-pre-wrap">{description || "No description provided."}</p>
             </div>
           </div>
         </div>
@@ -282,7 +282,7 @@ export default function BlueprintBuilder() {
         <button 
           onClick={() => setStep(step - 1)}
           disabled={step === 1}
-          className="px-6 py-2.5 rounded-lg font-medium text-slate-300 bg-[#0f172a] border border-white/10 hover:bg-[#0a0f1e] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-6 py-2.5 rounded-lg font-medium text-[var(--text-secondary)] bg-[var(--bg-body)] border border-[var(--border-light)] hover:bg-[var(--bg-surface)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           Back
         </button>
@@ -291,7 +291,7 @@ export default function BlueprintBuilder() {
           <button 
             onClick={() => setStep(step + 1)}
             disabled={title.length < 5 || description.length < 20}
-            className="px-6 py-2.5 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+            className="px-6 py-2.5 rounded-lg font-medium text-white bg-[var(--color-brand-navy)] hover:bg-[var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
           >
             Continue to {step === 1 ? "Structure" : "Review"}
           </button>
@@ -299,7 +299,7 @@ export default function BlueprintBuilder() {
           <button 
             onClick={handleSaveDraft}
             disabled={isSaving}
-            className="px-6 py-2.5 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50"
+            className="px-6 py-2.5 rounded-lg font-medium text-white bg-[var(--color-brand-navy)] hover:bg-[var(--color-primary)] transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50"
           >
             {isSaving ? "Saving..." : courseId ? "Save Changes" : "Save as Draft"}
             {courseId ? <Save className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}

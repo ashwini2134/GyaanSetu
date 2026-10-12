@@ -74,7 +74,10 @@ export interface ThinkOfBlock {
     title: string;
     description: string;
     image?: string;
+    bullets?: string[];
+    highlightCard?: string;
   };
+  stage1Transition?: string;
   visualization: {
     type: ThinkOfVisualType;
     title: string;
@@ -83,13 +86,19 @@ export interface ThinkOfBlock {
     trueLabel?: string;
     falseLabel?: string;
     centerLabel?: string;
+    bullets?: string[];
+    highlightCard?: string;
   };
+  stage2Transition?: string;
   code: {
     language: string;
     code: string;
     output?: string;
+    highlights?: string[];
+    highlightCard?: string;
   };
-  reflection: {
+  takeaway?: string;
+  reflection?: {
     question: string;
     answer: string;
     options?: string[];
@@ -265,6 +274,421 @@ export interface BFSDFSConfig {
   completionMessages: string[];
 }
 
+export interface InvestigationSlide {
+  title: string;
+  body: string;
+}
+
+export interface InvestigationQuestion {
+  category: string;
+  scenario: string;
+  question: string;
+  options: string[];
+  correct: string;
+  explanation: string;
+}
+
+export interface InvestigationConfig {
+  slides: InvestigationSlide[];
+  questions: InvestigationQuestion[];
+  completionSummary: { label: string; value: string }[];
+  completionMessage: string;
+  completionTitle: string;
+}
+
+export interface SearchProblemBuilderLocation {
+  id: string;
+  label: string;
+  x: number;
+  y: number;
+}
+
+export interface SearchProblemBuilderOption {
+  id: string;
+  label: string;
+  correct: boolean;
+  feedback?: string;
+}
+
+export interface BFSDFSGameNode {
+  id: string;
+  label: string;
+  x: number;
+  y: number;
+}
+
+export type BFSDFSGameEdge = [string, string];
+
+export interface BFSDFSGameRound {
+  id: string;
+  mission: string;
+  treasureNode: string;
+  startNode: string;
+  bfsOrder: string[];
+  dfsOrder: string[];
+  winner: 'bfs' | 'dfs';
+  explanation: string;
+}
+
+export interface BFSDFSGameConfig {
+  slides: { title: string; body: string }[];
+  nodes: BFSDFSGameNode[];
+  edges: BFSDFSGameEdge[];
+  rounds: BFSDFSGameRound[];
+  completionTitle: string;
+  completionMessage: string;
+  closingMessage: string;
+}
+
+export interface ConfidenceScenario {
+  id: string;
+  title: string;
+  situation: string;
+  expectedMin: number;
+  expectedMax: number;
+  explanation: string;
+}
+
+export interface ConfidenceChallengeConfig {
+  slides: { title: string; body: string }[];
+  scenarios: ConfidenceScenario[];
+  completionTitle: string;
+  completionMessage: string;
+  closeThreshold: number;
+  farThreshold: number;
+}
+
+export interface CaseEvidence {
+  id: string;
+  title: string;
+  evidence: string;
+  question: string;
+  correct: 'increase' | 'decrease' | 'stay_similar';
+  newBelief: number;
+  explanation: string;
+}
+
+export interface CaseFileInvestigationConfig {
+  slides: { title: string; body: string }[];
+  caseTitle: string;
+  initialBelief: number;
+  status: string;
+  evidences: CaseEvidence[];
+  completionTitle: string;
+  completionMessage: string;
+  takeaways: string[];
+}
+
+export interface PipelineEvidence {
+  id: string;
+  label: string;
+  description: string;
+}
+
+export interface DecisionPipelineConfig {
+  slides: { title: string; body: string }[];
+  scenarioTitle: string;
+  priorBeliefPercent: number;
+  priorBeliefCard: string;
+  priorBeliefExplanation: string;
+  evidences: PipelineEvidence[];
+  evidenceExplanation: string;
+  updatedConfidence: number;
+  updatedConfidenceExplanation: string;
+  options: { label: string; value: string }[];
+  correctOption: string;
+  decisionExplanation: string;
+  summaryText: string;
+}
+
+export interface MarkovChainPracticeConfig {
+  transitionMatrix: Record<string, Record<string, number>>;
+  stateLabels: Record<string, string>;
+  questions: { question: string; options: string[]; correctIndex: number; explanation: string }[];
+  completionTitle: string;
+  completionMessage: string;
+  takeaways: string[];
+}
+
+export interface HillClimbExerciseConfig {
+  slides: { title: string; body: string }[];
+  landscape: number[];
+  scenarioText?: string;
+  completionTitle: string;
+  completionMessage: string;
+  takeaways: string[];
+}
+
+export interface SearchProblemBuilderConfig {
+  slides: { title: string; body: string }[];
+  scenarioText: string;
+  locations: SearchProblemBuilderLocation[];
+  edges: [string, string][];
+  startState: { correctId: string; errorMessage: string };
+  goalState: { correctId: string; errorMessage: string };
+  actions: { options: SearchProblemBuilderOption[] };
+  pathCost: { options: SearchProblemBuilderOption[] };
+  validationSteps: { label: string }[];
+  completionTitle: string;
+  completionMessage: string;
+  closingMessage: string;
+}
+
+export interface WarehouseOrderPosition {
+  id: string;
+  label: string;
+  x: number;
+  y: number;
+}
+
+export interface WarehouseStepOrder {
+  id: string;
+  g: number;
+  h: number;
+}
+
+export interface WarehouseStep {
+  robotX: number;
+  robotY: number;
+  availableOrders: WarehouseStepOrder[];
+  correctOrderId: string;
+  greedyOrderId: string;
+  explanation: string;
+}
+
+export interface WarehouseAIGameConfig {
+  slides: { title: string; body: string }[];
+  orderPositions: WarehouseOrderPosition[];
+  steps: WarehouseStep[];
+  completionTitle: string;
+  completionMessage: string;
+  closingMessage: string;
+}
+
+export interface PropLogicGameConfig {
+  slides: { title: string; body: string }[];
+  completionTitle: string;
+  completionMessage: string;
+}
+
+export interface KBGameConfig {
+  slides: { title: string; body: string }[];
+  completionTitle: string;
+  completionMessage: string;
+}
+
+export interface InferenceGameConfig {
+  slides: { title: string; body: string }[];
+  completionTitle: string;
+  completionMessage: string;
+}
+
+export interface PizzaToppingConfig {
+  id: string;
+  name: string;
+  score: number;
+  color: string;
+}
+
+export interface PizzaOptimizationConfig {
+  slides: { title: string; body: string }[];
+  toppings: PizzaToppingConfig[];
+  baseScore: number;
+  completionTitle: string;
+  completionMessages: {
+    high: string;
+    medium: string;
+    low: string;
+  };
+  takeaways: string[];
+}
+
+export interface LostAndFoundCategory {
+  id: string;
+  label: string;
+}
+
+export interface LostAndFoundItem {
+  id: string;
+  label: string;
+  categoryId: string;
+}
+
+export interface LostAndFoundConfig {
+  slides: { title: string; body: string }[];
+  categories: LostAndFoundCategory[];
+  round1Items: LostAndFoundItem[];
+  newItems: LostAndFoundItem[];
+  completionTitle: string;
+  completionMessage: string;
+  takeaways: string[];
+}
+
+export interface MLWorkflowStep {
+  id: string;
+  label: string;
+  explanation: string;
+}
+
+export interface MLWorkflowConfig {
+  slides: { title: string; body: string }[];
+  steps: MLWorkflowStep[];
+  completionTitle: string;
+  completionMessage: string;
+  takeaways: string[];
+}
+
+export interface FaceFeature {
+  id: string;
+  label: string;
+  isFaceFeature: boolean;
+  zoneX: number;
+  zoneY: number;
+  zoneW: number;
+  zoneH: number;
+  weight: number;
+  feedback: string;
+}
+
+export interface FaceBuilderConfig {
+  slides: { title: string; body: string }[];
+  features: FaceFeature[];
+  completionTitle: string;
+  completionMessage: string;
+  takeaways: string[];
+}
+
+export interface NeuralNetworkConfig {
+  slides: { title: string; body: string }[];
+  completionTitle: string;
+  completionMessage: string;
+  takeaways: string[];
+}
+
+export interface TokenizationConfig {
+  slides: { title: string; body: string }[];
+  completionTitle: string;
+  completionMessage: string;
+  takeaways: string[];
+}
+
+export interface SearchEnginePipelineConfig {
+  slides: { title: string; body: string }[];
+  completionTitle: string;
+  completionMessage: string;
+  takeaways: string[];
+}
+
+export interface PredictNextWordConfig {
+  slides: { title: string; body: string }[];
+  completionTitle: string;
+  completionMessage: string;
+  takeaways: string[];
+}
+
+export interface BiasScenarioConfig {
+  name: string;
+  details: { label: string; value: string }[];
+  question: string;
+  correctAnswer: boolean;
+  explanation: string;
+}
+
+export interface PrivacyScenarioConfig {
+  appName: string;
+  permissions: string[];
+  requiredPermissions: string[];
+  explanation: string;
+}
+
+export interface FairOrUnfairConfig {
+  slides: { title: string; body: string }[];
+  biasScenarios: BiasScenarioConfig[];
+  privacyScenarios: PrivacyScenarioConfig[];
+  completionTitle: string;
+  completionMessage: string;
+  takeaways: string[];
+}
+
+export interface ApprovalCardConfig {
+  id: string;
+  text: string;
+  expected: 'ready' | 'needs';
+  explanation: string;
+}
+
+export interface DashboardItemConfig {
+  label: string;
+  cardIds: string[];
+}
+
+export interface AIApprovalChecklistConfig {
+  slides: { title: string; body: string }[];
+  systemName: string;
+  systemPurpose: string;
+  cards: ApprovalCardConfig[];
+  dashboardItems: DashboardItemConfig[];
+  completionTitle: string;
+  completionMessage: string;
+  takeaways: string[];
+}
+
+export interface StudyDayPlannerConfig {
+  title?: string;
+}
+
+export interface NeuronCalculatorConfig {
+  problems: NeuronCalcProblem[];
+}
+
+export interface ClusteringScenario {
+  id: string;
+  emoji: string;
+  title: string;
+  description: string;
+  correctAlgorithm: 'kmeans' | 'hierarchical' | 'dbscan';
+  explanation: string;
+}
+
+export interface ClusteringMatchConfig {
+  scenarios: ClusteringScenario[];
+}
+
+export interface SmoothieIngredient {
+  key: string;
+  emoji: string;
+  label: string;
+  defaultInput: number;
+  defaultWeight: number;
+}
+
+export interface SmoothieBlenderMode {
+  key: 'relu' | 'sigmoid' | 'tanh';
+  emoji: string;
+  label: string;
+  subtitle: string;
+  description: string;
+}
+
+export interface SmoothieForwardPassConfig {
+  targetScore: number;
+  ingredients: SmoothieIngredient[];
+  blenderModes: SmoothieBlenderMode[];
+  finalChallenge: {
+    targetScore: number;
+    lockedKeys: string[];
+  };
+}
+
+export interface NeuronCalcProblem {
+  inputs: number[];
+  weights: number[];
+  bias: number;
+  weightedSum: number;
+  activated: number;
+  activation: 'relu' | 'sigmoid';
+}
+
 export interface PracticeExerciseConfig {
   id?: string;
   title: string;
@@ -281,6 +705,32 @@ export interface PracticeExerciseConfig {
   aiConversationConfig?: AIConversationConfig;
   pathBuilderConfig?: PathBuilderConfig;
   bfsdfsConfig?: BFSDFSConfig;
+  investigationConfig?: InvestigationConfig;
+  searchProblemBuilderConfig?: SearchProblemBuilderConfig;
+  bfsdfsGameConfig?: BFSDFSGameConfig;
+  warehouseAIGameConfig?: WarehouseAIGameConfig;
+  propLogicGameConfig?: PropLogicGameConfig;
+  kbGameConfig?: KBGameConfig;
+  inferenceGameConfig?: InferenceGameConfig;
+  confidenceChallengeConfig?: ConfidenceChallengeConfig;
+  caseFileInvestigationConfig?: CaseFileInvestigationConfig;
+  decisionPipelineConfig?: DecisionPipelineConfig;
+  markovChainPracticeConfig?: MarkovChainPracticeConfig;
+  hillClimbConfig?: HillClimbExerciseConfig;
+  pizzaOptimizationConfig?: PizzaOptimizationConfig;
+  lostAndFoundConfig?: LostAndFoundConfig;
+  mlWorkflowConfig?: MLWorkflowConfig;
+  faceBuilderConfig?: FaceBuilderConfig;
+  neuralNetworkConfig?: NeuralNetworkConfig;
+  tokenizationConfig?: TokenizationConfig;
+  searchEnginePipelineConfig?: SearchEnginePipelineConfig;
+  predictNextWordConfig?: PredictNextWordConfig;
+  fairOrUnfairConfig?: FairOrUnfairConfig;
+  aiApprovalChecklistConfig?: AIApprovalChecklistConfig;
+  neuronCalculatorConfig?: NeuronCalculatorConfig;
+  studyDayPlannerConfig?: StudyDayPlannerConfig;
+  smoothieForwardPassConfig?: SmoothieForwardPassConfig;
+  clusteringMatchConfig?: ClusteringMatchConfig;
 }
 
 export interface BookPageContent {
@@ -311,6 +761,166 @@ export interface PracticeBlock {
   requiredPatterns?: string[];
 }
 
+// ── AI Course Premium Learning Blocks ─────────────────────────────────────────
+
+export interface AIConceptCard {
+  number: number;
+  title: string;
+  illustration?: string;
+  description: string;
+}
+
+export interface BfsDfsStep {
+  title: string;
+  description: string;
+}
+
+export interface BfsDfsContent {
+  bfsSentences: string[];
+  bfsSteps: BfsDfsStep[];
+  dfsSentences: string[];
+  dfsSteps: BfsDfsStep[];
+}
+
+export interface GreedyAStarContent {
+  greedySentences: string[];
+  greedySteps: BfsDfsStep[];
+  aStarSentences: string[];
+  aStarSteps: BfsDfsStep[];
+}
+
+export interface ProbabilityChapter {
+  title: string;
+  sentences: string[];
+  terms?: { term: string; definition: string }[];
+  interactive?: 'conditional-probability' | 'random-variable' | 'joint-probability' | 'bayesian-network' | 'markov-chain' | 'local-search' | 'state-space' | 'simulated-annealing' | 'feasible-region' | 'arc-consistency' | 'knowledge-engineering-try-it-yourself' | 'k-means' | 'neural-network-structure' | 'activation-function-explorer' | 'training-hyperparameters' | 'perceptron-learning';
+  image?: string;
+  imageAlt?: string;
+  example?: { title: string; table: string[][]; note?: string };
+}
+
+export interface ProbabilityContent {
+  chapters: ProbabilityChapter[];
+}
+
+export interface AdversarialChapter {
+  title: string;
+  sentences: string[];
+  pseudocode?: string;
+}
+
+export interface AdversarialContent {
+  chapters: AdversarialChapter[];
+}
+
+export interface OverfittingInfographicData {
+  takeaway: string;
+}
+
+export interface SectionBreakdown {
+  sentences: string[];
+  steps: { title: string; description: string }[];
+}
+
+export interface AILearnSectionBlock {
+  type: 'ai_section';
+  theme?: 'light' | 'dark';
+  hero: {
+    category: string;
+    title: string;
+    intro: string;
+    illustration?: string;
+  };
+  concepts: AIConceptCard[];
+  bfsDfsContent?: BfsDfsContent;
+  greedyAStarContent?: GreedyAStarContent;
+  probabilityContent?: ProbabilityContent;
+  chapterContent?: ProbabilityContent;
+  adversarialContent?: AdversarialContent;
+  overfittingContent?: OverfittingInfographicData;
+  sectionBreakdown?: SectionBreakdown;
+  keyInsight: string;
+}
+
+export interface AIThinkOfPanel {
+  number: number;
+  label: string;
+  illustration?: string;
+  description: string;
+  caption?: string;
+  visual?: {
+    type: string;
+    items?: string[];
+    conclusion?: string;
+  };
+}
+
+export interface AIThinkOfPanelBlock {
+  type: 'ai_think_of';
+  title: string;
+  subtitle: string;
+  panels: AIThinkOfPanel[];
+  insight: string;
+  reinforcement?: string;
+}
+
+export interface InfographicPanel {
+  title: string;
+  caption: string;
+  label: string;
+}
+
+export interface InfographicBlock {
+  type: 'infographic';
+  id: string;
+  panels: InfographicPanel[];
+  takeaway: string;
+}
+
+// ── AI Challenge Set ───────────────────────────────────────────────────────────
+
+export interface AIChallengeCard {
+  id: string;
+  label: string;
+  usesAI: boolean;
+}
+
+export interface AIClassifyApp {
+  name: string;
+  answer: string;
+  explanation: string;
+}
+
+export interface AISituation {
+  text: string;
+  usesAI: boolean;
+}
+
+export interface AIRulesItem {
+  text: string;
+  answer: string;
+}
+
+export interface AIChallenge {
+  id: string;
+  title: string;
+  difficulty: string;
+  objective: string;
+  instruction: string;
+  type: 'select_cards' | 'classify' | 'situations' | 'rules_vs_learning';
+  cards?: AIChallengeCard[];
+  apps?: AIClassifyApp[];
+  choices?: string[];
+  situations?: AISituation[];
+  items?: AIRulesItem[];
+  explanation?: string;
+}
+
+export interface AIChallengeSetBlock {
+  type: 'ai_challenge_set';
+  challenges: AIChallenge[];
+}
+
 export type ContentBlock =
   | TextBlock
   | ExplanationBlock
@@ -321,7 +931,11 @@ export type ContentBlock =
   | CodeExampleBlock
   | ReflectionBlock
   | InteractiveBookBlock
-  | PracticeBlock;
+  | PracticeBlock
+  | AILearnSectionBlock
+  | AIThinkOfPanelBlock
+  | AIChallengeSetBlock
+  | InfographicBlock;
 
 // ── Section ───────────────────────────────────────────────────────────────────
 
@@ -356,9 +970,15 @@ export interface CodingProblem {
   title: string;
   description: string;
   difficulty: Difficulty;
+  type?: 'coding' | 'reflection';
+  hints?: string[];
   starterCode: string;
   solution: string;
   testCases: TestCase[];
+  /** Optional per-problem override for the "Before You Start" card. Falls back to a sensible default when omitted. */
+  beforeYouStart?: string[];
+  /** Optional per-problem override for the "How We Evaluate" card. Falls back to a sensible default when omitted. */
+  evaluationNotes?: string[];
 }
 
 // ── Summary ───────────────────────────────────────────────────────────────────

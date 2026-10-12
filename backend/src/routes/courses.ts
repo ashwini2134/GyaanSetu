@@ -6,8 +6,8 @@ import type { AuthenticatedRequest } from "../middleware/auth.js";
 const router = Router();
 
 export const COURSE_LECTURE_COUNTS: Record<string, number> = {
-  "python": 14,
-  "cs50ai": 10,
+  "python20": 14,
+  "fundamentals-of-ai": 9,
 };
 router.get("/", requireAuth, async (_req, res, next) => {
   try {

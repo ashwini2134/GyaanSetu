@@ -75,7 +75,7 @@ export function CourseSearchFilters({ courses, searchQuery, setSearchQuery, onFi
   // Unique categories and levels from input courses
   const levels = ["All", "Beginner", "Intermediate", "Advanced"];
   const categories = ["All", "Programming", "Computer Science", "Artificial Intelligence"];
-  const popularSearches = ["Python", "AI", "Beginner", "Computer Science"];
+  const popularSearches = ["Python", "Fundamentals of AI", "Beginner", "Computer Science"];
 
   return (
     <div className="w-full bg-[#161B22] border border-[#2D3748] rounded-[12px] p-[20px] mb-6 shadow-md">
@@ -191,7 +191,7 @@ interface NoResultsStateProps {
 }
 
 export function NoResultsState({ query, onSelectSuggestion }: NoResultsStateProps) {
-  const suggestions = ["Python", "AI", "Beginner", "Computer Science"];
+  const suggestions = ["Python", "Fundamentals of AI", "Beginner", "Computer Science"];
   return (
     <div className="text-center py-12 px-6 bg-[#0c101b]/30 border border-slate-800/50 rounded-3xl max-w-lg mx-auto">
       <div className="w-12 h-12 rounded-full bg-slate-800/40 flex items-center justify-center mx-auto mb-4 border border-slate-700/30">

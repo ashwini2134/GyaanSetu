@@ -1,0 +1,230 @@
+.not-found {
+  --nf-bg-top: #0a0d16;
+  --nf-bg-bottom: #05060b;
+  --nf-ink: #edeff5;
+  --nf-ink-muted: #8890a6;
+  --nf-ink-faint: #565d73;
+  --nf-accent: #00bfb3;
+  --nf-accent-ink: #06110f;
+  --nf-card-bg: rgba(15, 18, 29, 0.62);
+  --nf-card-border: rgba(255, 214, 140, 0.14);
+  --nf-brass: #c9a15a;
+  --nf-brass-dark: #7a5f30;
+
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: radial-gradient(ellipse 120% 80% at 50% 0%, var(--nf-bg-top), var(--nf-bg-bottom));
+  color: var(--nf-ink);
+  font-family: inherit;
+  padding: 3rem 1.25rem 4rem;
+  box-sizing: border-box;
+}
+
+.not-found__motes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.not-found__mote {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(0, 191, 179, 0.4);
+  filter: blur(0.5px);
+}
+
+.not-found__stage {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2.5rem;
+  width: 100%;
+  max-width: 44rem;
+  z-index: 1;
+}
+
+.not-found__wash {
+  position: absolute;
+  top: -6rem;
+  left: -4rem;
+  width: 40rem;
+  height: 40rem;
+  background: radial-gradient(ellipse 55% 55% at 22% 45%, rgba(0, 191, 179, 0.16), transparent 68%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ---- compass fixture ---- */
+
+.not-found__fixture-col {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 0 0 auto;
+  width: 12rem;
+}
+
+.not-found__compass-btn {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  display: block;
+}
+
+.not-found__compass {
+  width: 9rem;
+  height: 9rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #232a3d, #14182450 70%), var(--nf-brass-dark);
+  border: 6px solid var(--nf-brass);
+  box-shadow: 0 16px 30px -10px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.08);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.not-found__compass-face {
+  width: 100%;
+  height: 100%;
+}
+
+.not-found__404 {
+  margin-top: 1.25rem;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--nf-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.not-found__hint {
+  margin-top: 0.35rem;
+  font-size: 0.8125rem;
+  color: var(--nf-ink-faint);
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+/* ---- card ---- */
+
+.not-found__card {
+  position: relative;
+  z-index: 2;
+  width: min(23rem, 100%);
+  flex: 1 1 20rem;
+  background: var(--nf-card-bg);
+  border: 1px solid var(--nf-card-border);
+  border-radius: 1.25rem;
+  padding: 2.25rem 2rem 2rem;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  text-align: center;
+}
+
+.not-found__eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--nf-accent);
+  margin: 0 0 0.5rem;
+}
+
+.not-found__title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--nf-ink);
+  margin: 0 0 0.75rem;
+  letter-spacing: -0.01em;
+}
+
+.not-found__subtitle {
+  font-size: 0.9rem;
+  color: var(--nf-ink-muted);
+  line-height: 1.5;
+  margin: 0 0 1.5rem;
+}
+
+.not-found__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.not-found__primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--nf-accent);
+  color: var(--nf-accent-ink);
+  border: none;
+  border-radius: 0.7rem;
+  padding: 0.8rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.15s ease;
+}
+
+.not-found__primary:hover {
+  filter: brightness(1.08);
+}
+
+.not-found__secondary-row {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.not-found__secondary {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.65rem;
+  padding: 0.6rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--nf-ink-muted);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.not-found__secondary:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: var(--nf-ink);
+}
+
+@media (max-width: 40rem) {
+  .not-found__stage {
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .not-found__mote {
+    display: none;
+  }
+}

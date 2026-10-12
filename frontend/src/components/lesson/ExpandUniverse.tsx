@@ -11,7 +11,7 @@ interface ExpandUniverseProps {
   onComplete: () => void;
 }
 
-type Phase = "start" | "instructions" | "ai_revealed" | "ml_revealed" | "dl_revealed" | "populate" | "complete";
+type Phase = "start" | "instructions" | "ai_revealed" | "ml_revealed" | "dl_revealed" | "ecosystem" | "populate" | "complete";
 
 interface ExampleItem {
   label: string;
@@ -136,31 +136,39 @@ export default function ExpandUniverse({ config, learningGoal, challenge, prompt
 
   const levelColors = (level: "ai" | "ml" | "dl"): LevelColors => {
     if (level === "ai") return theme.root;
-    if (level === "ml") return theme.root;
+    if (level === "ml") return theme.child;
     return theme.grandchild;
   };
 
   const isRevealed = (level: "ai" | "ml" | "dl") => {
-    if (level === "ai") return true;
-    if (level === "ml") return ["ml_revealed", "dl_revealed", "populate", "complete"].includes(phase);
-    if (level === "dl") return ["dl_revealed", "populate", "complete"].includes(phase);
+    if (level === "ai") return phase !== "start";
+    if (level === "ml") return ["ml_revealed", "dl_revealed", "ecosystem", "populate", "complete"].includes(phase);
+    if (level === "dl") return ["dl_revealed", "ecosystem", "populate", "complete"].includes(phase);
     return false;
   };
 
   const handleNodeClick = useCallback((level: "ai" | "ml" | "dl") => {
-    if (phase === "start" && level === "ai") {
+    if (phase === "start") {
       setPhase("ai_revealed");
-      setTimeout(() => setPhase("ml_revealed"), 1200);
+    } else if (phase === "ai_revealed" && level === "ai") {
+      setPhase("ml_revealed");
     } else if (phase === "ml_revealed" && level === "ml") {
       setPhase("dl_revealed");
-      setTimeout(() => {
-        setPhase("populate");
-        setExamples(makeExamples(config));
-      }, 1500);
     }
   }, [phase, config]);
 
   useEffect(() => {
+    if (phase === "dl_revealed") {
+      const t = setTimeout(() => setPhase("ecosystem"), 1500);
+      return () => clearTimeout(t);
+    }
+    if (phase === "ecosystem") {
+      const t = setTimeout(() => {
+        setPhase("populate");
+        setExamples(makeExamples(config));
+      }, 3000);
+      return () => clearTimeout(t);
+    }
     if (phase === "populate" && examples.length === 0) {
       setExamples(makeExamples(config));
     }
@@ -175,7 +183,8 @@ export default function ExpandUniverse({ config, learningGoal, challenge, prompt
 
     setTimeout(() => {
       setPlacedFlash(item.belongsTo);
-      setBelongsMsg({ text: item.explanation, x: CX, y: CY - 10 });
+      const level = item.belongsTo === "ai" ? config.root.label : item.belongsTo === "ml" ? config.child.label : config.grandchild.label;
+      setBelongsMsg({ text: `belongs to ${level}`, x: CX, y: CY - 10 });
       setExamples((prev) =>
         prev.map((e, i) => (i === idx ? { ...e, placed: true } : e))
       );
@@ -191,7 +200,7 @@ export default function ExpandUniverse({ config, learningGoal, challenge, prompt
         } else {
           setPlacing(false);
         }
-      }, 2200);
+      }, 5000);
     }, 600);
   }, [examples, placing, totalExamples]);
 
@@ -268,7 +277,7 @@ export default function ExpandUniverse({ config, learningGoal, challenge, prompt
     const colors = levelColors(level);
     const r = level === "ai" ? AI_R : level === "ml" ? ML_R : DL_R;
     const revealed = isRevealed(level);
-    const isClickable = (phase === "start" && level === "ai") || (phase === "ml_revealed" && level === "ml");
+    const isClickable = (phase === "ai_revealed" && level === "ai") || (phase === "ml_revealed" && level === "ml");
     const labelY = level === "ai" ? CY - r + 24 : level === "ml" ? CY - r + 20 : CY + 5;
     const fullLabel = levelLabel(level);
     const abbr = shortLabel(fullLabel);
@@ -287,7 +296,7 @@ export default function ExpandUniverse({ config, learningGoal, challenge, prompt
           cy={CY}
           r={r}
           fill={colors.fill}
-          stroke={placedFlash === level ? "#10b981" : colors.stroke}
+          stroke={placedFlash === level ? colors.stroke : colors.stroke}
           strokeWidth={placedFlash === level ? 3 : 2.5}
           className={isClickable ? "cursor-pointer" : ""}
           onClick={() => handleNodeClick(level)}
@@ -324,9 +333,9 @@ export default function ExpandUniverse({ config, learningGoal, challenge, prompt
           </text>
         )}
         {placedFlash === level && (
-          <circle cx={CX} cy={CY} r={r + 10} fill="none" stroke="#10b981" strokeWidth={3} opacity={0.7}>
+          <circle cx={CX} cy={CY} r={r + 10} fill="none" stroke={colors.stroke} strokeWidth={3} opacity={0.8}>
             <animate attributeName="r" values={`${r + 6};${r + 22}`} dur="1.5s" repeatCount="1" />
-            <animate attributeName="opacity" values="0.7;0" dur="1.5s" repeatCount="1" />
+            <animate attributeName="opacity" values="0.8;0" dur="1.5s" repeatCount="1" />
           </circle>
         )}
       </g>
@@ -334,12 +343,18 @@ export default function ExpandUniverse({ config, learningGoal, challenge, prompt
   };
 
   const hintText = (phase === "start"
-    ? `\u2726 Tap ${config.root.label} to discover what's inside`
-    : phase === "ml_revealed"
-      ? `\u2726 Tap ${config.child.label} to see what's inside`
-      : phase === "populate" && !belongsMsg
-        ? `\u2726 Tap each example to see where it belongs`
-        : null);
+    ? null
+    : phase === "ai_revealed"
+      ? `\u2726 Tap ${config.root.label} to see what's inside`
+      : phase === "ml_revealed"
+        ? `\u2726 Tap ${config.child.label} to see what's inside`
+        : phase === "dl_revealed"
+          ? null
+          : phase === "ecosystem"
+            ? null
+            : phase === "populate" && !belongsMsg
+              ? `\u2726 Tap each example to see where it belongs`
+              : null);
 
   return (
     <div className="rounded-2xl border border-slate-700/30 bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm overflow-hidden">
@@ -358,7 +373,7 @@ export default function ExpandUniverse({ config, learningGoal, challenge, prompt
             <button onClick={goPrev} disabled={stage === 0} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-slate-800/60 hover:bg-slate-700/60 disabled:opacity-30 disabled:cursor-not-allowed text-slate-300 text-xs font-semibold border border-slate-700/40 transition-all">
               <ArrowLeft size={13} /> Previous
             </button>
-            <span className="text-[10px] text-slate-600 font-mono">{stage + 1} / {instructionCount}</span>
+            <span className="text-[10px] text-slate-300 font-mono">{stage + 1} / {instructionCount}</span>
             {stage < instructionCount - 1 && (
               <button onClick={goNext} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-all">
                 Next <ArrowRight size={13} />
@@ -375,9 +390,60 @@ export default function ExpandUniverse({ config, learningGoal, challenge, prompt
         </div>
 
         <svg className="absolute inset-0 w-full h-full" viewBox={`0 0 ${VW} ${VH}`} preserveAspectRatio="xMidYMid meet">
+          {phase === "start" && (
+            <g className="cursor-pointer" onClick={() => handleNodeClick("ai")}>
+              <circle cx={CX} cy={CY} r={60} fill="rgba(59,130,246,0.08)" stroke="rgba(59,130,246,0.4)" strokeWidth={1.5}>
+                <animate attributeName="r" values="55;65;55" dur="3s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0.5;1;0.5" dur="3s" repeatCount="indefinite" />
+              </circle>
+              <circle cx={CX} cy={CY} r={40} fill="rgba(59,130,246,0.12)" stroke="rgba(59,130,246,0.6)" strokeWidth={1}>
+                <animate attributeName="r" values="38;44;38" dur="3s" repeatCount="indefinite" />
+              </circle>
+              <text x={CX} y={CY - 6} textAnchor="middle" fontSize={15} fill="white" fontWeight="bold" className="pointer-events-none select-none">
+                tap to see what happens
+              </text>
+              <text x={CX} y={CY + 16} textAnchor="middle" fontSize={9} fill="#93c5fd" className="pointer-events-none select-none">
+                discover the AI universe
+              </text>
+            </g>
+          )}
           <NodeRing level="ai" />
           <NodeRing level="ml" />
           <NodeRing level="dl" />
+
+          {phase === "ml_revealed" && (
+            <g>
+              <rect x={CX - 150} y={CY - ML_R - 40} width={300} height={24} rx={12} fill="rgba(15,23,42,0.9)" stroke="rgba(217,119,6,0.4)" strokeWidth={1} />
+              <text x={CX} y={CY - ML_R - 25} textAnchor="middle" fontSize={10} fill="#fbbf24" className="pointer-events-none select-none">
+                {"\u2726"} {config.child.label} is a subset of {config.root.label}
+              </text>
+            </g>
+          )}
+
+          {phase === "dl_revealed" && (
+            <g>
+              <rect x={CX - 160} y={CY - DL_R - 30} width={320} height={24} rx={12} fill="rgba(15,23,42,0.9)" stroke="rgba(16,185,129,0.4)" strokeWidth={1} />
+              <text x={CX} y={CY - DL_R - 15} textAnchor="middle" fontSize={10} fill="#6ee7b7" className="pointer-events-none select-none">
+                {"\u2726"} {config.grandchild.label} is a subset of {config.child.label}
+              </text>
+            </g>
+          )}
+
+          {phase === "ecosystem" && (
+            <g>
+              {[AI_R, ML_R, DL_R].map((r, i) => (
+                <circle key={i} cx={CX} cy={CY} r={r + 4} fill="none" stroke={i === 0 ? "rgba(59,130,246,0.3)" : i === 1 ? "rgba(217,119,6,0.3)" : "rgba(16,185,129,0.3)"} strokeWidth={1.5} strokeDasharray="6 4" opacity={0.6}>
+                  <animate attributeName="stroke-dashoffset" values="0;-30" dur="3s" repeatCount="indefinite" />
+                </circle>
+              ))}
+              <line x1={CX} y1={CY - AI_R} x2={CX} y2={CY + AI_R} stroke="rgba(148,163,184,0.08)" strokeWidth={1} />
+              <line x1={CX - AI_R} y1={CY} x2={CX + AI_R} y2={CY} stroke="rgba(148,163,184,0.08)" strokeWidth={1} />
+              <rect x={CX - 170} y={CY + AI_R + 8} width={340} height={36} rx={18} fill="rgba(15,23,42,0.9)" stroke="rgba(99,102,241,0.3)" strokeWidth={1} />
+              <text x={CX} y={CY + AI_R + 30} textAnchor="middle" fontSize={11} fill="#e2e8f0" fontWeight="bold" className="pointer-events-none select-none">
+                {"\u2726"} {config.root.label} → {config.child.label} → {config.grandchild.label}: An Ecosystem of Intelligence
+              </text>
+            </g>
+          )}
 
           {phase === "populate" && examples.map((item, i) =>
             !item.placed && (
@@ -417,8 +483,8 @@ export default function ExpandUniverse({ config, learningGoal, challenge, prompt
 
           {belongsMsg && (
             <g>
-              <rect x={belongsMsg.x - 190} y={belongsMsg.y - 14} width={380} height={28} rx={14} fill="rgba(15,23,42,0.9)" stroke="rgba(16,185,129,0.4)" strokeWidth={1} />
-              <text x={belongsMsg.x} y={belongsMsg.y + 1} textAnchor="middle" fontSize={10} fill="#6ee7b7" className="pointer-events-none select-none">
+              <rect x={belongsMsg.x - 190} y={belongsMsg.y - 14} width={380} height={28} rx={14} fill="rgba(15,23,42,0.9)" stroke="rgba(59,130,246,0.4)" strokeWidth={1} />
+              <text x={belongsMsg.x} y={belongsMsg.y + 1} textAnchor="middle" fontSize={10} fill="#93c5fd" className="pointer-events-none select-none">
                 {"\u2726"} {belongsMsg.text}
               </text>
             </g>
@@ -427,7 +493,7 @@ export default function ExpandUniverse({ config, learningGoal, challenge, prompt
 
         {hintText && (
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
-            <p className="text-xs font-medium text-slate-400 text-center px-4 py-1.5 rounded-full bg-slate-800/60 border border-slate-700/30 backdrop-blur-sm">
+            <p className="text-xs font-medium text-slate-300 text-center px-4 py-1.5 rounded-full bg-slate-800/60 border border-slate-700/30 backdrop-blur-sm">
               {hintText}
             </p>
           </div>
@@ -442,7 +508,7 @@ export default function ExpandUniverse({ config, learningGoal, challenge, prompt
               <Sparkles size={26} className="text-emerald-400" />
             </div>
             <h3 className="text-lg font-bold text-white mb-1">Great Job</h3>
-            <p className="text-xs text-slate-400 text-center max-w-xs mb-6">
+            <p className="text-xs text-slate-300 text-center max-w-xs mb-6">
               {config.completionMessage || "You explored the AI universe and discovered how each field nests inside the next."}
             </p>
             <div className="flex items-center gap-3">

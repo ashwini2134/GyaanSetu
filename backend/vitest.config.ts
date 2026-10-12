@@ -10,6 +10,8 @@ export default defineConfig({
     },
     env: {
       DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/fraylon_lms_test",
+      // Force mock AI mode in tests — avoids hitting real Gemini quota
+      GOOGLE_AI_API_KEY: "",
     },
   },
 });

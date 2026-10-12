@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import { ZodError } from "zod";
 
 export class AppError extends Error {
   status: number;
@@ -11,6 +12,11 @@ export class AppError extends Error {
 export function errorHandler(err: unknown, _req: Request, res: Response, _next: NextFunction): void {
   if (err instanceof AppError) {
     res.status(err.status).json({ error: err.message });
+    return;
+  }
+  if (err instanceof ZodError) {
+    const message = err.errors[0]?.message ?? "Invalid request data";
+    res.status(400).json({ error: message, details: err.errors });
     return;
   }
   console.error(err);

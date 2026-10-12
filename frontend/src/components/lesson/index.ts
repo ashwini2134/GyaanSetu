@@ -7,6 +7,7 @@ export { default as ReflectionCard } from './ReflectionCard';
 export { default as PracticeCard } from './PracticeCard';
 export { default as InteractiveBook } from './InteractiveBook';
 export { default as QuizEngine } from './QuizEngine';
+export { default as QuizReviewCard } from './QuizReviewCard';
 export { default as ProblemCard } from './ProblemCard';
 export { default as SummaryCard } from './SummaryCard';
 export { default as ProgressWidget } from './ProgressWidget';

@@ -1,0 +1,1293 @@
+
+
+=================================
+LECTURE 1
+=================================
+TITLE: What is Python?
+
+--- Section 1: What is Programming? ---
+[Explanation: What Does It Mean to Program?]
+**Programming** is the art of giving instructions to a computer so it can perform tasks automatically. Instead of clicking buttons in an app, you write the instructions yourself. The computer follows them step by step, exactly as written.
+Computers are very fast but also very literal — they do exactly what you tell them
+- Programming lets you automate repetitive tasks
+- Programs are written in a **programming language** like Python, which both humans and computers can understand
+- Every program is just a sequence of instructions stored in a text file
+[Analogy: Think of a Program as a Cooking Recipe]
+A recipe lists ingredients and steps: chop onions, boil water, cook for 10 minutes. A program does the same thing — it lists steps like 'store this value,' 'add these two numbers,' 'print the result.' The computer follows the recipe just like you follow cooking instructions.
+[Think Of]
+Recipe: Ingredients + Steps → Dish
+[Explanation: Programming Languages]
+There are hundreds of programming languages, each designed for different purposes. Python is special because it is designed to be easy to read and write.
+Python's syntax (the rules for writing code) is similar to English
+- You can write simple programs with just a few lines of code
+- Python hides complex details so you can focus on solving problems
+[Code Example: Your First Program — Hello World]
+print("Hello, World!")
+[Practice]
+Write a program that prints your name on the first line and your college name on the second line.
+Starter: # Print your name
+print("")
+# Print your college
+
+--- Section 2: Why Python? ---
+[Explanation: Why Python is Perfect for Beginners]
+Python was created by Guido van Rossum in 1991 with a clear philosophy: make programming easy and fun. Today it is used by beginners and professionals alike.
+Easy to read — Python code looks almost like plain English
+- No complicated symbols or punctuation — clean and minimal
+- Huge community — millions of tutorials and libraries available for free
+- Runs everywhere — Windows, Mac, Linux, even on small devices
+[Explanation: Real-World Applications of Python]
+Python is not just for learning — it powers some of the most important technology in the world.
+**Web Development** — Instagram, Pinterest, and Spotify use Python for their backends
+- **Data Science** — Python is the #1 language for analyzing data and building charts
+- **Artificial Intelligence** — Most AI and machine learning libraries are written in Python
+- **Automation** — Python can automate boring tasks like renaming files or sending emails
+[Analogy: Think of Python as a Swiss Army Knife]
+A Swiss Army knife has many tools — blade, scissors, screwdriver — all in one device. Python is the same: you can build websites, analyze data, make games, or automate tasks, all with the same language.
+[Think Of]
+Swiss Army Knife: One tool, many uses
+
+--- Section 3: Getting Started ---
+[Explanation: Installing Python]
+Before you can write Python programs, you need to install Python on your computer. It's free and takes just a few minutes.
+Go to python.org and download the latest version
+- Run the installer and check 'Add Python to PATH'
+- After installation, open Terminal (Mac/Linux) or Command Prompt (Windows)
+- Type python --version to verify it installed correctly
+[Think Of]
+Setting Up Your Kitchen: Gather tools before you cook
+[Explanation: Python Shell (Interactive Mode)]
+The **Python shell** (also called REPL) lets you type Python commands one at a time and see results immediately.
+Type python in your terminal to start the shell
+- You'll see >>> prompt — Python is waiting for your command
+- Type print("Hello") and press Enter — Python runs it instantly
+- Type exit() to leave the shell
+[Explanation: Running .py Files]
+For real programs, you save your code in a file with a .py extension and run the entire file at once.
+Create a new file called hello.py
+- Write your Python code in the file using any text editor
+- Open terminal, navigate to the folder containing the file
+- Type python hello.py and press Enter — Python runs every line in order
+[Code Example: Interactive Shell vs File: Same Code, Same Result]
+# In the shell:
+>>> print("Hello, World!")
+Hello, World!
+
+# In a .py file:
+print("Hello, World!")
+
+# Run: python myfile.py
+# Output: Hello, World!
+[Explanation: Python is Interpreted]
+Python is an **interpreted language**, which means it runs your code line by line without needing a separate compilation step.
+No compile step — write code and run it immediately
+- If Python finds an error on line 5, it stops there and shows the error message
+- This makes Python great for beginners — you get instant feedback
+- You can test small pieces of code in the shell without creating files
+[Practice]
+Print 3 things Python can do, each on a separate line: 'Python builds websites', 'Python analyzes data', and 'Python automates tasks'.
+Starter: # Python can do many things!
+print("Python builds websites")
+
+--- Main Quiz ---
+No main quiz.json
+
+--- Problem ---
+Title: Hello World
+Desc: Write a program that prints 'Hello, World!' to the screen.
+Starter: 
+Title: Personal Info
+Desc: Write a program that prints your name, age, and the city you live in — each on a separate line using three print() statements.
+Starter: 
+
+
+=================================
+LECTURE 2
+=================================
+TITLE: Variables & Data Types
+
+--- Section 1: Variables ---
+[Explanation: What is a Variable?]
+A **variable** is a named container that stores a value. Think of it like a labeled box where you can put information. You create a variable with the `=` sign.
+Variables store values like numbers, text, or true/false
+- Use the = sign to assign a value: name = "Lakshanya"
+- Once assigned, use the variable name anywhere to access the value
+- Variables can be updated — old value is replaced
+[Analogy: A Variable is a Labeled Jar]
+Imagine jars with labels. One jar labeled 'sugar' contains sugar. Another labeled 'flour' contains flour. You look at the label to know what's inside. In Python, the label is the variable name and the contents is the value.
+[Think Of]
+Labeled Storage Box: Each box has a label and holds one item
+[Explanation: Naming Rules]
+Variable names must follow clear rules.
+Start with a letter or underscore (_), not a number
+- Use only letters, numbers, and underscores
+- Case-sensitive: myVar and myvar are different
+- Cannot use Python keywords like if, else, while, for, print
+[Code Example: Creating Variables]
+name = "Lakshanya"
+age = 20
+height = 5.6
+
+print(name)
+print(age)
+print(height)
+[Practice]
+Create three variables: your name, your age, and your college. Print each on a separate line.
+Starter: # Store your information
+name = ""
+age = 
+college = ""
+
+# Print each variable
+
+--- Section 2: Data Types ---
+[Explanation: Every Value Has a Type]
+In Python, every value belongs to a **type** that tells Python what kind of data it is and what you can do with it.
+int — whole numbers like 42, 0, -7
+- float — decimal numbers like 3.14, 2.5, -0.001
+- str — text/strings like "hello", "Python"
+- bool — True or False values
+- Use type() to check the type of any value
+[Think Of]
+Different Containers: Each container type holds specific kinds of items
+[Code Example: Checking Types with type()]
+print(type(42))
+print(type(3.14))
+print(type("Hello"))
+print(type(True))
+[Explanation: Type Conversion]
+Sometimes you need to convert between types — turn a string into a number or a number into a string.
+int("5") converts string "5" to integer 5
+- str(42) converts integer 42 to string "42"
+- float("3.14") converts string to float 3.14
+- Be careful: int("hello") causes an error because "hello" is not a number
+[Practice]
+Store your current age in a variable. Add 5 to it. Print the result using an f-string.
+Starter: # Store current age
+age = 
+
+# Calculate age after 5 years
+future_age = 
+
+# Print the result
+
+--- Section 3: Strings ---
+[Explanation: Working with Strings]
+A **string** is a sequence of characters — letters, numbers, spaces, symbols — enclosed in quotes.
+Use single quotes: 'Hello' or double quotes: "Hello"
+- Both work the same way — choose what you prefer
+- Strings can contain spaces, punctuation, and special characters
+- Add strings together with + (concatenation)
+[Code Example: String Operations]
+first = "Lakshanya"
+last = "Krishna"
+
+# Concatenation
+full = first + " " + last
+print(full)
+
+# Repeat string
+print("Ha! " * 3)
+
+# Length
+print(len(first))
+[Practice]
+Create variables for name, age, and college. Print them in this format: "Name: [name], Age: [age], College: [college]"
+Starter: name = ""
+age = 
+college = ""
+
+# Print profile card
+[reflection]
+
+--- Main Quiz ---
+No main quiz.json
+
+--- Problem ---
+Title: Personal Card
+Desc: Create variables for your name, age, and favorite color. Print each on a separate line. Then update the age by adding 1 and print the new age.
+Starter: # Create variables
+name = ""
+age = 
+fav_color = ""
+
+# Print them
+
+# Update age and print
+Title: Type Checker
+Desc: Print the type of each of these values: 42, 3.14, 'Hello', True. Use the type() function.
+Starter: # Print the type of each value
+print(type())
+print(type())
+print(type())
+print(type())
+
+
+=================================
+LECTURE 3
+=================================
+TITLE: Input & Output
+
+--- Section 1: print() Output ---
+[Explanation: Displaying Output with print()]
+You already know print() displays text. But print() has superpowers — you can print multiple items, change separators, and control line endings.
+print() accepts multiple items separated by commas
+- By default, items are separated by a space
+- Use sep parameter to change the separator
+- Use end parameter to change what comes at the end (default is newline)
+[Code Example: Print Multiple Items]
+print("Hello", "World")
+print(1, 2, 3, 4)
+print("Python", "is", "awesome")
+[Practice]
+Use print() with sep to display numbers 1 through 5 separated by arrows: "1 → 2 → 3 → 4 → 5"
+Starter: # Print numbers with arrow separator
+print(1, 2, 3, 4, 5, sep="")
+[reflection]
+
+--- Section 2: User Input ---
+[Explanation: Getting Input with input()]
+The `input()` function waits for the user to type something and press Enter. It **always returns a string** — even if the user types a number.
+input() pauses the program and waits for the user
+- You can show a prompt: input("Enter your name: ")
+- The return value is always a string
+- Use int(input()) to get an integer from the user
+[Analogy: input() is Like a Receptionist]
+You ask a question (the prompt), then wait for the person to answer (type and press Enter). The receptionist (input()) hands you the answer on a piece of paper (a string). If you need it as a number, you must convert it yourself.
+[Think Of]
+Receptionist: Receptionist asks a question, waits for your answer, then tells the program
+[Code Example: Getting and Using Input]
+name = input("Enter your name: ")
+print("Hello, " + name + "!")
+[Practice]
+Ask the user for their name (string), age (integer), and city (string). Then print all details in a formatted card using f-strings.
+Starter: # Get student details
+name = input("Enter your name: ")
+age = 
+city = 
+
+# Print details card
+
+--- Section 3: f-Strings Deep Dive ---
+[Explanation: Formatting with f-Strings]
+**f-strings** (formatted strings) are the cleanest way to combine text and variables. Just prefix your string with `f` and put expressions inside `{}`.
+Prefix the string with f: f"Hello {name}"
+- Any expression works inside {}: math, function calls, variables
+- f-strings handle type conversion automatically
+- They are faster and more readable than + concatenation
+[Think Of]
+Fill-In-The-Blank: Write the sentence with blanks { }, then fill them with variable values
+[Code Example: f-String Examples]
+name = "Lakshanya"
+age = 20
+
+print(f"Hello, {name}!")
+print(f"{name} is {age} years old")
+print(f"In 5 years, {name} will be {age + 5}")
+[Practice]
+Ask the user for two numbers. Convert them to integers. Print the sum, difference, and product using f-strings.
+Starter: # Get two numbers
+num1 = int(input("Enter first number: "))
+num2 = 
+
+# Calculate and print
+
+--- Main Quiz ---
+No main quiz.json
+
+--- Problem ---
+Title: Greeting Card
+Desc: Ask the user for their name and age using input(). Print a greeting: 'Hello [name]! You are [age] years old. Welcome to Python!'
+Starter: # Get user info
+name = input("Enter your name: ")
+age = input("Enter your age: ")
+
+# Print greeting
+Title: Addition Calculator
+Desc: Ask the user for two numbers. Convert them to integers. Print the sum in the format: '[num1] + [num2] = [sum]'
+Starter: num1 = int(input("First number: "))
+num2 = int(input("Second number: "))
+
+# Calculate and print sum
+Title: Story Generator
+Desc: Create a personalized story using user input and f-strings.
+Starter: undefined
+
+
+=================================
+LECTURE 4
+=================================
+TITLE: Operators
+
+--- Section 1: Arithmetic Operators ---
+[Explanation: Math in Python]
+Python can do all the math you learned in school. Arithmetic operators let you add, subtract, multiply, divide, and perform advanced operations.
++ addition, - subtraction, * multiplication, / division
+- // floor division — divides and rounds down
+- % modulo — returns the remainder of division
+- ** power (exponent) — raises a number to a power
+[Code Example: Basic Arithmetic]
+print(10 + 5)
+print(10 - 5)
+print(10 * 5)
+print(10 / 5)
+[Explanation: PEMDAS — Order of Operations]
+Python follows standard math rules: Parentheses, Exponents, Multiplication/Division, Addition/Subtraction.
+Parentheses () have the highest priority
+- Exponents ** come next
+- Multiplication *, Division /, Floor Division //, Modulo % are next
+- Addition + and Subtraction - are last
+[Think Of]
+The Order Rulebook: PEMDAS tells Python which math operation to perform first
+[Practice]
+Ask the user for marks obtained and total marks. Calculate percentage = (obtained / total) * 100. Print with 2 decimal places.
+Starter: obtained = int(input("Marks obtained: "))
+total = int(input("Total marks: "))
+
+percentage = 
+print(f"Percentage: {percentage:.2f}%")
+
+--- Section 2: Comparison Operators ---
+[Explanation: Comparing Values]
+**Comparison operators** compare two values and return either True or False.
+== equal to (not = which is assignment)
+- != not equal to
+- < less than, > greater than
+- <= less than or equal, >= greater than or equal
+[Code Example: Comparison in Action]
+print(5 == 5)
+print(5 != 5)
+print(10 > 5)
+print(3 < 1)
+print(7 >= 7)
+print(8 <= 4)
+[reflection]
+[Practice]
+Ask the user for their age. Check if they are eligible to vote (age >= 18). Print the result.
+Starter: age = int(input("Enter your age: "))
+eligible = 
+print(f"Eligible to vote: {eligible}")
+
+--- Section 3: Logical Operators ---
+[Explanation: Combining Conditions]
+**Logical operators** let you combine multiple conditions to make complex decisions.
+and — True only if BOTH sides are True
+- or — True if AT LEAST ONE side is True
+- not — reverses the result (True becomes False)
+[Analogy: Think of and/or as Gatekeepers]
+Two guards at a door. With and: both must say yes. With or: if either says yes, you enter. With not: the guard says the opposite.
+[Think Of]
+Gatekeepers: and = BOTH must pass. or = AT LEAST ONE must pass.
+[Code Example: Logical Operators]
+age = 20
+has_id = True
+print(age >= 18 and has_id)
+print(age >= 18 or has_id)
+print(not has_id)
+
+score = 85
+extra = False
+print(score >= 80 or extra)
+[Practice]
+Ask for marks and family income. Qualifies if marks >= 85 AND income < 50000.
+Starter: marks = int(input("Marks: "))
+income = int(input("Income: "))
+qualifies = 
+print(f"Qualifies: {qualifies}")
+
+--- Main Quiz ---
+No main quiz.json
+
+--- Problem ---
+Title: Average Calculator
+Desc: Ask the user for three test scores. Calculate the average and print it formatted to 2 decimal places.
+Starter: s1 = int(input("Score 1: "))
+s2 = int(input("Score 2: "))
+s3 = int(input("Score 3: "))
+
+# Calculate and print average
+Title: Even or Odd
+Desc: Ask the user for a number. Use the modulo operator to check if it's even or odd. Print 'Even' or 'Odd'.
+Starter: num = int(input("Enter a number: "))
+
+# Check even or odd using modulo operator
+
+
+=================================
+LECTURE 5
+=================================
+TITLE: Conditional Statements
+
+--- Section 1: if Statements ---
+[Explanation: Making Decisions with if]
+The `if` statement lets you run code only when a condition is True. If False, the code is skipped.
+Write if followed by a condition and a colon
+- The code to run goes on the next line, indented 4 spaces
+- Python uses indentation to show what code belongs to the if
+- If True, the indented block runs; if False, it is skipped
+[Analogy: if is Like a Traffic Light]
+Green light (True) → you go. Red light (False) → you stop. The if statement checks the condition and decides whether to run the code or skip it.
+[Think Of]
+Traffic Light: Green → GO, Red → STOP. The condition decides which path to take.
+[Code Example: Basic if Statement]
+age = 18
+if age >= 18:
+    print("You are an adult")
+    print("You can vote!")
+[Practice]
+Ask for age. If 18+, print "You are eligible to vote!"
+Starter: age = int(input("Enter your age: "))
+if age >= 18:
+
+--- Section 2: if-else & elif ---
+[Explanation: Two Paths with if-else]
+When you need to choose between two options, use if-else. One block runs if True, another if False.
+if condition: — runs when True
+- else: — runs when False
+- Only ONE of the two blocks runs, never both
+[Code Example: if-else in Action]
+age = 16
+if age >= 18:
+    print("You can vote")
+else:
+    print("Too young to vote")
+[Explanation: Multiple Conditions with elif]
+When you have more than two possibilities, use elif. You can chain as many as needed.
+if checks the first condition
+- elif checks the next (if previous was False)
+- else runs only if ALL conditions were False
+[Explanation: Truthy and Falsy Values]
+Some values are treated as True (truthy) and others as False (falsy) in conditions.
+Falsy: None, 0, 0.0, "" (empty string), [] (empty list)
+- Truthy: everything else — non-zero numbers, non-empty strings
+- Lets you write concise conditions like if name:
+[Practice]
+Ask for marks. Print grade: 90+ = A, 80-89 = B, 70-79 = C, 60-69 = D, below 60 = F.
+Starter: marks = int(input("Enter marks: "))
+if marks >= 90:
+    
+elif 
+elif 
+elif 
+else:
+[reflection]
+
+--- Main Quiz ---
+No main quiz.json
+
+--- Problem ---
+Title: Largest of Three
+Desc: Ask the user for three numbers. Print the largest number among them using if-elif-else.
+Starter: a = int(input("First: "))
+b = int(input("Second: "))
+c = int(input("Third: "))
+
+# Find and print the largest
+Title: Leap Year Checker
+Desc: Ask the user for a year. Determine if it's a leap year: divisible by 4 AND (not divisible by 100 OR divisible by 400).
+Starter: # Get year from user input
+year = int(input("Enter year: "))
+
+# Check leap year condition
+Title: Rock, Paper, Scissors
+Desc: Build a rock-paper-scissors game against the computer with score tracking.
+Starter: undefined
+
+
+=================================
+LECTURE 6
+=================================
+TITLE: For Loops
+
+--- Section 1: Loop Basics ---
+[Explanation: What is a Loop?]
+A **loop** repeats a block of code multiple times. Instead of writing the same code 10 times, you write it once inside a loop.
+Loops eliminate repetitive code
+- You control how many times the loop runs
+- Each repetition is called an iteration
+[Analogy: A Loop is Like a Washing Machine Cycle]
+You load clothes, set the timer, and the machine repeats the cycle until time runs out. A for loop processes each item in a list automatically.
+[Think Of]
+Washing Machine Cycle: The machine runs through each step automatically for every item
+[Code Example: Basic for Loop with a List]
+fruits = ["apple", "banana", "cherry"]
+for fruit in fruits:
+    print(f"I like {fruit}")
+[Practice]
+Create a list of three colors. Use a for loop to print each color.
+Starter: colors = ["red", "blue", "green"]
+for color in colors:
+
+--- Section 2: range() Function ---
+[Explanation: Counting with range()]
+The `range()` function generates a sequence of numbers. Perfect when you want to repeat a specific number of times.
+range(stop) — numbers from 0 to stop-1
+- range(start, stop) — numbers from start to stop-1
+- range(start, stop, step) — numbers with custom step
+[Code Example: range() Basics]
+print("range(5):")
+for i in range(5):
+    print(i)
+
+print("range(2, 6):")
+for i in range(2, 6):
+    print(i)
+[Practice]
+Use a for loop with range() to print numbers 1 through 10.
+Starter: for i in range(, ):
+    print(i)
+[reflection]
+
+--- Section 3: Nested Loops ---
+[Explanation: Loops Inside Loops]
+You can put a loop inside another loop. The inner loop runs completely for EACH iteration of the outer loop.
+The outer loop controls rows
+- The inner loop controls columns
+- Nested loops are great for patterns and tables
+[Code Example: Multiplication Table]
+for i in range(1, 4):
+    for j in range(1, 4):
+        print(f"{i} x {j} = {i*j}")
+[Practice]
+Use nested loops to print a 4x6 rectangle of stars. The outer loop runs 4 times (rows), and the inner loop runs 6 times (columns).
+Starter: for row in range(4):
+    for col in range(6):
+        print("*", end="")
+    print()
+[reflection]
+
+--- Main Quiz ---
+No main quiz.json
+
+--- Problem ---
+Title: Sum from 1 to N
+Desc: Ask for a number N. Use a for loop with range() to calculate the sum of all numbers from 1 to N. Print the result.
+Starter: n = int(input("Enter N: "))
+total = 0
+
+# Use a for loop to sum 1 to N
+Title: Factorial Calculator
+Desc: Ask for a number N. Calculate N! (N factorial) using a for loop. N! = 1 * 2 * 3 * ... * N
+Starter: n = int(input("Enter N: "))
+fact = 1
+
+# Calculate factorial
+Title: Multiplication Explorer
+Desc: Print a customizable multiplication table using nested loops.
+Starter: undefined
+
+
+=================================
+LECTURE 7
+=================================
+TITLE: While Loops
+
+--- Section 1: while Loop ---
+[Explanation: The while Loop]
+A `while` loop keeps running as long as its condition is True. It checks the condition BEFORE each iteration.
+while condition: — checks before each run
+- If True, the body runs, then checks again
+- If False, the loop stops
+[Analogy: while is Like Checking Your Phone]
+While waiting for a friend: check for messages. No message → wait. Message arrives → stop. The while loop checks a condition and keeps going until it changes.
+[Think Of]
+Checking Your Phone: Keep checking until there are no more notifications
+[Code Example: Basic while Loop]
+count = 1
+while count <= 5:
+    print(f"Count: {count}")
+    count = count + 1
+print("Done!")
+[Explanation: Avoiding Infinite Loops]
+An **infinite loop** runs forever because the condition never becomes False.
+Always update the counter variable inside the loop
+- Make sure the condition will eventually become False
+- Use break to exit early if needed
+- Press Ctrl+C to stop a running program
+[Practice]
+Ask for a number N. Use a while loop to calculate sum of 1 to N.
+Starter: n = int(input("Enter N: "))
+count = 1
+total = 0
+while count <= n:
+    total = 
+    count = 
+print(f"Sum: {total}")
+
+--- Section 2: break & continue ---
+[Explanation: Controlling Loop Flow]
+Sometimes you need to exit early or skip an iteration. break and continue give you this control.
+break — exits the loop immediately
+- continue — skips to the next iteration
+- break is useful for 'found it!' scenarios
+- continue is useful for 'skip this one' scenarios
+[Code Example: break — Exit Early]
+for num in range(1, 10):
+    if num == 5:
+        print("Found 5! Stopping...")
+        break
+    print(f"Checking: {num}")
+[Explanation: while vs for]
+Choose the right loop for the right job.
+Use for when you know the count or have a list
+- Use while when waiting for a condition to change
+- for loops are safer (no infinite loops)
+[Practice]
+Ask for a number N. Use a while loop to count down from N to 1, then print 'Blast off!'
+Starter: n = int(input("Enter a number: "))
+while n > 0:
+    print(n)
+    n = 
+print("Blast off!")
+[reflection]
+
+--- Main Quiz ---
+No main quiz.json
+
+--- Problem ---
+Title: Number Guessing Game
+Desc: Set a secret number (e.g., 7). Use a while loop to let the user guess. Keep asking until they get it right. Print 'Correct!' and stop.
+Starter: secret = 7
+
+# Guessing loop
+Title: Count Digits
+Desc: Ask for a positive integer. Count how many digits it has using a while loop. Print the count.
+Starter: num = int(input("Number: "))
+count = 0
+
+# Count digits using while loop
+Title: Number Guessing Game with Levels
+Desc: Create a number guessing game with multiple difficulty levels, guess limits, and replay.
+Starter: undefined
+
+
+=================================
+LECTURE 8
+=================================
+TITLE: Lists
+
+--- Section 1: List Basics ---
+[Explanation: What is a List?]
+A **list** is an ordered collection of items enclosed in square brackets []. You can store any type of data.
+Create: fruits = ["apple", "banana", "cherry"]
+- Items are separated by commas
+- Lists keep their order (first item stays first)
+- Lists can contain mixed types
+[Analogy: A List is Like a Shopping List]
+You write items in order: first eggs, then milk, then bread. You can add items, remove items, or check what's at position 2. Python lists work exactly the same way.
+[Think Of]
+Shopping List: Items in order. Add, remove, or access by position.
+[Code Example: Creating and Printing Lists]
+fruits = ["apple", "banana", "cherry"]
+print(fruits)
+
+mixed = ["hello", 42, True, 3.14]
+print(mixed)
+print(type(fruits))
+[Practice]
+Create a list with 3 items. Use a for loop to print each with a number.
+Starter: groceries = ["milk", "bread", "eggs"]
+for i in range(len(groceries)):
+
+--- Section 2: Indexing & Slicing ---
+[Explanation: Accessing Items with Index]
+Each item in a list has a position called an **index**. Python uses zero-based indexing.
+Index starts at 0: fruits[0] is the first item
+- Negative index counts from end: fruits[-1] is last
+- Slicing extracts a portion: fruits[1:3] gets index 1 and 2
+- len(list) gives the number of items
+[Code Example: Indexing and Slicing]
+fruits = ["apple", "banana", "cherry", "date", "elderberry"]
+print(fruits[0])
+print(fruits[-1])
+print(fruits[1:4])
+print(fruits[:3])
+print(fruits[2:])
+print(fruits[::2])
+[Practice]
+Create a list of 5 numbers. Print the first, last, and middle elements.
+Starter: nums = [10, 20, 30, 40, 50]
+print(f"First: {nums[0]}")
+print(f"Last: {nums[]}")
+print(f"Middle: {nums[]}")
+[reflection]
+
+--- Section 3: List Methods ---
+[Explanation: Working with List Methods]
+Lists have built-in **methods** that let you modify and analyze them.
+append(item) — adds item to the end
+- remove(item) — removes the first occurrence
+- sort() — sorts in ascending order
+- len(list) — returns the number of items
+[Code Example: List Operations]
+tasks = ["study", "exercise", "code"]
+print(tasks)
+tasks.append("read")
+print(tasks)
+tasks.remove("exercise")
+print(tasks)
+tasks[0] = "review"
+print(tasks)
+print(f"Total: {len(tasks)}")
+[Practice]
+Start with [78, 92, 85, 63, 88]. Add 95, remove the lowest, sort, and print the average.
+Starter: marks = [78, 92, 85, 63, 88]
+marks.append()
+marks.remove()
+marks.sort()
+print(f"Marks: {marks}")
+print(f"Average: {sum(marks)//len(marks)}")
+[reflection]
+
+--- Main Quiz ---
+No main quiz.json
+
+--- Problem ---
+Title: Marks Manager
+Desc: Create a list of 5 marks. Add a new mark, remove the lowest mark, sort the list, and print the average.
+Starter: marks = [78, 92, 85, 63, 88]
+
+# Add 95
+# Remove lowest
+# Sort and print average
+Title: List Reversal
+Desc: Create a list of 5 numbers. Reverse it using slicing and print both the original and reversed lists.
+Starter: nums = [1, 2, 3, 4, 5]
+
+# Reverse and print
+Title: Shopping List Manager
+Desc: Build a menu-driven shopping list with add, remove, and purchase tracking.
+Starter: undefined
+
+
+=================================
+LECTURE 9
+=================================
+TITLE: Tuples & Sets
+
+--- Section 1: Tuples ---
+[Explanation: What is a Tuple?]
+A **tuple** is like a list but **immutable** — you cannot change it after creation. Use parentheses ().
+Tuples are created with (): coordinates = (10, 20)
+- Items cannot be added, removed, or changed
+- Tuples are faster than lists and protect data from modification
+- Use tuples for data that should stay constant
+[Analogy: A Tuple is Like a Sealed Envelope]
+Once sealed with coordinates inside, you can read them but not change them. Tuples work the same — great for fixed data like RGB colors or dates.
+[Think Of]
+Sealed Envelope: Once sealed, contents cannot change. Safe and tamper-proof.
+[Code Example: Creating and Using Tuples]
+colors = (255, 0, 0)
+coordinates = (10.5, 20.3)
+person = ("Alice", 25, "Engineer")
+
+print(colors[0])
+print(coordinates)
+print(person[1])
+
+# This would FAIL:
+# colors[0] = 128  # TypeError!
+[Explanation: Tuple Packing and Unpacking]
+**Packing** creates a tuple by grouping values. **Unpacking** extracts values into separate variables.
+Packing: point = 10, 20 (parentheses optional)
+- Unpacking: x, y = point
+- Swap variables: a, b = b, a (uses tuple unpacking)
+- Great for returning multiple values from functions
+[Practice]
+Create a tuple with your name, age, and city. Unpack it and print each value.
+Starter: my_info = ("", , "")
+name, age, city = my_info
+
+--- Section 2: Sets ---
+[Explanation: What is a Set?]
+A **set** is an unordered collection of **unique** items. Duplicates are automatically removed.
+Sets have no duplicates — each item appears once
+- Sets are unordered — cannot access by index
+- Great for removing duplicates and membership tests
+[Think Of]
+Bag Of Unique Items: Every marble appears only once. No duplicates allowed.
+[Code Example: Creating Sets]
+numbers = {1, 2, 3, 2, 1, 4, 3}
+print(numbers)
+[Explanation: Set Operations]
+Sets support mathematical operations like union, intersection, and difference.
+union (|) — all items from both sets
+- intersection (&) — items in BOTH sets
+- difference (-) — items in first but NOT second
+- in — check membership (very fast in sets)
+[Practice]
+Remove duplicates from [3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5] using a set, then sort.
+Starter: numbers = [3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5]
+unique = sorted()
+print(f"Unique sorted: {unique}")
+
+--- Main Quiz ---
+No main quiz.json
+
+--- Problem ---
+Title: Unique Sorter
+Desc: Given a list with duplicates [3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5], remove duplicates using a set and sort the result.
+Starter: nums = [3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5]
+
+# Remove duplicates and sort
+Title: Tuple Operations
+Desc: Create a tuple with coordinates (x, y, z). Unpack it into three variables. Swap x and z using tuple unpacking. Print the result.
+Starter: coords = (10, 20, 30)
+x, y, z = coords
+
+# Swap x and z and print
+
+
+=================================
+LECTURE 10
+=================================
+TITLE: Dictionaries
+
+--- Section 1: Dictionary Basics ---
+[Explanation: What is a Dictionary?]
+A **dictionary** stores pairs of keys and values. Each key is unique and maps to a value.
+Keys must be unique and immutable (strings, numbers)
+- Values can be anything: numbers, strings, lists, even other dicts
+- Access: student["name"] gets the value for key "name"
+- Dictionaries are unordered — accessed by key, not position
+[Analogy: A Dictionary is Like a Phone Book]
+You look up a person's name (the key) to find their phone number (the value). Each name is unique. You search by name directly — that's how Python dictionaries work.
+[Think Of]
+Phone Book: Look up a name (key) to find the number (value).
+[Code Example: Creating and Accessing Dictionaries]
+student = {
+    "name": "Lakshanya",
+    "age": 20,
+    "college": "SRM University"
+}
+print(student["name"])
+print(student["age"])
+print(student)
+[Practice]
+Create a dictionary with keys: name, age, city, hobby. Print each value.
+Starter: profile = {
+    "name": "",
+    "age": ,
+    "city": "",
+    "hobby": ""
+}
+print(f"Name: {profile['name']}")
+[visual_aid]
+
+--- Section 2: Modifying Dictionaries ---
+[Explanation: Adding, Updating, and Deleting]
+Dictionaries are mutable — you can change them after creation.
+Add: student["grade"] = "A" — creates a new key-value pair
+- Update: student["age"] = 21 — changes the existing value
+- Delete: del student["grade"] — removes the key-value pair
+- Check: "name" in student — returns True if key exists
+[Code Example: Dictionary Modifications]
+student = {"name": "Lakshanya", "age": 20}
+print(student)
+
+student["grade"] = "A"
+print(student)
+
+student["age"] = 21
+print(student)
+
+print("name" in student)
+del student["grade"]
+print(student)
+[Explanation: Dictionary Methods]
+Dictionaries have useful methods for working with keys, values, and items.
+.keys() — returns all keys
+- .values() — returns all values
+- .items() — returns all (key, value) pairs
+- .get(key) — safely gets value or returns None if missing
+[Practice]
+Create a student dict with name and 3 subject marks. Calculate average and add as new key. Print all items.
+Starter: student = {"name": "Lakshanya", "math": 85, "science": 92, "english": 78}
+student["average"] = 
+for key, value in student.items():
+    print(f"{key}: {value}")
+[visual_aid]
+[reflection]
+
+--- Main Quiz ---
+No main quiz.json
+
+--- Problem ---
+Title: Student Grades
+Desc: Create a dictionary with student names as keys and their grades as values. Add a new student, update an existing grade, and print each student with their grade.
+Starter: grades = {"Alice": 85, "Bob": 92, "Charlie": 78}
+
+# Add Diana with grade 88
+# Update Bob to 95
+# Print all
+Title: Word Frequency
+Desc: Count how many times each word appears in the sentence 'the cat and the dog and the bird'. Use a dictionary.
+Starter: sentence = "the cat and the dog and the bird"
+words = sentence.split()
+counts = {}
+
+# Count word frequencies
+Title: Contact Book
+Desc: Manage contacts using a dictionary with search and update features.
+Starter: undefined
+
+
+=================================
+LECTURE 11
+=================================
+TITLE: Functions
+
+--- Section 1: Why Functions? ---
+[Explanation: Why Do We Need Functions?]
+Without functions, you copy-paste the same code everywhere. Functions let you **define once, use many times**.
+Avoid repeating the same code
+- Make programs easier to read and understand
+- Fix bugs in one place instead of everywhere
+- Break complex problems into smaller pieces
+[Analogy: A Function is Like a Vending Machine]
+You press A3 (parameters), the machine runs its code (function body), and out comes a snack (return value). You don't care HOW it works inside — just press the button and get the result.
+[Think Of]
+Vending Machine: Insert coins (input) → Press button (call) → Get item (output)
+[Code Example: Without Functions vs With Functions]
+# WITHOUT functions:
+print("Hello, Alice!")
+print("Hello, Bob!")
+print("Hello, Charlie!")
+
+# WITH functions:
+def greet(name):
+    print(f"Hello, {name}!")
+
+greet("Alice")
+greet("Bob")
+greet("Charlie")
+
+--- Section 2: Defining Functions ---
+[Explanation: How to Define a Function]
+Use `def` followed by the function name, parentheses for parameters, a colon, and an indented body.
+def function_name(): — define a function
+- Parameters go inside parentheses: def add(a, b):
+- Use return to send a value back
+- If no return, the function returns None
+[Code Example: Functions with and without Return]
+def say_hello():
+    print("Hello!")
+
+result = say_hello()
+print(f"Return value: {result}")
+
+def add(a, b):
+    return a + b
+
+result = add(3, 4)
+print(f"3 + 4 = {result}")
+[Explanation: Default Parameters]
+You can give parameters **default values**. If the caller doesn't provide that argument, the default is used.
+def greet(name="Guest"): — default value
+- greet() uses "Guest", greet("Alice") uses "Alice"
+- Parameters with defaults must come LAST
+[reflection]
+[Practice]
+Define a function square_perimeter(side) that returns the perimeter of a square. Test it with sides 5 and 12.
+Starter: def square_perimeter(side):
+    
+
+print(square_perimeter(5))
+print(square_perimeter(12))
+
+--- Main Quiz ---
+No main quiz.json
+
+--- Problem ---
+Title: Area Calculator
+Desc: Define functions for area of rectangle, circle, and triangle. Call each with sample values and print the results.
+Starter: def rectangle_area(l, w):
+    return l * w
+
+def circle_area(r):
+    return 3.14 * r * r
+
+def triangle_area(b, h):
+    return 0.5 * b * h
+
+# Test each function
+Title: Temperature Converter
+Desc: Define celsius_to_fahrenheit(c) and fahrenheit_to_celsius(f) functions. Test both with sample values.
+Starter: def celsius_to_fahrenheit(c):
+    return (c * 9/5) + 32
+
+def fahrenheit_to_celsius(f):
+    return (f - 32) * 5/9
+
+# Test both
+Title: Unit Converter Toolkit
+Desc: Build a modular unit converter using functions for temperature, length, weight, and time.
+Starter: undefined
+
+
+=================================
+LECTURE 12
+=================================
+TITLE: String Operations
+
+--- Section 1: String Basics ---
+[Explanation: Strings are Sequences]
+A string is a sequence of characters. You can access individual characters, slice portions, and measure length — just like lists.
+Indexing: text[0] gets the first character
+- Slicing: text[1:4] gets characters at index 1-3
+- len(text) returns the number of characters
+- Negative indexing: text[-1] gets the last character
+[Think Of]
+Chain of Characters: Each character has a position. You can access individual links.
+[Code Example: String Indexing and Slicing]
+text = "Python"
+print(text[0])
+print(text[-1])
+print(text[1:4])
+print(text[:3])
+print(text[::2])
+print(len(text))
+[Practice]
+Create a string with your name. Print first char, last char, length, and first 3 chars.
+Starter: name = "Lakshanya"
+print(f"First: {name[0]}")
+print(f"Last: {name[]}")
+print(f"Length: {len()}")
+print(f"First 3: {name[:]}")
+[visual_aid]
+
+--- Section 2: String Methods ---
+[Explanation: Powerful String Methods]
+Python strings have built-in methods for changing case, removing whitespace, finding text, and more.
+upper() / lower() — change case
+- strip() — removes whitespace from both ends
+- replace(old, new) — replaces text
+- find(substring) — returns index or -1 if not found
+- startswith() / endswith() — check beginning/end
+[Think Of]
+Editing Tools: Each method transforms the string in a specific way
+[Code Example: Case Methods and Cleanup]
+text = "  Hello, World!  "
+print(text.upper())
+print(text.lower())
+print(text.strip())
+print(text.strip().replace("World", "Python"))
+
+msg = "hello.txt"
+print(msg.endswith(".txt"))
+[Explanation: Splitting and Joining]
+Strings can be split into lists and lists can be joined into strings.
+split() — splits a string into a list (default: space)
+- split(",") — splits by comma
+- " ".join(list) — joins list items into a string
+[Practice]
+Ask for first name and last name. Print the initials in uppercase with a dot between them.
+Starter: first = input("First name: ")
+last = input("Last name: ")
+initial = first[0].upper() + "." + last[0].upper()
+print(initial)
+[visual_aid]
+
+--- Main Quiz ---
+No main quiz.json
+
+--- Problem ---
+Title: Palindrome Checker
+Desc: Ask the user for a word. Check if it's a palindrome (reads same forward and backward). Ignore case.
+Starter: word = input("Enter a word: ")
+
+# Check palindrome
+Title: Email Extractor
+Desc: Given 'Name: Alice, Email: alice@example.com; Name: Bob, Email: bob@test.com', extract all email addresses.
+Starter: data = "Name: Alice, Email: alice@example.com; Name: Bob, Email: bob@test.com"
+
+# Extract and print emails
+
+
+=================================
+LECTURE 13
+=================================
+TITLE: File Handling
+
+--- Section 1: Why Files? ---
+[Explanation: Why Do We Need File Handling?]
+Without files, all data disappears when your program ends. Files let you save data permanently.
+Variables disappear when the program closes — files persist
+- Files let you share data between different programs
+- Real applications save user data, settings, and logs to files
+- Python handles text files (.txt) and structured files (.csv, .json)
+[Analogy: File Handling is Like a Notebook]
+Writing in a notebook saves information even after you close it. Open it tomorrow and the information is still there. File handling does the same for your programs.
+[Think Of]
+Notebook: Open it, read/write pages, close it when done.
+
+--- Section 2: Reading Files ---
+[Explanation: Opening and Reading Files]
+Use the open() function to work with files. The default mode is 'read' (r).
+file = open("filename.txt", "r") — opens for reading
+- file.read() — reads the entire file as one string
+- file.readlines() — reads all lines into a list
+- Always close the file: file.close()
+[Code Example: Reading a File]
+# First create a file
+with open("notes.txt", "w") as f:
+    f.write("Line 1\nLine 2\nLine 3")
+
+# Now read it
+with open("notes.txt", "r") as file:
+    content = file.read()
+    print(content)
+[Explanation: The with Statement]
+The `with` statement automatically closes the file even if an error occurs.
+with open("file.txt", "r") as f: — auto-closes when done
+- No need to call .close() manually
+- Safer and cleaner than manual open/close
+[Practice]
+Write 3 names to students.txt. Read them back and greet each: 'Hello, [name]!'
+Starter: with open("students.txt", "w") as f:
+    f.write("Alice\nBob\nCharlie\n")
+
+with open("students.txt", "r") as f:
+    for name in f:
+        print(f"Hello, {name.strip()}!")
+[reflection]
+
+--- Section 3: Writing Files ---
+[Explanation: Writing and Appending]
+Python has three main file modes: read (r), write (w), and append (a).
+"w" mode — WRITE: creates or overwrites
+- "a" mode — APPEND: adds to end of existing file
+- "r" mode — READ: reads from existing file
+- Use "w" carefully — it deletes existing content!
+[Code Example: Write vs Append]
+with open("diary.txt", "w") as f:
+    f.write("Day 1: Started Python\n")
+
+with open("diary.txt", "a") as f:
+    f.write("Day 2: File handling!\n")
+
+with open("diary.txt", "r") as f:
+    print(f.read())
+[Practice]
+Ask for today's date and a diary entry. Append the entry to 'diary.txt'. Then read and display the full diary.
+Starter: date = input("Date: ")
+entry = input("Diary entry: ")
+
+with open("diary.txt", "a") as f:
+    f.write(date + "\n")
+    f.write(entry + "\n\n")
+
+with open("diary.txt", "r") as f:
+    print(f.read())
+[reflection]
+
+--- Main Quiz ---
+No main quiz.json
+
+--- Problem ---
+Title: Notes App
+Desc: Ask the user for 3 notes. Write them to 'notes.txt' (one per line). Then read the file and display each note with a line number.
+Starter: # Get 3 notes
+n1 = input("Note 1: ")
+n2 = input("Note 2: ")
+n3 = input("Note 3: ")
+
+# Write to file
+
+# Read and display
+Title: File Copy
+Desc: Read all lines from 'source.txt' (create it first) and write them to 'copy.txt' with line numbers. Print the contents of copy.txt.
+Starter: # Create source file
+with open("source.txt", "w") as f:
+    f.write("Line A\nLine B\nLine C\n")
+
+# Read and copy with numbers
+
+
+=================================
+LECTURE 14
+=================================
+TITLE: Mini Project
+
+--- Section 1: Project Options ---
+[Explanation: Choose Your Project]
+You've learned variables, conditionals, loops, functions, lists, dictionaries, strings, and file handling. Now pick one of four projects to build from scratch.
+**Student Management System** — Add, view, update, and delete student records
+- **Expense Tracker** — Log expenses, view totals, and filter by category
+- **Quiz Application** — Create quizzes with multiple choice questions and scoring
+- **To-Do List** — Add tasks, mark complete, and save/load from a file
+[Analogy: This is Your Graduation Project]
+Just like a chef who learns all the techniques before cooking their signature dish, you've learned all the Python ingredients. Now put them together to create something amazing!
+[reflection]
+
+--- Section 2: Project Requirements ---
+[Explanation: Minimum Requirements]
+Your project must include the following features to be complete.
+Minimum 3 functions (including main())
+- User input and formatted output
+- At least one loop (for or while)
+- At least one conditional (if/elif/else)
+- Use a list or dictionary to store data
+- **Bonus**: File handling (save/load data from a file)
+[text]
+[Code Example: Project Template — Student Management System]
+# Student Management System
+
+def add_student(students):
+    name = input("Enter student name: ")
+    grade = int(input("Enter grade: "))
+    students[name] = grade
+    print(f"Added {name}")
+
+def view_all(students):
+    if not students:
+        print("No students yet")
+        return
+    for name, grade in students.items():
+        print(f"{name}: {grade}")
+
+def main():
+    students = {}
+    while True:
+        print("\n1. Add Student")
+        print("2. View All")
+        print("3. Exit")
+        choice = input("Choose: ")
+        if choice == "1":
+            add_student(students)
+        elif choice == "2":
+            view_all(students)
+        elif choice == "3":
+            break
+        else:
+            print("Invalid choice")
+
+main()
+[reflection]
+[Practice]
+Write a menu program showing 4 project options. Let the user pick one (1-4) and print a confirmation.
+Starter: print("1. Student Management System")
+print("2. Expense Tracker")
+print("3. Quiz Application")
+print("4. To-Do List")
+choice = int(input("Choose (1-4): "))
+projects = ["", "Student Management System", "Expense Tracker", "Quiz Application", "To-Do List"]
+
+--- Main Quiz ---
+No main quiz.json
+
+--- Problem ---
+Title: Mini Project: Plan Your App
+Desc: Write a Python program that prints a menu with 4 project options. Let the user pick one (1-4). Print a confirmation message: 'You selected: [Project Name]'
+Starter: print("=== Choose Your Project ===")
+print("1. Student Management System")
+print("2. Expense Tracker")
+print("3. Quiz Application")
+print("4. To-Do List")
+
+choice = int(input("Enter choice (1-4): "))
+
+# Print confirmation
+Title: Student Grade Tracker
+Desc: Capstone: manage student grades with file persistence, reports, and letter grades.
+Starter: undefined

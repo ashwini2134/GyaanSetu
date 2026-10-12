@@ -3,6 +3,9 @@ import type { CodingProblem } from '../../types/lesson';
 import CodeEditor from './CodeEditor';
 import { runPython, normalizeNumbers, stripPrompts } from '../../utils/pythonRunner';
 import { authFetch } from '../../authClient';
+import { useAuth } from '../../auth';
+import BeforeYouStartCard from './BeforeYouStartCard';
+import HowWeEvaluateCard from './HowWeEvaluateCard';
 
 const DIFF_COLOR: Record<string, string> = {
   easy:   'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
@@ -84,6 +87,8 @@ interface ProblemCardProps {
 }
 
 export default function ProblemCard({ problem, index, completed, onComplete, onAttempt, isOpen, onOpenChange }: ProblemCardProps) {
+  const { user } = useAuth();
+  const watermarkText = user ? `${user.name} · ${user.email}` : '';
   const [localOpen, setLocalOpen] = useState(false);
   const open = isOpen !== undefined ? isOpen : localOpen;
   const setOpen = (val: boolean) => {
@@ -94,6 +99,15 @@ export default function ProblemCard({ problem, index, completed, onComplete, onA
   const [testResults, setTestResults] = useState<TestResult[] | null>(null);
   const [allPassed, setAllPassed] = useState(completed ?? false);
   const [showCompletion, setShowCompletion] = useState(false);
+
+  // "Before You Start" is expanded the first time a student ever sees a
+  // problem, then collapsed by default afterward so it doesn't nag returning
+  // users — remembered globally, not per-problem.
+  const [seenBeforeYouStart] = useState(() => {
+    const seen = localStorage.getItem('lms:seenBeforeYouStart') === '1';
+    if (!seen) localStorage.setItem('lms:seenBeforeYouStart', '1');
+    return seen;
+  });
 
   // Run-only state (separate from submission)
   const [runOutput, setRunOutput] = useState<string | null>(null);
@@ -148,6 +162,19 @@ export default function ProblemCard({ problem, index, completed, onComplete, onA
     onAttempt?.();
     handleSave(code);
     if (allPassed) return;
+    
+    if (problem.type === 'reflection') {
+      const words = code.trim().split(/\\s+/).filter(w => w.length > 0);
+      if (words.length >= 20) {
+        completeProblem();
+      } else {
+        setRunError(`Reflection needs more detail. Please write at least 20 words (currently ${words.length}).`);
+        setRunOutput(null);
+        setTestResults(null);
+      }
+      return;
+    }
+
     if (problem.testCases.length === 0) {
       completeProblem();
       return;
@@ -228,13 +255,13 @@ export default function ProblemCard({ problem, index, completed, onComplete, onA
       <div
         className={`rounded-2xl border transition-all duration-200 cursor-pointer group relative
           ${allPassed
-            ? 'border-emerald-500/25 bg-gradient-to-br from-emerald-600/8 to-slate-800/40'
-            : 'border-slate-700/30 bg-gradient-to-br from-slate-800/40 to-slate-900/40 hover:border-blue-500/30 hover:bg-slate-800/60'}`}
+            ? 'border-emerald-500/25 bg-gradient-to-br from-emerald-500/10 to-[var(--bg-surface)]'
+            : 'border-[var(--border-primary)] bg-[var(--bg-surface)] hover:border-blue-500/30 shadow-sm'}`}
         onClick={() => setOpen(true)}
       >
         <div className="flex items-center gap-4 px-5 py-4">
           <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 text-sm font-bold
-            ${allPassed ? 'bg-emerald-600/20 text-emerald-400' : 'bg-blue-600/15 text-blue-400 group-hover:bg-blue-600/25'}`}>
+            ${allPassed ? 'bg-emerald-600/20 text-emerald-500' : 'bg-blue-600/15 text-blue-500 group-hover:bg-blue-600/25'}`}>
             {allPassed ? (
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -242,7 +269,7 @@ export default function ProblemCard({ problem, index, completed, onComplete, onA
             ) : index + 1}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-slate-200 group-hover:text-white transition-colors truncate">
+            <p className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-blue-500 transition-colors truncate">
               {problem.title}
             </p>
           </div>
@@ -258,7 +285,7 @@ export default function ProblemCard({ problem, index, completed, onComplete, onA
               {problem.difficulty}
             </span>
           )}
-          <svg className="w-4 h-4 text-slate-500 group-hover:text-blue-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="w-4 h-4 text-[var(--text-secondary)] group-hover:text-blue-500 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
           </svg>
         </div>
@@ -267,7 +294,23 @@ export default function ProblemCard({ problem, index, completed, onComplete, onA
   }
 
   return (
-    <div className={`rounded-2xl border overflow-hidden relative ${allPassed ? 'border-emerald-500/25' : 'border-slate-700/30'}`}>
+    <div
+      className={`rounded-2xl border overflow-hidden relative shadow-sm ${allPassed ? 'border-emerald-500/25' : 'border-[var(--border-primary)]'}`}
+    >
+      {watermarkText && (
+        <div className="absolute inset-0 z-[5] pointer-events-none overflow-hidden select-none" aria-hidden="true">
+          <div
+            className="absolute flex flex-wrap content-start gap-x-10 gap-y-16 opacity-[0.035]"
+            style={{ top: '-20%', left: '-20%', width: '140%', height: '160%', transform: 'rotate(-22deg)' }}
+          >
+            {Array.from({ length: 60 }).map((_, i) => (
+              <span key={i} className="text-[10px] font-mono text-[#64748b] whitespace-nowrap">
+                {watermarkText}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
       {showCompletion && (
         <div className="absolute inset-0 z-10 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center animate-in fade-in zoom-in duration-500">
           <div className="flex flex-col items-center gap-3 text-center px-6">
@@ -278,18 +321,18 @@ export default function ProblemCard({ problem, index, completed, onComplete, onA
             </div>
             <div>
               <p className="text-lg font-bold text-white">Problem Solved</p>
-              <p className="text-sm text-slate-400 mt-1">Great job!</p>
+              <p className="text-sm text-slate-300 mt-1">Great job!</p>
             </div>
           </div>
         </div>
       )}
 
-      <div className="flex items-center justify-between px-5 py-3 bg-slate-800/40 border-b border-slate-700/30">
+      <div className="flex items-center justify-between px-5 py-3 bg-[var(--bg-surface)] border-b border-[var(--border-primary)]">
         <div className="flex items-center gap-3">
           <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border capitalize ${diffCls}`}>
             {problem.difficulty}
           </span>
-          <h3 className="text-sm font-semibold text-white">{problem.title}</h3>
+          <h3 className="text-sm font-semibold text-[var(--text-primary)]">{problem.title}</h3>
           {allPassed && (
             <span className="inline-flex items-center gap-1 text-xs text-emerald-400">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -301,7 +344,7 @@ export default function ProblemCard({ problem, index, completed, onComplete, onA
         </div>
         <button
           onClick={() => setOpen(false)}
-          className="text-slate-500 hover:text-slate-300 transition-colors"
+          className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -309,13 +352,13 @@ export default function ProblemCard({ problem, index, completed, onComplete, onA
         </button>
       </div>
 
-      <div className="flex border-b border-slate-700/30 bg-slate-900/40">
+      <div className="flex border-b border-[var(--border-primary)] bg-slate-50">
         {(['description', 'hints'] as const).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
             className={`px-4 py-2 text-xs font-medium capitalize transition-all ${
-              tab === t ? 'text-blue-300 border-b-2 border-blue-500' : 'text-slate-500 hover:text-slate-300'
+              tab === t ? 'text-blue-500 border-b-2 border-blue-500' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
             {t}
@@ -323,17 +366,17 @@ export default function ProblemCard({ problem, index, completed, onComplete, onA
         ))}
       </div>
 
-      <div className="bg-slate-900/30">
+      <div className="bg-[var(--bg-surface)]">
         {tab === 'description' ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
-            <div className="p-5 border-r border-slate-700/30 space-y-4">
-              <div 
-                className="prose prose-invert prose-sm max-w-none" 
-                style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
-                onCopy={(e) => e.preventDefault()}
-              >
-                <p className="text-sm text-slate-200 leading-relaxed whitespace-pre-line">{problem.description}</p>
+            <div className="p-5 border-r border-[var(--border-primary)] space-y-4">
+              <BeforeYouStartCard points={problem.beforeYouStart} defaultCollapsed={seenBeforeYouStart} />
+
+              <div className="prose prose-sm max-w-none text-[var(--text-primary)]">
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed whitespace-pre-line">{problem.description}</p>
               </div>
+
+              <HowWeEvaluateCard points={problem.evaluationNotes} />
 
               {allPassed && (
                 <div className="mt-6 p-4 rounded-xl bg-slate-800/40 border border-slate-700/30">
@@ -356,10 +399,10 @@ export default function ProblemCard({ problem, index, completed, onComplete, onA
 
               {totalCount > 0 && (
                 <div className="space-y-2">
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Test Cases ({totalCount})</p>
+                  <p className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Test Cases ({totalCount})</p>
                   {problem.testCases.map((tc, i) => (
-                    <div key={i} className="flex items-center gap-2 text-xs text-slate-400">
-                      <span className="w-4 h-4 rounded-full bg-slate-700/50 flex items-center justify-center text-[9px] text-slate-500 font-bold">
+                    <div key={i} className="flex items-center gap-2 text-xs text-slate-300">
+                      <span className="w-4 h-4 rounded-full bg-slate-700/50 flex items-center justify-center text-[9px] text-slate-300 font-bold">
                         {i + 1}
                       </span>
                       <span>{tc.label}</span>
@@ -377,6 +420,7 @@ export default function ProblemCard({ problem, index, completed, onComplete, onA
                 height="240px"
                 showSaveButton
                 showSubmitButton
+                disableClipboard
                 onSave={handleSave}
                 onRun={handleRun}
                 onSubmit={handleSubmit}
@@ -385,7 +429,7 @@ export default function ProblemCard({ problem, index, completed, onComplete, onA
               {/* Run output — shown only when Run is clicked (no test cases) */}
               {runOutput !== null && !testResults && (
                 <div className="p-3 rounded-xl border border-slate-700/30 bg-slate-900/50">
-                  <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Console Output</p>
+                  <p className="text-[10px] font-semibold text-slate-300 uppercase tracking-wider mb-2">Console Output</p>
                   {runError ? (
                     <pre className="text-sm text-red-300 font-mono whitespace-pre-wrap">{runError}</pre>
                   ) : (
@@ -416,7 +460,7 @@ export default function ProblemCard({ problem, index, completed, onComplete, onA
                   )}
 
                   <div className="space-y-3">
-                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Submission Result</p>
+                    <p className="text-[10px] font-semibold text-slate-300 uppercase tracking-wider">Submission Result</p>
                     {testResults.map((r, i) => (
                       <div key={i} className={`p-3 rounded-xl border text-xs ${
                         r.passed ? 'border-emerald-700/30 bg-emerald-900/10' : 'border-red-700/30 bg-red-900/10'
@@ -441,18 +485,18 @@ export default function ProblemCard({ problem, index, completed, onComplete, onA
                             {/* Line-by-line diff */}
                             {r.diffLines && (
                               <div className="space-y-0.5 font-mono text-[10px]">
-                                <div className="text-slate-500 mb-1 text-[9px] uppercase tracking-wider">Line-by-line comparison:</div>
+                                <div className="text-slate-300 mb-1 text-[9px] uppercase tracking-wider">Line-by-line comparison:</div>
                                 {r.diffLines.filter(d => !d.match).length > 0 && (
                                   <>
                                     <div className="text-green-400">Expected Output:</div>
                                     {r.diffLines.map((d) => (
-                                      <div key={d.line} className={`${d.match ? 'text-slate-600' : 'text-green-400 bg-green-900/10 px-1 -mx-1 rounded'}`}>
+                                      <div key={d.line} className={`${d.match ? 'text-slate-300' : 'text-green-400 bg-green-900/10 px-1 -mx-1 rounded'}`}>
                                         {d.expected || ' '}
                                       </div>
                                     ))}
                                     <div className="text-red-400 mt-2">Actual Output:</div>
                                     {r.diffLines.map((d) => (
-                                      <div key={d.line} className={`${d.match ? 'text-slate-600' : 'text-red-400 bg-red-900/10 px-1 -mx-1 rounded'}`}>
+                                      <div key={d.line} className={`${d.match ? 'text-slate-300' : 'text-red-400 bg-red-900/10 px-1 -mx-1 rounded'}`}>
                                         {d.actual || ' '}
                                       </div>
                                     ))}
@@ -474,11 +518,11 @@ export default function ProblemCard({ problem, index, completed, onComplete, onA
                             {(!r.diffLines || r.diffLines.filter(d => !d.match).length === 0) && (
                               <div className="space-y-1 font-mono text-[10px]">
                                 <div className="flex gap-2">
-                                  <span className="text-slate-500 shrink-0">Expected:</span>
+                                  <span className="text-slate-300 shrink-0">Expected:</span>
                                   <span className="text-emerald-400 whitespace-pre-wrap" style={{ userSelect: 'none', WebkitUserSelect: 'none' }}>{r.expected || '(empty)'}</span>
                                 </div>
                                 <div className="flex gap-2">
-                                  <span className="text-slate-500 shrink-0">Actual:</span>
+                                  <span className="text-slate-300 shrink-0">Actual:</span>
                                   <span className="text-red-400 whitespace-pre-wrap">{r.actual || '(empty)'}</span>
                                 </div>
                               </div>
@@ -496,21 +540,21 @@ export default function ProblemCard({ problem, index, completed, onComplete, onA
           <div className="p-5 space-y-3">
             <div className="rounded-xl border border-blue-700/30 bg-blue-900/10 p-4">
               <p className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-2">Hints</p>
-              <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-line">
-                {problem.solution
-                  ? splitHints(problem.solution)
-                  : 'Try breaking the problem into smaller steps. Think about what each line of code needs to do.'}
-              </p>
+              {problem.hints && problem.hints.length > 0 ? (
+                <ul className="text-sm text-slate-300 space-y-2 list-disc list-inside">
+                  {problem.hints.map((hint, i) => (
+                    <li key={i}>{hint}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-line">
+                  Try breaking the problem into smaller steps. Think about what each line of code needs to do.
+                </p>
+              )}
             </div>
           </div>
         )}
       </div>
     </div>
   );
-}
-
-function splitHints(solution: string): string {
-  const lines = solution.split('\n').filter(l => l.trim());
-  if (lines.length <= 2) return 'Think about what each part of your solution needs to accomplish.';
-  return `• Start by thinking about what input you need\n• Then process it step by step\n• Make sure your output matches the expected format`;
 }

@@ -6,14 +6,17 @@ import {
   Trophy, 
   Flame, 
   BookOpen, 
-  Brain, 
   Code, 
-  LayoutDashboard, 
   Search,
-  Sparkles,
-  Info,
-  Award,
-  TrendingUp
+  Users,
+  Copy,
+  Check,
+  ChevronDown,
+  Lightbulb,
+  Megaphone,
+  User,
+  ArrowRight,
+  X
 } from 'lucide-react';
 
 interface LeaderboardEntry {
@@ -57,33 +60,9 @@ interface LeaderboardResponse {
   currentUser: CurrentUserCard | null;
 }
 
-function getTitleColorClass(title: string) {
-  const t = title.toLowerCase();
-  if (t === 'legend') return 'text-red-400 bg-red-500/10 border-red-500/20 font-black animate-pulse';
-  if (t === 'grandmaster') return 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20 font-extrabold';
-  if (t === 'master') return 'text-purple-400 bg-purple-500/10 border-purple-500/20 font-extrabold';
-  if (t === 'builder') return 'text-blue-400 bg-blue-500/10 border-blue-500/20 font-extrabold';
-  if (t === 'explorer') return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20 font-extrabold';
-  return 'text-slate-400 bg-slate-500/10 border-slate-500/20 font-extrabold';
-}
-
 function getInitials(name: string) {
   if (!name) return 'U';
   return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-}
-
-function getGradient(index: number) {
-  const gradients = [
-    'from-amber-400 to-yellow-600',
-    'from-slate-300 to-slate-500',
-    'from-amber-600 to-orange-700',
-    'from-blue-400 to-purple-600',
-    'from-emerald-400 to-teal-600',
-    'from-rose-400 to-pink-600',
-    'from-cyan-400 to-blue-600',
-    'from-violet-400 to-indigo-600',
-  ];
-  return gradients[index % gradients.length];
 }
 
 export default function LeaderboardPage() {
@@ -93,10 +72,18 @@ export default function LeaderboardPage() {
   const [totalLearners, setTotalLearners] = useState(0);
   const [currentUserCard, setCurrentUserCard] = useState<CurrentUserCard | null>(null);
   
-  const [timeframe, setTimeframe] = useState<'all-time' | 'weekly' | 'monthly'>('all-time');
+  const [timeframe, setTimeframe] = useState<'all-time' | 'weekly' | 'monthly'>('weekly');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
-  const [showRulesModal, setShowRulesModal] = useState(false);
+  const [showRankingDetails, setShowRankingDetails] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [myInviteCode, setMyInviteCode] = useState('');
+  
+  const [showRedeemModal, setShowRedeemModal] = useState(false);
+  const [redeemCodeInput, setRedeemCodeInput] = useState('');
+  const [redeemError, setRedeemError] = useState('');
+  const [redeemSuccess, setRedeemSuccess] = useState('');
+  const [redeeming, setRedeeming] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -115,6 +102,13 @@ export default function LeaderboardPage() {
         if (active) setLoading(false);
       });
       
+    authFetch<{code: string}>(`/invites/code`)
+      .then(data => {
+        if (!active) return;
+        setMyInviteCode(data.code);
+      })
+      .catch(err => console.warn('Failed to fetch invite code:', err));
+      
     return () => {
       active = false;
     };
@@ -124,521 +118,380 @@ export default function LeaderboardPage() {
     entry.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const top3 = entries.slice(0, 3);
-  const rest = filteredEntries.filter(e => !top3.find(t => t.id === e.id));
+  const handleCopyCode = () => {
+    if (!myInviteCode) return;
+    navigator.clipboard.writeText(myInviteCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
-  function renderMovement(movement: string) {
-    if (movement === 'NEW') {
-      return (
-        <span className="text-[9px] font-extrabold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded-full uppercase tracking-wider animate-pulse">
-          NEW
-        </span>
-      );
+  const handleRedeem = async () => {
+    if (!redeemCodeInput.trim()) return;
+    setRedeeming(true);
+    setRedeemError('');
+    setRedeemSuccess('');
+    try {
+      await authFetch('/invites/redeem', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: redeemCodeInput.trim() })
+      });
+      setRedeemSuccess('Code successfully redeemed!');
+      setTimeout(() => {
+        setShowRedeemModal(false);
+        setRedeemCodeInput('');
+        setRedeemSuccess('');
+      }, 2000);
+    } catch (err: any) {
+      setRedeemError(err.message || 'Failed to redeem code');
+    } finally {
+      setRedeeming(false);
     }
-    if (movement.startsWith('↑')) {
-      return <span className="text-xs font-bold text-emerald-400 flex items-center">{movement}</span>;
-    }
-    if (movement.startsWith('↓')) {
-      return <span className="text-xs font-bold text-rose-400 flex items-center">{movement}</span>;
-    }
-    return <span className="text-xs text-slate-500 font-medium">—</span>;
-  }
-
-  function getPodiumBorder(position: 'first' | 'second' | 'third') {
-    if (position === 'first') return 'border-yellow-400/40 shadow-yellow-400/5 bg-[#1F190D]/50';
-    if (position === 'second') return 'border-slate-400/30 shadow-slate-400/5 bg-[#131722]/50';
-    return 'border-amber-600/30 shadow-amber-600/5 bg-[#1C1610]/50';
-  }
-
-  function getPodiumBadge(position: 'first' | 'second' | 'third') {
-    if (position === 'first') return 'bg-yellow-400/20 text-yellow-300 border border-yellow-400/30';
-    if (position === 'second') return 'bg-slate-300/20 text-slate-200 border border-slate-300/30';
-    return 'bg-amber-600/20 text-amber-400 border border-amber-600/30';
-  }
-
-  function PodiumCard({ entry, position }: { entry: LeaderboardEntry; position: 'first' | 'second' | 'third' }) {
-    const label = { first: 'Gold #1', second: 'Silver #2', third: 'Bronze #3' };
-    const order = position === 'first' ? 'order-1 md:order-2 scale-105 z-10' : position === 'second' ? 'order-2 md:order-1' : 'order-3';
-
-    return (
-      <div 
-        onClick={() => navigate('/profile/' + entry.id)}
-        className={`flex-1 flex flex-col items-center p-5 rounded-2xl border backdrop-blur-md shadow-xl transition-all hover:scale-[1.02] cursor-pointer ${getPodiumBorder(position)} ${order}`}
-      >
-        <div className="flex flex-col items-center mb-3">
-          <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full ${getPodiumBadge(position)}`}>
-            {label[position]}
-          </span>
-        </div>
-        <div className="relative mb-3">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-slate-700 flex items-center justify-center text-lg font-bold text-white shadow-lg overflow-hidden">
-            {entry.avatarUrl ? (
-              <img src={entry.avatarUrl} alt="" className="w-full h-full object-cover" />
-            ) : (
-              <span className={`bg-gradient-to-br ${getGradient(entry.rank - 1)} w-full h-full flex items-center justify-center`}>
-                {getInitials(entry.name)}
-              </span>
-            )}
-          </div>
-          <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-[10px] font-black text-slate-300">
-            {entry.rank}
-          </div>
-        </div>
-        
-        <p className="text-sm font-bold text-white text-center truncate max-w-[130px]">{entry.name}</p>
-        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border mt-1 ${getTitleColorClass(entry.rankTitle)}`}>
-          {entry.rankTitle}
-        </span>
-        
-        <div className="my-3 text-center">
-          <p className="text-2xl font-black text-blue-400 bg-blue-500/5 border border-blue-500/10 shadow-inner px-3 py-1 rounded-xl">
-            {entry.score} XP
-          </p>
-        </div>
-
-        <div className="w-full flex flex-col gap-1.5 text-xs border-t border-slate-800/60 pt-3 mt-1">
-          <div className="flex items-center gap-2 text-slate-300 hover:text-white transition-colors">
-            <Flame size={13} className="text-amber-500 fill-amber-500" />
-            <span className="font-semibold text-slate-200">{entry.streak} Day Streak</span>
-          </div>
-          <div className="flex items-center gap-2 text-slate-300 hover:text-white transition-colors">
-            <Brain size={13} className="text-purple-400" />
-            <span className="font-semibold text-slate-200">{entry.problemsSolved} Problems Solved</span>
-          </div>
-          <div className="flex items-center gap-2 text-slate-300 hover:text-white transition-colors">
-            <BookOpen size={13} className="text-blue-400" />
-            <span className="font-semibold text-slate-200">{entry.coursesCompleted} Courses Completed</span>
-          </div>
-          <div className="flex items-center gap-2 text-slate-300 hover:text-white transition-colors">
-            <Code size={13} className="text-emerald-400" />
-            <span className="font-semibold text-slate-200">{entry.projectsCompleted} Projects Completed</span>
-          </div>
-        </div>
-      </div>
-    );
+  };
+  
+  // Pad empty rows to ensure minimum of 5
+  const displayEntries = [...filteredEntries];
+  while (displayEntries.length < 5 && searchQuery === '') {
+    displayEntries.push({ _isEmptySlot: true } as any);
   }
 
   return (
-    <div className="min-h-screen bg-[#060913] text-slate-100 pb-16 font-sans">
-      <div className="relative overflow-hidden border-b border-slate-900 bg-[#080d1a]/50">
-        <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 via-transparent to-blue-500/5" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-yellow-500/3 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/3 rounded-full blur-3xl" />
-        <div className="relative max-w-5xl mx-auto px-4 md:px-8 py-10 md:py-14">
-          <nav className="flex items-center gap-2 text-xs text-slate-500 mb-4">
-            <button onClick={() => navigate('/')} className="text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1 font-medium bg-transparent border-0 cursor-pointer">
-              <LayoutDashboard size={12} /> Dashboard
-            </button>
-            <span className="text-slate-600">/</span>
-            <span className="text-slate-400 font-semibold">Leaderboard</span>
-          </nav>
-          
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-2xl bg-yellow-500/10 border border-yellow-500/20 shadow-lg shadow-yellow-500/2">
-                <Trophy size={28} className="text-yellow-400" />
-              </div>
-              <div>
-                <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight flex items-center gap-2">
-                  🏆 Leaderboard
-                </h1>
-                <div className="flex flex-wrap items-center gap-3 mt-1.5">
-                  <span className="text-slate-400 text-sm font-bold">Learn. Build. Compete.</span>
-                  <button 
-                    onClick={() => setShowRulesModal(true)} 
-                    className="inline-flex items-center gap-1.5 text-[10px] font-extrabold text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/20 px-2.5 py-0.5 rounded-full cursor-pointer transition-colors"
-                  >
-                    <Info size={11} /> How Rankings Work
-                  </button>
-                </div>
-                <p className="text-slate-500 text-xs mt-1.5 max-w-xl">
-                  Rankings are determined by XP, consistency, problem solving, course completion, and project completion.
-                </p>
-              </div>
+    <div className="min-h-screen bg-white text-[#111827] pb-16 font-sans">
+      <div className="max-w-[1000px] mx-auto px-4 md:px-8 pt-8">
+        
+        {/* Breadcrumb */}
+        <nav className="text-sm text-[#6b7280] mb-6">
+          <button onClick={() => navigate('/dashboard')} className="hover:text-[#111827] transition-colors bg-transparent border-0 cursor-pointer">Dashboard</button> / Leaderboard
+        </nav>
+        
+        {/* Page Header */}
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 flex items-center justify-center rounded-[12px] bg-[#eaf7f3] text-[#12564f]">
+              <Trophy size={24} />
             </div>
-
-            <div className="flex-shrink-0 self-start md:self-center">
-              <div className="flex items-center gap-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 px-4 py-2.5 rounded-2xl shadow-xl shadow-blue-500/2">
-                <Sparkles size={16} className="text-blue-400" />
-                <span className="text-sm font-extrabold text-blue-300">{totalLearners.toLocaleString()} Active Learners Competing</span>
-              </div>
+            <div>
+              <h1 className="text-[24px] font-bold text-[#111827] leading-none mb-1.5">Leaderboard</h1>
+              <p className="text-[13.5px] text-[#6b7280]">Learn. Build. Compete. Improve every day.</p>
             </div>
           </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 bg-white border border-[#e8ebea] rounded-full px-3 py-1.5 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-[#22a06b]"></span>
+              <span className="text-sm font-medium text-[#6b7280]">
+                {totalLearners === 1 ? '1 active learner' : `${totalLearners} active learners`}
+              </span>
+            </div>
+            <button onClick={() => setShowRedeemModal(true)} className="flex items-center gap-2 bg-white hover:bg-slate-50 text-[#111827] border border-[#e8ebea] rounded-[9px] px-4 py-2 text-sm font-medium transition-colors cursor-pointer">
+              Redeem Code
+            </button>
+            <button onClick={handleCopyCode} className="flex items-center gap-2 bg-[#16a394] hover:bg-[#128a7d] text-white rounded-[9px] px-4 py-2 text-sm font-medium transition-colors cursor-pointer border-0">
+              <Users size={16} /> Invite learners
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div className="max-w-5xl mx-auto px-4 md:px-8 py-8">
-        
+        {/* Invite Code Strip */}
+        <div className="flex flex-col sm:flex-row items-center justify-between bg-white border border-dashed border-[#d1d5db] rounded-[12px] p-4 mb-8 gap-4">
+          <span className="text-sm text-[#4b5563] text-center sm:text-left">Share this code so classmates can join the board:</span>
+          <button 
+            onClick={handleCopyCode}
+            disabled={!myInviteCode}
+            className="flex items-center gap-2 bg-[#eaf7f3] hover:bg-[#d6f0e9] text-[#12564f] rounded-[8px] px-3 py-1.5 transition-colors group cursor-pointer border-0 disabled:opacity-50"
+          >
+            <span className="font-mono font-bold text-sm">{myInviteCode || 'Loading...'}</span>
+            {copied ? <Check size={14} className="text-[#22a06b]" /> : <Copy size={14} className="opacity-70 group-hover:opacity-100" />}
+          </button>
+        </div>
+
+        {/* Hero Card */}
         {currentUserCard ? (
-          <div className="mb-8 bg-gradient-to-r from-blue-950/40 via-slate-900/50 to-purple-950/40 border border-blue-500/25 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl" />
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-purple-500/5 rounded-full blur-2xl" />
-            
-            <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-6 relative z-10">
-              <div className="flex flex-col items-center justify-center bg-slate-950/60 border border-blue-500/30 rounded-2xl p-6 min-w-[200px] text-center shadow-xl flex-shrink-0">
-                <p className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-                  {currentUserCard.score} XP
-                </p>
-                <span className={`text-[10px] uppercase font-black tracking-widest px-2.5 py-0.5 rounded-full border mt-2 ${getTitleColorClass(currentUserCard.rankTitle)}`}>
-                  {currentUserCard.rankTitle}
-                </span>
-                <p className="text-sm text-yellow-400 font-extrabold mt-3 bg-yellow-500/10 border border-yellow-500/25 px-3 py-1 rounded-full shadow-inner">
-                  Rank #{currentUserCard.rank}
-                </p>
-              </div>
-
-              <div className="flex flex-col gap-4 flex-grow">
-                <div className="flex flex-wrap items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 border border-blue-400/20 flex items-center justify-center text-sm font-bold text-white shadow-xl flex-shrink-0 overflow-hidden">
-                    {user?.avatarUrl ? (
-                      <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      getInitials(user?.name || 'User')
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="text-md font-bold text-white">
-                      {user?.name || 'Your Profile'}
-                    </h3>
-                    <div className="flex items-center gap-2 mt-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
-                      <Sparkles size={11} className="text-emerald-400 animate-pulse" />
-                      <span>
-                        You are ahead of {currentUserCard.totalLearners - currentUserCard.rank} learners ({currentUserCard.rank === 1 ? 'Top Ranker' : `Top ${Math.max(1, Math.ceil((currentUserCard.rank / currentUserCard.totalLearners) * 100))}%`})!
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 lg:gap-4 max-w-xl">
-                  <div className="bg-slate-950/40 border border-slate-800/80 p-2.5 rounded-xl text-center">
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Current Streak</p>
-                    <p className="text-sm font-black text-amber-500 mt-0.5">{currentUserCard.streak} Days</p>
-                  </div>
-                  <div className="bg-slate-950/40 border border-slate-800/80 p-2.5 rounded-xl text-center">
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Problems Solved</p>
-                    <p className="text-sm font-black text-purple-400 mt-0.5">{currentUserCard.problemsSolved}</p>
-                  </div>
-                  <div className="bg-slate-950/40 border border-slate-800/80 p-2.5 rounded-xl text-center">
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Courses Completed</p>
-                    <p className="text-sm font-black text-emerald-400 mt-0.5">{currentUserCard.coursesCompleted}</p>
-                  </div>
-                  <div className="bg-slate-950/40 border border-slate-800/80 p-2.5 rounded-xl text-center">
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Projects Completed</p>
-                    <p className="text-sm font-black text-rose-400 mt-0.5">{currentUserCard.projectsCompleted}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col justify-center min-w-[200px] lg:border-l lg:border-slate-800/80 lg:pl-6">
-                <div className="flex justify-between items-center text-xs font-semibold text-slate-400 mb-1">
-                  <span className="font-extrabold text-blue-400">{currentUserCard.allTimeXp} / {currentUserCard.nextThreshold} XP</span>
-                  {currentUserCard.nextTitle ? (
-                    <span className="text-slate-400 font-medium">Next Rank: <span className="font-bold text-white">{currentUserCard.nextTitle}</span></span>
+          <div className="bg-white border border-[#e8ebea] rounded-[16px] shadow-sm mb-8 overflow-hidden">
+            <div className="p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-8">
+              {/* Left Side */}
+              <div className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-5">
+                <div className="w-16 h-16 rounded-full bg-[#eaf7f3] text-[#16a394] flex items-center justify-center text-2xl font-bold flex-shrink-0 overflow-hidden">
+                  {user?.avatarUrl ? (
+                    <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-amber-400 font-bold">Max Rank Achieved</span>
+                    getInitials(user?.name || 'User')
                   )}
                 </div>
-                <div className="w-full bg-slate-950/80 border border-slate-850 h-3.5 rounded-full overflow-hidden flex">
-                  <div 
-                    className="h-full rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-all duration-500" 
-                    style={{ width: `${currentUserCard.progressPercent}%` }} 
-                  />
+                <div>
+                  <div className="flex flex-col sm:flex-row items-center gap-3 mb-1.5 mt-2 md:mt-0">
+                    <h2 className="text-xl font-bold text-[#111827]">{user?.name || 'Your Profile'}</h2>
+                    <span className="bg-[#eaf7f3] text-[#16a394] text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                      {currentUserCard.rankTitle}
+                    </span>
+                  </div>
+                  <p className="text-sm text-[#6b7280]">
+                    Rank #{currentUserCard.rank} &middot; {currentUserCard.rank === 1 ? 'First learner on the board' : `Top ${Math.max(1, Math.ceil((currentUserCard.rank / currentUserCard.totalLearners) * 100))}%`}
+                  </p>
                 </div>
-                <span className="text-[10px] font-bold text-slate-400 mt-1.5 self-end">
-                  {currentUserCard.progressPercent}% Complete
+              </div>
+
+              {/* Right Side (XP Ring) */}
+              <div className="flex flex-col items-center flex-shrink-0">
+                <div className="relative w-20 h-20 flex items-center justify-center">
+                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                    <circle className="text-[#f3f4f6] stroke-current" strokeWidth="8" cx="50" cy="50" r="40" fill="transparent"></circle>
+                    <circle className="text-[#16a394] stroke-current" strokeWidth="8" strokeLinecap="round" cx="50" cy="50" r="40" fill="transparent" strokeDasharray="251.2" strokeDashoffset={251.2 - (251.2 * currentUserCard.progressPercent) / 100}></circle>
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-[15px] font-bold text-[#111827] leading-none">{currentUserCard.score}</span>
+                    <span className="text-[10px] font-bold text-[#6b7280] leading-none mt-1">XP</span>
+                    {timeframe !== 'all-time' && (
+                      <span className="text-[8px] text-[#9ca3af] leading-none mt-0.5">{currentUserCard.allTimeXp} lifetime</span>
+                    )}
+                  </div>
+                </div>
+                <span className="text-[11px] text-[#6b7280] mt-2">
+                  {currentUserCard.progressPercent}% to {currentUserCard.nextTitle || 'Max Rank'}
                 </span>
+              </div>
+            </div>
+            
+            <div className="border-t border-[#e8ebea] bg-white">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 md:p-6 text-center divide-x-0 md:divide-x divide-y md:divide-y-0 divide-[#e8ebea]">
+                <div className="flex flex-col items-center p-2">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center border border-[#e8ebea] mb-2 group hover:bg-[#16a394] hover:border-[#16a394] transition-colors duration-150 ease-in-out cursor-default">
+                    <Flame size={16} className="text-[#6b7280] group-hover:text-white transition-colors duration-150 ease-in-out" strokeWidth={1.5} />
+                  </div>
+                  <span className="font-bold text-lg text-[#111827] leading-none mb-1">{currentUserCard.streak}</span>
+                  <span className="text-xs text-[#6b7280]">Day streak</span>
+                </div>
+                <div className="flex flex-col items-center p-2">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center border border-[#e8ebea] mb-2 group hover:bg-[#16a394] hover:border-[#16a394] transition-colors duration-150 ease-in-out cursor-default">
+                    <Check size={16} className="text-[#6b7280] group-hover:text-white transition-colors duration-150 ease-in-out" strokeWidth={1.5} />
+                  </div>
+                  <span className="font-bold text-lg text-[#111827] leading-none mb-1">{currentUserCard.problemsSolved}</span>
+                  <span className="text-xs text-[#6b7280]">Problems</span>
+                </div>
+                <div className="flex flex-col items-center p-2">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center border border-[#e8ebea] mb-2 group hover:bg-[#16a394] hover:border-[#16a394] transition-colors duration-150 ease-in-out cursor-default">
+                    <BookOpen size={16} className="text-[#6b7280] group-hover:text-white transition-colors duration-150 ease-in-out" strokeWidth={1.5} />
+                  </div>
+                  <span className="font-bold text-lg text-[#111827] leading-none mb-1">{currentUserCard.coursesCompleted}</span>
+                  <span className="text-xs text-[#6b7280]">Courses</span>
+                </div>
+                <div className="flex flex-col items-center p-2">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center border border-[#e8ebea] mb-2 group hover:bg-[#16a394] hover:border-[#16a394] transition-colors duration-150 ease-in-out cursor-default">
+                    <Code size={16} className="text-[#6b7280] group-hover:text-white transition-colors duration-150 ease-in-out" strokeWidth={1.5} />
+                  </div>
+                  <span className="font-bold text-lg text-[#111827] leading-none mb-1">{currentUserCard.projectsCompleted}</span>
+                  <span className="text-xs text-[#6b7280]">Projects</span>
+                </div>
               </div>
             </div>
           </div>
         ) : (
-          user && (
-            <div className="mb-8 p-4 rounded-2xl bg-slate-900/40 border border-slate-800 text-center text-sm text-slate-500">
-              Your Position Card loading... Make sure your profile matches student status.
+          !loading && user && (
+            <div className="mb-8 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center text-sm text-slate-500">
+              Profile metrics loading...
             </div>
           )
         )}
 
-        <div className="flex justify-between items-center mb-6 gap-4">
-          <div className="flex bg-[#0E1324] border border-slate-800 p-1 rounded-xl">
-            {(['all-time', 'weekly', 'monthly'] as const).map(tab => (
-              <button
-                key={tab}
-                onClick={() => setTimeframe(tab)}
-                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all uppercase tracking-wide cursor-pointer border-0 ${
-                  timeframe === tab 
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/10' 
-                    : 'text-slate-400 hover:text-slate-200 bg-transparent'
-                }`}
-              >
-                {tab === 'all-time' ? 'All-Time' : tab === 'weekly' ? 'Weekly' : 'Monthly'}
-              </button>
-            ))}
-          </div>
-
-          <div className="relative max-w-xs w-full">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search Learner..."
-              className="w-full bg-[#0E1324] border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs font-medium text-white focus:outline-none focus:border-blue-500 focus:shadow-[0_0_12px_rgba(59,130,246,0.15)] transition-all"
-            />
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="space-y-4">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="bg-slate-900/40 border border-slate-800 rounded-2xl h-20 animate-pulse" />
-            ))}
-          </div>
-        ) : entries.length === 0 ? (
-          <div className="text-center py-20 bg-slate-900/40 border border-slate-800 rounded-3xl">
-            <div className="w-16 h-16 rounded-full bg-slate-850 flex items-center justify-center mx-auto mb-4">
-              <Trophy size={32} className="text-slate-600" />
+        {/* Standings Card */}
+        <div className="bg-white border border-[#e8ebea] rounded-[16px] shadow-sm mb-8 overflow-hidden">
+          <div className="flex flex-col md:flex-row items-center justify-between p-4 md:p-6 border-b border-[#e8ebea] gap-4">
+            <div className="flex items-center gap-6 text-sm w-full md:w-auto overflow-x-auto">
+              {(['all-time', 'weekly', 'monthly'] as const).map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setTimeframe(tab)}
+                  className={`capitalize pb-2 border-b-2 transition-colors font-bold border-0 bg-transparent cursor-pointer whitespace-nowrap ${
+                    timeframe === tab ? 'border-[#16a394] text-[#12564f]' : 'border-transparent text-[#6b7280] hover:text-[#111827]'
+                  }`}
+                >
+                  {tab.replace('-', ' ')}
+                </button>
+              ))}
             </div>
-            <h3 className="text-lg font-black text-slate-300 mb-2">No Rankings Found</h3>
-            <p className="text-sm text-slate-500 max-w-sm mx-auto">
-              Start learning to climb the leaderboard. Real-time metrics will show up once a learner completes dynamic exercises.
-            </p>
-            <button
-              onClick={() => navigate('/courses')}
-              className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-white px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 transition-all cursor-pointer border-0"
-            >
-              <TrendingUp size={16} /> Start Learning
-            </button>
+            <div className="relative w-full md:w-64">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9ca3af]" />
+              <input 
+                type="text" 
+                placeholder="Search learners..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-[#f9fafb] border border-[#e8ebea] text-sm text-[#111827] rounded-[9px] pl-9 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#16a394]/20 focus:border-[#16a394] transition-all"
+              />
+            </div>
           </div>
-        ) : (
-          <>
-            {top3.length > 0 && searchQuery === '' && (
-              <div className="mb-10">
-                <div className="flex flex-col md:flex-row items-stretch md:items-end justify-center gap-4 md:gap-6">
-                  {top3[1] && <PodiumCard entry={top3[1]} position="second" />}
-                  {top3[0] && <PodiumCard entry={top3[0]} position="first" />}
-                  {top3[2] && <PodiumCard entry={top3[2]} position="third" />}
-                </div>
-              </div>
-            )}
-
-            <div className="bg-slate-900/30 border border-slate-800/80 rounded-2xl overflow-hidden shadow-xl">
-              <div className="hidden md:grid grid-cols-12 gap-3 px-5 py-4 border-b border-slate-800 text-[10px] font-black text-slate-500 uppercase tracking-wider bg-slate-900/50">
-                <div className="col-span-1 text-center">Rank</div>
-                <div className="col-span-1 text-center">Trend</div>
-                <div className="col-span-3">Learner</div>
-                <div className="col-span-2 text-center">Streak</div>
-                <div className="col-span-1 text-center">Problems Solved</div>
-                <div className="col-span-1 text-center">Courses Completed</div>
-                <div className="col-span-1 text-center">Projects Completed</div>
-                <div className="col-span-2 text-right">XP</div>
-              </div>
-
-              <div className="divide-y divide-slate-800/40">
-                {filteredEntries.length > 0 ? (
-                  filteredEntries.map((entry) => {
-                    const isYou = entry.email === user?.email;
+          
+          <div className="w-full overflow-x-auto">
+            <table className="w-full text-left text-sm whitespace-nowrap">
+              <thead className="text-[#111827] font-bold text-xs uppercase tracking-wider bg-white">
+                <tr>
+                  <th className="px-6 py-4 w-24">Rank</th>
+                  <th className="px-6 py-4">Learner</th>
+                  <th className="px-6 py-4 text-right">XP</th>
+                  <th className="px-6 py-4 text-right">Streak</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#e8ebea]">
+                {loading ? (
+                   [1, 2, 3, 4, 5].map(i => (
+                    <tr key={i}>
+                      <td className="px-6 py-4" colSpan={4}>
+                        <div className="h-8 bg-slate-100 animate-pulse rounded"></div>
+                      </td>
+                    </tr>
+                  ))
+                ) : displayEntries.map((entry: any, index) => {
+                  if (entry._isEmptySlot) {
                     return (
-                      <div
-                        key={entry.id}
-                        onClick={() => navigate('/profile/' + entry.id)}
-                        className={`grid grid-cols-1 md:grid-cols-12 gap-3 px-5 py-4 items-center transition-colors cursor-pointer ${
-                          isYou 
-                            ? 'bg-gradient-to-r from-blue-500/10 via-blue-500/5 to-transparent border-l-4 border-blue-500 shadow-[inset_1px_0_0_rgba(59,130,246,0.3)] relative font-bold' 
-                            : 'hover:bg-slate-800/20'
-                        }`}
-                      >
-                        <div className="col-span-1 flex items-center justify-between md:justify-center">
-                          <span className="text-xs text-slate-400 font-bold md:hidden">RANK</span>
-                          <span className="text-sm font-extrabold font-mono text-slate-300">#{entry.rank}</span>
-                        </div>
+                      <tr key={`empty-${index}`} className="hover:bg-[#f9fafb]/50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="w-8 h-8 rounded-full bg-[#f3f4f6] text-[#9ca3af] flex items-center justify-center text-xs font-bold">
+                            {index + 1}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-[#f3f4f6] text-[#9ca3af] flex items-center justify-center">
+                              <User size={16} />
+                            </div>
+                            <span className="text-[#9ca3af] font-medium">Open slot</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-right text-[#9ca3af]">--</td>
+                        <td className="px-6 py-4 text-right text-[#9ca3af]">--</td>
+                      </tr>
+                    );
+                  }
 
-                        <div className="col-span-1 flex items-center justify-between md:justify-center">
-                          <span className="text-xs text-slate-400 font-bold md:hidden">TREND</span>
-                          {renderMovement(entry.rankMovement)}
+                  const isYou = entry.email === user?.email;
+                  return (
+                    <tr 
+                      key={entry.id} 
+                      onClick={() => navigate('/profile/' + entry.id)}
+                      className={`cursor-pointer transition-colors ${isYou ? 'bg-[#eaf7f3]/50 hover:bg-[#eaf7f3]' : 'hover:bg-[#f9fafb]'}`}
+                    >
+                      <td className="px-6 py-4">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
+                          entry.rank === 1 ? 'bg-[#e0a52c] text-white' : 'bg-[#f3f4f6] text-[#6b7280]'
+                        }`}>
+                          {entry.rank}
                         </div>
-
-                        <div className="col-span-3 flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 flex items-center justify-center text-xs font-bold text-white shadow-md flex-shrink-0 overflow-hidden">
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white overflow-hidden ${
+                            entry.avatarUrl ? '' : `bg-[#16a394]`
+                          }`}>
                             {entry.avatarUrl ? (
                               <img src={entry.avatarUrl} alt="" className="w-full h-full object-cover" />
                             ) : (
-                              <span className={`bg-gradient-to-br ${getGradient(entry.rank - 1)} w-full h-full flex items-center justify-center`}>
-                                {getInitials(entry.name)}
+                              getInitials(entry.name)
+                            )}
+                          </div>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                            <span className="font-bold text-[#111827]">{entry.name}</span>
+                            {isYou && (
+                              <span className="text-[10px] font-bold bg-[#eaf7f3] text-[#16a394] px-2 py-0.5 rounded-full inline-block">
+                                {entry.rankTitle}
                               </span>
                             )}
                           </div>
-                          <div className="min-w-0">
-                            <p className="text-sm font-bold text-slate-200 truncate flex items-center gap-1.5">
-                              {entry.name}
-                              {isYou && <span className="text-[8px] font-black text-blue-400 bg-blue-500/10 border border-blue-500/20 px-1.5 py-0.5 rounded-full uppercase">You</span>}
-                            </p>
-                            <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded border mt-1 inline-block ${getTitleColorClass(entry.rankTitle)}`}>
-                              {entry.rankTitle}
-                            </span>
-                          </div>
                         </div>
+                      </td>
+                      <td className="px-6 py-4 text-right text-[#6b7280] font-medium">{entry.score} XP</td>
+                      <td className="px-6 py-4 text-right text-[#6b7280] font-medium">{entry.streak} days</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          
+          <div className="p-4 md:p-6 border-t border-[#e8ebea]">
+            <button className="w-full flex items-center justify-center gap-2 border border-[#e8ebea] hover:bg-[#f9fafb] text-[#111827] font-semibold text-sm rounded-[9px] py-3 transition-colors bg-white cursor-pointer">
+              View full leaderboard <ArrowRight size={16} className="text-[#6b7280]" />
+            </button>
+          </div>
+        </div>
 
-                        <div className="col-span-2 flex items-center justify-between md:justify-center">
-                          <span className="text-xs text-slate-400 font-bold md:hidden">STREAK</span>
-                          <span className="inline-flex items-center gap-1.5 text-xs text-amber-500 font-semibold">
-                            <Flame size={13} className="text-amber-500 fill-amber-500" />
-                            <span>{entry.streak} Days</span>
-                          </span>
-                        </div>
-
-                        <div className="col-span-1 flex items-center justify-between md:justify-center">
-                          <span className="text-xs text-slate-400 font-bold md:hidden">PROBLEMS SOLVED</span>
-                          <span className="text-xs text-slate-300 font-semibold">{entry.problemsSolved}</span>
-                        </div>
-
-                        <div className="col-span-1 flex items-center justify-between md:justify-center">
-                          <span className="text-xs text-slate-400 font-bold md:hidden">COURSES COMPLETED</span>
-                          <span className="text-xs text-slate-300 font-semibold">{entry.coursesCompleted}</span>
-                        </div>
-
-                        <div className="col-span-1 flex items-center justify-between md:justify-center">
-                          <span className="text-xs text-slate-400 font-bold md:hidden">PROJECTS COMPLETED</span>
-                          <span className="text-xs text-slate-300 font-semibold">{entry.projectsCompleted}</span>
-                        </div>
-
-                        <div className="col-span-2 flex items-center justify-between md:justify-end">
-                          <span className="text-xs text-slate-400 font-bold md:hidden">XP</span>
-                          <span className="text-sm font-black text-blue-400 bg-blue-500/5 px-3 py-1 rounded-lg border border-blue-500/10 shadow-sm">{entry.score} XP</span>
-                        </div>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <div className="px-5 py-8 text-center text-sm text-slate-500">
-                    No results match your search query "{searchQuery}".
+        {/* Tip Card */}
+        <div className="bg-[#eaf7f3] border border-[#16a394]/20 rounded-[16px] overflow-hidden mb-6 transition-all duration-300">
+          <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-shrink-0 text-[#12564f]">
+                <Lightbulb size={20} />
+              </div>
+              <div>
+                <h3 className="font-bold text-[#12564f] text-sm">Want to know how rankings work?</h3>
+                <p className="text-xs text-[#12564f]/70 mt-0.5">Click to see scoring, badges and tips.</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => setShowRankingDetails(!showRankingDetails)}
+              className="flex-shrink-0 flex items-center justify-center gap-2 bg-white hover:bg-white/80 text-[#12564f] font-semibold text-sm px-4 py-2 rounded-[9px] border border-[#16a394]/20 transition-colors cursor-pointer w-full sm:w-auto"
+            >
+              Show me <ChevronDown size={16} className={`transition-transform ${showRankingDetails ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
+          
+          {showRankingDetails && (
+            <div className="px-6 pb-6 pt-2 border-t border-[#16a394]/10">
+               <p className="text-xs text-[#12564f]/80 mb-4 leading-relaxed">
+                GyanSetu rankings are computed dynamically using a strict hierarchy to reward consistent learning and capstone achievements.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[
+                  { title: "1. Timeframe or Overall XP", desc: "Highest XP earned within the selected period." },
+                  { title: "2. Consistency / Current Streak", desc: "Higher learning consistency breaks XP ties." },
+                  { title: "3. Coding Problems Solved", desc: "More coding exercises solved breaks streak ties." },
+                  { title: "4. Courses Completed", desc: "More completed modules breaks problem ties." },
+                  { title: "5. Projects Completed", desc: "More completed capstone projects breaks course ties." },
+                  { title: "6. Join Date", desc: "Earlier registration date wins if all metrics are equal." }
+                ].map((rule, idx) => (
+                  <div key={idx} className="p-3 bg-white/60 rounded-xl border border-[#16a394]/5">
+                    <p className="text-xs font-bold text-[#12564f]">{rule.title}</p>
+                    <p className="text-[11px] text-[#12564f]/70 mt-1">{rule.desc}</p>
                   </div>
-                )}
+                ))}
               </div>
             </div>
+          )}
+        </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-              
-              <div className="bg-[#0b0f19] border border-slate-900 rounded-2xl p-5 shadow-xl">
-                <h3 className="text-sm font-black text-white flex items-center gap-2 mb-4">
-                  <Info size={16} className="text-blue-500" />
-                  How Ranking Works
-                </h3>
-                <p className="text-xs text-slate-400 mb-4 leading-relaxed">
-                  Ranking priority is calculated using the following strict hierarchy to reward consistent and capstone-oriented learning:
-                </p>
-                <ol className="space-y-2 text-xs">
-                  {[
-                    'Overall XP or timeframe XP (Highest)',
-                    'Consistency / Current Streak',
-                    'Coding Problems Solved',
-                    'Courses Completed & Certified',
-                    'Capstone Projects Completed (Tie-Breaker)'
-                  ].map((step, idx) => (
-                    <li key={idx} className="flex gap-2.5 items-start">
-                      <span className="flex-shrink-0 w-5 h-5 rounded-full bg-slate-900 border border-slate-800 text-[10px] font-black text-slate-300 flex items-center justify-center">
-                        {idx + 1}
-                      </span>
-                      <span className="text-slate-300 font-semibold">{step}</span>
-                    </li>
-                  ))}
-                </ol>
-                <p className="text-[10px] text-slate-500 mt-4 leading-relaxed">
-                  If metrics are completely equal, users who joined Fraylon Academy earlier are ranked higher.
-                </p>
-              </div>
+        {/* Footer Note */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 bg-white border border-[#e8ebea] rounded-[12px] p-4 mb-10 text-center sm:text-left">
+          <Megaphone size={18} className="text-[#16a394] flex-shrink-0" />
+          <p className="text-sm text-[#6b7280]">Keep learning consistently to earn XP and climb the leaderboard!</p>
+        </div>
 
-              <div className="bg-[#0b0f19] border border-slate-900 rounded-2xl p-5 shadow-xl">
-                <h3 className="text-sm font-black text-white flex items-center gap-2 mb-4">
-                  <Sparkles size={16} className="text-yellow-500" />
-                  How to Climb
-                </h3>
-                <p className="text-xs text-slate-400 mb-4 leading-relaxed">
-                  Complete challenges to earn XP points:
-                </p>
-                <div className="space-y-2.5">
-                  {[
-                    { label: 'Complete a Project', xp: '+100 XP', color: 'text-amber-400 bg-amber-500/10' },
-                    { label: 'Finish a Lecture', xp: '+50 XP', color: 'text-blue-400 bg-blue-500/10' },
-                    { label: 'Pass a Quiz', xp: '+30 XP', color: 'text-purple-400 bg-purple-500/10' },
-                    { label: 'Solve a Problem', xp: '+20 XP', color: 'text-emerald-400 bg-emerald-500/10' },
-                  ].map((item, idx) => (
-                    <div key={idx} className="flex justify-between items-center text-xs p-2 rounded-xl bg-slate-900/40 border border-slate-800/40">
-                      <span className="text-slate-300 font-bold">{item.label}</span>
-                      <span className={`px-2 py-0.5 rounded-lg text-[10px] font-extrabold ${item.color}`}>
-                        {item.xp}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex gap-2 items-center text-[10px] text-amber-500 bg-amber-500/5 border border-amber-500/10 p-2.5 rounded-xl mt-4">
-                  <Flame size={12} className="fill-amber-500 animate-bounce" />
-                  <span className="font-semibold">Current Streak multiplies learning momentum!</span>
-                </div>
-              </div>
-
-              <div className="bg-[#0b0f19] border border-slate-900 rounded-2xl p-5 shadow-xl">
-                <h3 className="text-sm font-black text-white flex items-center gap-2 mb-4">
-                  <Award size={16} className="text-purple-500" />
-                  Rank Titles Reference
-                </h3>
-                <p className="text-xs text-slate-400 mb-4 leading-relaxed">
-                  Earn points to unlock prestigious status titles displayed on your profile:
-                </p>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  {[
-                    { title: 'Beginner', xp: '0-99 XP' },
-                    { title: 'Explorer', xp: '100-499 XP' },
-                    { title: 'Builder', xp: '500-999 XP' },
-                    { title: 'Master', xp: '1000-1999 XP' },
-                    { title: 'Grandmaster', xp: '2000-4999 XP' },
-                    { title: 'Legend', xp: '5000+ XP' },
-                  ].map((tier, idx) => (
-                    <div key={idx} className={`p-2.5 rounded-xl border flex flex-col justify-center text-center ${getTitleColorClass(tier.title)}`}>
-                      <span className="font-extrabold">{tier.title}</span>
-                      <span className="text-[9px] opacity-80 mt-0.5">{tier.xp}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-            </div>
-          </>
-        )}
       </div>
 
-      {showRulesModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <div className="relative w-full max-w-md bg-[#0E1324] border border-blue-500/35 rounded-3xl p-6 shadow-2xl">
-            <h3 className="text-lg font-black text-white flex items-center gap-2 mb-4">
-              <Award size={20} className="text-yellow-400" />
-              How Rankings Work
-            </h3>
+      {/* Redeem Modal */}
+      {showRedeemModal && (
+        <div className="fixed inset-0 bg-[#111827]/40 flex items-center justify-center z-50 p-4" onClick={() => setShowRedeemModal(false)}>
+          <div className="bg-white rounded-[16px] w-full max-w-sm p-6 shadow-xl relative" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setShowRedeemModal(false)} className="absolute top-4 right-4 text-[#9ca3af] hover:text-[#4b5563] bg-transparent border-0 cursor-pointer">
+              <X size={20} />
+            </button>
+            <h3 className="text-lg font-bold text-[#111827] mb-2">Redeem Invite Code</h3>
+            <p className="text-sm text-[#6b7280] mb-4">Enter a code from a classmate to join their network.</p>
             
-            <p className="text-xs text-slate-400 mb-4 leading-relaxed">
-              Fraylon Academy rankings are computed dynamically using a strict hierarchy to reward consistent learning and capstone achievements.
-            </p>
-            
-            <div className="space-y-2.5">
-              {[
-                { title: "1. Timeframe or Overall XP", desc: "Highest XP earned within the selected period." },
-                { title: "2. Consistency / Current Streak", desc: "Higher learning consistency breaks XP ties." },
-                { title: "3. Coding Problems Solved", desc: "More coding exercises solved breaks streak ties." },
-                { title: "4. Courses Completed", desc: "More completed modules breaks problem ties." },
-                { title: "5. Projects Completed", desc: "More completed capstone projects breaks course ties." },
-                { title: "6. Join Date", desc: "Earlier registration date wins if all metrics are equal." }
-              ].map((rule, idx) => (
-                <div key={idx} className="p-3 bg-slate-950/50 border border-slate-800/80 rounded-xl">
-                  <p className="text-xs font-extrabold text-slate-200">{rule.title}</p>
-                  <p className="text-[11px] text-slate-400 mt-1">{rule.desc}</p>
-                </div>
-              ))}
-            </div>
+            <input 
+              type="text" 
+              value={redeemCodeInput}
+              onChange={e => setRedeemCodeInput(e.target.value.toUpperCase())}
+              placeholder="FRAY-XXXX-XXXX"
+              className="w-full bg-[#f9fafb] border border-[#e8ebea] text-[#111827] font-mono text-center rounded-[9px] px-4 py-3 mb-4 focus:outline-none focus:ring-2 focus:ring-[#16a394]/20 focus:border-[#16a394] transition-all uppercase"
+            />
 
-            <button
-              onClick={() => setShowRulesModal(false)}
-              className="w-full mt-6 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer border-0"
+            {redeemError && <p className="text-xs text-red-500 mb-4 text-center">{redeemError}</p>}
+            {redeemSuccess && <p className="text-xs text-[#22a06b] mb-4 text-center font-medium">{redeemSuccess}</p>}
+
+            <button 
+              onClick={handleRedeem}
+              disabled={redeeming || !redeemCodeInput.trim()}
+              className="w-full flex items-center justify-center gap-2 bg-[#16a394] hover:bg-[#128a7d] text-white rounded-[9px] px-4 py-3 text-sm font-bold transition-colors cursor-pointer border-0 disabled:opacity-50"
             >
-              Got it
+              {redeeming ? 'Redeeming...' : 'Redeem Code'}
             </button>
           </div>
         </div>

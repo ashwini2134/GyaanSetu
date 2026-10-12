@@ -14,6 +14,7 @@ interface CodeEditorProps {
   showSubmitButton?: boolean;
   expectedOutput?: string;
   solution?: string;
+  disableClipboard?: boolean;
   onChange?: (code: string) => void;
   onRun?: (code: string, output: string, error: string | null) => void;
   onSubmit?: (code: string, output: string, error: string | null, expectedOutput?: string) => void;
@@ -72,6 +73,7 @@ export default function CodeEditor({
   showSubmitButton = false,
   expectedOutput,
   solution,
+  disableClipboard = false,
   onChange,
   onRun,
   onSubmit,
@@ -88,8 +90,7 @@ export default function CodeEditor({
   const [prompts, setPrompts] = useState<string[]>([]);
   const pendingAction = useRef<'run' | 'submit' | null>(null);
   const pendingCodeRef = useRef<string>('');
-  const lastInjectedRef = useRef<string>('');
-  const lastRawCodeRef = useRef<string>('');
+  const pendingRawCodeRef = useRef<string>('');
   const editorRef = useRef<any>(null);
   const userEditedRef = useRef(false);
 
@@ -109,7 +110,7 @@ export default function CodeEditor({
     onChange?.(v);
   };
 
-  const executeCode = useCallback((finalCode: string, notify: 'run' | 'submit', dynamicExpected?: string) => {
+  const executeCode = useCallback((finalCode: string, notify: 'run' | 'submit', dynamicExpected?: string, rawCode?: string) => {
     setRunning(true);
     setOutput(null);
     setRunError(null);
@@ -122,8 +123,12 @@ export default function CodeEditor({
         if (result.error) {
           setRunError(friendlyError(result.error));
         }
-        if (notify === 'run') onRun?.(finalCode, result.output, result.error ? friendlyError(result.error) : null);
-        if (notify === 'submit') onSubmit?.(finalCode, result.output, result.error ? friendlyError(result.error) : null, dynamicExpected);
+        // Callers (e.g. test-case grading) need the original code with real
+        // input() calls intact, not the single-value-injected version we just
+        // ran — grading re-executes this against each test case's own input.
+        const codeForCallback = rawCode ?? finalCode;
+        if (notify === 'run') onRun?.(codeForCallback, result.output, result.error ? friendlyError(result.error) : null);
+        if (notify === 'submit') onSubmit?.(codeForCallback, result.output, result.error ? friendlyError(result.error) : null, dynamicExpected);
       } finally {
         setRunning(false);
       }
@@ -135,31 +140,27 @@ export default function CodeEditor({
 
     const currentCode = editorRef.current ? editorRef.current.getValue() : code;
 
-    // If we already have injected code AND the raw code hasn't changed, reuse it
-    if (lastInjectedRef.current && lastRawCodeRef.current === currentCode) {
-      executeCode(lastInjectedRef.current, notify);
-      return;
-    }
-    // Code changed, clear cached injection
-    lastInjectedRef.current = '';
-    lastRawCodeRef.current = '';
-
+    // Every explicit Run/Submit click re-prompts for input when the code
+    // reads any — the previous version cached the last injected input and
+    // silently reused it, which made it impossible to try a new value
+    // without first editing the code.
     const scanned = scanForInput(currentCode);
     if (scanned.hasInput && !showInputPanel) {
       setInputFields(scanned.fields);
       pendingAction.current = notify;
       pendingCodeRef.current = scanned.replacedCode;
+      pendingRawCodeRef.current = currentCode;
       setShowInputPanel(true);
       return;
     }
     if (showInputPanel && pendingAction.current) {
       const values = inputFields.map(f => f.value);
       const injected = injectInputs(pendingCodeRef.current, values);
-      lastInjectedRef.current = injected;
-      lastRawCodeRef.current = currentCode;
+      const rawCode = pendingRawCodeRef.current;
       setShowInputPanel(false);
       pendingAction.current = null;
       pendingCodeRef.current = '';
+      pendingRawCodeRef.current = '';
 
       // If solution is provided, compute dynamic expected output with same values
       let dynamicExpected: string | undefined;
@@ -171,7 +172,7 @@ export default function CodeEditor({
           if (!solResult.error) dynamicExpected = solResult.output;
         }
       }
-      executeCode(injected, notify, dynamicExpected);
+      executeCode(injected, notify, dynamicExpected, rawCode);
       return;
     }
     executeCode(currentCode, notify);
@@ -208,8 +209,7 @@ export default function CodeEditor({
     setOutput(null);
     setRunError(null);
     setSaved(false);
-    lastInjectedRef.current = '';
-    lastRawCodeRef.current = '';
+    pendingRawCodeRef.current = '';
     if (editorRef.current) {
       editorRef.current.setValue(initialCode);
     }
@@ -234,7 +234,7 @@ export default function CodeEditor({
         <span className="w-3 h-3 rounded-full bg-red-500/70" />
         <span className="w-3 h-3 rounded-full bg-yellow-500/70" />
         <span className="w-3 h-3 rounded-full bg-green-500/70" />
-        <span className="ml-2 text-[10px] text-slate-400 font-medium uppercase tracking-wider flex-1">
+        <span className="ml-2 text-[10px] text-slate-300 font-medium uppercase tracking-wider flex-1">
           {language}
         </span>
         <div className="flex items-center gap-1">
@@ -249,7 +249,7 @@ export default function CodeEditor({
           {showResetButton && !readOnly && (
             <button
               onClick={handleReset}
-              className="p-1 text-slate-400 hover:text-slate-200 rounded bg-slate-700/40 hover:bg-slate-700/70 transition-all"
+              className="p-1 text-slate-300 hover:text-slate-200 rounded bg-slate-700/40 hover:bg-slate-700/70 transition-all"
               title="Reset code"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -262,13 +262,36 @@ export default function CodeEditor({
       </div>
 
       {/* Monaco Editor */}
+      <div
+        onCopy={disableClipboard ? (e) => e.preventDefault() : undefined}
+        onCut={disableClipboard ? (e) => e.preventDefault() : undefined}
+        onPaste={disableClipboard ? (e) => e.preventDefault() : undefined}
+        onContextMenu={disableClipboard ? (e) => e.preventDefault() : undefined}
+      >
       <MonacoEditor
         height={height}
         language={language}
         value={code}
         onChange={handleChange}
         theme="vs-dark"
-        onMount={(editor) => { editorRef.current = editor; }}
+        onMount={(editor, monaco) => {
+          editorRef.current = editor;
+          if (disableClipboard) {
+            const blockAction = () => null;
+            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyC, blockAction);
+            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV, blockAction);
+            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyX, blockAction);
+            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyV, blockAction);
+            const domNode = editor.getDomNode();
+            if (domNode) {
+              const block = (e: Event) => { e.preventDefault(); e.stopPropagation(); };
+              domNode.addEventListener('copy', block, true);
+              domNode.addEventListener('cut', block, true);
+              domNode.addEventListener('paste', block, true);
+              domNode.addEventListener('contextmenu', block, true);
+            }
+          }
+        }}
         options={{
           readOnly,
           minimap: { enabled: false },
@@ -286,8 +309,10 @@ export default function CodeEditor({
           tabSize: 4,
           insertSpaces: true,
           wordWrap: 'on',
+          contextmenu: !disableClipboard,
         }}
       />
+      </div>
 
       {/* Input Panel */}
       {showInputPanel && (
@@ -302,7 +327,7 @@ export default function CodeEditor({
             {inputFields.map((field, i) => (
               <div key={field.id}>
                 {field.prompt && (
-                  <label className="text-[11px] text-slate-400 mb-1 block">{field.prompt}</label>
+                  <label className="text-[11px] text-slate-300 mb-1 block">{field.prompt}</label>
                 )}
                 <input
                   type="text"
@@ -326,7 +351,7 @@ export default function CodeEditor({
             </button>
             <button
               onClick={dismissInputPanel}
-              className="px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-slate-200 rounded-lg bg-slate-700/40 hover:bg-slate-700/70 transition-all"
+              className="px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-slate-200 rounded-lg bg-slate-700/40 hover:bg-slate-700/70 transition-all"
             >
               Cancel
             </button>
@@ -390,13 +415,13 @@ export default function CodeEditor({
         }`}>
           {/* Output section */}
           <div className="px-4 py-1.5 bg-slate-800/40 border-b border-slate-700/30 flex items-center gap-2">
-            <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="w-3.5 h-3.5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Output</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-300">Output</span>
           </div>
           {hasError ? (
-            <pre className="px-4 py-3 text-sm font-mono leading-relaxed text-slate-500 italic">
+            <pre className="px-4 py-3 text-sm font-mono leading-relaxed text-slate-300 italic">
               No output generated
             </pre>
           ) : (
@@ -434,12 +459,12 @@ export default function CodeEditor({
       {!readOnly && output === null && !hasError && (
         <div className="border-t border-slate-700/30 px-4 py-3 bg-slate-800/20">
           <div className="flex items-center gap-2 mb-1">
-            <svg className="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="w-3.5 h-3.5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Output</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-300">Output</span>
           </div>
-          <p className="text-sm text-slate-500 italic">Run the code to see output</p>
+          <p className="text-sm text-slate-300 italic">Run the code to see output</p>
         </div>
       )}
     </div>

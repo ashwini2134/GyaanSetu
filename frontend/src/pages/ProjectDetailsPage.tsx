@@ -1,19 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Clock, Code2, CheckCircle2, ChevronRight, Play, BookOpen, Target, ArrowRight, GitBranch, Globe } from "lucide-react";
+import { ArrowLeft, Clock, Code2, CheckCircle2, ChevronRight, Play, BookOpen, Target, ArrowRight, GitBranch, Globe, Loader2, AlertCircle, RefreshCw, XCircle } from "lucide-react";
 import { projectsData } from "../data/projectsData";
 import { useProjectStatus } from "../hooks/useProjectStatus";
-
+import ProjectSubmission from "../components/student/ProjectSubmission";
 export default function ProjectDetailsPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
-  const { statuses, loading, startProject, completeProject } = useProjectStatus();
+  
+  if (!projectId) return null;
 
-  const [githubUrl, setGithubUrl] = useState("");
-  const [liveDemoUrl, setLiveDemoUrl] = useState("");
-  const [description, setDescription] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
+  const { submission, loading: statusLoading, error: statusError, submitProject, cancelSubmission } = useProjectStatus(projectId);
 
   const project = projectsData.find((p) => p.id === projectId);
 
@@ -27,10 +24,7 @@ export default function ProjectDetailsPage() {
         <p className="text-slate-400 max-w-md mb-8">
           The project you are looking for doesn't exist or has been moved.
         </p>
-        <Link
-          to="/projects"
-          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium transition-all"
-        >
+        <Link to="/projects" className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#00BFB3] hover:bg-[#00BFB3]/90 text-white font-medium transition-all">
           <ArrowLeft size={18} />
           Back to Projects
         </Link>
@@ -38,33 +32,27 @@ export default function ProjectDetailsPage() {
     );
   }
 
-  // Find index for next/prev navigation
   const currentIndex = projectsData.findIndex((p) => p.id === projectId);
   const prevProject = currentIndex > 0 ? projectsData[currentIndex - 1] : null;
   const nextProject = currentIndex < projectsData.length - 1 ? projectsData[currentIndex + 1] : null;
 
-  const currentStatus = statuses[project.id]?.status;
-
-  const handleComplete = async () => {
-    if (!githubUrl.trim() || !description.trim()) {
-      setError("GitHub Repository URL and Description are required.");
-      return;
-    }
-    setError("");
-    await completeProject(project.id, { githubUrl, liveDemoUrl, description });
-    setSuccess(true);
-    setTimeout(() => setSuccess(false), 3000);
-  };
+  const currentStatus = submission?.status || "NOT_SUBMITTED";
 
   return (
     <div className="w-full min-h-full p-4 md:p-6 lg:p-8">
+      {statusError && (
+        <div className="max-w-5xl mx-auto mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center gap-3">
+          <AlertCircle size={20} />
+          Failed to load project status: {statusError}
+        </div>
+      )}
+      
       <div className="max-w-5xl mx-auto space-y-8">
-        
         {/* Navigation & Header */}
         <div>
           <button
             onClick={() => navigate("/projects")}
-            className="flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 transition-colors mb-6 w-fit"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-slate-200 bg-slate-800/60 border border-slate-700/50 hover:bg-slate-700/60 hover:border-[#00BFB3]/40 hover:text-white transition-all mb-6 w-fit shadow-sm"
           >
             <ArrowLeft size={16} />
             Back to Projects
@@ -73,10 +61,7 @@ export default function ProjectDetailsPage() {
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-4">
-                <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 border border-blue-500/20 text-blue-400">
-                  {project.difficulty}
-                </span>
-                <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 border border-slate-700 text-slate-300">
+                <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold bg-[#00BFB3] text-[#FFFFFF] border-transparent">
                   {project.category}
                 </span>
                 {project.estimatedDuration && (
@@ -93,30 +78,6 @@ export default function ProjectDetailsPage() {
                 {project.longDescription}
               </p>
             </div>
-            
-            <div className="flex-shrink-0 flex gap-3">
-              {loading ? (
-                <div className="px-6 py-3 rounded-xl bg-slate-800 text-slate-400 font-medium">Loading...</div>
-              ) : currentStatus === "COMPLETED" ? (
-                <button disabled className="flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 font-medium cursor-not-allowed">
-                  <CheckCircle2 size={18} />
-                  Completed
-                </button>
-              ) : currentStatus === "IN_PROGRESS" ? (
-                <button disabled className="flex items-center gap-2 px-6 py-3 rounded-xl bg-amber-600/20 border border-amber-500/30 text-amber-400 font-medium cursor-not-allowed">
-                  <Play size={18} fill="currentColor" />
-                  In Progress
-                </button>
-              ) : (
-                <button 
-                  onClick={() => startProject(project.id)}
-                  className="flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium transition-all shadow-lg shadow-blue-500/20"
-                >
-                  <Play size={18} fill="currentColor" />
-                  Start Project
-                </button>
-              )}
-            </div>
           </div>
         </div>
 
@@ -130,13 +91,13 @@ export default function ProjectDetailsPage() {
             {project.features && project.features.length > 0 && (
               <section className="rounded-2xl border border-slate-700/30 bg-slate-800/30 backdrop-blur-sm p-6 md:p-8">
                 <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                  <Target className="text-blue-400" size={20} />
+                  <Target className="text-[#00BFB3]" size={20} />
                   Key Features & Objectives
                 </h2>
                 <ul className="grid sm:grid-cols-2 gap-4">
                   {project.features.map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-3">
-                      <CheckCircle2 className="text-emerald-400 flex-shrink-0 mt-0.5" size={18} />
+                      <CheckCircle2 className="text-[#00BFB3] flex-shrink-0 mt-0.5" size={18} />
                       <span className="text-slate-300 leading-relaxed">{feature}</span>
                     </li>
                   ))}
@@ -148,13 +109,13 @@ export default function ProjectDetailsPage() {
             {project.instructions && project.instructions.length > 0 && (
               <section className="rounded-2xl border border-slate-700/30 bg-slate-800/30 backdrop-blur-sm p-6 md:p-8">
                 <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                  <BookOpen className="text-blue-400" size={20} />
+                  <BookOpen className="text-[#00BFB3]" size={20} />
                   Step-by-Step Instructions
                 </h2>
                 <div className="space-y-4">
                   {project.instructions.map((step, idx) => (
                     <div key={idx} className="flex gap-4">
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-sm">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#1B2B44] text-[#FFFFFF] border-transparent flex items-center justify-center font-bold text-sm">
                         {idx + 1}
                       </div>
                       <p className="text-slate-300 leading-relaxed pt-1">{step}</p>
@@ -175,122 +136,14 @@ export default function ProjectDetailsPage() {
             )}
             
             {/* Submission Section */}
-            {currentStatus === "COMPLETED" ? (
-              <section className="rounded-2xl border border-emerald-500/30 bg-emerald-900/10 backdrop-blur-sm p-6 md:p-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30 text-emerald-400">
-                    <CheckCircle2 size={24} />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-emerald-400">Project Completed</h2>
-                    <p className="text-sm text-emerald-500/70">You have successfully submitted this project.</p>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="flex items-start gap-4 p-4 rounded-xl bg-slate-800/50 border border-slate-700/50">
-                    <GitBranch className="text-slate-400 mt-1 flex-shrink-0" size={20} />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">GitHub Repository</p>
-                      <a href={statuses[project.id]?.githubUrl} target="_blank" rel="noreferrer" className="text-blue-400 hover:text-blue-300 hover:underline truncate block">
-                        {statuses[project.id]?.githubUrl}
-                      </a>
-                    </div>
-                  </div>
-
-                  {statuses[project.id]?.liveDemoUrl && (
-                    <div className="flex items-start gap-4 p-4 rounded-xl bg-slate-800/50 border border-slate-700/50">
-                      <Globe className="text-slate-400 mt-1 flex-shrink-0" size={20} />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Live Demo</p>
-                        <a href={statuses[project.id]?.liveDemoUrl} target="_blank" rel="noreferrer" className="text-blue-400 hover:text-blue-300 hover:underline truncate block">
-                          {statuses[project.id]?.liveDemoUrl}
-                        </a>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex items-start gap-4 p-4 rounded-xl bg-slate-800/50 border border-slate-700/50">
-                    <BookOpen className="text-slate-400 mt-1 flex-shrink-0" size={20} />
-                    <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Submission Description</p>
-                      <p className="text-slate-300 leading-relaxed whitespace-pre-wrap">{statuses[project.id]?.description}</p>
-                    </div>
-                  </div>
-                </div>
-              </section>
-            ) : currentStatus === "IN_PROGRESS" ? (
-              <section className="rounded-2xl border border-blue-500/30 bg-blue-900/10 backdrop-blur-sm p-6 md:p-8">
-                <h2 className="text-xl font-bold text-white mb-2">Submit Your Project</h2>
-                <p className="text-slate-400 mb-6 text-sm">Ready to share what you built? Fill out the details below to mark this project as complete.</p>
-                
-                {success && (
-                  <div className="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center gap-3">
-                    <CheckCircle2 size={20} />
-                    Project submitted successfully!
-                  </div>
-                )}
-                
-                {error && (
-                  <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-                    {error}
-                  </div>
-                )}
-
-                <div className="space-y-5">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1.5">GitHub Repository URL <span className="text-red-400">*</span></label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
-                        <GitBranch size={18} />
-                      </div>
-                      <input
-                        type="url"
-                        value={githubUrl}
-                        onChange={(e) => setGithubUrl(e.target.value)}
-                        placeholder="https://github.com/yourusername/project-name"
-                        className="w-full bg-slate-900/50 border border-slate-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1.5">Live Demo URL <span className="text-slate-500 font-normal">(Optional)</span></label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
-                        <Globe size={18} />
-                      </div>
-                      <input
-                        type="url"
-                        value={liveDemoUrl}
-                        onChange={(e) => setLiveDemoUrl(e.target.value)}
-                        placeholder="https://your-live-demo.com"
-                        className="w-full bg-slate-900/50 border border-slate-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1.5">What did you build? <span className="text-red-400">*</span></label>
-                    <textarea
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      placeholder="Briefly describe what you built and what you learned..."
-                      rows={4}
-                      className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all resize-y"
-                    ></textarea>
-                  </div>
-
-                  <button
-                    onClick={handleComplete}
-                    className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all shadow-lg shadow-blue-500/20"
-                  >
-                    <CheckCircle2 size={20} />
-                    Submit Project
-                  </button>
-                </div>
-              </section>
-            ) : null}
+            <ProjectSubmission 
+              projectId={projectId}
+              submission={submission}
+              loading={statusLoading}
+              error={statusError}
+              submitProject={submitProject}
+              cancelSubmission={cancelSubmission}
+            />
 
           </div>
 
@@ -340,7 +193,7 @@ export default function ProjectDetailsPage() {
                 <ul className="space-y-3">
                   {project.learningOutcomes.map((outcome, idx) => (
                     <li key={idx} className="flex items-start gap-2 text-sm text-slate-300">
-                      <CheckCircle2 className="text-emerald-500/70 flex-shrink-0 mt-0.5" size={16} />
+                      <CheckCircle2 className="text-[#00BFB3] flex-shrink-0 mt-0.5" size={16} />
                       {outcome}
                     </li>
                   ))}

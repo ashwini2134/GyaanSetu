@@ -11,7 +11,17 @@ async function fetchJson<T>(path: string): Promise<T | null> {
   try {
     const res = await fetch(url(path));
     if (!res.ok) return null;
-    return res.json() as Promise<T>;
+    // Vite's dev server (and most static hosts with SPA fallback) return
+    // 200 + index.html for a path that doesn't exist as a real file, rather
+    // than a 404 — so res.ok alone doesn't mean the JSON is real. Reject
+    // non-JSON responses explicitly instead of letting JSON.parse throw
+    // asynchronously after this try block has already returned (a rejection
+    // there would bypass this catch and propagate as an unhandled error).
+    const contentType = res.headers.get('content-type') ?? '';
+    if (!contentType.includes('application/json') && !contentType.includes('text/json')) {
+      return null;
+    }
+    return (await res.json()) as T;
   } catch {
     return null;
   }
@@ -49,6 +59,7 @@ export function useLessonData(
     }
 
     const num = Number(lectureNumber);
+    let cancelled = false;
 
     setLoading(true);
     setError(null);
@@ -61,6 +72,8 @@ export function useLessonData(
         lesson = await fetchJson<LessonData>(
           `data/${courseSlug}/lecture_${num}/lesson.json`
         );
+
+        if (cancelled) return;
 
         // 2. Try DB if static JSON fails
         if (!lesson) {
@@ -79,6 +92,8 @@ export function useLessonData(
             // fallback
           }
         }
+
+        if (cancelled) return;
 
         if (lesson) {
           // Merge quiz if not embedded
@@ -112,6 +127,8 @@ export function useLessonData(
                     title: p.title,
                     description: p.description,
                     difficulty,
+                    type: p.type as any,
+                    hints: p.hints,
                     starterCode: p.starterCode,
                     solution: p.solution ?? '',
                     testCases: p.testCases ?? [],
@@ -125,17 +142,22 @@ export function useLessonData(
             }
           }
 
+          if (cancelled) return;
           setLessonData(lesson);
         } else {
-          // Signal caller to fall back to notes.md
+          if (cancelled) return;
           setError('no-lesson-json');
         }
       } catch (e) {
-        setError(e instanceof Error ? e.message : 'Failed to load lesson');
+        if (!cancelled) {
+          setError(e instanceof Error ? e.message : 'Failed to load lesson');
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     })();
+
+    return () => { cancelled = true; };
   }, [courseSlug, lectureNumber]);
 
   return { lessonData, loading, error };

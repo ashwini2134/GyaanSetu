@@ -2,6 +2,7 @@ import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
 import { prisma } from "../prisma.js";
 import type { AuthenticatedRequest } from "../middleware/auth.js";
+import { awardXp } from "../services/gamificationService.js";
 
 const router = Router();
 
@@ -14,6 +15,60 @@ const CATEGORY_STRUCTURE: Record<string, string[]> = {
   "Mock Tests": ["Full Mock"],
   "Reports & Analytics": []
 };
+
+router.get("/categories", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    // 1. Fetch published dynamic assessments
+    const publishedAssessments = await prisma.assessment.findMany({
+      where: { isPublished: true },
+      include: {
+        _count: { select: { questions: true } }
+      }
+    });
+
+    // 2. Fetch legacy questions
+    const legacyGroups = await prisma.assessmentQuestion.groupBy({
+      by: ['category', 'subsection'],
+      where: { assessmentId: null },
+      _count: { _all: true }
+    });
+
+    const categoriesMap: Record<string, any[]> = {};
+
+    // Add legacy
+    for (const group of legacyGroups) {
+      if (!categoriesMap[group.category]) categoriesMap[group.category] = [];
+      categoriesMap[group.category].push({
+        name: group.subsection,
+        questionCount: group._count._all,
+        isDynamic: false
+      });
+    }
+
+    // Add dynamic
+    for (const p of publishedAssessments) {
+      if (!categoriesMap[p.category]) categoriesMap[p.category] = [];
+      categoriesMap[p.category].push({
+        name: p.subsection,
+        questionCount: p._count.questions,
+        description: p.description || "",
+        isDynamic: true
+      });
+    }
+
+    const result = Object.keys(categoriesMap).map(categoryName => {
+      return {
+        id: categoryName.toLowerCase().replace(/\s+/g, '-'),
+        name: categoryName,
+        subsections: categoriesMap[categoryName]
+      };
+    });
+
+    res.json({ categories: result });
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.get("/progress/:userId", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
@@ -31,9 +86,9 @@ router.get("/progress/:userId", requireAuth, async (req: AuthenticatedRequest, r
     });
 
     const passedSubsections = new Set<string>();
-    
+
     attempts.forEach(attempt => {
-      if (attempt.passed) {
+      if (attempt.passed && attempt.lectureId) {
         passedSubsections.add(attempt.lectureId);
       }
     });
@@ -80,11 +135,13 @@ router.get("/subsection-status/:userId", requireAuth, async (req: AuthenticatedR
 
     const statusMap = new Map<string, string>();
     attempts.forEach(attempt => {
-      if (attempt.passed) {
-        statusMap.set(attempt.lectureId, "completed");
-      } else {
-        if (statusMap.get(attempt.lectureId) !== "completed") {
-          statusMap.set(attempt.lectureId, "in_progress");
+      if (attempt.lectureId) {
+        if (attempt.passed) {
+          statusMap.set(attempt.lectureId, "completed");
+        } else {
+          if (statusMap.get(attempt.lectureId) !== "completed") {
+            statusMap.set(attempt.lectureId, "in_progress");
+          }
         }
       }
     });
@@ -163,12 +220,48 @@ router.post('/submit', requireAuth, async (req: AuthenticatedRequest, res) => {
       });
     }
 
-    const scoreNum = Number(score) || 0;
-    const totalNum = Number(totalQuestions) || 0;
     const timeNum = Number(timeTaken) || 0;
-    const passed = totalNum > 0 && (scoreNum / totalNum) >= 0.6;
+
+    // Fetch questions to grade securely on the backend
+    const dbQuestions = await prisma.assessmentQuestion.findMany({
+      where: {
+        category: { equals: category, mode: 'insensitive' },
+        subsection: { equals: subsection, mode: 'insensitive' }
+      },
+      select: { id: true, correctAnswer: true }
+    });
+
+    const questionMap = new Map<string, string>();
+    dbQuestions.forEach(q => questionMap.set(q.id, q.correctAnswer));
+
+    let calculatedScore = 0;
+    if (Array.isArray(answers)) {
+      answers.forEach((ans: any) => {
+        const correct = questionMap.get(ans.questionId);
+        if (correct && ans.userAnswer === correct) {
+          calculatedScore++;
+        }
+      });
+    }
+
+    const totalNum = dbQuestions.length || Number(totalQuestions) || 0;
+    const passed = totalNum > 0 && (calculatedScore / totalNum) >= 0.6;
     const status = passed ? 'completed' : 'in_progress';
 
+    // 1. Check if a completed record already exists BEFORE we update it
+    const existingProgress = await prisma.assessmentProgress.findUnique({
+      where: {
+        userId_category_subsection: {
+          userId,
+          category,
+          subsection
+        }
+      }
+    });
+    
+    const wasAlreadyCompleted = existingProgress?.status === 'completed';
+
+    // 2. Perform the update
     const result = await prisma.assessmentProgress.upsert({
       where: {
         userId_category_subsection: {
@@ -178,7 +271,7 @@ router.post('/submit', requireAuth, async (req: AuthenticatedRequest, res) => {
         }
       },
       update: {
-        score: scoreNum,
+        score: calculatedScore,
         totalQuestions: totalNum,
         timeTaken: timeNum,
         status,
@@ -189,7 +282,7 @@ router.post('/submit', requireAuth, async (req: AuthenticatedRequest, res) => {
         userId,
         category,
         subsection,
-        score: scoreNum,
+        score: calculatedScore,
         totalQuestions: totalNum,
         timeTaken: timeNum,
         status,
@@ -198,9 +291,14 @@ router.post('/submit', requireAuth, async (req: AuthenticatedRequest, res) => {
       }
     });
 
+    // 3. Award XP if they just passed for the first time
+    if (passed && !wasAlreadyCompleted) {
+      await awardXp(userId, 50, "Assessment Passed", `assessment_passed_${category}_${subsection}`);
+    }
+
     return res.status(200).json({
       success: true,
-      score: scoreNum,
+      score: calculatedScore,
       totalQuestions: totalNum,
       passed,
       status,
@@ -255,24 +353,26 @@ router.get("/analytics/:userId", requireAuth, async (req: AuthenticatedRequest, 
     attempts.forEach(attempt => {
       const percent = (attempt.score / 100) * 100;
       totalScorePercent += percent;
-      
+
       const time = (attempt.answers as any)?.timeTaken || 0;
       totalTimeTaken += time;
 
-      if (attempt.passed && !passedSet.has(attempt.lectureId)) {
+      if (attempt.passed && attempt.lectureId && !passedSet.has(attempt.lectureId)) {
         passedSet.add(attempt.lectureId);
         totalCompleted++;
       }
 
       // Extract category from lectureId "assessment::Category::Subsection"
-      const parts = attempt.lectureId.split("::");
-      const category = parts[1];
-      if (category) {
-        if (!categoryScores[category]) {
-          categoryScores[category] = { total: 0, count: 0 };
+      if (attempt.lectureId) {
+        const parts = attempt.lectureId.split("::");
+        const category = parts[1];
+        if (category) {
+          if (!categoryScores[category]) {
+            categoryScores[category] = { total: 0, count: 0 };
+          }
+          categoryScores[category].total += percent;
+          categoryScores[category].count++;
         }
-        categoryScores[category].total += percent;
-        categoryScores[category].count++;
       }
 
       // Group for history chart (YYYY-MM-DD)
@@ -292,7 +392,7 @@ router.get("/analytics/:userId", requireAuth, async (req: AuthenticatedRequest, 
     }
 
     const recentAttempts = attempts.slice(0, 5).map(attempt => {
-      const parts = attempt.lectureId.split("::");
+      const parts = attempt.lectureId ? attempt.lectureId.split("::") : ["unknown", "Unknown", "Unknown"];
       return {
         category: parts[1] || "Unknown",
         subsection: parts[2] || "Unknown",

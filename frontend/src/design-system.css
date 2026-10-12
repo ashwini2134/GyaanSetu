@@ -1,0 +1,508 @@
+/* ======================================================================
+   GYANSETU DESIGN TOKENS
+   Premium, modern, Indian-rooted learning platform.
+   Light-first design with navy blue and sky blue accents.
+   ====================================================================== */
+
+/* ──────────────────────────────────────────────────────────────────
+   BRAND COLORS — identical in both themes
+   ────────────────────────────────────────────────────────────────── */
+:root {
+  --brand-primary: #1E3A8A;
+  --brand-primary-dark: #1E40AF;
+  --brand-secondary: #3B82F6;
+  --brand-navy: #1E3A8A;
+  --brand-black: #0F172A;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   LIGHT THEME — Day Workspace
+   Modern, spacious, airy. White surfaces, thin borders, soft shadows.
+   ────────────────────────────────────────────────────────────────── */
+:root {
+  /* ── Surfaces ──────────────────────────── */
+  --bg-page: #FAFBFC;
+  --bg-surface: #FFFFFF;
+  --bg-elevated: #F7F9FC;
+  --bg-card: #FFFFFF;
+  --bg-navbar: #FFFFFF;
+  --bg-sidebar: #FFFFFF;
+  --bg-input: #FFFFFF;
+  --bg-inset: #F0F3F7;
+
+  /* ── Text ──────────────────────────────── */
+  --text-heading: #16324F;
+  --text-primary: #16324F;
+  --text-body: #5B6472;
+  --text-secondary: #5B6472;
+  --text-muted: #8C96A6;
+  --text-inverse: #FFFFFF;
+
+  /* ── Borders ───────────────────────────── */
+  --border: #E7EDF3;
+  --border-hover: #D0D7E2;
+  --border-focus: var(--brand-primary);
+  --border-light: rgba(22, 50, 79, 0.06);
+  --border-medium: rgba(22, 50, 79, 0.12);
+
+  /* ── Shadows ───────────────────────────── */
+  --shadow-sm: 0 1px 3px rgba(14, 17, 23, 0.04), 0 1px 2px rgba(14, 17, 23, 0.04);
+  --shadow-md: 0 4px 12px rgba(14, 17, 23, 0.06), 0 1px 3px rgba(14, 17, 23, 0.04);
+  --shadow-lg: 0 12px 32px rgba(14, 17, 23, 0.08), 0 2px 8px rgba(14, 17, 23, 0.04);
+  --shadow-xl: 0 24px 48px rgba(14, 17, 23, 0.12);
+
+  /* ── Radius ────────────────────────────── */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  /* ── States ────────────────────────────── */
+  --success: #22C55E;
+  --success-bg: rgba(34, 197, 94, 0.08);
+  --warning: #F59E0B;
+  --warning-bg: rgba(245, 158, 11, 0.08);
+  --danger: #EF4444;
+  --danger-bg: rgba(239, 68, 68, 0.08);
+  --info: #3B82F6;
+  --info-bg: rgba(59, 130, 246, 0.08);
+
+  /* ── Buttons ───────────────────────────── */
+  --button-primary-bg: var(--brand-primary);
+  --button-primary-hover: var(--brand-primary-dark);
+  --button-primary-text: #FFFFFF;
+  --button-secondary-bg: var(--bg-surface);
+  --button-secondary-border: var(--border);
+  --button-secondary-text: var(--text-body);
+  --button-danger-bg: var(--danger);
+  --button-danger-text: #FFFFFF;
+  --button-ghost-text: var(--text-body);
+
+  /* ── Nav & Sidebar ─────────────────────── */
+  --nav-bg: var(--bg-navbar);
+  --nav-text: var(--text-body);
+  --nav-hover-bg: var(--bg-elevated);
+  --nav-active-bg: rgba(0, 191, 179, 0.08);
+  --nav-active-text: var(--brand-primary);
+  --sidebar-bg: var(--bg-sidebar);
+  --sidebar-item: var(--text-body);
+  --sidebar-item-hover: var(--bg-elevated);
+  --sidebar-item-active: var(--brand-primary);
+
+  /* ── Progress ──────────────────────────── */
+  --progress-track: #E7EDF3;
+  --progress-fill: var(--brand-primary);
+
+  /* ── Forms ─────────────────────────────── */
+  --input-bg: var(--bg-input);
+  --input-border: var(--border);
+  --input-border-focus: var(--brand-primary);
+  --input-text: var(--text-body);
+  --input-placeholder: var(--text-muted);
+
+  /* ── Cards ─────────────────────────────── */
+  --card-bg: var(--bg-card);
+  --card-border: var(--border);
+  --card-shadow: var(--shadow-sm);
+  --card-hover-shadow: var(--shadow-md);
+
+  /* ── Misc ──────────────────────────────── */
+  --color-primary: var(--brand-primary);
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   DARK THEME — Night Workspace
+   Premium software feel — GitHub Dark / Linear / Raycast inspired.
+   Graphite surfaces with subtle layering. No navy. No saturated blues.
+   ────────────────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  /* ── Surfaces ──────────────────────────── */
+  --bg-page: #0E1117;
+  --bg-surface: #151922;
+  --bg-elevated: #1A202C;
+  --bg-card: #171C25;
+  --bg-navbar: #0E1117;
+  --bg-sidebar: #0E1117;
+  --bg-input: #1A202C;
+  --bg-inset: #12161E;
+
+  /* ── Text ──────────────────────────────── */
+  --text-heading: #FFFFFF;
+  --text-primary: #FFFFFF;
+  --text-body: #D0D7E2;
+  --text-secondary: #D0D7E2;
+  --text-muted: #8A95A6;
+  --text-inverse: #0E1117;
+
+  /* ── Borders ───────────────────────────── */
+  --border: #2A3445;
+  --border-hover: #3D4A5C;
+  --border-focus: var(--brand-primary);
+  --border-light: rgba(255, 255, 255, 0.06);
+  --border-medium: rgba(255, 255, 255, 0.12);
+
+  /* ── Shadows ───────────────────────────── */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25), 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.4);
+
+  /* ── States ────────────────────────────── */
+  --success-bg: rgba(34, 197, 94, 0.12);
+  --warning-bg: rgba(245, 158, 11, 0.12);
+  --danger-bg: rgba(239, 68, 68, 0.12);
+  --info-bg: rgba(59, 130, 246, 0.12);
+
+  /* ── Buttons ───────────────────────────── */
+  --button-secondary-bg: var(--bg-surface);
+  --button-secondary-border: var(--border);
+  --button-secondary-text: var(--text-body);
+  --button-ghost-text: var(--text-body);
+
+  /* ── Nav & Sidebar ─────────────────────── */
+  --nav-bg: var(--bg-navbar);
+  --nav-text: var(--text-body);
+  --nav-hover-bg: var(--bg-surface);
+  --nav-active-bg: rgba(0, 191, 179, 0.10);
+  --nav-active-text: var(--brand-primary);
+  --sidebar-bg: var(--bg-sidebar);
+  --sidebar-item: var(--text-body);
+  --sidebar-item-hover: var(--bg-surface);
+  --sidebar-item-active: var(--brand-primary);
+
+  /* ── Progress ──────────────────────────── */
+  --progress-track: #2A3445;
+  --progress-fill: var(--brand-primary);
+
+  /* ── Forms ─────────────────────────────── */
+  --input-bg: var(--bg-input);
+  --input-border: var(--border);
+  --input-border-focus: var(--brand-primary);
+  --input-text: var(--text-body);
+  --input-placeholder: var(--text-muted);
+
+  /* ── Cards ─────────────────────────────── */
+  --card-bg: var(--bg-card);
+  --card-border: var(--border);
+  --card-shadow: var(--shadow-sm);
+  --card-hover-shadow: var(--shadow-md);
+}
+
+/* ======================================================================
+   LEGACY ALIASES — backward compatibility for old variable names.
+   Uses var() for lazy evaluation — automatically resolves to the
+   current theme's value without needing [data-theme="dark"] overrides.
+   ====================================================================== */
+:root, [data-theme="dark"] {
+  /* ── General surfaces ── */
+  --bg-main: var(--bg-page);
+  --bg-header: var(--bg-navbar);
+  --bg-editor: var(--bg-elevated);
+  --bg-gutter: var(--bg-inset);
+  --surface-page: var(--bg-page);
+  --surface-container: var(--bg-elevated);
+  --surface-card: var(--bg-card);
+  --surface-card-hover: var(--bg-elevated);
+  --surface-sidebar: var(--bg-sidebar);
+  --surface-navbar: var(--bg-navbar);
+
+  /* ── Text ── */
+  --text-secondary-old: var(--text-body);
+
+  /* ── Borders ── */
+  --border-primary: var(--border);
+
+  /* ── Accents ── */
+  --accent: var(--brand-primary);
+  --accent-hover: var(--brand-primary-dark);
+  --accent-indigo: #1B2B44;
+  --accent-violet: #00BFB3;
+  --accent-mint: #79C8C2;
+  --accent-text: #FFFFFF;
+  --accent-glow: rgba(0, 191, 179, 0.10);
+  --accent-gradient: var(--brand-primary);
+  --accent-gradient-hover: var(--brand-primary-dark);
+  --gradient-violet: var(--brand-primary);
+
+  /* ── Course UI ── */
+  --lecture-card: var(--surface-card);
+  --lecture-card-hover: var(--surface-card-hover);
+  --sidebar-active: var(--nav-active-bg);
+  --sidebar-active-text: var(--nav-active-text);
+  --lecture-bg: var(--lecture-card);
+  --lecture-active: var(--sidebar-active);
+  --lecture-border: var(--border-medium);
+
+  /* ── Quiz ── */
+  --quiz-correct: var(--success);
+  --quiz-wrong: var(--danger);
+  --quiz-warning: var(--warning);
+
+  /* ── Project ── */
+  --project-approved: var(--success);
+  --project-pending: var(--warning);
+  --project-reviewing: var(--info);
+
+  /* ── Certificate ── */
+  --certificate-gold: #F59E0B;
+  --certificate-border: var(--brand-primary);
+
+  /* ── Portfolio ── */
+  --portfolio-card: var(--surface-card);
+  --portfolio-badge: var(--brand-primary);
+
+  /* ── Testing Center ── */
+  --pipeline-success: var(--success);
+  --pipeline-running: var(--info);
+  --pipeline-failed: var(--danger);
+
+  /* ── Achievement ── */
+  --achievement-bg: var(--nav-active-bg);
+  --achievement-icon: var(--brand-primary);
+
+  /* ── Badge ── */
+  --badge-programming-bg: var(--nav-active-bg);
+  --badge-programming-text: var(--brand-primary);
+}
+
+/* ======================================================================
+   ILLUSTRATION TOKENS — for SVG illustrations in AI course content.
+   These are designed for fixed dark illustration surfaces and do NOT
+   change between themes. Illustrations remain visually identical.
+   ====================================================================== */
+:root {
+  --illustration-primary: #6366f1;
+  --illustration-secondary: #818cf8;
+  --illustration-accent: #a78bfa;
+  --illustration-deep: #4338ca;
+  --illustration-deeper: #7c3aed;
+  --illustration-light: #c4b5fd;
+  --illustration-lightest: #e9d5ff;
+  --illustration-glow: rgba(167,139,250,0.55);
+  --illustration-node: #818cf8;
+  --illustration-edge: #6366f1;
+  --illustration-success: #22c55e;
+  --illustration-success-light: #4ade80;
+  --illustration-success-lighter: #6ee7b7;
+  --illustration-success-bright: #34d399;
+  --illustration-success-dim: #10b981;
+  --illustration-success-bg: #052e16;
+  --illustration-success-alt: #48BB78;
+  --illustration-warning: #f59e0b;
+  --illustration-warning-light: #fbbf24;
+  --illustration-warning-lighter: #fcd34d;
+  --illustration-danger: #ef4444;
+  --illustration-danger-light: #f43f5e;
+  --illustration-info: #60a5fa;
+  --illustration-info-deep: #3b82f6;
+  --illustration-special: #22d3ee;
+  --illustration-bg-dark: #1e1b4b;
+  --illustration-surface: #0f172a;
+  --illustration-bg-deep: #06090f;
+  --illustration-surface-alt: #1e293b;
+  --illustration-surface-mid: #334155;
+  --illustration-element-muted: #475569;
+  --illustration-element-dim: #4b5563;
+  --illustration-element-deep: #374151;
+  --illustration-muted-text: #94A3B8;
+  --illustration-muted-light: #64748b;
+  --illustration-muted-lighter: #6b7280;
+  --illustration-bg-glow: #080c18;
+  --illustration-bg-surface-deep: #0a0e17;
+  --illustration-bg-surface-mid: #0f1421;
+  --illustration-bg-surface-dark: #0b0e14;
+  --illustration-bg-dim: #060912;
+  --illustration-success-bg-alt: #0f2e0f;
+  --illustration-success-bg-deep: #065f46;
+  --illustration-accent-pink: #f472b6;
+  --illustration-danger-bg: #7f1d1d;
+  --illustration-danger-bg-alt: #2e0f0f;
+  --illustration-surface-alt-deep: #1a2744;
+  --illustration-surface-mid-alt: #0a1628;
+  --illustration-surface-mid-deep: #0a1020;
+  --illustration-bg-warm: #1c0f00;
+  --illustration-text-muted-alt: #94A8B8;
+  --illustration-bg-surface-deeper: #0a0e1a;
+  --illustration-track: #e2e8f0;
+  --illustration-danger-light-vivid: #fb7185;
+  --illustration-danger-muted: #f87171;
+  --illustration-success-deep: #059669;
+  --illustration-warning-deep: #d97706;
+  --illustration-warning-faint: #fde68a;
+  --illustration-special-light: #38bdf8;
+  --illustration-special-alt: #06b6d4;
+  --illustration-accent-deep: #6d28d9;
+  --illustration-accent-deeper: #4c1d95;
+  --illustration-danger-light-soft: #fca5a5;
+  --illustration-danger-mid: #f56565;
+  --illustration-danger-bg-deep: #450a0a;
+  --illustration-surface-muted: #0c0f1a;
+  --illustration-surface-dark-alt: #111827;
+  --illustration-bg-accent-alt: #1a1530;
+  --illustration-accent-faint: #f5f3ff;
+  --illustration-success-lighter-alt: #86efac;
+  --illustration-warning-bg: #713f12;
+  --illustration-special-mid: #06b6d4;
+  --illustration-text-primary: #f8fafc;
+  --illustration-text-secondary: #cbd5e1;
+  --illustration-text-muted: #94a3b8;
+}
+
+/* ======================================================================
+   PRACTICE EXERCISE MODULE
+   Semantic tokens for AI practice components (coding exercises, quizzes).
+   Light theme: dark code-editor aesthetic on light page.
+   Dark theme: elevated graphite surface on dark page.
+   ====================================================================== */
+:root {
+  --practice-surface: #0F172A;
+  --practice-surface-hover: #1B2B44;
+  --practice-surface-alt: #1E293B;
+  --practice-card: #0F172A;
+  --practice-card-hover: #1B2B44;
+  --practice-card-selected: rgba(0,191,179,.10);
+  --practice-title: #F8FAFC;
+  --practice-description: #CBD5E1;
+  --practice-text-muted: #94A3B8;
+  --practice-accent: #00BFB3;
+  --practice-accent-hover: #009E95;
+  --practice-accent-glow: rgba(0,191,179,.15);
+  --practice-border: rgba(0,191,179,.20);
+  --practice-border-strong: rgba(0,191,179,.35);
+  --practice-option: #1B2B44;
+  --practice-option-hover: #243351;
+  --practice-option-selected: rgba(0,191,179,.12);
+  --practice-option-selected-text: #00BFB3;
+  --practice-correct: #22C55E;
+  --practice-correct-bg: rgba(34,197,94,.12);
+  --practice-wrong: #EF4444;
+  --practice-wrong-bg: rgba(239,68,68,.12);
+  --practice-progress-track: #1E293B;
+  --practice-progress-fill: #00BFB3;
+  --practice-chip: #00BFB3;
+  --practice-chip-bg: rgba(0,191,179,.12);
+  --practice-chip-text: #00BFB3;
+  --practice-icon: #00BFB3;
+  --practice-shadow: rgba(0,191,179,.20);
+  --practice-score: #F8FAFC;
+  --practice-score-label: #94A3B8;
+  --practice-banner-correct: rgba(34,197,94,.12);
+  --practice-banner-correct-text: #22C55E;
+  --practice-banner-wrong: rgba(239,68,68,.12);
+  --practice-banner-wrong-text: #EF4444;
+}
+
+[data-theme="dark"] {
+  --practice-surface: #1A202C;
+  --practice-surface-hover: #222A38;
+  --practice-surface-alt: #151922;
+  --practice-card: #1A202C;
+  --practice-card-hover: #222A38;
+  --practice-card-selected: rgba(0,191,179,.15);
+  --practice-option: #151922;
+  --practice-option-hover: #1A202C;
+  --practice-option-selected: rgba(0,191,179,.15);
+  --practice-progress-track: #2A3445;
+  --practice-shadow: rgba(0,0,0,.3);
+}
+
+/* ======================================================================
+   LESSON NAVIGATION MODULE
+   Tokens for the lesson sidebar and inline navigation.
+   ====================================================================== */
+:root {
+  --lesson-nav-bg: transparent;
+  --lesson-nav-border: rgba(148,163,184,.12);
+  --lesson-nav-text: #94A3B8;
+  --lesson-nav-text-active: #00BFB3;
+  --lesson-nav-text-completed: inherit;
+  --lesson-nav-icon: #64748B;
+  --lesson-nav-icon-active: #00BFB3;
+  --lesson-nav-icon-completed: #00BFB3;
+  --lesson-nav-hover-bg: rgba(0,191,179,.08);
+  --lesson-nav-hover-border: rgba(0,191,179,.20);
+  --lesson-nav-active-bg: rgba(0,191,179,.08);
+  --lesson-nav-active-border: #00BFB3;
+  --lesson-nav-connector-completed: rgba(0,191,179,.30);
+  --lesson-nav-connector-default: rgba(148,163,184,.15);
+  --lesson-nav-header: #64748B;
+}
+
+[data-theme="dark"] {
+  --lesson-nav-border: rgba(208,215,226,.10);
+  --lesson-nav-text: #8A95A6;
+  --lesson-nav-icon: #8A95A6;
+  --lesson-nav-connector-default: rgba(208,215,226,.10);
+  --lesson-nav-header: #8A95A6;
+}
+
+/* ======================================================================
+   AI COURSE CONTENT
+   Two section types for every AI lecture:
+   TYPE A — Dark Immersive (hero, visual, demo, simulation)
+   TYPE B — Reading Card (theory, explanation, algorithm, list, table)
+   ====================================================================== */
+:root {
+  --ai-section-bg: #0F172A;
+  --ai-section-bg-alt: #1B2B44;
+  --ai-section-text: #F8FAFC;
+  --ai-section-text-secondary: #CBD5E1;
+  --ai-section-text-muted: #94A3B8;
+  --ai-section-accent: #00BFB3;
+  --ai-section-border: rgba(255,255,255,.06);
+  --ai-card-bg: #FFFFFF;
+  --ai-card-border: #E2E8F0;
+  --ai-card-heading: #0F172A;
+  --ai-card-text: #0F172A;
+  --ai-card-text-secondary: #475569;
+  --ai-card-accent: #00BFB3;
+  --ai-radius: 16px;
+  --ai-card-padding: 20px;
+  --ai-card-shadow: 0 1px 2px rgba(15,23,42,.06);
+}
+
+[data-theme="dark"] {
+  --ai-section-bg: #151922;
+  --ai-section-bg-alt: #1A202C;
+  --ai-section-border: rgba(255,255,255,.05);
+  --ai-card-bg: #171C25;
+  --ai-card-border: #2A3445;
+  --ai-card-heading: #FFFFFF;
+  --ai-card-text: #D0D7E2;
+  --ai-card-text-secondary: #8A95A6;
+  --ai-card-shadow: 0 1px 2px rgba(0,0,0,.2);
+}
+
+/* ======================================================================
+   FORM CONTROLS — Custom Fraylon-styled controls for the AI course.
+   Each control has idle, hover, active, focus, and disabled states
+   using brand-primary (#00BFB3) as accent.
+   These are already theme-agnostic (use brand colors, not surface colors).
+   ====================================================================== */
+:root, [data-theme="dark"] {
+  --control-bg: transparent;
+  --control-border: rgba(255,255,255,0.2);
+  --control-border-hover: #00BFB3;
+  --control-focus-ring: 0 0 0 2px rgba(0,191,179,0.35);
+  --control-disabled-opacity: 0.45;
+
+  /* Toggle Switch */
+  --switch-track: #1E293B;
+  --switch-track-active: #00BFB3;
+  --switch-track-border: rgba(255,255,255,0.15);
+  --switch-thumb: #94A3B8;
+  --switch-thumb-active: #FFFFFF;
+  --switch-glow: rgba(0,191,179,0.3);
+
+  /* Range Slider */
+  --range-track: #1E293B;
+  --range-thumb: #00BFB3;
+  --range-thumb-border: #FFFFFF;
+  --range-thumb-glow: rgba(0,191,179,0.3);
+
+  /* Checkbox / Radio */
+  --check-border: rgba(255,255,255,0.3);
+  --check-bg: transparent;
+  --check-bg-checked: #00BFB3;
+  --check-border-checked: #00BFB3;
+}

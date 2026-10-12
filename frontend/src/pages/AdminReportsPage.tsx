@@ -512,7 +512,7 @@ function CertificationsTab({ data }: { data: any }) {
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             <Award size={14} className="text-yellow-400" /> By Course
           </h3>
-          <StatusBar items={Object.entries(summary.byCourse).map(([k, v]: any) => ({ label: k, value: v, total: summary.total }))} colorMap={{ cs50ai: "#A855F7", python: "#3B82F6" }} />
+          <StatusBar items={Object.entries(summary.byCourse).map(([k, v]: any) => ({ label: k, value: v, total: summary.total }))} colorMap={{ 'fundamentals-of-ai': "#00BFB3", python: "#009E95" }} />
         </div>
       )}
 

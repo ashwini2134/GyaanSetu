@@ -1,0 +1,1106 @@
+<!doctype html><html><head><meta charset="utf-8"></head><body><title>Fraylon Academy — Landing Page Product Plan</title>
+<style>
+  @font-face {
+    font-family: 'ui-serif-stack';
+    src: local('Iowan Old Style'), local('Palatino Linotype'), local('Palatino');
+  }
+
+  :root {
+    --paper: #F6F7F9;
+    --paper-raised: #FFFFFF;
+    --paper-sunken: #EEF0F4;
+    --ink: #0D1220;
+    --ink-soft: #4B5468;
+    --ink-faint: #8892A4;
+    --line: #DFE3EA;
+    --line-strong: #C7CCD6;
+    --accent: #0F9FB6;
+    --accent-deep: #0B7A8C;
+    --accent-soft: rgba(15,159,182,0.10);
+    --accent-line: rgba(15,159,182,0.35);
+    --indigo: #5B6EF5;
+    --indigo-soft: rgba(91,110,245,0.10);
+    --good: #2F8A57;
+    --good-bg: rgba(47,138,87,0.10);
+    --good-line: rgba(47,138,87,0.28);
+    --warn: #A6741F;
+    --warn-bg: rgba(166,116,31,0.12);
+    --warn-line: rgba(166,116,31,0.30);
+    --bad: #B23A48;
+    --bad-bg: rgba(178,58,72,0.10);
+    --bad-line: rgba(178,58,72,0.28);
+    --merge: #6B4FA0;
+    --merge-bg: rgba(107,79,160,0.10);
+    --merge-line: rgba(107,79,160,0.28);
+    --shadow: 0 1px 2px rgba(13,18,32,0.04), 0 8px 24px -12px rgba(13,18,32,0.10);
+    --font-display: 'ui-serif-stack', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Roboto Mono', Menlo, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0A0E1A;
+      --paper-raised: #10151F;
+      --paper-sunken: #060911;
+      --ink: #E7EAF2;
+      --ink-soft: #98A2B8;
+      --ink-faint: #626E85;
+      --line: #1E2536;
+      --line-strong: #2B3348;
+      --accent: #2FC2D6;
+      --accent-deep: #6FDAE8;
+      --accent-soft: rgba(47,194,214,0.13);
+      --accent-line: rgba(47,194,214,0.35);
+      --indigo: #8B98FF;
+      --indigo-soft: rgba(139,152,255,0.14);
+      --good: #55C588;
+      --good-bg: rgba(85,197,136,0.13);
+      --good-line: rgba(85,197,136,0.30);
+      --warn: #E0B152;
+      --warn-bg: rgba(224,177,82,0.14);
+      --warn-line: rgba(224,177,82,0.32);
+      --bad: #E68A94;
+      --bad-bg: rgba(230,138,148,0.13);
+      --bad-line: rgba(230,138,148,0.30);
+      --merge: #B29CE0;
+      --merge-bg: rgba(178,156,224,0.14);
+      --merge-line: rgba(178,156,224,0.30);
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #0A0E1A; --paper-raised: #10151F; --paper-sunken: #060911;
+    --ink: #E7EAF2; --ink-soft: #98A2B8; --ink-faint: #626E85;
+    --line: #1E2536; --line-strong: #2B3348;
+    --accent: #2FC2D6; --accent-deep: #6FDAE8; --accent-soft: rgba(47,194,214,0.13); --accent-line: rgba(47,194,214,0.35);
+    --indigo: #8B98FF; --indigo-soft: rgba(139,152,255,0.14);
+    --good: #55C588; --good-bg: rgba(85,197,136,0.13); --good-line: rgba(85,197,136,0.30);
+    --warn: #E0B152; --warn-bg: rgba(224,177,82,0.14); --warn-line: rgba(224,177,82,0.32);
+    --bad: #E68A94; --bad-bg: rgba(230,138,148,0.13); --bad-line: rgba(230,138,148,0.30);
+    --merge: #B29CE0; --merge-bg: rgba(178,156,224,0.14); --merge-line: rgba(178,156,224,0.30);
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+  }
+  :root[data-theme="light"] {
+    --paper: #F6F7F9; --paper-raised: #FFFFFF; --paper-sunken: #EEF0F4;
+    --ink: #0D1220; --ink-soft: #4B5468; --ink-faint: #8892A4;
+    --line: #DFE3EA; --line-strong: #C7CCD6;
+    --accent: #0F9FB6; --accent-deep: #0B7A8C; --accent-soft: rgba(15,159,182,0.10); --accent-line: rgba(15,159,182,0.35);
+    --indigo: #5B6EF5; --indigo-soft: rgba(91,110,245,0.10);
+    --good: #2F8A57; --good-bg: rgba(47,138,87,0.10); --good-line: rgba(47,138,87,0.28);
+    --warn: #A6741F; --warn-bg: rgba(166,116,31,0.12); --warn-line: rgba(166,116,31,0.30);
+    --bad: #B23A48; --bad-bg: rgba(178,58,72,0.10); --bad-line: rgba(178,58,72,0.28);
+    --merge: #6B4FA0; --merge-bg: rgba(107,79,160,0.10); --merge-line: rgba(107,79,160,0.28);
+    --shadow: 0 1px 2px rgba(13,18,32,0.04), 0 8px 24px -12px rgba(13,18,32,0.10);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--accent-soft); color: var(--ink); }
+
+  a { color: var(--accent-deep); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+
+  h1, h2, h3, h4 { font-family: var(--font-display); color: var(--ink); font-weight: 600; text-wrap: balance; margin: 0; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 0;
+    max-width: 1320px;
+    margin: 0 auto;
+  }
+
+  /* ---------- TOC ---------- */
+  .toc {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 48px 20px 48px 28px;
+    border-right: 1px solid var(--line);
+  }
+  .toc-brand {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .toc-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+  .toc-list a {
+    display: block;
+    padding: 7px 10px;
+    border-radius: 7px;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+  .toc-list a:hover { background: var(--paper-sunken); color: var(--ink); text-decoration: none; }
+  .toc-num { font-family: var(--font-mono); color: var(--ink-faint); font-size: 11px; margin-right: 6px; }
+
+  /* ---------- MAIN ---------- */
+  main { min-width: 0; padding: 0 0 120px; }
+
+  .cover {
+    padding: 76px 64px 56px;
+    border-bottom: 1px solid var(--line);
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--accent-deep);
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-line);
+    padding: 5px 11px;
+    border-radius: 100px;
+    margin-bottom: 22px;
+  }
+  .cover h1 {
+    font-size: clamp(2.1rem, 4vw, 3.1rem);
+    line-height: 1.08;
+    max-width: 16ch;
+  }
+  .cover .dek {
+    font-size: 1.15rem;
+    color: var(--ink-soft);
+    max-width: 62ch;
+    margin-top: 20px;
+    line-height: 1.55;
+  }
+  .cover-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    margin-top: 36px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+  .cover-meta div { font-size: 12.5px; }
+  .cover-meta .k { font-family: var(--font-mono); color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-bottom: 3px; }
+  .cover-meta .v { color: var(--ink); font-weight: 600; }
+
+  section.block { padding: 56px 64px; border-bottom: 1px solid var(--line); }
+  section.block:last-of-type { border-bottom: none; }
+  .block-head { max-width: 760px; margin-bottom: 32px; }
+  .block-num { font-family: var(--font-mono); font-size: 12px; color: var(--accent-deep); letter-spacing: 0.06em; margin-bottom: 10px; display: block; }
+  .block-head h2 { font-size: 1.9rem; }
+  .block-head p.lede { color: var(--ink-soft); font-size: 1.02rem; margin-top: 12px; max-width: 68ch; }
+
+  .prose { max-width: 720px; }
+  .prose p { color: var(--ink-soft); margin: 0 0 16px; }
+  .prose p:last-child { margin-bottom: 0; }
+  .prose strong { color: var(--ink); }
+
+  /* ---------- Findings ---------- */
+  .findings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .finding {
+    background: var(--paper-raised);
+    padding: 22px 24px;
+  }
+  .finding .fnum { font-family: var(--font-mono); font-size: 12px; color: var(--ink-faint); }
+  .finding h3 { font-size: 1.02rem; margin: 8px 0 8px; line-height: 1.3; }
+  .finding p { font-size: 13.5px; color: var(--ink-soft); margin: 0; line-height: 1.55; }
+
+  /* ---------- Audit table ---------- */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--paper-raised); box-shadow: var(--shadow); }
+  table { border-collapse: collapse; width: 100%; min-width: 920px; }
+  thead th {
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+    background: var(--paper-sunken);
+  }
+  tbody td {
+    padding: 15px 16px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+    font-size: 13.5px;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--paper-sunken); }
+  td.section-name { font-weight: 700; color: var(--ink); white-space: nowrap; font-family: var(--font-display); font-size: 15px; }
+  td.why { color: var(--ink-soft); max-width: 220px; }
+  td.mark { text-align: center; font-size: 15px; }
+  .m-yes { color: var(--good); }
+  .m-partial { color: var(--warn); }
+  .m-no { color: var(--bad); }
+  td.reasoning { color: var(--ink-soft); max-width: 300px; }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 4px 9px;
+    border-radius: 100px;
+    border: 1px solid;
+    white-space: nowrap;
+  }
+  .pill-keep { color: var(--good); background: var(--good-bg); border-color: var(--good-line); }
+  .pill-improve { color: var(--warn); background: var(--warn-bg); border-color: var(--warn-line); }
+  .pill-remove { color: var(--bad); background: var(--bad-bg); border-color: var(--bad-line); }
+  .pill-merge { color: var(--merge); background: var(--merge-bg); border-color: var(--merge-line); }
+  .pill-new { color: var(--accent-deep); background: var(--accent-soft); border-color: var(--accent-line); }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 14px; font-size: 12.5px; color: var(--ink-faint); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+  /* ---------- Sitemap ---------- */
+  .sitemap { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--paper-raised); box-shadow: var(--shadow); }
+  .sitemap-row {
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
+    gap: 18px;
+    align-items: center;
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--line);
+  }
+  .sitemap-row:last-child { border-bottom: none; }
+  .sitemap-row .idx { font-family: var(--font-mono); color: var(--ink-faint); font-size: 13px; }
+  .sitemap-row .name { font-weight: 700; font-family: var(--font-display); font-size: 16px; }
+  .sitemap-row .replaces { font-size: 12px; color: var(--ink-faint); margin-top: 3px; }
+  .sitemap-row .replaces b { color: var(--ink-soft); font-weight: 600; }
+
+  /* ---------- Journey ---------- */
+  .journey { position: relative; padding-left: 28px; }
+  .journey::before { content: ""; position: absolute; left: 6px; top: 6px; bottom: 6px; width: 2px; background: var(--line-strong); }
+  .journey-step { position: relative; padding-bottom: 30px; }
+  .journey-step:last-child { padding-bottom: 0; }
+  .journey-step::before {
+    content: "";
+    position: absolute;
+    left: -28px;
+    top: 4px;
+    width: 11px; height: 11px;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 2px solid var(--accent);
+  }
+  .journey-step .pct { font-family: var(--font-mono); font-size: 11px; color: var(--accent-deep); text-transform: uppercase; letter-spacing: 0.06em; }
+  .journey-step h4 { font-size: 1.05rem; margin: 6px 0 6px; }
+  .journey-step p { color: var(--ink-soft); font-size: 14px; margin: 0; max-width: 60ch; }
+
+  /* ---------- Section spec cards ---------- */
+  .spec-card {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--paper-raised);
+    box-shadow: var(--shadow);
+    margin-bottom: 22px;
+    overflow: hidden;
+  }
+  .spec-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 26px;
+    border-bottom: 1px solid var(--line);
+    background: var(--paper-sunken);
+    flex-wrap: wrap;
+  }
+  .spec-head .titles { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .spec-head h3 { font-size: 1.3rem; }
+  .spec-tag { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-faint); }
+  .spec-body { padding: 24px 26px 26px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px 32px; }
+  .spec-field { min-width: 0; }
+  .spec-field .fk {
+    font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.07em; text-transform: uppercase;
+    color: var(--accent-deep); margin-bottom: 6px; display: block;
+  }
+  .spec-field .fv { font-size: 14px; color: var(--ink-soft); line-height: 1.55; }
+  .spec-field .fv.headline-text { font-family: var(--font-display); font-size: 17px; color: var(--ink); font-weight: 600; line-height: 1.35; }
+  .spec-field.full { grid-column: 1 / -1; }
+  .spec-field .cta-chip {
+    display: inline-block; font-size: 13px; font-weight: 700; color: var(--accent-deep);
+    background: var(--accent-soft); border: 1px solid var(--accent-line); padding: 4px 11px; border-radius: 8px; margin-right: 8px; margin-bottom: 6px;
+  }
+
+  /* ---------- Flow diagrams ---------- */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--paper-raised);
+    box-shadow: var(--shadow);
+  }
+  .flow-step {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 18px;
+    padding: 18px 24px;
+    align-items: center;
+    position: relative;
+  }
+  .flow-step:not(:last-child) { border-bottom: 1px dashed var(--line-strong); }
+  .flow-step .fs-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: var(--accent-soft); border: 1px solid var(--accent-line);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-weight: 700; color: var(--accent-deep); font-size: 13px;
+  }
+  .flow-step .fs-title { font-weight: 700; color: var(--ink); font-size: 14.5px; }
+  .flow-step .fs-desc { font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
+  .flow-arrow { display: flex; justify-content: center; padding: 2px 0; color: var(--ink-faint); font-family: var(--font-mono); font-size: 12px; }
+
+  .flow.horizontal { flex-direction: row; overflow-x: auto; }
+  .flow.horizontal .flow-step { grid-template-columns: 1fr; text-align: center; min-width: 168px; border-bottom: none; }
+  .flow.horizontal .flow-step:not(:last-child) { border-right: 1px dashed var(--line-strong); }
+  .flow.horizontal .fs-icon { margin: 0 auto 10px; }
+
+  /* ---------- Component recs ---------- */
+  .lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 16px; }
+  .lib-card { border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; background: var(--paper-raised); }
+  .lib-card h4 { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.02em; color: var(--accent-deep); margin-bottom: 12px; }
+  .lib-card ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .lib-card li { font-size: 13px; color: var(--ink-soft); padding-left: 14px; position: relative; }
+  .lib-card li::before { content: "—"; position: absolute; left: 0; color: var(--ink-faint); }
+  .lib-card li b { color: var(--ink); }
+
+  /* ---------- Priority ---------- */
+  .priority-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .priority-col { border-radius: 14px; border: 1px solid var(--line); overflow: hidden; background: var(--paper-raised); }
+  .priority-col .pc-head { padding: 16px 20px; font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; border-bottom: 1px solid var(--line); }
+  .priority-col.must .pc-head { background: var(--bad-bg); color: var(--bad); }
+  .priority-col.should .pc-head { background: var(--warn-bg); color: var(--warn); }
+  .priority-col.nice .pc-head { background: var(--good-bg); color: var(--good); }
+  .priority-col ul { margin: 0; padding: 16px 20px; list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .priority-col li { font-size: 13.5px; color: var(--ink-soft); padding-left: 16px; position: relative; line-height: 1.45; }
+  .priority-col li::before { content: "▸"; position: absolute; left: 0; color: var(--ink-faint); }
+  .priority-col li b { color: var(--ink); display: block; margin-bottom: 2px; }
+
+  /* ---------- Asset table ---------- */
+  .asset-table td, .asset-table th { font-size: 13px; }
+
+  footer.doc-footer { padding: 40px 64px; color: var(--ink-faint); font-size: 12.5px; font-family: var(--font-mono); }
+
+  @media (max-width: 980px) {
+    .layout { grid-template-columns: 1fr; }
+    .toc { display: none; }
+    .cover, section.block { padding: 40px 24px; }
+    .spec-body { grid-template-columns: 1fr; }
+    .priority-cols { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="layout">
+  <nav class="toc" aria-label="Table of contents">
+    <div class="toc-brand">Fraylon / Landing Plan</div>
+    <ul class="toc-list">
+      <li><a href="#findings"><span class="toc-num">00</span>Cross-Cutting Findings</a></li>
+      <li><a href="#audit"><span class="toc-num">01</span>Current Page Audit</a></li>
+      <li><a href="#sitemap"><span class="toc-num">02</span>New Sitemap</a></li>
+      <li><a href="#journey"><span class="toc-num">03</span>Visitor Journey</a></li>
+      <li><a href="#methodology"><span class="toc-num">—</span>Methodology Loop</a></li>
+      <li><a href="#portfolio-flow"><span class="toc-num">—</span>Portfolio Pipeline</a></li>
+      <li><a href="#specs"><span class="toc-num">04</span>Section Specs</a></li>
+      <li><a href="#components"><span class="toc-num">05</span>Components</a></li>
+      <li><a href="#assets"><span class="toc-num">06</span>Placeholder Assets</a></li>
+      <li><a href="#animation"><span class="toc-num">07</span>Animation Plan</a></li>
+      <li><a href="#story"><span class="toc-num">08</span>Final UX Story</a></li>
+      <li><a href="#priority"><span class="toc-num">09</span>Priority</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <div class="cover">
+      <span class="eyebrow">Product Plan · No Code</span>
+      <h1>The Fraylon Academy Landing Page, Rethought</h1>
+      <p class="dek">A section-by-section audit of what's live today, followed by a complete narrative redesign — sitemap, visitor journey, copy, animation direction, and component recommendations. No implementation. Grounded in the actual current codebase, not a generic template.</p>
+      <div class="cover-meta">
+        <div><span class="k">Scope</span><span class="v">13 live sections + 10 unused/orphaned components read in full</span></div>
+        <div><span class="k">Core problem</span><span class="v">Reads like "another LMS," not an engineering academy</span></div>
+        <div><span class="k">Method</span><span class="v">Audit → Findings → Narrative rebuild → Spec sheet</span></div>
+      </div>
+    </div>
+
+    <!-- ============ 00 FINDINGS ============ -->
+    <section class="block" id="findings">
+      <div class="block-head">
+        <span class="block-num">00 / Before the section audit</span>
+        <h2>The page's real problem isn't any one section</h2>
+        <p class="lede">It's the shape of the whole thing. These eight patterns showed up while reading through all thirteen live sections plus the ten that were built and abandoned — they explain <em>why</em> the page feels generic more than any single weak section does.</p>
+      </div>
+      <div class="findings-grid">
+        <div class="finding">
+          <span class="fnum">01</span>
+          <h3>The same four ideas, six times</h3>
+          <p>"Real projects, not videos," "AI reviews your code," "AI mentor," and "portfolio" each get restated in Hero, What Is Fraylon, Problem/Solution, Problem Cards, How It Works, Platform Spotlight, and Testimonials — with less novelty every time. By section seven a returning idea reads as filler, not reinforcement.</p>
+        </div>
+        <div class="finding">
+          <span class="fnum">02</span>
+          <h3>The flagship idea has no section</h3>
+          <p>Portfolio is Fraylon's most ownable, most different claim — and today it's a bullet point in three other sections. A full <code>LearnerPortfolioSection</code> component already exists in the codebase, fully built, and is never imported anywhere.</p>
+        </div>
+        <div class="finding">
+          <span class="fnum">03</span>
+          <h3>Template fatigue</h3>
+          <p>Nine of thirteen sections use the identical formula: small mono eyebrow → bold heading → one sentence → card grid with a hover shadow. That repetition of <em>rhythm</em>, not just message, is a bigger tell than any copy choice — it's why the page reads as a template even where the writing is good.</p>
+        </div>
+        <div class="finding">
+          <span class="fnum">04</span>
+          <h3>One stock photo, doing a lot of damage</h3>
+          <p>The Courses section uses generic Unsplash photography — a laptop, a circuit board — while every other section is custom-coded. It's the single most "default LMS" moment on the page, sitting right next to the most product-specific one.</p>
+        </div>
+        <div class="finding">
+          <span class="fnum">05</span>
+          <h3>The methodology story exists but is buried</h3>
+          <p><code>HowItWorksSection</code> is already 80% of the "Learn → Practice → Build → Portfolio" story the brief asks for — but it's positioned as item five of thirteen in a scroll, not staged as its own moment.</p>
+        </div>
+        <div class="finding">
+          <span class="fnum">06</span>
+          <h3>Two taglines, no canonical line</h3>
+          <p>Hero says "Don't Just Watch. Build. Ship. Get Hired." Footer says "The LMS that grades itself. Learn. Build. Grow." Neither is wrong, but a visitor who reads both isn't sure which one is <em>the</em> Fraylon line.</p>
+        </div>
+        <div class="finding">
+          <span class="fnum">07</span>
+          <h3>The stats undercut confidence</h3>
+          <p>Leading the social-proof stat row with "2 Project-Based Courses" is honest, but it's the wrong honest number to lead with — it reads as small before a visitor has any other context to weigh it against.</p>
+        </div>
+        <div class="finding">
+          <span class="fnum">08</span>
+          <h3>Ten abandoned attempts, still in the repo</h3>
+          <p><code>CommunitySection</code>, <code>FeaturesSection</code>, <code>LearningPathsSection</code>, <code>WhyFraylonSection</code>, and six more exist, unused, each a past pass at this same pitch. None were deleted when superseded — evidence the page has never had one committed direction. This plan should end that pattern, not add an eleventh attempt.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 01 AUDIT ============ -->
+    <section class="block" id="audit">
+      <div class="block-head">
+        <span class="block-num">01 / Section-by-section</span>
+        <h2>Current Landing Page Audit</h2>
+        <p class="lede">Every section currently imported into <code>LandingPage.tsx</code>, in the order it appears on the page, judged against the same five questions.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Section</th>
+              <th>Why it exists</th>
+              <th>Value</th>
+              <th>Excites</th>
+              <th>Premium</th>
+              <th>Converts</th>
+              <th>Verdict &amp; reasoning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="section-name">Trust Strip</td>
+              <td class="why">Above-the-fold credibility marquee, rotates 3 messages</td>
+              <td class="mark m-partial">△</td>
+              <td class="mark m-no">✗</td>
+              <td class="mark m-no">✗</td>
+              <td class="mark m-no">✗</td>
+              <td class="reasoning"><span class="pill pill-remove">Remove</span><br>Rotating one-at-a-time hides two of three messages at any moment. Cheap-feeling marquee pattern before the hero has even landed.</td>
+            </tr>
+            <tr>
+              <td class="section-name">Hero</td>
+              <td class="why">First impression, primary headline + CTA</td>
+              <td class="mark m-yes">✓</td>
+              <td class="mark m-partial">△</td>
+              <td class="mark m-yes">✓</td>
+              <td class="mark m-yes">✓</td>
+              <td class="reasoning"><span class="pill pill-improve">Improve</span><br>"Don't Just Watch. Build. Ship. Get Hired." is the best line on the page — keep it. The right-side visual is an abstract logo scene; it doesn't yet <em>show</em> a project or a portfolio the way the copy promises.</td>
+            </tr>
+            <tr>
+              <td class="section-name">What Is Fraylon</td>
+              <td class="why">Explain the model: real IDE, real projects, AI review</td>
+              <td class="mark m-yes">✓</td>
+              <td class="mark m-partial">△</td>
+              <td class="mark m-partial">△</td>
+              <td class="mark m-partial">△</td>
+              <td class="reasoning"><span class="pill pill-merge">Merge</span><br>Good copy, but restates Hero almost point for point. The fake code-editor mockup is a very common dev-tool-landing pattern now, not distinctive.</td>
+            </tr>
+            <tr>
+              <td class="section-name">Problem → Solution</td>
+              <td class="why">Old way vs. Fraylon way, side-by-side list</td>
+              <td class="mark m-yes">✓</td>
+              <td class="mark m-partial">△</td>
+              <td class="mark m-partial">△</td>
+              <td class="mark m-yes">✓</td>
+              <td class="reasoning"><span class="pill pill-merge">Merge</span><br>Clear and scannable, but it's the same "old vs. new" argument the very next section makes again with different visuals.</td>
+            </tr>
+            <tr>
+              <td class="section-name">Problem Cards</td>
+              <td class="why">"What We Solve" — 3 tilt cards, same old-vs-new argument again</td>
+              <td class="mark m-partial">△</td>
+              <td class="mark m-yes">✓</td>
+              <td class="mark m-yes">✓</td>
+              <td class="mark m-no">✗</td>
+              <td class="reasoning"><span class="pill pill-merge">Merge</span><br>The mouse-tilt interaction is genuinely the best micro-interaction on the page — worth reusing elsewhere. The content is redundant with the section directly above it.</td>
+            </tr>
+            <tr>
+              <td class="section-name">How It Works</td>
+              <td class="why">4-step product loop: Learn → AI help → Build → Portfolio</td>
+              <td class="mark m-yes">✓</td>
+              <td class="mark m-yes">✓</td>
+              <td class="mark m-yes">✓</td>
+              <td class="mark m-yes">✓</td>
+              <td class="reasoning"><span class="pill pill-keep">Keep &amp; elevate</span><br>The strongest section on the page and the closest thing to the Methodology story the brief asks for. It's buried as item six of thirteen — it deserves to be its own staged moment, not a list.</td>
+            </tr>
+            <tr>
+              <td class="section-name">Social Proof / Stats</td>
+              <td class="why">Animated stat counters: 2 courses, 100% reviewed, 10s review time</td>
+              <td class="mark m-partial">△</td>
+              <td class="mark m-yes">✓</td>
+              <td class="mark m-yes">✓</td>
+              <td class="mark m-partial">△</td>
+              <td class="reasoning"><span class="pill pill-improve">Improve</span><br>Deliberately honest — no invented traction numbers, which is right. But "2 courses" as the lead stat undercuts confidence before the count-up even finishes.</td>
+            </tr>
+            <tr>
+              <td class="section-name">Platform Spotlight</td>
+              <td class="why">2 cards: Fraylon Mentor, Learning Dashboard</td>
+              <td class="mark m-partial">△</td>
+              <td class="mark m-partial">△</td>
+              <td class="mark m-partial">△</td>
+              <td class="mark m-partial">△</td>
+              <td class="reasoning"><span class="pill pill-merge">Merge</span><br>Third mention of the AI Mentor by this point in the scroll. Two lonely feature cards is a thin use of a full section.</td>
+            </tr>
+            <tr>
+              <td class="section-name">Courses</td>
+              <td class="why">Curriculum catalog: Python 2.0, AI Fundamentals</td>
+              <td class="mark m-yes">✓</td>
+              <td class="mark m-no">✗</td>
+              <td class="mark m-partial">△</td>
+              <td class="mark m-yes">✓</td>
+              <td class="reasoning"><span class="pill pill-improve">Improve</span><br>Structurally fine, functionally clear — undone entirely by generic Unsplash stock photography, the one visibly "default LMS" moment on an otherwise custom-built page.</td>
+            </tr>
+            <tr>
+              <td class="section-name">Testimonials <span style="color:var(--ink-faint); font-weight:400;">(mislabeled)</span></td>
+              <td class="why">4 feature-highlight cards standing in for real testimonials, which don't exist yet</td>
+              <td class="mark m-no">✗</td>
+              <td class="mark m-no">✗</td>
+              <td class="mark m-partial">△</td>
+              <td class="mark m-no">✗</td>
+              <td class="reasoning"><span class="pill pill-remove">Remove</span><br>Honest about not having real testimonials yet — but restates Code Review, AI Mentor, Portfolio, and Project-Based Learning for the fourth time each. Pure repetition fatigue.</td>
+            </tr>
+            <tr>
+              <td class="section-name">FAQ</td>
+              <td class="why">Objection handling: free?, prior experience?, certificates, vs. bootcamp</td>
+              <td class="mark m-yes">✓</td>
+              <td class="mark m-no">✗</td>
+              <td class="mark m-yes">✓</td>
+              <td class="mark m-yes">✓</td>
+              <td class="reasoning"><span class="pill pill-keep">Keep</span><br>Genuinely useful, honestly written (e.g. clarifies the core stays free forever). FAQ isn't supposed to excite — it's supposed to remove doubt, and it does.</td>
+            </tr>
+            <tr>
+              <td class="section-name">Final CTA</td>
+              <td class="why">Last conversion push before the footer</td>
+              <td class="mark m-partial">△</td>
+              <td class="mark m-no">✗</td>
+              <td class="mark m-partial">△</td>
+              <td class="mark m-partial">△</td>
+              <td class="reasoning"><span class="pill pill-improve">Improve</span><br>Subcopy — "Stop grading manually and start scaling your learning" — is written for an instructor buying a SaaS tool, not a student deciding to learn. That's a copy bug, not a style choice, and it's undermining an otherwise fine closing moment.</td>
+            </tr>
+            <tr>
+              <td class="section-name">Footer</td>
+              <td class="why">Utility nav, legal, socials</td>
+              <td class="mark m-yes">✓</td>
+              <td class="mark m-no">✗</td>
+              <td class="mark m-yes">✓</td>
+              <td class="mark m-no">✗</td>
+              <td class="reasoning"><span class="pill pill-keep">Keep</span><br>Does its job. Only fix: its tagline ("The LMS that grades itself") doesn't match Hero's tagline — unify to one canonical line.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend">
+        <span><span class="m-yes">✓</span> Strong</span>
+        <span><span class="m-partial">△</span> Partial</span>
+        <span><span class="m-no">✗</span> Weak</span>
+      </div>
+    </section>
+
+    <!-- ============ 02 SITEMAP ============ -->
+    <section class="block" id="sitemap">
+      <div class="block-head">
+        <span class="block-num">02 / The rebuild</span>
+        <h2>New Landing Page Sitemap</h2>
+        <p class="lede">Thirteen sections collapse to eleven. Four redundant "why we're different" sections merge into one higher-craft moment; that space funds two entirely new sections the current page is missing.</p>
+      </div>
+      <div class="sitemap">
+        <div class="sitemap-row"><div class="idx">01</div><div><div class="name">Hero</div><div class="replaces">Kept &amp; upgraded — <b>Hero</b></div></div><span class="pill pill-improve">Improve</span></div>
+        <div class="sitemap-row"><div class="idx">02</div><div><div class="name">Proof Strip</div><div class="replaces">Replaces <b>Trust Strip</b></div></div><span class="pill pill-improve">Improve</span></div>
+        <div class="sitemap-row"><div class="idx">03</div><div><div class="name">The Shift</div><div class="replaces">Merges <b>What Is Fraylon</b> + <b>Problem→Solution</b> + <b>Problem Cards</b></div></div><span class="pill pill-merge">Merge</span></div>
+        <div class="sitemap-row"><div class="idx">04</div><div><div class="name">Teaching Methodology</div><div class="replaces">Elevates <b>How It Works</b> into its own flagship story</div></div><span class="pill pill-new">New</span></div>
+        <div class="sitemap-row"><div class="idx">05</div><div><div class="name">Live Learning Preview</div><div class="replaces">New — no prior equivalent</div></div><span class="pill pill-new">New</span></div>
+        <div class="sitemap-row"><div class="idx">06</div><div><div class="name">The Portfolio Engine</div><div class="replaces">Resurrects &amp; redesigns the unused <b>LearnerPortfolioSection</b></div></div><span class="pill pill-new">New — flagship</span></div>
+        <div class="sitemap-row"><div class="idx">07</div><div><div class="name">Roadmap</div><div class="replaces">Rebuilds the unused <b>LearningPathsSection</b> idea</div></div><span class="pill pill-new">New</span></div>
+        <div class="sitemap-row"><div class="idx">08</div><div><div class="name">Courses</div><div class="replaces">Kept, visuals replaced — <b>Courses</b></div></div><span class="pill pill-improve">Improve</span></div>
+        <div class="sitemap-row"><div class="idx">09</div><div><div class="name">Platform Capabilities</div><div class="replaces">Merges <b>Platform Spotlight</b> + <b>Social Proof</b>, drops <b>Testimonials</b></div></div><span class="pill pill-merge">Merge</span></div>
+        <div class="sitemap-row"><div class="idx">10</div><div><div class="name">FAQ</div><div class="replaces">Kept, one question added — <b>FAQ</b></div></div><span class="pill pill-keep">Keep</span></div>
+        <div class="sitemap-row"><div class="idx">11</div><div><div class="name">Final CTA</div><div class="replaces">Kept, copy fixed — <b>CTA</b></div></div><span class="pill pill-improve">Improve</span></div>
+        <div class="sitemap-row"><div class="idx">—</div><div><div class="name">Footer</div><div class="replaces">Kept, tagline unified</div></div><span class="pill pill-keep">Keep</span></div>
+      </div>
+    </section>
+
+    <!-- ============ 03 JOURNEY ============ -->
+    <section class="block" id="journey">
+      <div class="block-head">
+        <span class="block-num">03 / Told in order</span>
+        <h2>Visitor Journey</h2>
+        <p class="lede">What a first-time visitor thinks at each point in the scroll — the test for whether this is a story or a stack of sections.</p>
+      </div>
+      <div class="journey">
+        <div class="journey-step">
+          <span class="pct">0–3 seconds</span>
+          <h4>"Oh — this is different."</h4>
+          <p>Headline + a live-feeling build happening in front of them, not a stock photo or an abstract animation. This is the moment that decides whether they scroll or bounce.</p>
+        </div>
+        <div class="journey-step">
+          <span class="pct">~10%</span>
+          <h4>"Okay, and it's legitimate."</h4>
+          <p>Three quiet credibility marks land together, not one at a time. No claim feels oversold because nothing is a rotating banner.</p>
+        </div>
+        <div class="journey-step">
+          <span class="pct">~20–30%</span>
+          <h4>"I see exactly what's different, once."</h4>
+          <p>One scroll-driven transformation — video player literally becomes a live code + AI review panel — makes the old-way/new-way argument in a single motion instead of three separate sections repeating it.</p>
+        </div>
+        <div class="journey-step">
+          <span class="pct">~35–45%</span>
+          <h4>"I understand how a lecture actually works."</h4>
+          <p>The methodology loop — Learn → Interact → Practice → Solve → Build → Reflect → Certificate — plays out as a guided scroll, using real widgets from the actual product (the same Truth Table Explorer, Modus Ponens flashcards, and K-Means demo built into the live course).</p>
+        </div>
+        <div class="journey-step">
+          <span class="pct">~50%</span>
+          <h4>"Wait, I can try this right now?"</h4>
+          <p>A real, working practice exercise sits inline on the page. No login. This is the section most competitors cannot copy, because most don't have a real in-house code runner. Fraylon does.</p>
+        </div>
+        <div class="journey-step">
+          <span class="pct">~60–70%</span>
+          <h4>"This is the part that actually matters to me."</h4>
+          <p>The portfolio pipeline — the emotional peak of the page. Every exercise they'd just tried becomes a visible artifact flowing into a growing, real-looking portfolio. This is where "I should sign up" turns from interest into intent.</p>
+        </div>
+        <div class="journey-step">
+          <span class="pct">~75–85%</span>
+          <h4>"Here's exactly what I'd study."</h4>
+          <p>Roadmap and course catalog, now read as confirmation of a decision already being made, not persuasion.</p>
+        </div>
+        <div class="journey-step">
+          <span class="pct">~90%</span>
+          <h4>"My last two questions, answered."</h4>
+          <p>Capability grid resolves "is this a real platform" (certificates, tracking, mentor uptime); FAQ resolves anything specific still open, including a new portfolio-specific question.</p>
+        </div>
+        <div class="journey-step">
+          <span class="pct">100%</span>
+          <h4>"Let's go."</h4>
+          <p>Final CTA closes on the same visual idea the Hero opened with — a portfolio card settling into place — so the page ends where its argument was always heading.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ METHODOLOGY FLOW ============ -->
+    <section class="block" id="methodology">
+      <div class="block-head">
+        <span class="block-num">Visual story · flagship 1 of 2</span>
+        <h2>Teaching Methodology Loop</h2>
+        <p class="lede">Every lecture in the product already follows this loop — it's not aspirational copy, it's what the converted lectures (1 through 9) actually do. The section's job is to make a visitor feel this loop, not read a list of it.</p>
+      </div>
+      <div class="flow horizontal">
+        <div class="flow-step"><div class="fs-icon">1</div><div class="fs-title">Learn</div><div class="fs-desc">Short concept, plain text &amp; diagrams</div></div>
+        <div class="flow-step"><div class="fs-icon">2</div><div class="fs-title">Interact</div><div class="fs-desc">Animation or simulation — the "bulb," the quantifier scanner</div></div>
+        <div class="flow-step"><div class="fs-icon">3</div><div class="fs-title">Practice</div><div class="fs-desc">Try It Yourself, in a real editor</div></div>
+        <div class="flow-step"><div class="fs-icon">4</div><div class="fs-title">Solve</div><div class="fs-desc">A graded problem, not a quiz</div></div>
+        <div class="flow-step"><div class="fs-icon">5</div><div class="fs-title">Build</div><div class="fs-desc">A real project or milestone</div></div>
+        <div class="flow-step"><div class="fs-icon">6</div><div class="fs-title">Reflect in Portfolio</div><div class="fs-desc">The finished work is saved, not graded and discarded</div></div>
+        <div class="flow-step"><div class="fs-icon">7</div><div class="fs-title">Earn Certificate</div><div class="fs-desc">Verifiable, tied to the work behind it</div></div>
+      </div>
+      <p style="margin-top:16px; font-size:13.5px; color:var(--ink-faint);">Animated as a pinned, horizontally-scrubbed timeline: the visitor scrolls vertically, the loop advances horizontally, and each stage swaps a small live preview panel behind it (real widget screenshots, not icons).</p>
+    </section>
+
+    <!-- ============ PORTFOLIO FLOW ============ -->
+    <section class="block" id="portfolio-flow">
+      <div class="block-head">
+        <span class="block-num">Visual story · flagship 2 of 2</span>
+        <h2>The Portfolio Pipeline</h2>
+        <p class="lede">The single idea the whole redesign is organized around: nothing a student does is thrown away. It all flows downstream into one growing, shareable artifact.</p>
+      </div>
+      <div class="flow">
+        <div class="flow-step"><div class="fs-icon">L</div><div><div class="fs-title">Learning</div><div class="fs-desc">Concepts, interactive demos — the raw material</div></div></div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step"><div class="fs-icon">P</div><div><div class="fs-title">Practice</div><div class="fs-desc">Try It Yourself + Practice Exercises — small, frequent reps</div></div></div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step"><div class="fs-icon">Pr</div><div><div class="fs-title">Projects</div><div class="fs-desc">Problems to Solve + Milestones — larger, graded work</div></div></div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step"><div class="fs-icon">★</div><div><div class="fs-title">Portfolio</div><div class="fs-desc">Every artifact above lands here automatically — the accumulation point</div></div></div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step"><div class="fs-icon">Pl</div><div><div class="fs-title">Placement</div><div class="fs-desc">A shareable, verifiable link a recruiter can actually open</div></div></div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step"><div class="fs-icon">C</div><div><div class="fs-title">Career</div><div class="fs-desc">The reason any of the above mattered</div></div></div>
+      </div>
+      <p style="margin-top:16px; font-size:13.5px; color:var(--ink-faint);">Animated as small labeled "artifact" cards that visibly travel down a connecting line from each stage and dock into a live-looking portfolio panel — the exact mockup already built in the unused <code>LearnerPortfolioSection</code>, reskinned to current brand tokens.</p>
+    </section>
+
+    <!-- ============ 04 SPECS ============ -->
+    <section class="block" id="specs">
+      <div class="block-head">
+        <span class="block-num">04 / Build brief</span>
+        <h2>Section-by-Section Specs</h2>
+        <p class="lede">Every section in the new sitemap, specified the way a studio would hand it to whoever builds it next. No code — direction only.</p>
+      </div>
+
+      <!-- HERO -->
+      <div class="spec-card">
+        <div class="spec-head"><div class="titles"><h3>01 — Hero</h3><span class="spec-tag">the thesis</span></div><span class="pill pill-improve">Improve</span></div>
+        <div class="spec-body">
+          <div class="spec-field"><span class="fk">Purpose</span><div class="fv">Prove in three seconds this isn't a video-course site.</div></div>
+          <div class="spec-field"><span class="fk">Reason it exists</span><div class="fv">First screen decides bounce vs. scroll. Everything else on the page only gets read if this works.</div></div>
+          <div class="spec-field full"><span class="fk">Headline</span><div class="fv headline-text">Don't Just Watch. Build. Ship. Get Hired.</div></div>
+          <div class="spec-field full"><span class="fk">Subheadline</span><div class="fv">Fraylon replaces lectures with real IDEs, an AI mentor that reviews every line, and a portfolio that grows while you learn.</div></div>
+          <div class="spec-field full"><span class="fk">CTA</span><div class="fv"><span class="cta-chip">Start Building Free</span><span class="cta-chip">See a Real Lecture</span></div></div>
+          <div class="spec-field"><span class="fk">Suggested animation</span><div class="fv">Orchestrated page-load sequence: headline reveals, then a code panel types a real curriculum snippet and resolves into a small portfolio-card artifact — the hero's one job made visible in 4 seconds.</div></div>
+          <div class="spec-field"><span class="fk">Suggested component</span><div class="fv">aceternity ui Text Generate Effect for the headline; magicui Border Beam around the resulting portfolio card to land the payoff.</div></div>
+          <div class="spec-field"><span class="fk">Placeholder</span><div class="fv">Simulated IDE typing a real short snippet from the curriculum (e.g. the A* search stub), not lorem code.</div></div>
+          <div class="spec-field"><span class="fk">Future asset needed</span><div class="fv">A real recorded product screen capture of a lecture + AI review, to eventually replace the simulation.</div></div>
+        </div>
+      </div>
+
+      <!-- PROOF STRIP -->
+      <div class="spec-card">
+        <div class="spec-head"><div class="titles"><h3>02 — Proof Strip</h3><span class="spec-tag">replaces Trust Strip</span></div><span class="pill pill-improve">Improve</span></div>
+        <div class="spec-body">
+          <div class="spec-field"><span class="fk">Purpose</span><div class="fv">Quiet, non-competing credibility marks directly under the hero.</div></div>
+          <div class="spec-field"><span class="fk">Reason it exists</span><div class="fv">The current version rotates three claims one at a time, so two are always hidden. Fixing that costs nothing and removes a real weakness.</div></div>
+          <div class="spec-field full"><span class="fk">Headline / Subheadline</span><div class="fv">No headline. All three marks shown together: "Every submission gets an AI review · Real IDE, not a video player · Certificates verify instantly."</div></div>
+          <div class="spec-field"><span class="fk">CTA</span><div class="fv">None.</div></div>
+          <div class="spec-field"><span class="fk">Suggested animation</span><div class="fv">Staggered fade/slide-in on load, 80ms apart. No looping.</div></div>
+          <div class="spec-field"><span class="fk">Suggested component</span><div class="fv">Plain framer-motion stagger — no new library needed.</div></div>
+          <div class="spec-field"><span class="fk">Placeholder / Future asset</span><div class="fv">Text only. Nothing needed.</div></div>
+        </div>
+      </div>
+
+      <!-- THE SHIFT -->
+      <div class="spec-card">
+        <div class="spec-head"><div class="titles"><h3>03 — The Shift</h3><span class="spec-tag">merges 3 sections into 1</span></div><span class="pill pill-merge">Merge</span></div>
+        <div class="spec-body">
+          <div class="spec-field"><span class="fk">Purpose</span><div class="fv">Make the old-way / new-way contrast one strong moment instead of three overlapping ones.</div></div>
+          <div class="spec-field"><span class="fk">Reason it exists</span><div class="fv">Frees roughly a third of the page's current length — that space funds the two brand-new flagship sections below.</div></div>
+          <div class="spec-field full"><span class="fk">Headline</span><div class="fv headline-text">Most courses hand you a video. We hand you a terminal.</div></div>
+          <div class="spec-field full"><span class="fk">Subheadline</span><div class="fv">Passive learning doesn't produce job-ready developers. Here's what changes when you learn by building.</div></div>
+          <div class="spec-field"><span class="fk">CTA</span><div class="fv">None — this section persuades, it doesn't convert.</div></div>
+          <div class="spec-field"><span class="fk">Suggested animation</span><div class="fv">Sticky, scroll-driven morph: a video-player mock literally transforms into a live code-editor-with-AI-review mock as the visitor scrolls, instead of three separate static sections making the same point.</div></div>
+          <div class="spec-field"><span class="fk">Suggested component</span><div class="fv">aceternity ui Sticky Scroll Reveal or Container Scroll Animation, built on the framer-motion useScroll/useTransform pattern already proven elsewhere in this codebase.</div></div>
+          <div class="spec-field"><span class="fk">Placeholder</span><div class="fv">Two mocked panels (video-player, code+review) cross-fading — DOM/CSS built, no real footage yet.</div></div>
+          <div class="spec-field"><span class="fk">Future asset needed</span><div class="fv">A real before/after screen capture, eventually.</div></div>
+        </div>
+      </div>
+
+      <!-- METHODOLOGY -->
+      <div class="spec-card">
+        <div class="spec-head"><div class="titles"><h3>04 — Teaching Methodology</h3><span class="spec-tag">new · flagship</span></div><span class="pill pill-new">New</span></div>
+        <div class="spec-body">
+          <div class="spec-field"><span class="fk">Purpose</span><div class="fv">Deliver the 7-step lecture loop as a felt experience, not a bullet list.</div></div>
+          <div class="spec-field"><span class="fk">Reason it exists</span><div class="fv">One of the two sections the brief explicitly asks for. Also finally gives the current page's strongest buried idea (How It Works) the spotlight it deserves.</div></div>
+          <div class="spec-field full"><span class="fk">Headline</span><div class="fv headline-text">Every lecture follows one loop.</div></div>
+          <div class="spec-field full"><span class="fk">Subheadline</span><div class="fv">Learn → Interact → Practice → Solve → Build → Reflect in Portfolio → Earn Certificate. Every step is graded by AI, not left to chance.</div></div>
+          <div class="spec-field full"><span class="fk">CTA</span><div class="fv"><span class="cta-chip">See What a Lecture Looks Like</span></div></div>
+          <div class="spec-field"><span class="fk">Suggested animation</span><div class="fv">Pinned section, horizontal-scrub timeline — vertical scroll drives horizontal progress through the 7 stages, each swapping a small preview panel.</div></div>
+          <div class="spec-field"><span class="fk">Suggested component</span><div class="fv">Custom horizontal scroll-pin (same technique as the existing parallax hook); motion-primitives Stepper; extend the already-built FeatureIcon3D set from 4 icons to 7.</div></div>
+          <div class="spec-field"><span class="fk">Placeholder</span><div class="fv">7 labeled panels with the existing 3D icon style.</div></div>
+          <div class="spec-field"><span class="fk">Future asset needed</span><div class="fv">Real thumbnails already exist in the product — the Truth Table Explorer bulb, the Modus Ponens flashcards, the K-Means widget — genuine screenshots, not stock art.</div></div>
+        </div>
+      </div>
+
+      <!-- LIVE PREVIEW -->
+      <div class="spec-card">
+        <div class="spec-head"><div class="titles"><h3>05 — Live Learning Preview</h3><span class="spec-tag">new</span></div><span class="pill pill-new">New</span></div>
+        <div class="spec-body">
+          <div class="spec-field"><span class="fk">Purpose</span><div class="fv">Let a skeptical visitor do something real in under 10 seconds.</div></div>
+          <div class="spec-field"><span class="fk">Reason it exists</span><div class="fv">The single lowest-cost, highest-conviction differentiator available: Fraylon already has a working in-house Python interpreter. Almost no competitor can ship this.</div></div>
+          <div class="spec-field full"><span class="fk">Headline</span><div class="fv headline-text">Try it. Right now. No account needed.</div></div>
+          <div class="spec-field full"><span class="fk">Subheadline</span><div class="fv">This is a real practice exercise from Lecture 2 of the Python course.</div></div>
+          <div class="spec-field"><span class="fk">CTA</span><div class="fv">Implicit — the interaction is the CTA. Trailing link: "Want the full course? Start free →"</div></div>
+          <div class="spec-field"><span class="fk">Suggested animation</span><div class="fv">None beyond standard focus/hover states — the interactivity itself is the content.</div></div>
+          <div class="spec-field"><span class="fk">Suggested component</span><div class="fv">The existing <code>CodeEditor</code> + <code>pythonRunner</code> components, embedded in a stripped demo mode.</div></div>
+          <div class="spec-field"><span class="fk">Placeholder</span><div class="fv">A real 3–5 line snippet with one blank to fill in.</div></div>
+          <div class="spec-field"><span class="fk">Future asset needed</span><div class="fv">None — this can ship with infrastructure that already exists today.</div></div>
+        </div>
+      </div>
+
+      <!-- PORTFOLIO -->
+      <div class="spec-card">
+        <div class="spec-head"><div class="titles"><h3>06 — The Portfolio Engine</h3><span class="spec-tag">new · flagship</span></div><span class="pill pill-new">New</span></div>
+        <div class="spec-body">
+          <div class="spec-field"><span class="fk">Purpose</span><div class="fv">Make the portfolio the emotional and strategic centerpiece of the page.</div></div>
+          <div class="spec-field"><span class="fk">Reason it exists</span><div class="fv">The most requested, most differentiated, most under-served idea on the current page — and the infrastructure already exists, unused, in the codebase.</div></div>
+          <div class="spec-field full"><span class="fk">Headline</span><div class="fv headline-text">Your portfolio isn't something you build later. It's built by finishing.</div></div>
+          <div class="spec-field full"><span class="fk">Subheadline</span><div class="fv">Every Try It Yourself, every Practice Exercise, every Problem Solved, every Milestone, every Capstone — automatically becomes proof of work.</div></div>
+          <div class="spec-field full"><span class="fk">CTA</span><div class="fv"><span class="cta-chip">See a Sample Portfolio</span><span class="cta-chip">Start Building Yours</span></div></div>
+          <div class="spec-field"><span class="fk">Suggested animation</span><div class="fv">The Learning → Practice → Projects → Portfolio → Placement → Career pipeline (see diagram above) rendered as artifact cards traveling down a connecting line and docking into a live portfolio panel on scroll.</div></div>
+          <div class="spec-field"><span class="fk">Suggested component</span><div class="fv">aceternity ui Tracing Beam for the connecting line; magicui Animated Beam between stage nodes; reactbits Stacking Cards for the docking moment.</div></div>
+          <div class="spec-field"><span class="fk">Placeholder</span><div class="fv">The existing <code>LearnerPortfolioSection</code> mockup structure (streaks, verified badge, certificates), reskinned from its current stale slate/blue palette onto the live brand tokens.</div></div>
+          <div class="spec-field"><span class="fk">Future asset needed</span><div class="fv">A real anonymized student portfolio link once the first cohort finishes a course.</div></div>
+        </div>
+      </div>
+
+      <!-- ROADMAP -->
+      <div class="spec-card">
+        <div class="spec-head"><div class="titles"><h3>07 — Roadmap</h3><span class="spec-tag">rebuilds an unused idea</span></div><span class="pill pill-new">New</span></div>
+        <div class="spec-body">
+          <div class="spec-field"><span class="fk">Purpose</span><div class="fv">Show progression and structure — distinct from the Courses grid, which is about choosing.</div></div>
+          <div class="spec-field"><span class="fk">Reason it exists</span><div class="fv">Delivers the "learning roadmap" message directly; the content (real lecture titles) already exists in <code>lectures.json</code>, nothing invented.</div></div>
+          <div class="spec-field full"><span class="fk">Headline</span><div class="fv headline-text">Two paths in. Both end in a portfolio.</div></div>
+          <div class="spec-field full"><span class="fk">Subheadline</span><div class="fv">Python 2.0 takes you from zero to shipping CLI tools. AI Fundamentals takes you from search algorithms to a working agent. Pick a path — or do both.</div></div>
+          <div class="spec-field"><span class="fk">CTA</span><div class="fv"><span class="cta-chip">View Full Roadmap</span></div></div>
+          <div class="spec-field"><span class="fk">Suggested animation</span><div class="fv">Interactive horizontal roadmap — hover or tap a node to preview that lecture's real content.</div></div>
+          <div class="spec-field"><span class="fk">Suggested component</span><div class="fv">aceternity ui Tracing Beam or a custom SVG path with motion-driven node reveals; 21st.dev timeline blocks.</div></div>
+          <div class="spec-field"><span class="fk">Placeholder / Future asset</span><div class="fv">Real lecture titles, already in the data layer — no placeholder needed.</div></div>
+        </div>
+      </div>
+
+      <!-- COURSES -->
+      <div class="spec-card">
+        <div class="spec-head"><div class="titles"><h3>08 — Courses</h3><span class="spec-tag">structure kept, visuals fixed</span></div><span class="pill pill-improve">Improve</span></div>
+        <div class="spec-body">
+          <div class="spec-field"><span class="fk">Purpose</span><div class="fv">Functional catalog entry point.</div></div>
+          <div class="spec-field"><span class="fk">Reason it exists</span><div class="fv">Mechanically the section already works — 3D tilt cards, clear info. It only needs its one glaring "generic LMS" tell removed.</div></div>
+          <div class="spec-field full"><span class="fk">Headline / Subheadline / CTA</span><div class="fv">Unchanged — "Start Building Today," existing copy, "View Curriculum."</div></div>
+          <div class="spec-field"><span class="fk">Suggested animation</span><div class="fv">Keep the existing mouse-tilt interaction as-is — it's the best micro-interaction on the current page.</div></div>
+          <div class="spec-field"><span class="fk">Suggested component</span><div class="fv">No new component. Swap content only.</div></div>
+          <div class="spec-field"><span class="fk">Placeholder</span><div class="fv">Replace each Unsplash photo with a live syntax-highlighted code snippet unique to that course, styled like the panel already built for the Shift section — real code, not stock imagery.</div></div>
+          <div class="spec-field"><span class="fk">Future asset needed</span><div class="fv">None — pattern scales automatically as "Data Structures (Coming Soon)" and future courses launch.</div></div>
+        </div>
+      </div>
+
+      <!-- CAPABILITIES -->
+      <div class="spec-card">
+        <div class="spec-head"><div class="titles"><h3>09 — Platform Capabilities</h3><span class="spec-tag">merges 2 sections, drops 1</span></div><span class="pill pill-merge">Merge</span></div>
+        <div class="spec-body">
+          <div class="spec-field"><span class="fk">Purpose</span><div class="fv">House the supporting product facts — certification, tracking, mentor availability — as one organized grid.</div></div>
+          <div class="spec-field"><span class="fk">Reason it exists</span><div class="fv">Stops three separate sections from each restating a version of the same pitch, and gives the stats a chance to be reframed away from "we only have 2 courses."</div></div>
+          <div class="spec-field full"><span class="fk">Headline</span><div class="fv headline-text">Everything else you'd expect. Done properly.</div></div>
+          <div class="spec-field full"><span class="fk">Subheadline</span><div class="fv">Certification, progress tracking, and a mentor that's actually available — the fundamentals, not reinvented, just not skipped.</div></div>
+          <div class="spec-field"><span class="fk">CTA</span><div class="fv">None — supporting section.</div></div>
+          <div class="spec-field"><span class="fk">Suggested animation</span><div class="fv">Keep the existing count-up stat pattern, reframed around review speed and mentor uptime rather than course count; hover-reveal on capability tiles.</div></div>
+          <div class="spec-field"><span class="fk">Suggested component</span><div class="fv">reactbits Bento Grid in place of the current 2-card layout — denser, reads as more platform-mature.</div></div>
+          <div class="spec-field"><span class="fk">Placeholder</span><div class="fv">Reuse the existing Bot / LineChart / Award icon set already imported in the current code.</div></div>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="spec-card">
+        <div class="spec-head"><div class="titles"><h3>10 — FAQ</h3><span class="spec-tag">kept</span></div><span class="pill pill-keep">Keep</span></div>
+        <div class="spec-body">
+          <div class="spec-field"><span class="fk">Purpose</span><div class="fv">Unchanged — late-funnel objection handling.</div></div>
+          <div class="spec-field"><span class="fk">Reason it exists</span><div class="fv">Already works well; the accordion pattern and answers are honest and specific.</div></div>
+          <div class="spec-field"><span class="fk">Suggested animation / component</span><div class="fv">No change — keep the existing accordion.</div></div>
+          <div class="spec-field"><span class="fk">Placeholder</span><div class="fv">Add one new question: "What exactly ends up in my portfolio, and can I control what's shown?" — directly supports the new flagship Portfolio section.</div></div>
+        </div>
+      </div>
+
+      <!-- FINAL CTA -->
+      <div class="spec-card">
+        <div class="spec-head"><div class="titles"><h3>11 — Final CTA</h3><span class="spec-tag">copy fixed, visual added</span></div><span class="pill pill-improve">Improve</span></div>
+        <div class="spec-body">
+          <div class="spec-field"><span class="fk">Purpose</span><div class="fv">Last conversion push — should feel like the payoff of everything above it.</div></div>
+          <div class="spec-field"><span class="fk">Reason it exists</span><div class="fv">Fixes an actual copy bug (instructor-facing language in a student-facing CTA) and gives the page a designed ending instead of trailing off on a plain gradient.</div></div>
+          <div class="spec-field full"><span class="fk">Headline</span><div class="fv headline-text">Ready to build something real?</div></div>
+          <div class="spec-field full"><span class="fk">Subheadline</span><div class="fv">Start your first AI-reviewed project today. Free — no credit card, no catch.</div></div>
+          <div class="spec-field full"><span class="fk">CTA</span><div class="fv"><span class="cta-chip">Start Building Free</span></div></div>
+          <div class="spec-field"><span class="fk">Suggested animation</span><div class="fv">A closing portfolio-card reveal that echoes the Hero's opening beat — the page ends on the same visual idea it opened with.</div></div>
+          <div class="spec-field"><span class="fk">Suggested component</span><div class="fv">magicui Confetti — used exactly once, only here, so it lands as a moment rather than noise.</div></div>
+          <div class="spec-field"><span class="fk">Placeholder</span><div class="fv">Reuse the Hero's portfolio-card asset for visual continuity.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 05 COMPONENTS ============ -->
+    <section class="block" id="components">
+      <div class="block-head">
+        <span class="block-num">05 / Toolkit</span>
+        <h2>Component Recommendations</h2>
+        <p class="lede">Grouped by library. Recommendations only — nothing here is installed or implemented.</p>
+      </div>
+      <div class="lib-grid">
+        <div class="lib-card">
+          <h4>aceternity ui</h4>
+          <ul>
+            <li><b>Sticky Scroll Reveal</b> — The Shift section's morph</li>
+            <li><b>Tracing Beam</b> — Portfolio pipeline &amp; Roadmap connector</li>
+            <li><b>Container Scroll Animation</b> — alternate for The Shift</li>
+            <li><b>Text Generate Effect</b> — Hero headline reveal</li>
+          </ul>
+        </div>
+        <div class="lib-card">
+          <h4>magicui</h4>
+          <ul>
+            <li><b>Border Beam</b> — Hero's portfolio-card payoff</li>
+            <li><b>Animated Beam</b> — node-to-node in the Portfolio pipeline</li>
+            <li><b>Confetti</b> — Final CTA, once only</li>
+            <li><b>Bento Grid</b> — Platform Capabilities</li>
+          </ul>
+        </div>
+        <div class="lib-card">
+          <h4>reactbits / reactbits.dev</h4>
+          <ul>
+            <li><b>Stacking Cards</b> — artifacts docking into the portfolio panel</li>
+            <li><b>Animated List</b> — alternate for the Proof Strip</li>
+          </ul>
+        </div>
+        <div class="lib-card">
+          <h4>motion-primitives</h4>
+          <ul>
+            <li><b>Stepper</b> — Methodology loop stage indicator</li>
+            <li>Text effects — supporting headline motion where needed</li>
+          </ul>
+        </div>
+        <div class="lib-card">
+          <h4>shadcn</h4>
+          <ul>
+            <li><b>Accordion</b> — formalizes the existing FAQ pattern</li>
+            <li><b>Tabs</b> — path switcher inside Roadmap (Python vs. AI)</li>
+          </ul>
+        </div>
+        <div class="lib-card">
+          <h4>21st.dev</h4>
+          <ul>
+            <li>Timeline / roadmap blocks — Roadmap section</li>
+            <li>Bento tile primitives — Platform Capabilities</li>
+          </ul>
+        </div>
+        <div class="lib-card">
+          <h4>framer motion <span style="color:var(--ink-faint); font-weight:400;">(already in use)</span></h4>
+          <ul>
+            <li>Remains the primary animation engine — every section above builds on <code>useScroll</code> / <code>useTransform</code> patterns already proven in the current codebase (parallax hook, 3D tilt cards, count-up stats).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 06 ASSETS ============ -->
+    <section class="block" id="assets">
+      <div class="block-head">
+        <span class="block-num">06 / Until the real thing exists</span>
+        <h2>Placeholder Asset List</h2>
+        <p class="lede">What stands in for a finished asset today, and what eventually replaces it.</p>
+      </div>
+      <div class="table-wrap">
+        <table class="asset-table">
+          <thead><tr><th>Asset</th><th>Used in</th><th>Interim placeholder</th><th>Eventually replaced by</th></tr></thead>
+          <tbody>
+            <tr><td class="section-name">Product visual</td><td class="why">Hero</td><td class="reasoning">Simulated code-typing → portfolio-card animation, using real curriculum code</td><td class="reasoning">Recorded screen capture of a real lecture + AI review</td></tr>
+            <tr><td class="section-name">Before/after mock</td><td class="why">The Shift</td><td class="reasoning">DOM-built video-player and code-editor mocks, cross-fading</td><td class="reasoning">Real before/after screen capture</td></tr>
+            <tr><td class="section-name">Methodology thumbnails</td><td class="why">Teaching Methodology</td><td class="reasoning">Existing 3D icon set, extended from 4 to 7</td><td class="reasoning">Real screenshots of the Truth Table Explorer, Modus Ponens flashcards, K-Means widget — already built and live</td></tr>
+            <tr><td class="section-name">Live exercise</td><td class="why">Live Learning Preview</td><td class="reasoning">None needed — real infrastructure already exists</td><td class="reasoning">—</td></tr>
+            <tr><td class="section-name">Portfolio mockup</td><td class="why">Portfolio Engine</td><td class="reasoning">Existing <code>LearnerPortfolioSection</code> layout, reskinned to current tokens</td><td class="reasoning">Real anonymized student portfolio link, post-first-cohort</td></tr>
+            <tr><td class="section-name">Roadmap nodes</td><td class="why">Roadmap</td><td class="reasoning">None needed — real lecture titles already in <code>lectures.json</code></td><td class="reasoning">—</td></tr>
+            <tr><td class="section-name">Course cover art</td><td class="why">Courses</td><td class="reasoning">Live syntax-highlighted code snippet per course</td><td class="reasoning">Same pattern scales to future courses — no replacement needed</td></tr>
+            <tr><td class="section-name">Closing visual</td><td class="why">Final CTA</td><td class="reasoning">Reuse of the Hero's portfolio-card asset</td><td class="reasoning">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 07 ANIMATION PLAN ============ -->
+    <section class="block" id="animation">
+      <div class="block-head">
+        <span class="block-num">07 / Direction, not spectacle</span>
+        <h2>Animation Plan</h2>
+        <p class="lede">Grouped by trigger, so motion serves the story instead of decorating it.</p>
+      </div>
+      <div class="findings-grid">
+        <div class="finding"><span class="fnum">Load-once</span><h3>Hero sequence</h3><p>Headline reveal → code-typing → portfolio-card resolve. Plays once on first paint, never repeats on scroll-back.</p></div>
+        <div class="finding"><span class="fnum">Scroll-triggered</span><h3>Reveals &amp; sticky moments</h3><p>The Shift's morph, the Methodology horizontal scrub, the Portfolio pipeline's artifact-docking — all tied to scroll position, all reversible on scroll-up.</p></div>
+        <div class="finding"><span class="fnum">Ambient</span><h3>Background glows &amp; float</h3><p>Kept from the current page — the blurred blob drift and card micro-float already work and shouldn't be touched, just used more sparingly so they read as atmosphere, not filler.</p></div>
+        <div class="finding"><span class="fnum">Interaction-driven</span><h3>Hover &amp; tilt</h3><p>The mouse-tilt card effect (currently on Problem Cards, Stats, Testimonials, Courses) consolidates onto fewer sections — Courses and the Portfolio artifact cards — so it reads as a signature move, not wallpaper.</p></div>
+        <div class="finding"><span class="fnum">One-time-special</span><h3>Confetti</h3><p>Fires exactly once, on the Final CTA. Nowhere else. Using it more than once anywhere on the page cancels its effect.</p></div>
+      </div>
+    </section>
+
+    <!-- ============ 08 UX STORY ============ -->
+    <section class="block" id="story">
+      <div class="block-head">
+        <span class="block-num">08 / In one breath</span>
+        <h2>Final UX Story</h2>
+      </div>
+      <div class="prose">
+        <p>A visitor lands and watches something get <strong>built</strong>, not narrated. One clean scroll shows them what changed versus a normal course platform, told once instead of three times. Then they're shown — not told — how a lecture actually works, using the real interactive pieces already living inside the product. They try one, themselves, before they've made any commitment at all.</p>
+        <p>Then comes the idea the whole page has been building toward: everything they'd just done doesn't disappear into a gradebook. It becomes a portfolio, automatically, the whole way from a first practice exercise to a capstone project to an actual career outcome. That's the moment intent forms. Everything after — roadmap, courses, capabilities, FAQ — is confirmation, not persuasion. The page closes exactly where it opened: a portfolio card settling into place, proof that the promise from the first three seconds was kept.</p>
+      </div>
+    </section>
+
+    <!-- ============ 09 PRIORITY ============ -->
+    <section class="block" id="priority" style="border-bottom:none;">
+      <div class="block-head">
+        <span class="block-num">09 / Sequencing</span>
+        <h2>Priority</h2>
+        <p class="lede">What earns its place first if this ships in phases rather than all at once.</p>
+      </div>
+      <div class="priority-cols">
+        <div class="priority-col must">
+          <div class="pc-head">Must have</div>
+          <ul>
+            <li><b>Portfolio Engine section</b>Ships the one idea missing that already has working infrastructure sitting unused.</li>
+            <li><b>Merge the 3 redundant "why we're different" sections</b>Removes the single biggest cause of "feels generic."</li>
+            <li><b>Fix the Final CTA copy bug</b>A one-line change with real cost currently — instructor language on a student CTA.</li>
+            <li><b>Replace Courses stock photography</b>Removes the only visible "default LMS" moment on the page.</li>
+          </ul>
+        </div>
+        <div class="priority-col should">
+          <div class="pc-head">Should have</div>
+          <ul>
+            <li><b>Teaching Methodology as its own section</b>Elevates the page's strongest existing idea out from under twelve others.</li>
+            <li><b>Live Learning Preview</b>Highest-conviction, lowest-cost differentiator — but ships after the core narrative is fixed.</li>
+            <li><b>Roadmap section</b>Content already exists in the data layer; mostly a presentation investment.</li>
+            <li><b>Reframe the stats row</b>Fixes a confidence problem, not a functional one.</li>
+          </ul>
+        </div>
+        <div class="priority-col nice">
+          <div class="pc-head">Nice to have</div>
+          <ul>
+            <li><b>Final CTA confetti moment</b>Delight, not necessity — and only works if used exactly once.</li>
+            <li><b>Bento-style Platform Capabilities grid</b>Visual upgrade over the current 2-card layout, not a message fix.</li>
+            <li><b>Unify Hero / Footer tagline</b>Small polish, low visitor-facing impact on its own.</li>
+            <li><b>Interactive roadmap node hover-preview</b>A refinement on top of a roadmap that already works without it.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <footer class="doc-footer">fraylon academy — landing page product plan — prepared as a planning document, no code included</footer>
+  </main>
+</div>
+</body></html>

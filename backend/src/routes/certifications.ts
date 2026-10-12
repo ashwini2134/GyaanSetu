@@ -1,9 +1,12 @@
 import { Router } from 'express';
+import QRCode from 'qrcode';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import type { AuthenticatedRequest } from '../middleware/auth.js';
 import { prisma } from '../prisma.js';
 import { COURSE_LECTURE_COUNTS } from './courses.js';
-import { checkEligibility, issueCertForStudent } from '../services/certificationService.js';
+import { checkEligibility, issueCertForStudent, getFinalProjectTitle } from '../services/certificationService.js';
+import { COURSE_FULL_NAMES } from '../lib/courseNames.js';
+import { config } from '../config.js';
 
 const router = Router();
 
@@ -40,27 +43,7 @@ router.get('/verify/:certNumber', async (req, res, next) => {
       data: { viewCount: { increment: 1 } }
     });
 
-    const capstoneLectureId = String(COURSE_LECTURE_COUNTS[cert.courseSlug] - 1);
-    const capstoneProgress = await prisma.progress.findFirst({
-      where: {
-        userId: cert.userId,
-        courseSlug: cert.courseSlug,
-        lectureId: capstoneLectureId,
-        projectCompleted: true,
-      },
-      select: { projectId: true },
-    });
-
-    const CAPSTONE_PROJECT_NAMES: Record<string, string> = {
-      student_management: 'Student Management System',
-      expense_tracker: 'Expense Tracker',
-      quiz_app: 'Quiz Application',
-      todo_list: 'To-Do List',
-    };
-
-    const capstoneTitle = capstoneProgress?.projectId
-      ? (CAPSTONE_PROJECT_NAMES[capstoneProgress.projectId] ?? capstoneProgress.projectId)
-      : null;
+    const capstoneTitle = await getFinalProjectTitle(cert.userId, cert.courseSlug);
 
     res.json({
       valid: true,
@@ -85,27 +68,8 @@ router.get('/', requireAuth, async (req: AuthenticatedRequest, res, next) => {
       orderBy: { issuedAt: 'desc' },
     });
 
-    const CAPSTONE_PROJECT_NAMES: Record<string, string> = {
-      student_management: 'Student Management System',
-      expense_tracker: 'Expense Tracker',
-      quiz_app: 'Quiz Application',
-      todo_list: 'To-Do List',
-    };
-
     const enrichedCerts = await Promise.all(certs.map(async cert => {
-      const capstoneLectureId = String(COURSE_LECTURE_COUNTS[cert.courseSlug] - 1);
-      const capstoneProgress = await prisma.progress.findFirst({
-        where: {
-          userId: cert.userId,
-          courseSlug: cert.courseSlug,
-          lectureId: capstoneLectureId,
-          projectCompleted: true,
-        },
-        select: { projectId: true },
-      });
-      const capstoneTitle = capstoneProgress?.projectId
-        ? (CAPSTONE_PROJECT_NAMES[capstoneProgress.projectId] ?? capstoneProgress.projectId)
-        : null;
+      const capstoneTitle = await getFinalProjectTitle(cert.userId, cert.courseSlug);
       return {
         ...cert,
         capstoneTitle,
@@ -136,11 +100,15 @@ router.get('/eligibility', requireAuth, async (req: AuthenticatedRequest, res, n
           conditions: {
             lecturesCompleted: { done: 0, required: COURSE_LECTURE_COUNTS[courseSlug], passed: false },
             practiceCompleted: { done: 0, required: COURSE_LECTURE_COUNTS[courseSlug], passed: false },
-            quizzesAttempted: { done: 0, required: COURSE_LECTURE_COUNTS[courseSlug], passed: false },
+            tryItEngaged: { done: 0, required: 0, passed: false },
+            quizzesPassed: { done: 0, required: COURSE_LECTURE_COUNTS[courseSlug], passed: false },
             problemsSubmitted: { done: 0, required: 0, passed: true },
-            projectCompleted: { done: 0, passed: false }
+            finalProjectApproved: { done: 0, passed: false }
           },
-          avgQuizScore: null
+          avgQuizScore: null,
+          capstoneScore: null,
+          overallScore: null,
+          lectureBreakdown: [],
         };
       }
     }
@@ -148,6 +116,20 @@ router.get('/eligibility', requireAuth, async (req: AuthenticatedRequest, res, n
   } catch (err) {
     console.error('Error in eligibility endpoint:', err);
     next(err);
+  }
+});
+
+// Student: per-lecture certification-readiness breakdown for the new
+// "how your certificate is graded" page — same underlying computation as
+// /eligibility (checkEligibility), just reshaped for a checklist UI instead
+// of a single pass/fail gate, so the two can never say different things.
+router.get('/:courseSlug/readiness', requireAuth, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const { courseSlug } = req.params as { courseSlug: string };
+    const result = await checkEligibility(req.user!.id, courseSlug);
+    res.json(result);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message ?? 'Failed to load certification readiness' });
   }
 });
 
@@ -202,10 +184,88 @@ router.post('/admin/issue', requireAuth, requireRole('admin'), async (req: Authe
   }
 });
 
+// Student: download their certificate as a rendered PDF (GyanSetu
+// branded course-completion template, rendered by the puppeteer-service).
+router.get('/:certNumber/download', requireAuth, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const certNumber = req.params.certNumber as string;
+    const cert = await prisma.issuedCertificate.findUnique({ where: { certNumber } });
+
+    if (!cert) {
+      res.status(404).json({ error: 'Certificate not found' });
+      return;
+    }
+    if (cert.userId !== req.user!.id && req.user!.role !== 'admin') {
+      res.status(403).json({ error: 'You can only download your own certificates' });
+      return;
+    }
+
+    const student = await prisma.user.findUnique({ where: { id: cert.userId }, select: { name: true } });
+    if (!student) {
+      res.status(404).json({ error: 'Certificate recipient not found' });
+      return;
+    }
+
+    const capstoneTitle = await getFinalProjectTitle(cert.userId, cert.courseSlug);
+
+    const courseBaseName = COURSE_FULL_NAMES[cert.courseSlug] ?? cert.courseSlug;
+    const courseName = capstoneTitle ? `${courseBaseName} (Final Project: ${capstoneTitle})` : courseBaseName;
+
+    const descriptionParts = ['Awarded for successfully completing all lectures, practice exercises, and assessments in the course'];
+    if (cert.avgScore !== null) descriptionParts.push(`with a quiz average of ${cert.avgScore}%`);
+    if (capstoneTitle) descriptionParts.push(`and the final project "${capstoneTitle}"`);
+    const descriptionText = `${descriptionParts.join(', ')}.`;
+
+    const verifyUrl = `${config.frontendUrl}/#/verify/${certNumber}`;
+    const qrPngBuffer = await QRCode.toBuffer(verifyUrl, {
+      errorCorrectionLevel: 'H',
+      type: 'png',
+      width: 400,
+      margin: 1,
+      color: { dark: '#000000', light: '#FFFFFF' },
+    });
+
+    const serviceUrl = process.env.PUPPETEER_SERVICE_URL;
+    const serviceToken = process.env.PUPPETEER_SERVICE_TOKEN;
+    if (!serviceUrl || !serviceToken) {
+      res.status(503).json({ error: 'Certificate rendering service is not configured' });
+      return;
+    }
+
+    const issueDateLabel = cert.issuedAt.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    const renderRes = await fetch(`${serviceUrl}/pdf/course`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${serviceToken}` },
+      body: JSON.stringify({
+        certNumber,
+        recipientName: student.name,
+        courseName,
+        descriptionText,
+        issueDateLabel,
+        qrPngBase64: qrPngBuffer.toString('base64'),
+        verifyUrlLabel: verifyUrl.replace(/^https?:\/\//, ''),
+      }),
+    });
+
+    if (!renderRes.ok) {
+      const errBody = await renderRes.text().catch(() => '');
+      console.error('Certificate render failed:', renderRes.status, errBody);
+      res.status(502).json({ error: 'Failed to render certificate' });
+      return;
+    }
+
+    const pdfBuffer = Buffer.from(await renderRes.arrayBuffer());
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="gyansetu-certificate-${certNumber}.pdf"`);
+    res.send(pdfBuffer);
+  } catch (err) { next(err); }
+});
+
 // Student: share certificate to LinkedIn (increments share count)
 router.post('/:certNumber/share', requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
-    const { certNumber } = req.params;
+    const certNumber = req.params.certNumber as string;
     const cert = await prisma.issuedCertificate.findUnique({
       where: { certNumber }
     });
@@ -226,9 +286,8 @@ router.post('/:certNumber/share', requireAuth, async (req: AuthenticatedRequest,
     });
 
     // Generate LinkedIn share URL
-    const courseName = cert.courseSlug === 'python' ? 'CS50P: Introduction to Python' : 
-                     cert.courseSlug === 'cs50ai' ? 'CS50 AI with Python' : cert.courseSlug;
-    const certUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/#/verify/${certNumber}`;
+    const courseName = COURSE_FULL_NAMES[cert.courseSlug] ?? cert.courseSlug;
+    const certUrl = `${config.frontendUrl}/#/verify/${certNumber}`;
     const linkedInUrl = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=${encodeURIComponent(courseName)}&organizationId=0&issueYear=${new Date(cert.issuedAt).getFullYear()}&certUrl=${encodeURIComponent(certUrl)}`;
 
     res.json({ linkedInUrl, certUrl });
@@ -240,7 +299,7 @@ router.post('/:certNumber/share', requireAuth, async (req: AuthenticatedRequest,
 // Student: update certificate template preference
 router.patch('/:certNumber/template', requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
-    const { certNumber } = req.params;
+    const certNumber = req.params.certNumber as string;
     const { templateId } = req.body as { templateId: string };
 
     const cert = await prisma.issuedCertificate.findUnique({
@@ -288,9 +347,8 @@ router.get('/:certNumber/badge', async (req, res, next) => {
       return;
     }
 
-    const courseName = cert.courseSlug === 'python' ? 'Python Fundamentals' : 
-                     cert.courseSlug === 'cs50ai' ? 'AI Foundations' : cert.courseSlug;
-    
+    const courseName = COURSE_FULL_NAMES[cert.courseSlug] ?? cert.courseSlug;
+
     // Generate SVG badge
     const badgeSvg = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
@@ -323,7 +381,7 @@ router.get('/:certNumber/badge', async (req, res, next) => {
     Certificate
   </text>
   <text x="200" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="rgba(255,255,255,0.6)">
-    Fraylon Academy
+    GyanSetu
   </text>
 </svg>`.trim();
 

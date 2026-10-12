@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { authFetch } from "../authClient";
+import { COURSE_FULL_NAMES } from "../data/courseNames";
 import {
   BookOpen, Plus, Search, X, Edit3, Trash2, Archive, Globe,
   CheckCircle2, AlertTriangle, BarChart3, Target, Lightbulb, HelpCircle,
@@ -81,7 +82,7 @@ interface CourseRef {
 // ── Helpers ──
 
 const EMPTY_EXERCISE: PracticeExercise = {
-  id: "", courseId: "cs50ai", lectureId: "0", sectionId: null,
+  id: "", courseId: "fundamentals-of-ai", lectureId: "0", sectionId: null,
   title: "", type: "ai", status: "draft",
   learningGoal: "", challenge: "", promptHint: "",
   validationRules: [], completionCriteria: [],
@@ -93,10 +94,7 @@ const EMPTY_EXERCISE: PracticeExercise = {
   hints: [], solutionCode: null, createdAt: "", updatedAt: "",
 };
 
-const COURSE_LABELS: Record<string, string> = {
-  python: "Python Programming",
-  cs50ai: "CS50 AI",
-};
+const COURSE_LABELS: Record<string, string> = COURSE_FULL_NAMES;
 
 const DIFFICULTY_COLORS: Record<string, string> = {
   beginner: "text-emerald-400 bg-emerald-900/30 border-emerald-700/40",
@@ -267,7 +265,7 @@ export default function AdminPracticeExercisesPage() {
   };
 
   const handleNew = () => {
-    setEditExercise({ ...EMPTY_EXERCISE, courseId: filterCourse || "cs50ai" });
+    setEditExercise({ ...EMPTY_EXERCISE, courseId: filterCourse || "fundamentals-of-ai" });
     setIsNew(true);
     setTab("editor");
   };
@@ -437,7 +435,7 @@ export default function AdminPracticeExercisesPage() {
                           ex.type === "ai" ? "text-purple-400 bg-purple-900/30 border-purple-700/40" : "text-blue-400 bg-blue-900/30 border-blue-700/40"
                         }`}>
                           {ex.type === "ai" ? <Brain size={10} /> : <Code size={10} />}
-                          {ex.type === "ai" ? "AI" : "Coding"}
+                          {ex.type === "ai" ? "Fundamentals of AI" : "Coding"}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-center">

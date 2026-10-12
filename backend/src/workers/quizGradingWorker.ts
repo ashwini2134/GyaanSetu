@@ -1,7 +1,4 @@
-// Fraylon - Phase 2.5 & 3
-import { PrismaClient } from '@prisma/client';
 import { certificateQueue } from '../lib/queue.js';
-
 import { prisma } from "../prisma.js";
 
 export async function processQuizGrading(job: any) {

@@ -139,7 +139,7 @@ export default function LessonEditor() {
           <h1 className="text-2xl font-bold text-slate-100">Course Editor</h1>
           <button 
             onClick={() => setIsSettingsModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#0f172a] border border-white/10 rounded-lg text-sm font-medium text-slate-300 hover:bg-[#0a0f1e] transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-surface)] border border-[var(--border-light)] rounded-lg text-sm font-medium text-[var(--color-brand-navy)] hover:bg-[var(--color-primary)] hover:text-[var(--bg-body)] hover:border-[var(--color-primary)] transition-colors duration-200"
           >
             <Settings className="w-4 h-4" />
             Course Settings

@@ -1,11 +1,16 @@
 // @ts-nocheck
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { api, type Course, authFetch } from "../api";
 import { useAuth } from "../auth";
 import { Card, DynamicCourseIcon } from "../components";
 
-import { useGamification, ACHIEVEMENTS, checkAchievements } from "../progress";
+import { useGamification } from "../progress";
+import { useAchievements } from "../hooks/useAchievements";
+import { getAchievementIcon } from "../lib/achievementIcons";
+import { XPCenter } from "../components/xp/XPCenter";
+import { StreakPopover } from "../components/xp/StreakPopover";
+import { X } from "lucide-react";
 
 const IconBook = () => (
   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -82,13 +87,16 @@ export default function Dashboard() {
   
   // Use our centralized Gamification hook
   // ✅ Wired to real API — GET /gamification/stats (via useGamification hook)
-  const { xp, achievements: unlockedAchievements, streak, stats, overallProgress } = useGamification();
+  const { xp, weeklyXp, streak, stats, overallProgress } = useGamification();
+  const { unlocked: unlockedAchievements, catalog: achievementCatalog } = useAchievements();
 
   const [activityData, setActivityData] = useState<{ date: string; count: number }[]>([]);
   const [activeCourseId] = useState<string | null>(null);
   const [activeStatId, setActiveStatId] = useState<string | null>(null);
   const [activeBadgeId, setActiveBadgeId] = useState<string | null>(null);
   const [lectureCounts, setLectureCounts] = useState<Record<string, number>>({});
+  const [streakOpen, setStreakOpen] = useState(false);
+  const [xpOpen, setXpOpen] = useState(false);
 
   const handleStatClick = (id: string) => {
     setActiveStatId(id);
@@ -106,6 +114,24 @@ export default function Dashboard() {
 
   const [courseStatsMap, setCourseStatsMap] = useState<Record<string, { completed: number; inProgressLectures: number; total: number; lecturesCompleted: number; percentage: number; status: string }>>({});
   const [dynamicStats, setDynamicStats] = useState({ coursesStarted: 0, coursesCompleted: 0, lecturesCompleted: 0 });
+
+  // Achievements panel height tracks the Courses section's real rendered
+  // height (via ResizeObserver, not a hardcoded number) so it stays correct
+  // automatically as courses are added or removed — no manual sync needed.
+  const coursesSectionRef = useRef<HTMLDivElement>(null);
+  const [coursesSectionHeight, setCoursesSectionHeight] = useState<number | null>(null);
+
+  useEffect(() => {
+    const el = coursesSectionRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setCoursesSectionHeight(entry.contentRect.height);
+      }
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [courses]);
 
   useEffect(() => {
     if (!courses) return;
@@ -144,8 +170,6 @@ export default function Dashboard() {
       .catch(() => {});
   }, []);
 
-  useEffect(() => { checkAchievements(); }, []);
-
   useEffect(() => {
     api
       .courses()
@@ -182,26 +206,33 @@ export default function Dashboard() {
   })();
 
   const displayAchievements = useMemo(() => {
-    return ACHIEVEMENTS.map(a => ({
+    const unlockedIds = new Set(unlockedAchievements.map(a => a.id));
+    const mapped = achievementCatalog.map(a => ({
       ...a,
-      unlocked: unlockedAchievements.includes(a.id)
+      title: a.name,
+      icon: getAchievementIcon(a.icon),
+      completedDescription: a.description,
+      unlocked: unlockedIds.has(a.id)
     }));
-  }, [unlockedAchievements]);
+    // Unlocked first — the compact dashboard preview is capped/scrollable,
+    // so earned badges should be what's immediately visible.
+    return mapped.sort((a, b) => Number(b.unlocked) - Number(a.unlocked));
+  }, [achievementCatalog, unlockedAchievements]);
 
   return (
-    <div className="w-full min-h-screen bg-[#0b0f19] text-slate-100 flex flex-col p-4 md:p-8">
+    <><div className="dashboard-page w-full min-h-screen bg-[var(--bg-body)] text-[var(--text-main)] flex flex-col p-4 md:p-8">
       <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col">
         {/* Header Block */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8 px-4 md:px-0">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900/40 px-3 py-1 text-xs text-blue-400 mb-4 font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-light)] bg-[var(--bg-surface)] px-3 py-1 text-xs text-[var(--text-secondary)] mb-4 font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-brand-navy)]"></span>
               Learning Hub
             </div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight mb-2">
+            <h1 className="text-3xl font-extrabold text-[var(--text-main)] tracking-tight mb-2">
               Welcome back, {user?.name?.split(' ')[0] || "Student"}!
             </h1>
-            <p className="text-slate-400 text-sm">
+            <p className="text-[var(--text-secondary)] text-sm">
               Track your progress, earn achievements, and build real skills.
             </p>
           </div>
@@ -211,20 +242,17 @@ export default function Dashboard() {
             {/* Streak card */}
             <button
               type="button"
-              onClick={() => handleStatClick('header_streak')}
-              className={`relative flex items-center gap-4 bg-slate-900/30 border rounded-2xl p-4 min-w-[170px] text-left transition-all duration-300 active:scale-[0.96] overflow-hidden ${
-                activeStatId === 'header_streak' ? 'border-orange-500/80 bg-orange-500/10 scale-[1.02] shadow-lg shadow-orange-500/10' : 'border-slate-800/80 hover:border-orange-500/30'
+              onClick={() => { handleStatClick('header_streak'); setStreakOpen(true); }}
+              className={`relative flex items-center gap-4 bg-[var(--bg-surface)] border rounded-2xl p-4 min-w-[170px] text-left transition-all duration-300 active:scale-[0.96] overflow-hidden group ${
+                activeStatId === 'header_streak' ? 'border-[var(--color-primary)] bg-[var(--bg-surface)] scale-[1.02] shadow-[var(--shadow-sm)]' : 'border-[var(--border-light)] hover:border-[var(--color-primary)]'
               }`}
             >
-              <div className="relative rounded-xl bg-orange-500/10 p-3 text-orange-400 flex-shrink-0 transition-transform duration-300">
+              <div className="relative rounded-full bg-[#16324F] group-hover:bg-[#00BFB3] transition-colors duration-200 border-2 border-white/70 shadow-sm p-3 text-[var(--bg-body)] flex-shrink-0">
                 <IconStreak />
-                {activeStatId === 'header_streak' && (
-                  <span className="absolute inset-0 rounded-xl bg-orange-500/30 animate-ping pointer-events-none" />
-                )}
               </div>
               <div>
-                <div className="text-2xl font-bold text-white leading-none">{streak.currentStreak} Days</div>
-                <div className="text-[11px] text-slate-400 mt-1 font-medium">Current Streak</div>
+                <div className="text-2xl font-bold text-[var(--text-main)] leading-none">{streak.currentStreak} Days</div>
+                <div className="text-[11px] text-[var(--text-muted)] mt-1 font-medium">Current Streak</div>
               </div>
             </button>
 
@@ -232,46 +260,41 @@ export default function Dashboard() {
             <button
               type="button"
               onClick={() => handleStatClick('header_progress')}
-              className={`relative flex items-center gap-4 bg-slate-900/30 border rounded-2xl p-4 min-w-[170px] text-left transition-all duration-300 active:scale-[0.96] overflow-hidden ${
-                activeStatId === 'header_progress' ? 'border-emerald-500/80 bg-emerald-500/10 scale-[1.02] shadow-lg shadow-emerald-500/10' : 'border-slate-800/80 hover:border-emerald-500/30'
+              className={`relative flex items-center gap-4 bg-[var(--bg-surface)] border rounded-2xl p-4 min-w-[170px] text-left transition-all duration-300 active:scale-[0.96] overflow-hidden group ${
+                activeStatId === 'header_progress' ? 'border-[var(--color-primary)] bg-[var(--bg-surface)] scale-[1.02] shadow-[var(--shadow-sm)]' : 'border-[var(--border-light)] hover:border-[var(--color-primary)]'
               }`}
             >
-              <div className="relative rounded-xl bg-emerald-500/10 p-3 text-emerald-400 flex-shrink-0 transition-transform duration-300">
+              <div className="relative rounded-full bg-[#16324F] group-hover:bg-[#00BFB3] transition-colors duration-200 border-2 border-white/70 shadow-sm p-3 text-[var(--bg-body)] flex-shrink-0">
                 <IconChart />
-                {activeStatId === 'header_progress' && (
-                  <span className="absolute inset-0 rounded-xl bg-emerald-500/30 animate-ping pointer-events-none" />
-                )}
               </div>
               <div>
-                <div className="text-2xl font-bold text-white leading-none">{overallProgress}%</div>
-                <div className="text-[11px] text-slate-400 mt-1 font-medium">Overall Progress</div>
+                <div className="text-2xl font-bold text-[var(--text-main)] leading-none">{overallProgress}%</div>
+                <div className="text-[11px] text-[var(--text-muted)] mt-1 font-medium">Overall Progress</div>
               </div>
             </button>
 
-            {/* Total XP card */}
+            {/* Weekly XP card */}
             <button
               type="button"
-              onClick={() => handleStatClick('header_xp')}
-              className={`relative flex items-center gap-4 bg-slate-900/30 border rounded-2xl p-4 min-w-[170px] text-left transition-all duration-300 active:scale-[0.96] overflow-hidden ${
-                activeStatId === 'header_xp' ? 'border-cyan-500/80 bg-cyan-500/10 scale-[1.02] shadow-lg shadow-cyan-500/10' : 'border-slate-800/80 hover:border-cyan-500/30'
+              onClick={() => { handleStatClick('header_xp'); setXpOpen(true); }}
+              className={`relative flex items-center gap-4 bg-[var(--bg-surface)] border rounded-2xl p-4 min-w-[170px] text-left transition-all duration-300 active:scale-[0.96] overflow-hidden group ${
+                activeStatId === 'header_xp' ? 'border-[var(--color-primary)] bg-[var(--bg-surface)] scale-[1.02] shadow-[var(--shadow-sm)]' : 'border-[var(--border-light)] hover:border-[var(--color-primary)]'
               }`}
             >
-              <div className="relative rounded-xl bg-blue-500/10 p-3 text-cyan-400 flex-shrink-0 transition-transform duration-300">
+              <div className="relative rounded-full bg-[#16324F] group-hover:bg-[#00BFB3] transition-colors duration-200 border-2 border-white/70 shadow-sm p-3 text-[var(--bg-body)] flex-shrink-0">
                 <IconDiamond />
-                {activeStatId === 'header_xp' && (
-                  <span className="absolute inset-0 rounded-xl bg-blue-500/30 animate-ping pointer-events-none" />
-                )}
               </div>
               <div>
-                <div className="text-2xl font-bold text-white leading-none">{xp}</div>
-                <div className="text-[11px] text-slate-400 mt-1 font-medium">Total XP</div>
+                <div className="text-2xl font-bold text-[var(--text-main)] leading-none">{weeklyXp.toLocaleString()}</div>
+                <div className="text-[11px] text-[var(--text-muted)] mt-1 font-medium">Weekly XP</div>
+                <div className="text-[10px] text-[var(--text-muted)] mt-0.5">{xp.toLocaleString()} lifetime</div>
               </div>
             </button>
           </div>
         </div>
 
         {err && (
-          <div className="mb-6 p-4 bg-red-950/30 border border-red-900/50 rounded-xl text-red-300 mx-4 md:mx-0">
+          <div className="mb-6 p-4 bg-[var(--bg-surface)] border border-[var(--border-light)] rounded-xl text-[var(--text-main)] mx-4 md:mx-0">
             <p className="font-semibold text-sm">Error loading courses</p>
             <p className="text-xs mt-1 opacity-80">{err}</p>
           </div>
@@ -279,30 +302,27 @@ export default function Dashboard() {
 
         {/* Course Search & Catalog Section */}
         {/* Separated Content Wrapper Pane */}
-        <div className="bg-[#0c101b]/80 border border-slate-800/60 rounded-3xl p-6 md:p-8 mb-8">
+        <div className="bg-[var(--bg-surface)] border border-[var(--border-light)] rounded-3xl p-6 md:p-8 mb-8">
           {/* Main Columns layout */}
           <div className="grid gap-8 lg:grid-cols-3">
             {/* Left Panel */}
-            <div className="lg:col-span-2 space-y-8">
+            <div className="lg:col-span-2 space-y-8" ref={coursesSectionRef}>
               {/* 6 Stats card grid */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {/* Courses Started */}
                 <button
                   type="button"
                   onClick={() => handleStatClick('courses_started')}
-                  className={`relative flex items-center gap-4 bg-slate-950/40 border rounded-3xl p-5 text-left transition-all duration-300 active:scale-[0.96] overflow-hidden ${
-                    activeStatId === 'courses_started' ? 'border-blue-500/80 scale-[1.02] bg-blue-500/10 shadow-lg shadow-blue-500/10' : 'border-slate-800/60 hover:border-slate-700/60'
+                  className={`relative flex items-center gap-4 bg-[var(--bg-surface)] border rounded-3xl p-5 text-left transition-all duration-300 active:scale-[0.96] overflow-hidden group ${
+                    activeStatId === 'courses_started' ? 'border-[var(--color-primary)] scale-[1.02] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)]' : 'border-[var(--border-light)] hover:border-[var(--color-primary)]'
                   }`}
                 >
-                  <div className="relative w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 flex-shrink-0 font-bold">
+                  <div className="relative w-10 h-10 rounded-full bg-[#16324F] group-hover:bg-[#00BFB3] transition-colors duration-200 border-2 border-white/70 shadow-sm flex items-center justify-center text-[var(--bg-body)] flex-shrink-0 font-bold">
                     <IconBook />
-                    {activeStatId === 'courses_started' && (
-                      <span className="absolute inset-0 rounded-2xl bg-blue-500/30 animate-ping pointer-events-none" />
-                    )}
                   </div>
                   <div>
-                    <div className="text-3xl font-extrabold text-white leading-none mb-1">{dynamicStats.coursesStarted}</div>
-                    <div className="text-[11px] text-slate-400 font-medium">Courses Started</div>
+                    <div className="text-3xl font-extrabold text-[var(--text-main)] leading-none mb-1">{dynamicStats.coursesStarted}</div>
+                    <div className="text-[11px] text-[var(--text-muted)] font-medium">Courses Started</div>
                   </div>
                 </button>
 
@@ -310,19 +330,16 @@ export default function Dashboard() {
                 <button
                   type="button"
                   onClick={() => handleStatClick('courses_completed')}
-                  className={`relative flex items-center gap-4 bg-slate-950/40 border rounded-3xl p-5 text-left transition-all duration-300 active:scale-[0.96] overflow-hidden ${
-                    activeStatId === 'courses_completed' ? 'border-green-500/80 scale-[1.02] bg-green-500/10 shadow-lg shadow-green-500/10' : 'border-slate-800/60 hover:border-slate-700/60'
+                  className={`relative flex items-center gap-4 bg-[var(--bg-surface)] border rounded-3xl p-5 text-left transition-all duration-300 active:scale-[0.96] overflow-hidden group ${
+                    activeStatId === 'courses_completed' ? 'border-[var(--color-primary)] scale-[1.02] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)]' : 'border-[var(--border-light)] hover:border-[var(--color-primary)]'
                   }`}
                 >
-                  <div className="relative w-10 h-10 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-400 flex-shrink-0">
+                  <div className="relative w-10 h-10 rounded-full bg-[#16324F] group-hover:bg-[#00BFB3] transition-colors duration-200 border-2 border-white/70 shadow-sm flex items-center justify-center text-[var(--bg-body)] flex-shrink-0">
                     <IconGraduation />
-                    {activeStatId === 'courses_completed' && (
-                      <span className="absolute inset-0 rounded-2xl bg-green-500/30 animate-ping pointer-events-none" />
-                    )}
                   </div>
                   <div>
-                    <div className="text-3xl font-extrabold text-white leading-none mb-1">{dynamicStats.coursesCompleted}</div>
-                    <div className="text-[11px] text-slate-400 font-medium">Courses Completed</div>
+                    <div className="text-3xl font-extrabold text-[var(--text-main)] leading-none mb-1">{dynamicStats.coursesCompleted}</div>
+                    <div className="text-[11px] text-[var(--text-muted)] font-medium">Courses Completed</div>
                   </div>
                 </button>
 
@@ -330,19 +347,17 @@ export default function Dashboard() {
                 <button
                   type="button"
                   onClick={() => handleStatClick('lectures_completed')}
-                  className={`relative flex items-center gap-4 bg-slate-950/40 border rounded-3xl p-5 text-left transition-all duration-300 active:scale-[0.96] overflow-hidden ${
-                    activeStatId === 'lectures_completed' ? 'border-purple-500/80 scale-[1.02] bg-purple-500/10 shadow-lg shadow-purple-500/10' : 'border-slate-800/60 hover:border-slate-700/60'
+                  className={`relative flex items-center gap-4 bg-[var(--bg-surface)] border rounded-3xl p-5 text-left transition-all duration-300 active:scale-[0.96] overflow-hidden group ${
+                    activeStatId === 'lectures_completed' ? 'border-[var(--color-primary)] scale-[1.02] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)]' : 'border-[var(--border-light)] hover:border-[var(--color-primary)]'
                   }`}
                 >
-                  <div className="relative w-10 h-10 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-400 flex-shrink-0">
+                  <div className="relative w-10 h-10 rounded-full bg-[#16324F] group-hover:bg-[#00BFB3] transition-colors duration-200 border-2 border-white/70 shadow-sm flex items-center justify-center text-[var(--bg-body)] flex-shrink-0">
                     <IconDevice />
-                    {activeStatId === 'lectures_completed' && (
-                      <span className="absolute inset-0 rounded-2xl bg-purple-500/30 animate-ping pointer-events-none" />
-                    )}
+                    
                   </div>
                   <div>
-                    <div className="text-3xl font-extrabold text-white leading-none mb-1">{dynamicStats.lecturesCompleted}</div>
-                    <div className="text-[11px] text-slate-400 font-medium">Lectures Completed</div>
+                    <div className="text-3xl font-extrabold text-[var(--text-main)] leading-none mb-1">{dynamicStats.lecturesCompleted}</div>
+                    <div className="text-[11px] text-[var(--text-muted)] font-medium">Lectures Completed</div>
                   </div>
                 </button>
 
@@ -350,19 +365,17 @@ export default function Dashboard() {
                 <button
                   type="button"
                   onClick={() => handleStatClick('quizzes_passed')}
-                  className={`relative flex items-center gap-4 bg-slate-950/40 border rounded-3xl p-5 text-left transition-all duration-300 active:scale-[0.96] overflow-hidden ${
-                    activeStatId === 'quizzes_passed' ? 'border-amber-500/80 scale-[1.02] bg-amber-500/10 shadow-lg shadow-amber-500/10' : 'border-slate-800/60 hover:border-slate-700/60'
+                  className={`relative flex items-center gap-4 bg-[var(--bg-surface)] border rounded-3xl p-5 text-left transition-all duration-300 active:scale-[0.96] overflow-hidden group ${
+                    activeStatId === 'quizzes_passed' ? 'border-[var(--color-primary)] scale-[1.02] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)]' : 'border-[var(--border-light)] hover:border-[var(--color-primary)]'
                   }`}
                 >
-                  <div className="relative w-10 h-10 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-400 flex-shrink-0 font-bold">
+                  <div className="relative w-10 h-10 rounded-full bg-[#16324F] group-hover:bg-[#00BFB3] transition-colors duration-200 border-2 border-white/70 shadow-sm flex items-center justify-center text-[var(--bg-body)] flex-shrink-0 font-bold">
                     <IconBrain />
-                    {activeStatId === 'quizzes_passed' && (
-                      <span className="absolute inset-0 rounded-2xl bg-amber-500/30 animate-ping pointer-events-none" />
-                    )}
+                    
                   </div>
                   <div>
-                    <div className="text-3xl font-extrabold text-white leading-none mb-1">{stats.quizzesPassed}</div>
-                    <div className="text-[11px] text-slate-400 font-medium">Quizzes Passed</div>
+                    <div className="text-3xl font-extrabold text-[var(--text-main)] leading-none mb-1">{stats.quizzesPassed}</div>
+                    <div className="text-[11px] text-[var(--text-muted)] font-medium">Quizzes Passed</div>
                   </div>
                 </button>
 
@@ -370,19 +383,17 @@ export default function Dashboard() {
                 <button
                   type="button"
                   onClick={() => handleStatClick('tasks_submitted')}
-                  className={`relative flex items-center gap-4 bg-slate-950/40 border rounded-3xl p-5 text-left transition-all duration-300 active:scale-[0.96] overflow-hidden ${
-                    activeStatId === 'tasks_submitted' ? 'border-teal-500/80 scale-[1.02] bg-teal-500/10 shadow-lg shadow-teal-500/10' : 'border-slate-800/60 hover:border-slate-700/60'
+                  className={`relative flex items-center gap-4 bg-[var(--bg-surface)] border rounded-3xl p-5 text-left transition-all duration-300 active:scale-[0.96] overflow-hidden group ${
+                    activeStatId === 'tasks_submitted' ? 'border-[var(--color-primary)] scale-[1.02] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)]' : 'border-[var(--border-light)] hover:border-[var(--color-primary)]'
                   }`}
                 >
-                  <div className="relative w-10 h-10 rounded-2xl bg-teal-500/10 flex items-center justify-center text-teal-400 flex-shrink-0">
+                  <div className="relative w-10 h-10 rounded-full bg-[#16324F] group-hover:bg-[#00BFB3] transition-colors duration-200 border-2 border-white/70 shadow-sm flex items-center justify-center text-[var(--bg-body)] flex-shrink-0">
                     <IconCheck />
-                    {activeStatId === 'tasks_submitted' && (
-                      <span className="absolute inset-0 rounded-2xl bg-teal-500/30 animate-ping pointer-events-none" />
-                    )}
+                    
                   </div>
                   <div>
-                    <div className="text-3xl font-extrabold text-white leading-none mb-1">{stats.tasksSubmitted}</div>
-                    <div className="text-[11px] text-slate-400 font-medium">Tasks Submitted</div>
+                    <div className="text-3xl font-extrabold text-[var(--text-main)] leading-none mb-1">{stats.tasksSubmitted}</div>
+                    <div className="text-[11px] text-[var(--text-muted)] font-medium">Tasks Submitted</div>
                   </div>
                 </button>
 
@@ -390,19 +401,17 @@ export default function Dashboard() {
                 <button
                   type="button"
                   onClick={() => handleStatClick('projects_solved')}
-                  className={`relative flex items-center gap-4 bg-slate-950/40 border rounded-3xl p-5 text-left transition-all duration-300 active:scale-[0.96] overflow-hidden ${
-                    activeStatId === 'projects_solved' ? 'border-orange-500/80 scale-[1.02] bg-orange-500/10 shadow-lg shadow-orange-500/10' : 'border-slate-800/60 hover:border-slate-700/60'
+                  className={`relative flex items-center gap-4 bg-[var(--bg-surface)] border rounded-3xl p-5 text-left transition-all duration-300 active:scale-[0.96] overflow-hidden group ${
+                    activeStatId === 'projects_solved' ? 'border-[var(--color-primary)] scale-[1.02] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)]' : 'border-[var(--border-light)] hover:border-[var(--color-primary)]'
                   }`}
                 >
-                  <div className="relative w-10 h-10 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-400 flex-shrink-0">
+                  <div className="relative w-10 h-10 rounded-full bg-[#16324F] group-hover:bg-[#00BFB3] transition-colors duration-200 border-2 border-white/70 shadow-sm flex items-center justify-center text-[var(--bg-body)] flex-shrink-0">
                     <IconMonitor />
-                    {activeStatId === 'projects_solved' && (
-                      <span className="absolute inset-0 rounded-2xl bg-orange-500/30 animate-ping pointer-events-none" />
-                    )}
+                    
                   </div>
                   <div>
-                    <div className="text-3xl font-extrabold text-white leading-none mb-1">{stats.projectsSolved}</div>
-                    <div className="text-[11px] text-slate-400 font-medium">Projects Solved</div>
+                    <div className="text-3xl font-extrabold text-[var(--text-main)] leading-none mb-1">{stats.projectsSolved}</div>
+                    <div className="text-[11px] text-[var(--text-muted)] font-medium">Projects Solved</div>
                   </div>
                 </button>
               </div>
@@ -412,15 +421,15 @@ export default function Dashboard() {
                 <div className="space-y-5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="text-white">
+                      <div className="text-[var(--text-main)]">
                         <IconBook />
                       </div>
-                      <h2 className="text-xl font-bold text-white tracking-tight">Your Courses</h2>
+                      <h2 className="text-xl font-bold text-[var(--text-main)] tracking-tight">Your Courses</h2>
                     </div>
                   </div>
 
                   {courses.length === 0 ? (
-                    <div className="text-center py-16 text-slate-500">
+                    <div className="text-center py-16 text-[var(--text-muted)]">
                       <IconBook />
                       <p className="text-sm mt-2">No courses available yet.</p>
                     </div>
@@ -433,15 +442,8 @@ export default function Dashboard() {
                         const total = progress.total || lectureCounts[c.slug] || 0;
                         const isCourseActive = activeCourseId === c.slug;
 
-                        let accentColor = "#3B82F6";
-                        let glowHover = "rgba(59,130,246,0.25)";
-                        if (c.category === "Artificial Intelligence") {
-                          accentColor = "#A855F7";
-                          glowHover = "rgba(168,85,247,0.25)";
-                        } else if (c.category === "Computer Science") {
-                          accentColor = "#22C55E";
-                          glowHover = "rgba(34,197,94,0.25)";
-                        }
+                        
+                        
 
                         const durationHrs = total * 3;
                         const skills = c.category === "Artificial Intelligence"
@@ -456,34 +458,17 @@ export default function Dashboard() {
 
                           >
                             <div
-                              className="relative bg-[#161B22] border border-[#2D3748] rounded-2xl overflow-hidden transition-all duration-[280ms] group-hover:scale-[1.03] group-hover:-translate-y-1 group-hover:border-slate-700/80"
-                              style={{
-                                boxShadow: `0 0 0 transparent`,
-                                height: "320px",
-                              }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.boxShadow = `0 12px 40px ${glowHover}`;
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.boxShadow = `0 0 0 transparent`;
-                              }}
+                              className="relative bg-[var(--bg-surface)] border border-[var(--border-light)] rounded-2xl overflow-hidden transition-all duration-[280ms] group-hover:-translate-y-1 group-hover:border-[var(--color-primary)]"
+                              style={{ height: "320px" }}
                             >
-                              {/* Background artwork - always visible */}
-                              <div className="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none">
-                                <div className="scale-[3] origin-center opacity-30 transition-opacity duration-[280ms]">
+                              <div className="absolute inset-0 flex items-end justify-end overflow-hidden pointer-events-none">
+                                <div className="scale-[1.6] origin-bottom-right opacity-40 transition-opacity duration-[280ms]">
                                   <DynamicCourseIcon courseName={c.title} category={c.category} />
                                 </div>
                               </div>
 
-                              {/* Persistent accent color gradient */}
-                              <div className="absolute inset-0 pointer-events-none"
-                                style={{
-                                  background: `radial-gradient(900px circle at 50% -20%, ${accentColor}25, transparent 70%)`,
-                                }}
-                              />
-
-                              {/* Dark gradient overlay for readability */}
-                              <div className="absolute inset-0 bg-gradient-to-t from-[#161B22] via-[#161B22]/60 to-[#161B22]/30 pointer-events-none" />
+                              {/* Gradient overlay to protect white text while keeping image crisp */}
+                              <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-brand-black)]/80 via-[var(--color-brand-black)]/20 to-transparent pointer-events-none" />
 
                               {/* Default visible content - fades out on hover */}
                               <div className="absolute inset-0 z-10 flex flex-col p-6 opacity-100 group-hover:opacity-0 transition-opacity duration-[280ms] pointer-events-none">
@@ -492,9 +477,9 @@ export default function Dashboard() {
                                   <span
                                     className="text-[10px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-full"
                                     style={{
-                                      color: accentColor,
-                                      backgroundColor: `${accentColor}18`,
-                                      border: `1px solid ${accentColor}30`,
+                                      color: "var(--color-primary)",
+                                      backgroundColor: "transparent",
+                                      border: "1px solid var(--color-primary)",
                                     }}
                                   >
                                     {c.category}
@@ -503,27 +488,27 @@ export default function Dashboard() {
 
                                 {/* Title + info */}
                                 <div className="mt-auto mb-2">
-                                  <h3 className="text-xl font-bold text-white leading-tight">
+                                  <h3 className="text-xl font-bold text-[var(--text-main)] leading-tight">
                                     {c.title}
                                   </h3>
                                   <div className="flex items-center gap-3 mt-2">
-                                    <span className="text-xs text-slate-400">{total} lectures</span>
-                                    <span className="w-1 h-1 rounded-full bg-slate-600" />
-                                    <span className="text-xs text-slate-400">~{durationHrs}h</span>
+                                    <span className="text-xs text-[var(--text-muted)]">{total} lectures</span>
+                                    <span className="w-1 h-1 rounded-full bg-[var(--bg-dark-surface)]" />
+                                    <span className="text-xs text-[var(--text-muted)]">~{durationHrs}h</span>
                                   </div>
                                 </div>
 
                                 {/* Progress bar */}
                                 <div>
-                                  <div className="flex items-center justify-between text-[10px] text-slate-500 mb-1.5">
+                                  <div className="flex items-center justify-between text-[10px] text-[var(--text-secondary)] mb-1.5">
                                     <span>{percent > 0 ? `${progress.completed} / ${total} Lectures` : "Not started"}</span>
                                   </div>
-                                  <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
+                                  <div className="w-full h-1 bg-[var(--bg-dark-surface)] rounded-full overflow-hidden">
                                     <div
                                       className="h-full rounded-full transition-all duration-500"
                                       style={{
                                         width: `${percent}%`,
-                                        backgroundColor: accentColor,
+                                        backgroundColor: "var(--color-primary)",
                                       }}
                                     />
                                   </div>
@@ -536,63 +521,59 @@ export default function Dashboard() {
                                   <span
                                     className="text-[10px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-full"
                                     style={{
-                                      color: accentColor,
-                                      backgroundColor: `${accentColor}18`,
-                                      border: `1px solid ${accentColor}30`,
+                                      color: "var(--color-primary)",
+                                      backgroundColor: "transparent",
+                                      border: "1px solid var(--color-primary)",
                                     }}
                                   >
                                     {c.category}
                                   </span>
                                 </div>
 
-                                <h3 className="text-lg font-bold text-white mt-12" style={{ color: accentColor }}>
+                                <h3 className="text-lg font-bold text-[var(--text-main)] mt-12" style={{ color: "var(--text-main)" }}>
                                   {c.title}
                                 </h3>
 
-                                <p className="text-xs text-slate-300 mt-2 leading-relaxed line-clamp-3">
+                                <p className="text-xs text-[var(--text-secondary)] mt-2 leading-relaxed line-clamp-3">
                                   {c.description}
                                 </p>
 
                                 <div className="flex flex-wrap gap-1.5 mt-3">
-                                  <span className="text-[10px] text-slate-400 flex items-center gap-1 px-2 py-0.5 rounded bg-slate-800/60">
+                                  <span className="text-[10px] text-[var(--text-secondary)] flex items-center gap-1 px-2 py-0.5 rounded bg-transparent border border-[var(--border-light)]">
                                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                     ~{durationHrs}h
                                   </span>
                                   {skills.map((s) => (
-                                    <span key={s} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800/60 text-slate-400">
+                                    <span key={s} className="text-[10px] px-1.5 py-0.5 rounded bg-transparent border border-[var(--border-light)] text-[var(--text-muted)]">
                                       {s}
                                     </span>
                                   ))}
                                 </div>
 
                                 <div className="mt-auto">
-                                  <div className="flex items-center justify-between text-[10px] text-slate-500 mb-1">
+                                  <div className="flex items-center justify-between text-[10px] text-[var(--text-secondary)] mb-1">
                                     <span>Progress ({progress.completed} / {total})</span>
-                                    <span className="text-slate-300 font-medium">{percent}%</span>
+                                    <span className="text-[var(--text-secondary)] font-medium">{percent}%</span>
                                   </div>
-                                  <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mb-4">
+                                  <div className="w-full h-1.5 bg-[var(--bg-body)] rounded-full overflow-hidden mb-4">
                                     <div
-                                      className={`h-full rounded-full transition-all duration-500 ${percent === 100 ? "bg-emerald-500" : "bg-blue-500"}`}
-                                      style={{ width: `${percent}%` }}
+                                      className="h-full rounded-full transition-all duration-500"
+                                      style={{ width: `${percent}%`, backgroundColor: "var(--color-primary)" }}
                                     />
                                   </div>
                                   <div className={`w-full py-2.5 rounded-lg text-center text-xs font-semibold transition-colors ${
-                                    percent === 100
-                                      ? "bg-emerald-600/20 border border-emerald-500/20 text-emerald-400"
-                                      : percent > 0
-                                        ? "bg-blue-600/20 border border-blue-500/20 text-blue-400"
-                                        : "bg-slate-700/60 border border-slate-600/60 text-slate-200"
+                                    percent > 0
+                                      ? "bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] border-transparent text-[var(--bg-body)] shadow-[var(--shadow-sm)]"
+                                      : "bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] border-transparent text-[var(--bg-body)] shadow-[var(--shadow-sm)]"
                                   }`}>
                                     {percent === 100 ? "View Certificate" : percent > 0 ? "Continue Learning" : "Start Course"}
                                   </div>
                                 </div>
                               </div>
 
-                              {/* Active ping */}
+                              {/* Active indicator */}
                               {isCourseActive && (
-                                <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full" style={{ backgroundColor: accentColor }}>
-                                  <span className="absolute inset-0 rounded-full animate-ping" style={{ backgroundColor: accentColor }} />
-                                </span>
+                                <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full animate-pulse-subtle" style={{ backgroundColor: "var(--color-primary)" }} />
                               )}
                             </div>
                           </Link>
@@ -604,43 +585,55 @@ export default function Dashboard() {
               )}
             </div>
 
-            {/* Right Panel: Achievements */}
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="text-slate-300"><IconTrophy /></div>
-                <h3 className="text-lg font-bold text-white tracking-tight">Achievements</h3>
+            {/* Right Panel: Achievements + Leaderboard */}
+            <div
+              className="flex flex-col"
+              style={coursesSectionHeight ? { height: coursesSectionHeight } : undefined}
+            >
+              <div className="flex items-center gap-2 mb-4 flex-shrink-0">
+                <div className="text-[var(--text-secondary)]"><IconTrophy /></div>
+                <h3 className="text-lg font-bold text-[var(--text-main)] tracking-tight">Achievements</h3>
               </div>
 
-              <Card className="flex-1 bg-slate-950/40 border border-slate-800/60 rounded-3xl p-4">
-                <div className="grid grid-cols-2 gap-3 auto-rows-fr h-full">
-                  {displayAchievements.map((achievement) => (
+              <Card
+                className="bg-[var(--bg-surface)] border border-[var(--border-light)] rounded-3xl p-4 flex flex-col flex-1 min-h-[300px]"
+              >
+                <div className="grid grid-cols-2 auto-rows-min gap-3 overflow-y-auto pr-1 flex-1 min-h-0 content-start">
+                  {displayAchievements.map((achievement, idx) => {
+                    const bgClass = achievement.unlocked ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-brand-navy)]/80';
+                    
+                    return (
                     <div
                       key={achievement.id}
-                      className={`group relative flex flex-col items-center text-center justify-center gap-1.5 p-3 rounded-2xl border transition-all duration-[280ms] hover:scale-[1.03] hover:-translate-y-0.5 ${
-                        achievement.unlocked
-                          ? 'border-emerald-500/40 bg-emerald-500/8 hover:border-emerald-400/60 hover:shadow-[0_0_20px_rgba(52,211,153,0.15)]'
-                          : 'border-slate-800/60 bg-slate-900/40 hover:border-slate-700/80 hover:shadow-[0_0_20px_rgba(148,163,184,0.08)]'
-                      }`}
+                      className={`group relative flex flex-col items-center text-center justify-center gap-1.5 p-3 rounded-2xl border border-transparent shadow-[var(--shadow-sm)] transition-all duration-[280ms] hover:scale-[1.03] hover:-translate-y-0.5 hover:bg-[var(--color-primary)] ${bgClass} `}
                     >
-                      <div className={`transition-all duration-200 group-hover:scale-110 ${achievement.unlocked ? '' : 'grayscale opacity-30 group-hover:opacity-50'}`}>
-                        <achievement.icon size={24} className={achievement.unlocked ? 'text-emerald-400' : 'text-slate-600'} />
+                      <div className={`transition-all duration-200 group-hover:scale-110 ${achievement.unlocked ? '' : 'opacity-80 group-hover:opacity-100'}`}>
+                        <achievement.icon size={24} className="text-[var(--bg-body)]" />
                       </div>
-                      <span className={`text-[11px] font-semibold leading-tight text-center transition-colors duration-200 ${achievement.unlocked ? 'text-emerald-400 group-hover:text-emerald-300' : 'text-slate-500 group-hover:text-slate-400'}`}>
+                      <span className="text-[11px] font-bold leading-tight text-center text-[var(--bg-body)]">
                         {achievement.title}
                       </span>
-                      <p className="text-[9px] leading-snug text-slate-500 transition-colors duration-200 group-hover:text-slate-400 text-center">
+                      <p className="text-[9px] font-medium leading-snug text-center text-[var(--bg-body)]/90">
                         {achievement.unlocked ? achievement.completedDescription : achievement.description}
                       </p>
                     </div>
-                  ))}
+                  )})}
                 </div>
 
-                <Link
-                  to="/leaderboard"
-                  className="mt-3 block w-full text-center py-2.5 bg-slate-900/40 hover:bg-slate-900/80 border border-slate-800 text-xs font-bold text-slate-300 rounded-2xl transition-all active:scale-[0.98]"
-                >
-                  View Leaderboard →
-                </Link>
+                <div className="mt-3 flex-shrink-0 flex flex-col gap-2">
+                  <Link
+                    to="/achievements"
+                    className="block w-full text-center py-3 bg-[var(--bg-body)] border border-[var(--border-light)] hover:border-[var(--color-primary)] text-xs font-bold text-[var(--text-main)] rounded-2xl transition-all active:scale-[0.98]"
+                  >
+                    View All Achievements
+                  </Link>
+                  <Link
+                    to="/leaderboard"
+                    className="block w-full text-center py-3 bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-xs font-bold text-[var(--bg-body)] rounded-2xl transition-all active:scale-[0.98]"
+                  >
+                    View Leaderboard
+                  </Link>
+                </div>
               </Card>
             </div>
           </div>
@@ -648,29 +641,29 @@ export default function Dashboard() {
 
         {/* Submission Activity — two-column: stats left, heatmap right */}
         <div className="pt-4 pb-6 w-full px-4 md:px-0">
-          <Card className="bg-slate-900/60 border border-slate-800/80 rounded-2xl overflow-hidden">
+          <Card className="bg-[var(--bg-surface)] border border-[var(--border-light)] rounded-2xl overflow-hidden">
             <div className="flex flex-col md:flex-row">
 
               {/* Left: title + stats */}
-              <div className="flex flex-col justify-between gap-6 p-6 md:w-52 md:border-r border-slate-800/80 flex-shrink-0">
+              <div className="flex flex-col justify-between gap-6 p-6 md:w-52 md:border-r border-[var(--border-light)] flex-shrink-0">
                 <div>
-                  <h2 className="text-base font-bold text-white flex items-center gap-2">
+                  <h2 className="text-base font-bold text-[var(--text-main)] flex items-center gap-2">
                     <IconChart /> Activity
                   </h2>
-                  <p className="text-xs text-slate-500 mt-1">Past 28 days</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-1">Past 28 days</p>
                 </div>
                 <div className="flex md:flex-col flex-wrap gap-5">
                   <div>
-                    <div className="text-3xl font-extrabold text-white leading-none">{totalActivityCount}</div>
-                    <div className="text-xs text-slate-400 mt-1">Total activities</div>
+                    <div className="text-3xl font-extrabold text-[var(--text-main)] leading-none">{totalActivityCount}</div>
+                    <div className="text-xs text-[var(--text-muted)] mt-1">Total activities</div>
                   </div>
                   <div>
-                    <div className="text-3xl font-extrabold text-white leading-none">{streak.longestStreak}</div>
-                    <div className="text-xs text-slate-400 mt-1">Longest streak (days)</div>
+                    <div className="text-3xl font-extrabold text-[var(--text-main)] leading-none">{streak.longestStreak}</div>
+                    <div className="text-xs text-[var(--text-muted)] mt-1">Longest streak (days)</div>
                   </div>
                   <div>
-                    <div className="text-sm font-semibold text-white leading-tight">{mostActiveDayLabel}</div>
-                    <div className="text-xs text-slate-400 mt-1">Most active day</div>
+                    <div className="text-sm font-semibold text-[var(--text-main)] leading-tight">{mostActiveDayLabel}</div>
+                    <div className="text-xs text-[var(--text-muted)] mt-1">Most active day</div>
                   </div>
                 </div>
               </div>
@@ -683,7 +676,7 @@ export default function Dashboard() {
                 {/* Day labels */}
                 <div className="grid grid-cols-7 gap-1.5 mb-1.5">
                   {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => (
-                    <div key={d} className="text-center text-xs text-slate-500 font-medium">{d}</div>
+                    <div key={d} className="text-center text-xs text-[var(--text-muted)] font-medium">{d}</div>
                   ))}
                 </div>
 
@@ -691,7 +684,7 @@ export default function Dashboard() {
                 <div className="grid grid-cols-7 gap-1.5">
                   {activityData.length === 0
                     ? Array.from({ length: 28 }).map((_, i) => (
-                        <div key={i} className="aspect-square rounded-md bg-slate-800 animate-pulse" />
+                        <div key={i} className="aspect-square rounded-md bg-[var(--bg-body)] animate-pulse" />
                       ))
                     : (() => {
                         const firstDate = new Date(activityData[0].date + 'T00:00:00');
@@ -704,17 +697,16 @@ export default function Dashboard() {
                             {activityData.map((day) => {
                               const isToday = day.date === today;
                               const bg =
-                                day.count >= 5 ? '#4ade80'
-                                : day.count >= 3 ? 'rgba(34,197,94,0.78)'
-                                : day.count >= 1 ? 'rgba(21,128,61,0.65)'
-                                : isToday ? 'rgba(71,85,105,0.8)'
-                                : 'rgba(30,41,59,0.9)';
+                                day.count >= 5 ? 'var(--color-primary)'
+                                : day.count >= 3 ? 'color-mix(in srgb, var(--color-primary) 60%, transparent)'
+                                : day.count >= 1 ? 'color-mix(in srgb, var(--color-primary) 30%, transparent)'
+                                : 'var(--bg-dark-surface)';
                               return (
                                 <div
                                   key={day.date}
                                   title={`${day.date}: ${day.count} ${day.count === 1 ? 'activity' : 'activities'}`}
                                   className="aspect-square rounded-md transition-opacity duration-150 hover:opacity-70 cursor-default"
-                                  style={{ background: bg, outline: isToday ? '2px solid rgba(100,116,139,0.5)' : 'none', outlineOffset: '-2px' }}
+                                  style={{ background: bg, outline: isToday ? '2px solid var(--border-light)' : 'none', outlineOffset: '-2px' }}
                                 />
                               );
                             })}
@@ -726,16 +718,16 @@ export default function Dashboard() {
 
                 {/* Legend */}
                 <div className="flex items-center gap-1.5 mt-4">
-                  <span className="text-xs text-slate-500">Less</span>
+                  <span className="text-xs text-[var(--text-muted)]">Less</span>
                   {[
-                    'rgba(30,41,59,0.9)',
-                    'rgba(21,128,61,0.65)',
-                    'rgba(34,197,94,0.78)',
-                    '#4ade80',
+                    'var(--bg-dark-surface)',
+                    'color-mix(in srgb, var(--color-primary) 30%, transparent)',
+                    'color-mix(in srgb, var(--color-primary) 60%, transparent)',
+                    'var(--color-primary)',
                   ].map((bg, i) => (
                     <div key={i} className="w-4 h-4 rounded-[3px]" style={{ background: bg }} />
                   ))}
-                  <span className="text-xs text-slate-500">More</span>
+                  <span className="text-xs text-[var(--text-muted)]">More</span>
                 </div>
               </div>
 
@@ -744,5 +736,40 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
+
+      {/* Streak Popover Modal */}
+      {streakOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setStreakOpen(false)}>
+          <div className="relative" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              onClick={() => setStreakOpen(false)}
+              className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-[var(--bg-surface)] border border-[var(--border)] shadow-md flex items-center justify-center cursor-pointer z-10 hover:bg-[var(--bg-elevated)] transition-colors"
+            >
+              <X size={14} className="text-[var(--text-muted)]" />
+            </button>
+            <StreakPopover />
+          </div>
+        </div>
+      )}
+
+      {/* XP Center Modal */}
+      {xpOpen && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 backdrop-blur-sm pt-4 pb-8" onClick={() => setXpOpen(false)}>
+          <div className="w-full max-w-lg mx-4" onClick={(e) => e.stopPropagation()}>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setXpOpen(false)}
+                className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-[var(--bg-surface)] border border-[var(--border)] shadow-md flex items-center justify-center cursor-pointer z-10 hover:bg-[var(--bg-elevated)] transition-colors"
+              >
+                <X size={14} className="text-[var(--text-muted)]" />
+              </button>
+              <XPCenter />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

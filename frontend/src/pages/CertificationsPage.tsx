@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   Award, ChevronRight, Lock, Download, ShieldCheck,
   Sparkles, BookOpen, Brain, ExternalLink,
 } from 'lucide-react';
-import { authFetch } from '../authClient';
+import { authFetch, authFetchBlob } from '../authClient';
 import { useAuth } from '../auth';
+import { COURSE_FULL_NAMES, COURSE_SHORT_LABELS } from '../data/courseNames';
 
 /* ─── config ─── */
 
@@ -18,18 +20,18 @@ interface CourseConfig {
 }
 
 const COURSES: Record<string, CourseConfig> = {
-  python: {
-    label:    'CS50P',
-    fullName: 'CS50P: Introduction to Python',
-    accent:   '#3B82F6',
-    glow:     'rgba(59,130,246,0.35)',
+  python20: {
+    label:    COURSE_SHORT_LABELS.python20,
+    fullName: COURSE_FULL_NAMES.python20,
+    accent:   '#00BFB3',
+    glow:     'rgba(0,191,179,0.35)',
     icon:     <BookOpen size={18} strokeWidth={1.5} />,
   },
-  cs50ai: {
-    label:    'CS50 AI',
-    fullName: 'CS50 AI with Python',
-    accent:   '#A855F7',
-    glow:     'rgba(168,85,247,0.35)',
+  'fundamentals-of-ai': {
+    label:    COURSE_SHORT_LABELS['fundamentals-of-ai'],
+    fullName: COURSE_FULL_NAMES['fundamentals-of-ai'],
+    accent:   '#009E95',
+    glow:     'rgba(0,158,149,0.35)',
     icon:     <Brain size={18} strokeWidth={1.5} />,
   },
 };
@@ -55,11 +57,13 @@ interface EligibilityResult {
   eligible: boolean;
   alreadyIssued: boolean;
   conditions: {
-    lecturesCompleted:  ConditionRow;
-    practiceCompleted:  ConditionRow;
-    quizzesAttempted:   ConditionRow;
-    problemsSubmitted:  ConditionRow;
-    projectCompleted:   ConditionRow;
+    lecturesCompleted:    ConditionRow;
+    practiceCompleted:    ConditionRow;
+    tryItEngaged:         ConditionRow;
+    quizzesPassed:        ConditionRow;
+    problemsSubmitted:    ConditionRow;
+    finalProjectApproved: ConditionRow;
+    milestonesCompleted?: ConditionRow;
   };
   avgQuizScore: number | null;
 }
@@ -84,16 +88,24 @@ function remainingItems(conditions: EligibilityResult['conditions']): string[] {
     const { done, required } = conditions.practiceCompleted;
     items.push(`${(required ?? 0) - done} practice exercise${(required ?? 0) - done !== 1 ? 's' : ''} remaining`);
   }
-  if (!conditions.quizzesAttempted.passed) {
-    const { done, required } = conditions.quizzesAttempted;
-    items.push(`${(required ?? 0) - done} quiz${(required ?? 0) - done !== 1 ? 'zes' : ''} not yet attempted`);
+  if (!conditions.tryItEngaged.passed) {
+    const { done, required } = conditions.tryItEngaged;
+    items.push(`${(required ?? 0) - done} "Try It Yourself" block${(required ?? 0) - done !== 1 ? 's' : ''} not yet engaged with`);
+  }
+  if (!conditions.quizzesPassed.passed) {
+    const { done, required } = conditions.quizzesPassed;
+    items.push(`${(required ?? 0) - done} quiz${(required ?? 0) - done !== 1 ? 'zes' : ''} not yet passed`);
   }
   if (!conditions.problemsSubmitted.passed) {
     const { done, required } = conditions.problemsSubmitted;
     items.push(`${(required ?? 0) - done} problem${(required ?? 0) - done !== 1 ? 's' : ''} still to submit`);
   }
-  if (!conditions.projectCompleted.passed) {
-    items.push('Capstone project not yet submitted');
+  if (conditions.milestonesCompleted && !conditions.milestonesCompleted.passed) {
+    const { done, required } = conditions.milestonesCompleted;
+    items.push(`${(required ?? 0) - done} milestone project${(required ?? 0) - done !== 1 ? 's' : ''} remaining`);
+  }
+  if (!conditions.finalProjectApproved.passed) {
+    items.push('Final project not yet approved');
   }
   return items;
 }
@@ -249,76 +261,13 @@ export default function CertificationsPage() {
   );
 }
 
-function downloadCertificateAsSvg(studentName: string, courseFullName: string, certNumber: string, dateString: string, accentColor: string) {
-  const svgContent = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
-  <defs>
-    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0b0f19" />
-      <stop offset="50%" stop-color="#111827" />
-      <stop offset="100%" stop-color="#070a13" />
-    </linearGradient>
-    <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#fbbf24" />
-      <stop offset="50%" stop-color="#d97706" />
-      <stop offset="100%" stop-color="#b45309" />
-    </linearGradient>
-  </defs>
-  
-  <!-- Outer border -->
-  <rect x="10" y="10" width="780" height="580" rx="20" fill="url(#bg-grad)" stroke="${accentColor}" stroke-width="3" />
-  <rect x="25" y="25" width="750" height="550" rx="15" fill="none" stroke="#1e293b" stroke-width="1" />
-  
-  <!-- Corner marks -->
-  <path d="M 35 55 L 35 35 L 55 35" fill="none" stroke="${accentColor}" stroke-width="2" />
-  <path d="M 765 55 L 765 35 L 745 35" fill="none" stroke="${accentColor}" stroke-width="2" />
-  <path d="M 35 545 L 35 565 L 55 565" fill="none" stroke="${accentColor}" stroke-width="2" />
-  <path d="M 765 545 L 765 565 L 745 565" fill="none" stroke="${accentColor}" stroke-width="2" />
-  
-  <!-- Content -->
-  <g text-anchor="middle" font-family="'Inter', sans-serif">
-    <!-- Academy Header -->
-    <text x="400" y="100" fill="${accentColor}" font-size="12" font-weight="900" letter-spacing="4">FRAYLON ACADEMY</text>
-    
-    <!-- Title -->
-    <text x="400" y="180" fill="#ffffff" font-size="32" font-weight="900" letter-spacing="1">CERTIFICATE OF COMPLETION</text>
-    <line x1="320" y1="205" x2="480" y2="205" stroke="${accentColor}" stroke-width="2" opacity="0.6" />
-    
-    <!-- Presented to -->
-    <text x="400" y="250" fill="#64748b" font-size="14" font-style="italic">This is proudly presented to</text>
-    
-    <!-- Student Name -->
-    <text x="400" y="315" fill="#ffffff" font-size="42" font-weight="900" font-family="'Georgia', serif">${studentName}</text>
-    
-    <!-- For completing -->
-    <text x="400" y="370" fill="#64748b" font-size="14" font-style="italic">for successfully completing the specialized program</text>
-    
-    <!-- Course Full Name -->
-    <text x="400" y="420" fill="${accentColor}" font-size="22" font-weight="800">${courseFullName}</text>
-    
-    <!-- Bottom Info -->
-    <line x1="280" y1="460" x2="520" y2="460" stroke="#334155" stroke-width="1" />
-    
-    <text x="400" y="495" fill="#94a3b8" font-size="12" font-weight="500">Issued on ${dateString}</text>
-    <text x="400" y="520" fill="#64748b" font-size="10" font-family="monospace">CREDENTIAL ID: ${certNumber}</text>
-  </g>
-  
-  <!-- Ribbon/Seal icon -->
-  <g transform="translate(680, 480) scale(0.8)">
-    <polygon points="30,40 45,95 20,80 -5,95 10,40" fill="#b45309" />
-    <polygon points="50,40 65,95 40,80 15,95 30,40" fill="#d97706" />
-    <circle cx="30" cy="30" r="35" fill="url(#gold-grad)" />
-    <circle cx="30" cy="30" r="28" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.6" />
-    <path d="M 30 18 L 33 26 L 41 26 L 35 31 L 37 39 L 30 34 L 23 39 L 25 31 L 19 26 L 27 26 Z" fill="#ffffff" opacity="0.9" />
-  </g>
-</svg>
-  `.trim();
-
-  const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+/** Fetches the server-rendered GyanSetu certificate PDF and saves it. */
+async function downloadCertificate(certNumber: string) {
+  const blob = await authFetchBlob(`/certifications/${certNumber}/download`);
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `certificate-${certNumber}.svg`;
+  link.download = `gyansetu-certificate-${certNumber}.pdf`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -341,6 +290,25 @@ function CertBlock({
   const allMet  = result?.eligible ?? false;
   const pct     = result ? overallPct(result.conditions) : 0;
   const left    = result ? remainingItems(result.conditions) : [];
+  const [downloading, setDownloading] = useState(false);
+  const [sealBroken, setSealBroken] = useState(() => {
+    if (!cert) return false;
+    try {
+      return localStorage.getItem(`fa_cert_seal_${cert.certNumber}`) === '1';
+    } catch {
+      return false;
+    }
+  });
+  const breakSeal = () => {
+    setSealBroken(true);
+    if (cert) {
+      try {
+        localStorage.setItem(`fa_cert_seal_${cert.certNumber}`, '1');
+      } catch {
+        // ignore — worst case the reveal just replays next visit
+      }
+    }
+  };
   const issueDate = cert
     ? new Date(cert.issuedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
     : null;
@@ -349,7 +317,7 @@ function CertBlock({
     : course.fullName;
 
   return (
-    <div className="rounded-3xl overflow-hidden border border-slate-800/60" style={{ background: '#111827' }}>
+    <div className="rounded-3xl overflow-hidden border border-[var(--border-medium)]" style={{ background: 'var(--surface-card)' }}>
 
       {/* ── Certificate mockup ── */}
       <div className="relative" style={{ height: 340 }}>
@@ -359,9 +327,9 @@ function CertBlock({
           className="absolute inset-4 rounded-2xl flex flex-col items-center justify-center overflow-hidden"
           style={{
             background: issued
-              ? 'linear-gradient(135deg, #1a1400 0%, #221a00 50%, #1a1400 100%)'
-              : 'linear-gradient(135deg, #0f1520 0%, #141b2d 50%, #0f1520 100%)',
-            border: issued ? `2px solid ${accent}50` : '2px solid #1e2a3a',
+              ? '#fdfbf6'
+              : 'linear-gradient(135deg, rgba(0,65,105,0.06) 0%, rgba(0,100,145,0.1) 50%, rgba(0,65,105,0.06) 100%)',
+            border: issued ? `2px solid ${accent}60` : '2px solid var(--border-medium)',
             filter: issued ? 'none' : 'none',
           }}
         >
@@ -371,7 +339,7 @@ function CertBlock({
               key={pos}
               className={`absolute ${pos} w-5 h-5`}
               style={{
-                borderColor: issued ? `${accent}60` : '#1e3a5f40',
+                borderColor: issued ? `${accent}80` : 'var(--border-medium)',
                 borderTopWidth:    pos.includes('top')    ? 2 : 0,
                 borderLeftWidth:   pos.includes('left')   ? 2 : 0,
                 borderBottomWidth: pos.includes('bottom') ? 2 : 0,
@@ -384,28 +352,42 @@ function CertBlock({
           {/* outer decorative ring */}
           <div
             className="absolute inset-6 rounded-xl pointer-events-none"
-            style={{ border: issued ? `1px solid ${accent}20` : '1px solid #1e2a3a60' }}
+            style={{ border: issued ? '1px solid #d8d2c4' : '1px solid #1e2a3a60' }}
           />
 
           {/* certificate content — two completely separate states */}
           {issued ? (
-            /* ── UNLOCKED: full certificate text ── */
+            /* ── UNLOCKED: light certificate paper, matches the downloaded design ── */
             <div className="relative z-10 flex flex-col items-center px-10 text-center w-full">
-              <div
-                className="w-14 h-14 rounded-full flex items-center justify-center mb-4"
-                style={{ background: `${accent}20`, border: `2px solid ${accent}60` }}
-              >
-                <Award size={24} style={{ color: accent }} />
+              {/* logo mark */}
+              <div className="absolute top-0 left-0 flex items-center gap-2">
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-black text-white flex-shrink-0"
+                  style={{ background: `linear-gradient(135deg, #60a5fa, ${accent})` }}
+                >
+                  GS
+                </div>
+                <div className="text-left leading-none">
+                  <p className="text-[12px] font-bold" style={{ color: '#161b22' }}>GyanSetu</p>
+                  <p className="text-[7px] font-semibold tracking-[0.2em]" style={{ color: '#6b7280' }}>ACADEMY</p>
+                </div>
               </div>
 
-              <p className="text-[9px] font-bold uppercase tracking-[0.3em] mb-3" style={{ color: `${accent}90` }}>
+              <div
+                className="w-12 h-12 rounded-full flex items-center justify-center mb-3"
+                style={{ background: `${accent}15`, border: `2px solid ${accent}50` }}
+              >
+                <Award size={20} style={{ color: accent }} />
+              </div>
+
+              <p className="text-[9px] font-bold uppercase tracking-[0.3em] mb-3" style={{ color: '#6b7280' }}>
                 Certificate of Completion
               </p>
 
-              <div className="w-24 h-px mb-4" style={{ background: `${accent}40` }} />
+              <div className="w-24 h-px mb-4" style={{ background: `${accent}60` }} />
 
               <p className="text-[22px] font-black leading-tight mb-2"
-                style={{ color: '#fff', fontFamily: 'Georgia, serif', letterSpacing: '-0.01em' }}>
+                style={{ color: '#161b22', fontFamily: 'Georgia, serif', letterSpacing: '-0.01em' }}>
                 {studentName}
               </p>
 
@@ -413,23 +395,23 @@ function CertBlock({
                 {courseTitleWithCapstone}
               </p>
 
-              <div className="w-24 h-px mb-3" style={{ background: `${accent}40` }} />
+              <div className="w-24 h-px mb-3" style={{ background: `${accent}60` }} />
 
               {issueDate && (
-                <p className="text-[10px]" style={{ color: `${accent}70` }}>
+                <p className="text-[10px]" style={{ color: '#6b7280' }}>
                   {issueDate}{cert?.avgScore !== null && <> · Quiz avg {cert?.avgScore}%</>}
                 </p>
               )}
 
-              <p className="text-[9px] uppercase tracking-widest font-semibold mt-2" style={{ color: `${accent}35` }}>
-                Fraylon Academy
+              <p className="text-[9px] uppercase tracking-widest font-semibold mt-2" style={{ color: '#9ca3af' }}>
+                GyanSetu
               </p>
             </div>
           ) : (
             /* ── LOCKED: just the progress, no certificate text ── */
             <div className="relative z-10 flex flex-col items-center gap-3 text-center">
               <div className="w-14 h-14 rounded-full flex items-center justify-center"
-                style={{ background: '#0d1525', border: '2px solid #1e3a5f' }}>
+                style={{ background: 'var(--surface-card)', border: '2px solid var(--border-medium)' }}>
                 <Lock size={20} className="text-slate-600" />
               </div>
 
@@ -453,6 +435,35 @@ function CertBlock({
             </div>
           )}
         </div>
+
+        {/* wax seal — issued certs stay sealed until the learner breaks it once; stays broken after (per-cert, localStorage) */}
+        <AnimatePresence>
+          {issued && !sealBroken && (
+            <motion.button
+              type="button"
+              onClick={breakSeal}
+              aria-label="Break the seal to reveal your certificate"
+              className="absolute inset-4 rounded-2xl flex flex-col items-center justify-center gap-3 cursor-pointer"
+              style={{ background: 'rgba(10,14,26,0.88)', backdropFilter: 'blur(6px)' }}
+              exit={{ opacity: 0, scale: 1.08 }}
+              transition={{ duration: 0.45, ease: 'easeIn' }}
+            >
+              <motion.div
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.94, rotate: -8 }}
+                className="w-16 h-16 rounded-full flex items-center justify-center"
+                style={{
+                  background: `radial-gradient(circle at 35% 30%, ${accent}, ${accent}88 70%)`,
+                  boxShadow: `0 0 0 3px ${accent}30, 0 8px 20px -6px ${accent}80`,
+                }}
+              >
+                <Award size={26} className="text-white" />
+              </motion.div>
+              <p className="text-white text-sm font-bold">Your certificate is sealed</p>
+              <p className="text-slate-400 text-xs">Click the seal to break it open</p>
+            </motion.button>
+          )}
+        </AnimatePresence>
 
         {/* course label pill — top left */}
         <div
@@ -481,11 +492,20 @@ function CertBlock({
             </div>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => downloadCertificateAsSvg(studentName, courseTitleWithCapstone, cert!.certNumber, issueDate || '', accent)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all hover:opacity-90 hover:-translate-y-0.5"
+                onClick={async () => {
+                  setDownloading(true);
+                  try {
+                    await downloadCertificate(cert!.certNumber);
+                  } catch {
+                    alert('Could not generate the certificate PDF. Please try again.');
+                  }
+                  setDownloading(false);
+                }}
+                disabled={downloading}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all hover:opacity-90 hover:-translate-y-0.5 disabled:opacity-50"
                 style={{ background: `${accent}20`, border: `1px solid ${accent}40`, color: accent }}
               >
-                <Download size={13} /> Download
+                <Download size={13} /> {downloading ? 'Generating…' : 'Download'}
               </button>
               <a
                 href={`${window.location.origin}/#/verify/${cert!.certNumber}`}

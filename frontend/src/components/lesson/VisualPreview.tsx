@@ -95,7 +95,7 @@ function ShoppingListCard({ text }: { text: string }) {
     <div className="max-h-72 overflow-y-auto">
       {items.length > 0 && (
         <div className="flex items-center justify-between mb-3 px-1 pvfade">
-          <p className="text-[10px] text-slate-400">{items.length} item{items.length !== 1 ? 's' : ''}</p>
+          <p className="text-[10px] text-slate-300">{items.length} item{items.length !== 1 ? 's' : ''}</p>
           <p className="text-[10px] text-emerald-400">{purchasedCount} purchased</p>
         </div>
       )}
@@ -104,7 +104,7 @@ function ShoppingListCard({ text }: { text: string }) {
           items.map((item, i) => (
             <AnimatedItem key={i} delay={0.04 * i}>
               <div className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs transition-all ${
-                item.purchased ? 'bg-emerald-500/5 text-slate-400' : 'bg-slate-800/30 text-slate-200'
+                item.purchased ? 'bg-emerald-500/5 text-slate-300' : 'bg-slate-800/30 text-slate-200'
               }`}>
                 <span className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${
                   item.purchased
@@ -118,7 +118,7 @@ function ShoppingListCard({ text }: { text: string }) {
             </AnimatedItem>
           ))
         ) : (
-          <p className="text-xs text-slate-500 italic text-center py-6 pvfade">Run your code to build your shopping list...</p>
+          <p className="text-xs text-slate-300 italic text-center py-6 pvfade">Run your code to build your shopping list...</p>
         )}
       </div>
     </div>
@@ -163,7 +163,7 @@ function ContactBookCard({ text }: { text: string }) {
   return (
     <div className="max-h-72 overflow-y-auto">
       {contacts.length > 1 && (
-        <p className="text-[10px] text-slate-400 mb-3 px-1 pvfade">{contacts.length} contact{contacts.length !== 1 ? 's' : ''}</p>
+        <p className="text-[10px] text-slate-300 mb-3 px-1 pvfade">{contacts.length} contact{contacts.length !== 1 ? 's' : ''}</p>
       )}
       <div className="grid gap-2">
         {contacts.length > 0 ? contacts.map((c, i) => (
@@ -175,13 +175,13 @@ function ContactBookCard({ text }: { text: string }) {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-slate-100 truncate">{c.name || 'Unknown'}</p>
                 {c.phone && (
-                  <p className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
+                  <p className="text-[11px] text-slate-300 flex items-center gap-1 mt-0.5">
                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
                     {c.phone}
                   </p>
                 )}
                 {c.email && (
-                  <p className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
+                  <p className="text-[11px] text-slate-300 flex items-center gap-1 mt-0.5">
                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                     {c.email}
                   </p>
@@ -190,7 +190,7 @@ function ContactBookCard({ text }: { text: string }) {
             </div>
           </AnimatedCard>
         )) : (
-          <p className="text-xs text-slate-500 italic text-center py-6 pvfade">Run your code to build your contact book...</p>
+          <p className="text-xs text-slate-300 italic text-center py-6 pvfade">Run your code to build your contact book...</p>
         )}
       </div>
     </div>
@@ -265,13 +265,13 @@ function GradeTrackerCard({ text }: { text: string }) {
           <div className="flex gap-3 border-t border-slate-700/30 pt-3">
             {avg !== null && (
               <div className="flex-1 bg-slate-800/40 rounded-xl p-3 border border-slate-700/20 text-center">
-                <p className="text-[9px] text-slate-500 uppercase tracking-wider">Average</p>
+                <p className="text-[9px] text-slate-300 uppercase tracking-wider">Average</p>
                 <p className="text-xl font-bold text-white mt-0.5">{avg.toFixed(1)}</p>
               </div>
             )}
             {letter && (
               <div className="flex-1 bg-slate-800/40 rounded-xl p-3 border border-slate-700/20 text-center">
-                <p className="text-[9px] text-slate-500 uppercase tracking-wider">Grade</p>
+                <p className="text-[9px] text-slate-300 uppercase tracking-wider">Grade</p>
                 <p className="text-xl font-bold text-emerald-400 mt-0.5">{letter}</p>
               </div>
             )}
@@ -279,7 +279,7 @@ function GradeTrackerCard({ text }: { text: string }) {
         </AnimatedCard>
       )}
       {grades.length === 0 && avg === null && (
-        <p className="text-xs text-slate-500 italic text-center py-6 pvfade">Run your code to generate your grade report...</p>
+        <p className="text-xs text-slate-300 italic text-center py-6 pvfade">Run your code to generate your grade report...</p>
       )}
     </div>
   );
@@ -350,7 +350,7 @@ function RPSChoiceIcon({ choice, size = 'md' }: { choice: string; size?: 'sm' | 
       </svg>
     </div>;
   return <div className={`${dims} rounded-xl bg-slate-700/50 flex items-center justify-center border border-slate-600/30`}>
-    <span className="text-slate-400 text-xs">?</span>
+    <span className="text-slate-300 text-xs">?</span>
   </div>;
 }
 
@@ -360,7 +360,7 @@ function GameCard({ text }: { text: string }) {
   if (rounds.length === 0 && !playerScore && !computerScore) {
     return (
       <div className="max-h-72 overflow-y-auto pvfade">
-        <p className="text-xs text-slate-500 italic text-center py-6 pvfade">Run your code to play the game...</p>
+        <p className="text-xs text-slate-300 italic text-center py-6 pvfade">Run your code to play the game...</p>
       </div>
     );
   }
@@ -371,16 +371,16 @@ function GameCard({ text }: { text: string }) {
       {(playerScore > 0 || computerScore > 0 || rounds.length > 0) && (
         <AnimatedCard delay={0.05}>
           <div className="bg-slate-800/40 rounded-2xl border border-slate-700/20 p-4">
-            <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold text-center mb-3">Score Board</p>
+            <p className="text-[9px] text-slate-300 uppercase tracking-wider font-bold text-center mb-3">Score Board</p>
             <div className="flex items-center justify-center gap-6">
               <div className="text-center">
                 <p className="text-2xl font-black text-emerald-400">{playerScore}</p>
-                <p className="text-[9px] text-slate-400 uppercase tracking-wider mt-0.5">You</p>
+                <p className="text-[9px] text-slate-300 uppercase tracking-wider mt-0.5">You</p>
               </div>
-              <div className="text-slate-600 text-lg font-black">VS</div>
+              <div className="text-slate-300 text-lg font-black">VS</div>
               <div className="text-center">
                 <p className="text-2xl font-black text-red-400">{computerScore}</p>
-                <p className="text-[9px] text-slate-400 uppercase tracking-wider mt-0.5">Computer</p>
+                <p className="text-[9px] text-slate-300 uppercase tracking-wider mt-0.5">Computer</p>
               </div>
             </div>
           </div>
@@ -390,7 +390,7 @@ function GameCard({ text }: { text: string }) {
       {/* Rounds */}
       {rounds.length > 0 && (
         <div className="space-y-2">
-          <p className="text-[9px] text-slate-500 uppercase tracking-wider font-semibold px-1">Rounds</p>
+          <p className="text-[9px] text-slate-300 uppercase tracking-wider font-semibold px-1">Rounds</p>
           {rounds.slice(-5).map((round, i) => (
             <AnimatedItem key={i} delay={0.08 * i}>
               <div className={`rounded-xl border p-3 transition-all ${
@@ -403,10 +403,10 @@ function GameCard({ text }: { text: string }) {
                 <div className="flex items-center justify-center gap-4">
                   <div className="text-center">
                     <RPSChoiceIcon choice={round.player} />
-                    <p className="text-[9px] text-slate-400 mt-1 capitalize">{round.player}</p>
+                    <p className="text-[9px] text-slate-300 mt-1 capitalize">{round.player}</p>
                   </div>
                   <div className="flex flex-col items-center gap-1">
-                    <span className="text-[10px] font-black text-slate-500">VS</span>
+                    <span className="text-[10px] font-black text-slate-300">VS</span>
                     <span className={`text-[10px] font-bold ${
                       round.result === 'win' ? 'text-emerald-400' :
                       round.result === 'lose' ? 'text-red-400' : 'text-amber-400'
@@ -416,10 +416,10 @@ function GameCard({ text }: { text: string }) {
                   </div>
                   <div className="text-center">
                     <RPSChoiceIcon choice={round.computer} />
-                    <p className="text-[9px] text-slate-400 mt-1 capitalize">{round.computer}</p>
+                    <p className="text-[9px] text-slate-300 mt-1 capitalize">{round.computer}</p>
                   </div>
                 </div>
-                <p className="text-[9px] text-slate-600 text-center mt-2">Round {round.round}</p>
+                <p className="text-[9px] text-slate-300 text-center mt-2">Round {round.round}</p>
               </div>
             </AnimatedItem>
           ))}
@@ -454,7 +454,7 @@ function MultiplicationTableCard({ text }: { text: string }) {
           </div>
         </div>
       ) : (
-        <p className="text-xs text-slate-500 italic text-center py-6 pvfade">Run your code to generate the table...</p>
+        <p className="text-xs text-slate-300 italic text-center py-6 pvfade">Run your code to generate the table...</p>
       )}
     </div>
   );
@@ -473,14 +473,14 @@ function GuessingGameCard({ text }: { text: string }) {
               : /too high|too low/i.test(line)
                 ? 'bg-orange-500/5 border border-orange-500/10 text-slate-300'
                 : /welcome|select|difficulty/i.test(line)
-                  ? 'text-slate-400 font-medium'
+                  ? 'text-slate-300 font-medium'
                   : 'text-slate-300'
           }`}>
             {line}
           </div>
         </AnimatedItem>
       )) : (
-        <p className="text-xs text-slate-500 italic text-center py-6 pvfade">Run your code to play the game...</p>
+        <p className="text-xs text-slate-300 italic text-center py-6 pvfade">Run your code to play the game...</p>
       )}
     </div>
   );
@@ -503,7 +503,7 @@ function UnitConverterCard({ text }: { text: string }) {
           ))}
         </div>
       ) : (
-        <p className="text-xs text-slate-500 italic text-center py-6 pvfade">Run your code to see the conversion...</p>
+        <p className="text-xs text-slate-300 italic text-center py-6 pvfade">Run your code to see the conversion...</p>
       )}
     </div>
   );
@@ -523,7 +523,7 @@ function TextAnalyzerCard({ text }: { text: string }) {
           {metrics.map((m, i) => (
             <AnimatedCard key={i} delay={0.06 * i}>
               <div className="bg-slate-800/40 rounded-xl p-3 border border-slate-700/20">
-                <p className="text-[9px] text-slate-500 uppercase tracking-wider">{m.label}</p>
+                <p className="text-[9px] text-slate-300 uppercase tracking-wider">{m.label}</p>
                 <p className="text-lg font-bold text-white mt-0.5">{m.value}</p>
               </div>
             </AnimatedCard>
@@ -534,7 +534,7 @@ function TextAnalyzerCard({ text }: { text: string }) {
           {lines.map((line, i) => (
             <p key={i} className="text-xs text-slate-300">{line}</p>
           ))}
-          {lines.length === 0 && <p className="text-xs text-slate-500 italic text-center py-6 pvfade">Run your code to see analysis...</p>}
+          {lines.length === 0 && <p className="text-xs text-slate-300 italic text-center py-6 pvfade">Run your code to see analysis...</p>}
         </div>
       )}
     </div>
@@ -571,7 +571,7 @@ function DiaryCard({ text }: { text: string }) {
           </div>
         </AnimatedItem>
       )) : (
-        <p className="text-xs text-slate-500 italic text-center py-6 pvfade">Run your code to see diary entries...</p>
+        <p className="text-xs text-slate-300 italic text-center py-6 pvfade">Run your code to see diary entries...</p>
       )}
     </div>
   );
@@ -598,7 +598,7 @@ function StudentManagementCard() {
                   </div>
                   <div>
                     <p className="text-xs font-semibold text-slate-100">{r.name}</p>
-                    <p className="text-[10px] text-slate-500">Record #{i+1}</p>
+                    <p className="text-[10px] text-slate-300">Record #{i+1}</p>
                   </div>
                 </div>
                 <span className="text-xs font-black px-2.5 py-1 rounded bg-slate-900 text-emerald-400">
@@ -609,7 +609,7 @@ function StudentManagementCard() {
           ))}
         </div>
       ) : (
-        <p className="text-xs text-slate-500 italic text-center py-6">No students saved yet. Add a student and save records to students.txt!</p>
+        <p className="text-xs text-slate-300 italic text-center py-6">No students saved yet. Add a student and save records to students.txt!</p>
       )}
     </div>
   );
@@ -635,11 +635,11 @@ function ExpenseTrackerCard() {
         <>
           <div className="flex gap-3">
             <div className="flex-1 bg-slate-800/40 border border-slate-700/20 rounded-xl p-3 text-center">
-              <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold">Total Expenses</p>
+              <p className="text-[9px] text-slate-300 uppercase tracking-wider font-bold">Total Expenses</p>
               <p className="text-xl font-bold text-emerald-400 mt-0.5">${total.toFixed(2)}</p>
             </div>
             <div className="flex-1 bg-slate-800/40 border border-slate-700/20 rounded-xl p-3 text-center">
-              <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold">Transactions</p>
+              <p className="text-[9px] text-slate-300 uppercase tracking-wider font-bold">Transactions</p>
               <p className="text-xl font-bold text-white mt-0.5">{records.length}</p>
             </div>
           </div>
@@ -649,7 +649,7 @@ function ExpenseTrackerCard() {
                 <div className="flex items-center justify-between px-3 py-2 bg-slate-800/20 rounded-lg text-xs border border-slate-700/10">
                   <div>
                     <p className="font-semibold text-slate-200">{r.description}</p>
-                    <p className="text-[10px] text-slate-500">{r.date} · <span className="text-blue-400">{r.category}</span></p>
+                    <p className="text-[10px] text-slate-300">{r.date} · <span className="text-blue-400">{r.category}</span></p>
                   </div>
                   <span className="font-bold text-slate-100">${r.amount.toFixed(2)}</span>
                 </div>
@@ -658,7 +658,7 @@ function ExpenseTrackerCard() {
           </div>
         </>
       ) : (
-        <p className="text-xs text-slate-500 italic text-center py-6">No expenses saved yet. Add an expense and save data to expenses.txt!</p>
+        <p className="text-xs text-slate-300 italic text-center py-6">No expenses saved yet. Add an expense and save data to expenses.txt!</p>
       )}
     </div>
   );
@@ -678,14 +678,14 @@ function TodoListCard() {
       {records.length > 0 ? (
         <>
           <div className="flex justify-between items-center px-1">
-            <span className="text-[10px] text-slate-400">{records.length} task{records.length !== 1 ? 's' : ''}</span>
+            <span className="text-[10px] text-slate-300">{records.length} task{records.length !== 1 ? 's' : ''}</span>
             <span className="text-[10px] text-emerald-400">{doneCount} completed</span>
           </div>
           <div className="space-y-1.5">
             {records.map((r, i) => (
               <AnimatedItem key={i} delay={0.04 * i}>
                 <div className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs border border-slate-700/10 transition-all ${
-                  r.completed ? 'bg-emerald-500/5 text-slate-400' : 'bg-slate-800/30 text-slate-200'
+                  r.completed ? 'bg-emerald-500/5 text-slate-300' : 'bg-slate-800/30 text-slate-200'
                 }`}>
                   <span className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 ${
                     r.completed ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400' : 'border-slate-600/60'
@@ -699,7 +699,7 @@ function TodoListCard() {
           </div>
         </>
       ) : (
-        <p className="text-xs text-slate-500 italic text-center py-6">No tasks saved yet. Add a task and save data to todo.txt!</p>
+        <p className="text-xs text-slate-300 italic text-center py-6">No tasks saved yet. Add a task and save data to todo.txt!</p>
       )}
     </div>
   );
@@ -731,15 +731,15 @@ function QuizAppCard({ text }: { text: string }) {
           <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-3">
             <span className="text-emerald-400 font-bold">✓</span>
           </div>
-          <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold">Quiz Completed</p>
+          <p className="text-[9px] text-slate-300 uppercase tracking-wider font-bold">Quiz Completed</p>
           <p className="text-2xl font-black text-white mt-1">{score}</p>
-          <p className="text-xs text-slate-400 mt-2">
+          <p className="text-xs text-slate-300 mt-2">
             Success rate: {((corrects / (questionsRun || 3)) * 100).toFixed(0)}%
           </p>
         </div>
       ) : (
         <div className="text-center">
-          <p className="text-xs text-slate-500 italic">Run your code and complete the quiz questions in the Console!</p>
+          <p className="text-xs text-slate-300 italic">Run your code and complete the quiz questions in the Console!</p>
         </div>
       )}
     </div>
@@ -790,13 +790,13 @@ export default function VisualPreview({ output, projectId, visible, steps }: Vis
     return (
       <div className="flex flex-col items-center justify-center text-center p-8">
         <div className="w-14 h-14 rounded-2xl bg-slate-800/40 border border-slate-700/20 flex items-center justify-center mb-4">
-          <svg className="w-7 h-7 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <svg className="w-7 h-7 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
           </svg>
         </div>
-        <p className="text-sm text-slate-500 font-medium mb-1">Run your project to see it come to life.</p>
-        <p className="text-xs text-slate-600">The output will appear here when you click "Run Project".</p>
+        <p className="text-sm text-slate-300 font-medium mb-1">Run your project to see it come to life.</p>
+        <p className="text-xs text-slate-300">The output will appear here when you click "Run Project".</p>
       </div>
     );
   }

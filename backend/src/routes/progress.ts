@@ -9,6 +9,9 @@ const router = Router();
 import { getUserSummary, getLeaderboard, awardXp } from "../services/gamificationService.js";
 import { recordQuizAttempt } from "../services/progressTrackingService.js";
 import { COURSE_LECTURE_COUNTS } from "./courses.js";
+import { evaluateAndUnlockAchievements } from "../achievements/evaluationEngine.js";
+import { sendNotification } from "../services/notificationService.js";
+import { toInternalLectureIndex, getCourseLectures, getRequiredProblemIds, getQuizQuestionCount } from "../lib/courseLectures.js";
 
 router.get("/", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
@@ -228,12 +231,13 @@ const sectionProgressSchema = z.object({
   lectureId: z.string(),
   practiceAttempted: z.boolean().optional(),
   practiceCompleted: z.boolean().optional(),
+  lectureTitle: z.string().optional(),
 });
 
 router.post("/section", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
     const userId = req.user!.id; // req.user.id is now a string
-    const { courseSlug, lectureId, practiceAttempted, practiceCompleted } = sectionProgressSchema.parse(req.body);
+    const { courseSlug, lectureId, practiceAttempted, practiceCompleted, lectureTitle } = sectionProgressSchema.parse(req.body);
 
     const existingProgress = await prisma.progress.findUnique({
       where: {
@@ -269,9 +273,48 @@ router.post("/section", requireAuth, async (req: AuthenticatedRequest, res, next
 
     if (practiceCompleted && !existingProgress?.practiceCompleted) {
       await awardXp(userId, 20, "Completed Practice", `practice_complete_${courseSlug}_${lectureId}`);
+      await sendNotification(
+        userId,
+        "practice_completed",
+        "Practice Exercise Completed",
+        `${lectureTitle ?? `Lecture ${lectureId}`} practice exercise completed.`,
+        `/course/${courseSlug}/lecture/${lectureId}`,
+        "medium"
+      );
     }
 
     res.json(progress);
+  } catch (error) {
+    next(error);
+  }
+});
+
+const tryItSchema = z.object({
+  courseSlug: z.string(),
+  lectureId: z.string(),
+  blockId: z.string(),
+  secondsDelta: z.number().int().min(0).max(300), // clamp a single flush to 5 min — defends against a stale/runaway tab
+});
+
+// Cumulative time-on-task for "Try It Yourself" code blocks — feeds the
+// certification-readiness engagement check (certificationService.ts). The
+// frontend flushes elapsed seconds periodically while a block is expanded
+// and once more on collapse/unmount, so this is called many times per
+// block; each call just adds its delta rather than replacing the total.
+router.post("/tryit", requireAuth, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const { courseSlug, lectureId, blockId, secondsDelta } = tryItSchema.parse(req.body);
+
+    const engagement = await prisma.tryItEngagement.upsert({
+      where: {
+        userId_courseSlug_lectureId_blockId: { userId, courseSlug, lectureId, blockId },
+      },
+      update: { secondsSpent: { increment: secondsDelta } },
+      create: { userId, courseSlug, lectureId, blockId, secondsSpent: secondsDelta },
+    });
+
+    res.json({ secondsSpent: engagement.secondsSpent });
   } catch (error) {
     next(error);
   }
@@ -281,12 +324,13 @@ const lectureCompletionSchema = z.object({
   courseSlug: z.string(),
   lectureId: z.string(),
   hasProject: z.boolean(),
+  lectureTitle: z.string().optional(),
 });
 
 router.post("/lecture", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
     const userId = req.user!.id;
-    const { courseSlug, lectureId, hasProject } = lectureCompletionSchema.parse(req.body);
+    const { courseSlug, lectureId, hasProject, lectureTitle } = lectureCompletionSchema.parse(req.body);
 
     let progress = await prisma.progress.findUnique({
       where: {
@@ -298,6 +342,7 @@ router.post("/lecture", requireAuth, async (req: AuthenticatedRequest, res, next
       },
     });
 
+    const wasAlreadyCompleted = progress?.status === "COMPLETED";
     const shouldComplete = !hasProject || progress?.projectCompleted;
 
     progress = await prisma.progress.upsert({
@@ -323,6 +368,17 @@ router.post("/lecture", requireAuth, async (req: AuthenticatedRequest, res, next
       },
     });
 
+    if (shouldComplete && !wasAlreadyCompleted) {
+      await sendNotification(
+        userId,
+        "lecture_completed",
+        "Lecture Completed",
+        `${lectureTitle ?? `Lecture ${lectureId}`} completed successfully.`,
+        `/course/${courseSlug}/lecture/${lectureId}`,
+        "medium"
+      );
+    }
+
     res.json(progress);
   } catch (error) {
     next(error);
@@ -332,12 +388,13 @@ router.post("/lecture", requireAuth, async (req: AuthenticatedRequest, res, next
 const actionSchema = z.object({
   actionType: z.enum(["section", "lecture", "quiz", "problem", "project", "course_start", "course_complete"]),
   actionId: z.string(),
+  difficulty: z.string().optional(),
 });
 
 router.post("/action", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
     const userId = req.user!.id;
-    const { actionType, actionId } = actionSchema.parse(req.body);
+    const { actionType, actionId, difficulty } = actionSchema.parse(req.body);
 
     let xpAmount = 0;
     let reason = "";
@@ -346,6 +403,15 @@ router.post("/action", requireAuth, async (req: AuthenticatedRequest, res, next)
       case "section":
         xpAmount = 10;
         reason = "Section Completed";
+        await sendNotification(
+          userId,
+          "section_completed",
+          "Section Completed",
+          "Section completed successfully.",
+          "",
+          "low",
+          `section_${userId}_${actionId}`
+        );
         break;
       case "lecture":
         xpAmount = 50;
@@ -367,14 +433,25 @@ router.post("/action", requireAuth, async (req: AuthenticatedRequest, res, next)
           },
           update: {
             status: "PASSED",
+            ...(difficulty && { difficulty }),
           },
           create: {
             userId,
             problemId: actionId,
             status: "PASSED",
             code: "",
+            difficulty,
           },
         });
+        await sendNotification(
+          userId,
+          "problem_solved",
+          "Problem Solved",
+          `Problem "${actionId}" solved successfully.`,
+          "",
+          "medium",
+          `problem_${userId}_${actionId}`
+        );
         break;
       case "project":
         xpAmount = 100;
@@ -412,7 +489,14 @@ router.post("/action", requireAuth, async (req: AuthenticatedRequest, res, next)
       await awardXp(userId, xpAmount, reason, `${actionType}_${actionId}`);
     }
 
-    res.json({ ok: true });
+    let unlockedAchievements: Awaited<ReturnType<typeof evaluateAndUnlockAchievements>> = [];
+    try {
+      unlockedAchievements = await evaluateAndUnlockAchievements(userId, `action:${actionType}`);
+    } catch (e) {
+      console.error("[achievements] evaluation failed after progress action", e);
+    }
+
+    res.json({ ok: true, unlockedAchievements });
   } catch (error) {
     next(error);
   }
@@ -433,7 +517,16 @@ router.get("/lecture/:courseSlug/:lectureId", requireAuth, async (req: Authentic
         }
       }),
       prisma.quizAttempt.findMany({
-        where: { userId, lectureId: `${courseSlug}-${lectureId}` },
+        // QuizAttempt.lectureId is the internal lesson id (e.g.
+        // "python20-lecture-0"), not "${courseSlug}-${displayNumber}" —
+        // those only coincide for 0-indexed courses. Without this
+        // conversion, fundamentals-of-ai (1-indexed display numbers) never
+        // matches, so a passed quiz would appear un-taken again on reload.
+        where: {
+          userId,
+          courseId: courseSlug,
+          lectureId: `${courseSlug}-lecture-${toInternalLectureIndex(courseSlug, Number(lectureId))}`,
+        },
         orderBy: { createdAt: 'desc' },
         take: 1
       })
@@ -452,16 +545,57 @@ router.get("/course/:courseSlug", requireAuth, async (req: AuthenticatedRequest,
   try {
     const userId = req.user!.id;
     const courseSlug = String(req.params.courseSlug);
-    const [sectionProgress, lectureCompletions] = await Promise.all([
+    const [sectionProgress, progressRows, quizAttempts, passedSubmissions] = await Promise.all([
       prisma.lectureProgress.findMany({
         where: { userId, courseSlug }
       }),
       prisma.progress.findMany({
-        where: { userId, courseSlug, status: "COMPLETED" },
-        select: { lectureId: true, status: true, completedAt: true }
-      })
+        where: { userId, courseSlug },
+        select: { lectureId: true, status: true, practiceCompleted: true, completedAt: true }
+      }),
+      prisma.quizAttempt.findMany({
+        where: { userId, courseId: courseSlug },
+        select: { lectureId: true, passed: true }
+      }),
+      prisma.submission.findMany({
+        where: { userId, status: "PASSED" },
+        select: { problemId: true }
+      }),
     ]);
-    res.json({ sections: sectionProgress, lectureCompletions });
+
+    const lectureCompletions = progressRows
+      .filter((p) => p.status === "COMPLETED")
+      .map((p) => ({ lectureId: p.lectureId, status: p.status, completedAt: p.completedAt }));
+
+    // Per-lecture "fully complete" — sections watched, practice done, quiz
+    // passed (if the lecture has one), and every real problem solved (if
+    // the lecture has any). This is what actually gates the NEXT lecture,
+    // not just "sections watched" — a student can't skip the quiz/problems
+    // pages and still unlock what comes after.
+    const progressByLecture = new Map(progressRows.map((p) => [p.lectureId, p]));
+    const quizPassedLectureIds = new Set(quizAttempts.filter((q) => q.passed).map((q) => q.lectureId));
+    const passedProblemIds = new Set(passedSubmissions.map((s) => s.problemId));
+
+    const lectures = getCourseLectures(courseSlug);
+    const fullyCompletedLectures: number[] = [];
+    for (const lec of lectures) {
+      const progress = progressByLecture.get(String(lec.number));
+      const sectionsDone = progress?.status === "COMPLETED";
+      const practiceDone = !!progress?.practiceCompleted;
+
+      const internalIndex = toInternalLectureIndex(courseSlug, lec.number);
+      const quizRequired = getQuizQuestionCount(courseSlug, lec.number) > 0;
+      const quizDone = !quizRequired || quizPassedLectureIds.has(`${courseSlug}-lecture-${internalIndex}`);
+
+      const requiredProblemIds = getRequiredProblemIds(courseSlug, lec.number);
+      const problemsDone = requiredProblemIds.every((id) => passedProblemIds.has(id));
+
+      if (sectionsDone && practiceDone && quizDone && problemsDone) {
+        fullyCompletedLectures.push(lec.number);
+      }
+    }
+
+    res.json({ sections: sectionProgress, lectureCompletions, fullyCompletedLectures });
   } catch (error) { next(error); }
 });
 
@@ -508,7 +642,7 @@ router.get("/activity", requireAuth, async (req: AuthenticatedRequest, res, next
     since.setDate(since.getDate() - (days - 1));
     since.setHours(0, 0, 0, 0);
 
-    const [quizAttempts, lectureCompletions, practiceSubmissions, projectCompletions] = await Promise.all([
+    const [quizAttempts, lectureCompletions, practiceSubmissions, projectCompletions, assessmentCompletions] = await Promise.all([
       prisma.quizAttempt.findMany({
         where: { userId, createdAt: { gte: since } },
         select: { createdAt: true },
@@ -524,6 +658,10 @@ router.get("/activity", requireAuth, async (req: AuthenticatedRequest, res, next
       prisma.project.findMany({
         where: { userId, status: "COMPLETED", completedAt: { gte: since } },
         select: { completedAt: true },
+      }),
+      prisma.assessmentProgress.findMany({
+        where: { userId, status: "completed", lastAttemptAt: { gte: since } },
+        select: { lastAttemptAt: true },
       }),
     ]);
 
@@ -544,6 +682,7 @@ router.get("/activity", requireAuth, async (req: AuthenticatedRequest, res, next
     lectureCompletions.forEach(p => tally(p.completedAt));
     practiceSubmissions.forEach(p => tally(p.createdAt));
     projectCompletions.forEach(p => tally(p.completedAt));
+    assessmentCompletions.forEach(a => tally(a.lastAttemptAt));
 
     const activity = Object.entries(counts)
       .map(([date, count]) => ({ date, count }))

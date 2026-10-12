@@ -58,7 +58,7 @@ router.get("/timeline", requireAuth, async (req: AuthenticatedRequest, res, next
         rawDate: user.createdAt,
         date: formatDate(user.createdAt),
         type: "joined",
-        title: "Joined Fraylon Academy"
+        title: "Joined GyanSetu"
       });
     }
 
@@ -114,7 +114,7 @@ router.get("/timeline", requireAuth, async (req: AuthenticatedRequest, res, next
       where: { userId, passed: true }
     });
     quizzes.forEach(q => {
-      const quizName = q.quizId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      const quizName = (q.courseId || q.lectureId || 'Unknown Quiz').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
       events.push({
         rawDate: q.createdAt,
         date: formatDate(q.createdAt),

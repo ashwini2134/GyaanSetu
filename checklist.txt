@@ -1,0 +1,96 @@
+FRAYLON ACADEMY
+Checklist
+Covers admin panel, content, student features, auth, design, across the platform.
+1. Admin Panel (6-Phase Roadmap)
+Phase 1 — Foundation
+☐	Admin layout, navigation, and role-based access set up
+☐	Auth/session handling verified for admin routes
+Status: Completed
+Phase 2 — Content Studio
+☐	Course/lecture content editor and management screens working
+☐	Quiz.json and markdown content editing flows verified
+Status: Completed
+Phase 3 — Automation Pipelines
+☐	BullMQ job queues configured and tested
+☐	AI review pipeline (Gemini) fetching real repo content, not just bare URL
+☐	GitHub API calls authenticated with Personal Access Token (avoid 403/rate-limit misreads)
+☐	Capstone pipeline logic reviewed end-to-end
+☐	Certificate generation flow tested
+☐	Notification engine tested (triggers, delivery, edge cases)
+☐	Portfolio auto-update on project completion verified
+Status: Prompts built, held back pending complexity review — re-check before enabling in production
+Phase 4 — Operations Monitor
+☐	System/job health dashboard implemented
+☐	Error and failure alerts wired up
+Status: Not yet started / to be scheduled after Phase 3
+Phase 5 — Analytics
+☐	5.5 Certificate Analytics — completion & issuance stats
+☐	5.6 Global Dashboard — platform-wide metrics view
+Status: Prioritized as safe to build independently of Phase 3
+Phase 6 — Settings
+☐	6.1 General platform settings
+☐	6.2 User/role management settings
+☐	6.3 Notification preferences
+☐	6.4 Integration/API key settings
+☐	6.5 Final settings review & polish
+Status: Prioritized as safe to build independently of Phase 3
+Admin Panel Testing
+☐	Testing documentation written for all six build phases
+☐	Manual QA pass completed for each phase's core flows
+☐	Known issues/bugs logged with repro steps
+2. AI Course Module — Audit & Fix Pass
+☐	Identify and remove fabricated 'Similar Questions' across all problems
+☐	Replace hardcoded generic hints with problem-specific hints
+☐	Add missing test cases for each coding problem
+☐	Re-verify problem statements match actual test/validation logic
+☐	Cross-check each lecture's Theory 1–3, Quiz, Problem, and Summary pages
+☐	Confirm practice exercises (30 total, 3 per lecture) follow the What You'll Learn / Your Challenge / Prompt Hint format
+☐	Sign off each lecture as audited and fixed
+3. Python Course Content
+☐	Audit all 14 lectures across their 6 pages each (Theory 1–3, Quiz, Problem, Summary)
+☐	Replace generic/tutorial-style content with Fraylon Mentor-voiced storytelling and real-world analogies
+☐	Verify content is distinct from generic sources (e.g. W3Schools-style phrasing)
+☐	Two-column audit report completed and reviewed for each lecture
+☐	Final content sign-off from team lead (Yuvaraj)
+4. Student-Facing Platform Features
+Dashboard
+☐	Dynamic course progress reflects real DB state (not localStorage)
+☐	Glassmorphic Python/AI course icons render correctly
+Projects
+☐	GitHub submission form validated (URL format, error states)
+☐	Status tracking (submitted/in review/approved) accurate
+☐	Portfolio reflection step working end-to-end
+Assessments
+☐	MCQ-only flow confirmed, no stray question types
+☐	Glassmorphism layout consistent with Projects section
+☐	Framer Motion animations perform smoothly on all screen sizes
+Quiz
+☐	Quiz visible for students with perfect scores (no suppression bug)
+☐	All quiz.json files present and not accidentally deleted in future commits
+Profile & Settings
+☐	Profile data pulled dynamically from Prisma/PostgreSQL
+☐	Settings changes persist correctly to the database
+Lesson Pages
+☐	Scroll-based content reveal (IntersectionObserver) working without external animation libraries
+☐	Revealed content stays permanently visible (reveal-and-keep behavior)
+☐	'Next Lesson' button fades in only after the last block is revealed
+☐	Lecture progress tracking correct across all 6 subsections per section type
+5. Gamification & Progress System
+☐	XP, streaks, and achievements fully migrated from localStorage to PostgreSQL
+☐	Quiz history and progress tracking confirmed accurate post-migration
+☐	Mission engine logic verified against Prisma-native services
+☐	gamificationService.ts and progressTrackingService.ts fully replace the old SQLite-based system
+☐	Portfolio data updates correctly tied to progress events
+6. Authentication
+☐	Google OAuth working end-to-end locally and in production
+☐	GitHub OAuth working end-to-end locally and in production
+☐	LinkedIn OAuth implemented (currently deferred — revisit)
+☐	Session/token handling tested across refresh and logout flows
+7. Design — Landing Page & About Us
+☐	Landing page restructured with ByteXL-inspired section layout
+☐	Sections split into components under components/landing/ to avoid JSX breakage
+☐	Cinematic scroll effects and parallax implemented
+☐	3D WebGL elements integrated and performance-tested
+☐	Refined color palette applied consistently across landing and About Us pages
+☐	Full responsiveness verified on mobile, tablet, and desktop
+☐	Framer Motion animations reviewed for smoothness and load impact

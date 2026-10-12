@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ShieldCheck, ShieldAlert, Award, Calendar, Loader2, Sparkles } from "lucide-react";
 import { authFetch } from "../authClient";
+import { COURSE_FULL_NAMES as COURSE_NAMES } from "../data/courseNames";
 
 interface VerifyResult {
   valid: boolean;
@@ -13,11 +14,6 @@ interface VerifyResult {
   capstoneTitle?: string | null;
   error?: string;
 }
-
-const COURSE_NAMES: Record<string, string> = {
-  python: "CS50P: Introduction to Python Programming",
-  cs50ai: "CS50 AI with Python",
-};
 
 export default function VerifyCertificatePage() {
   const { certNumber } = useParams<{ certNumber: string }>();
@@ -50,10 +46,8 @@ export default function VerifyCertificatePage() {
       <header className="w-full border-b border-slate-900 bg-[#0b0f19]/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#60a5fa] to-[#2563eb] flex items-center justify-center font-sans font-black text-[#0c1222] text-[13px]">
-              FA
-            </div>
-            <span className="font-bold text-white text-sm tracking-wide">Fraylon Academy</span>
+            <img src="/logo.svg" alt="GyanSetu" className="w-8 h-8 object-contain" />
+            <span className="font-bold text-white text-sm tracking-wide">GyanSetu</span>
           </div>
         </div>
       </header>
@@ -122,7 +116,7 @@ export default function VerifyCertificatePage() {
 
             {/* Verification Footer Text */}
             <div className="mt-8 border-t border-slate-900 pt-6 text-center text-xs text-slate-500 leading-relaxed">
-              This credential was issued electronically by Fraylon Academy after the student completed all required lectures, coding assignments, quiz assessments, and capstone projects.
+              This credential was issued electronically by GyanSetu after the student completed all required lectures, coding assignments, quiz assessments, and capstone projects.
             </div>
           </div>
         ) : (
@@ -149,7 +143,7 @@ export default function VerifyCertificatePage() {
 
       {/* Footer */}
       <footer className="w-full border-t border-slate-900 bg-slate-950/40 py-6 text-center text-xs text-slate-650">
-        &copy; {new Date().getFullYear()} Fraylon Academy. All rights reserved.
+        &copy; {new Date().getFullYear()} GyanSetu. All rights reserved.
       </footer>
     </div>
   );

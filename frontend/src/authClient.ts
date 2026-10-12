@@ -13,6 +13,7 @@ export type AuthUser = {
   portfolioUrl?: string;
   profileVisibility?: string;
   profileTheme?: string;
+  portfolioTemplate?: string;
   createdAt?: string;
 };
 
@@ -49,6 +50,24 @@ export function clearToken(): void {
   localStorage.removeItem(TOKEN_KEY);
 }
 
+// Decodes a JWT's exp claim client-side (no signature verification — this is
+// only used to skip a doomed network call, never to trust the token). A
+// stale token left in localStorage from an earlier session is the common
+// case on public pages like /login and /register; without this check every
+// visit fires /auth/me and /auth/refresh, both of which 401 and log a
+// browser-level "Failed to load resource" console entry that can't be
+// suppressed from JS once the request is actually sent.
+export function isTokenExpired(token: string): boolean {
+  try {
+    const payload = token.split(".")[1];
+    const decoded = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
+    if (typeof decoded.exp !== "number") return false;
+    return decoded.exp * 1000 <= Date.now();
+  } catch {
+    return true;
+  }
+}
+
 export class AuthApiError extends Error {
   status: number;
   constructor(message: string, status: number) {
@@ -63,6 +82,19 @@ async function parseResponse<T>(res: Response): Promise<T> {
     throw new AuthApiError(data.error ?? res.statusText, res.status);
   }
   return data;
+}
+
+export async function authFetchBlob(path: string): Promise<Blob> {
+  const token = getToken();
+  const headers = new Headers();
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+
+  const res = await fetch(`${API_BASE}${path}`, { headers, credentials: "include" });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new AuthApiError(data.error ?? res.statusText, res.status);
+  }
+  return res.blob();
 }
 
 export async function authFetch<T>(path: string, init: RequestInit = {}, retry = true): Promise<T> {
@@ -100,10 +132,10 @@ export async function authFetch<T>(path: string, init: RequestInit = {}, retry =
 }
 
 export const authApi = {
-  register: (email: string, password: string, name: string) =>
+  register: (email: string, password: string, name: string, githubUrl?: string) =>
     authFetch<{ access_token: string; user: AuthUser }>("/auth/register", {
       method: "POST",
-      body: JSON.stringify({ email, password, name }),
+      body: JSON.stringify({ email, password, name, githubUrl: githubUrl || undefined }),
     }),
 
   login: (email: string, password: string) =>
@@ -167,6 +199,7 @@ export const authApi = {
     notificationPrefs?: Record<string, boolean>;
     profileVisibility?: string;
     profileTheme?: string;
+    portfolioTemplate?: string;
   }) =>
     authFetch<{ user: AuthUser }>("/auth/profile", {
       method: "PATCH",

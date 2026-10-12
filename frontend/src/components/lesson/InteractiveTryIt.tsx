@@ -1,26 +1,63 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { CodeExampleBlock } from '../../types/lesson';
 import CodeEditor from './CodeEditor';
+import { authFetch } from '../../authClient';
 
-export default function InteractiveTryIt({ block }: { block: CodeExampleBlock }) {
+const FLUSH_INTERVAL_MS = 15000;
+
+export default function InteractiveTryIt({ block, courseSlug, lectureNumber, blockId }: {
+  block: CodeExampleBlock;
+  courseSlug?: string;
+  lectureNumber?: number;
+  blockId?: string;
+}) {
   const [expanded, setExpanded] = useState(false);
+  const pendingSecondsRef = useRef(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const flush = () => {
+    const seconds = pendingSecondsRef.current;
+    if (seconds <= 0 || !courseSlug || lectureNumber === undefined || !blockId) return;
+    pendingSecondsRef.current = 0;
+    authFetch('/progress/tryit', {
+      method: 'POST',
+      body: JSON.stringify({ courseSlug, lectureId: String(lectureNumber), blockId, secondsDelta: seconds }),
+    }).catch(() => {
+      // Best-effort — a dropped flush just means slightly under-counted
+      // engagement time, not a broken feature. Time isn't re-queued.
+    });
+  };
+
+  useEffect(() => {
+    if (!expanded) return;
+    const tick = setInterval(() => { pendingSecondsRef.current += 1; }, 1000);
+    intervalRef.current = setInterval(flush, FLUSH_INTERVAL_MS);
+    return () => {
+      clearInterval(tick);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      flush();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expanded]);
+
+  const cardCls = "rounded-2xl border border-[var(--ai-card-border)] bg-[var(--ai-card-bg)] shadow-[var(--ai-card-shadow)] p-5";
 
   if (!expanded) {
     return (
-      <div className="rounded-2xl border border-slate-700/30 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm p-5">
+      <div className={cardCls}>
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
-              <svg className="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <h3 className="text-sm font-semibold text-[var(--ai-card-heading)] flex items-center gap-2">
+              <svg className="w-4 h-4 text-[var(--ai-card-accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
               </svg>
               {block.title}
             </h3>
-            <p className="text-xs text-slate-500 mt-1 ml-6">Try running this code</p>
+            <p className="text-xs text-[var(--ai-card-text-secondary)] mt-1 ml-6">Try running this code</p>
           </div>
           <button
             onClick={() => setExpanded(true)}
-            className="text-[11px] text-amber-400 hover:text-amber-300 px-3 py-1.5 rounded bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 transition-all font-medium"
+            className="text-[11px] text-[var(--ai-card-accent)] hover:text-[var(--brand-primary-dark)] px-3 py-1.5 rounded bg-[var(--ai-card-accent)]/10 hover:bg-[var(--ai-card-accent)]/20 border border-[var(--ai-card-accent)]/20 transition-all font-medium"
           >
             Try It →
           </button>
@@ -30,17 +67,17 @@ export default function InteractiveTryIt({ block }: { block: CodeExampleBlock })
   }
 
   return (
-    <div className="rounded-2xl border border-slate-700/30 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm p-5">
+    <div className={cardCls}>
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
-          <svg className="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <h3 className="text-sm font-semibold text-[var(--ai-card-heading)] flex items-center gap-2">
+          <svg className="w-4 h-4 text-[var(--ai-card-accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
           </svg>
           {block.title}
         </h3>
         <button
           onClick={() => setExpanded(false)}
-          className="text-[11px] text-slate-400 hover:text-slate-200 px-2 py-1 rounded bg-slate-700/40 hover:bg-slate-700/70 transition-all"
+          className="text-[11px] text-[var(--ai-card-text-secondary)] hover:text-[var(--ai-card-heading)] px-2 py-1 rounded bg-[var(--surface-container)] hover:bg-[var(--ai-card-border)] transition-all"
         >
           Collapse
         </button>

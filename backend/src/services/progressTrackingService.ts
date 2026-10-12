@@ -13,7 +13,12 @@ export async function recordQuizAttempt(
   
   const attempt = await prisma.quizAttempt.create({
     data: {
-      userId, lectureId, courseId: 'unknown', score, passed, answers: answers ?? {},
+      userId,
+      lectureId: lectureId || null,
+      courseId: 'unknown',
+      score,
+      passed,
+      answers: answers ?? {},
     },
   });
 
@@ -21,15 +26,27 @@ export async function recordQuizAttempt(
     await awardXp(userId, 0, "Attempted Quiz", undefined);
   }
 
-  await sendNotification(
-    userId,
-    "quiz_result",
-    passed ? "✅ Quiz Passed!" : "📝 Quiz Attempted",
-    passed
-      ? `You passed with ${score}%!`
-      : `You scored ${score}%. Keep trying!`,
-    `/course/${courseSlug}/lecture/${lectureId}`
-  );
+  if (passed && score === 100) {
+    await sendNotification(
+      userId,
+      "perfect_score",
+      "Perfect Score",
+      `You scored 100% in ${courseSlug}${lectureId ? `, lecture ${lectureId}` : ''}.`,
+      `/course/${courseSlug}${lectureId ? `/lecture/${lectureId}` : ''}`,
+      "medium"
+    );
+  } else {
+    await sendNotification(
+      userId,
+      "quiz_result",
+      passed ? "Quiz Passed" : "Quiz Attempted",
+      passed
+        ? `You passed with ${score}%.`
+        : `You scored ${score}%. Keep trying!`,
+      `/course/${courseSlug}/lecture/${lectureId}`,
+      passed ? "medium" : "low"
+    );
+  }
 
   return { attempt, passed };
 }

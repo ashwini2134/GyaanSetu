@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth';
 import { authFetch } from '../authClient';
+import { COURSE_FULL_NAMES } from '../data/courseNames';
 import {
   ShieldCheck, LayoutDashboard, Users, GraduationCap, FileCheck, BookOpen,
   Brain, Clock, CheckCircle2, XCircle, ExternalLink, Search, ChevronRight,
@@ -52,10 +53,7 @@ interface EligibleStudent {
   courseSlug: string; avgQuizScore: number | null;
 }
 
-const COURSE_LABELS: Record<string, string> = {
-  python: 'CS50P: Introduction to Python',
-  cs50ai: 'CS50 AI with Python',
-};
+const COURSE_LABELS: Record<string, string> = COURSE_FULL_NAMES;
 
 export default function AdminPage() {
   const navigate = useNavigate();
@@ -258,7 +256,7 @@ export default function AdminPage() {
                     <tbody>
                       {filteredStudents.map(s => (
                         <tr key={s.id} className="border-b border-slate-800/60 last:border-0 hover:bg-slate-800/30 transition-colors cursor-pointer"
-                          onClick={() => navigate(`/profile/${s.id}`)}
+                          onClick={() => navigate(`/portfolio/${s.id}`)}
                         >
                           <td className="px-4 py-3">
                             <p className="font-medium text-white text-xs">{s.name}</p>

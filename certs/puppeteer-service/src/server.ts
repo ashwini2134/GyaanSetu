@@ -1,6 +1,6 @@
 import express, { type NextFunction, type Request, type Response } from 'express';
 import { z } from 'zod';
-import { getBrowser, renderCertPdf, shutdownBrowser } from './render';
+import { getBrowser, renderCertPdf, renderCourseCertPdf, renderPortfolioPdf, shutdownBrowser } from './render';
 
 const PORT = Number(process.env.PORT ?? 8787);
 const TOKEN = process.env.PUPPETEER_SERVICE_TOKEN;
@@ -18,6 +18,47 @@ const renderBodySchema = z.object({
   bodyText: z.string().min(1).max(2_000),
   issueDateLabel: z.string().min(1).max(64),
   qrPngBase64: z.string().min(64).max(2_000_000), // bound it; ~250KB base64 is typical
+});
+
+const courseCertBodySchema = z.object({
+  certNumber: z.string().min(1).max(64),
+  recipientName: z.string().min(1).max(200),
+  courseName: z.string().min(1).max(300),
+  descriptionText: z.string().min(1).max(2_000),
+  issueDateLabel: z.string().min(1).max(64),
+  qrPngBase64: z.string().min(64).max(2_000_000),
+  verifyUrlLabel: z.string().min(1).max(300),
+});
+
+const portfolioBodySchema = z.object({
+  studentName: z.string().min(1).max(200),
+  tagline: z.string().max(300).optional(),
+  generatedDateLabel: z.string().min(1).max(64),
+  accentHex: z.string().max(9).optional(),
+  stats: z.object({
+    coursesCompleted: z.number().int().min(0),
+    problemsSolved: z.number().int().min(0),
+    projectsBuilt: z.number().int().min(0),
+    practiceAccuracy: z.number().min(0).max(100).nullable(),
+  }),
+  problemsByDifficulty: z.object({
+    easy: z.number().int().min(0),
+    medium: z.number().int().min(0),
+    hard: z.number().int().min(0),
+  }),
+  skills: z.array(z.string().max(80)).max(80),
+  certificates: z.array(z.object({
+    title: z.string().max(200),
+    issuedDateLabel: z.string().max(64).optional(),
+  })).max(50),
+  projects: z.array(z.object({
+    name: z.string().max(200),
+    techStack: z.string().max(300).optional(),
+    difficulty: z.string().max(40).optional(),
+    completedDateLabel: z.string().max(64).optional(),
+  })).max(50),
+  qrPngBase64: z.string().min(64).max(2_000_000).optional(),
+  verifyUrlLabel: z.string().max(300).optional(),
 });
 
 function bearerAuth(req: Request, res: Response, next: NextFunction): void {
@@ -67,6 +108,50 @@ app.post('/pdf', bearerAuth, async (req, res) => {
     res.status(200).send(pdf);
   } catch (err) {
     console.error('[render] failed:', err);
+    res.status(500).json({ error: 'render failed' });
+  }
+});
+
+// Fraylon Academy course-completion certs — separate template (no baked
+// PNG background) from the Fraylon Technologies internship cert above.
+app.post('/pdf/course', bearerAuth, async (req, res) => {
+  const parsed = courseCertBodySchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'invalid body', issues: parsed.error.issues });
+    return;
+  }
+  const { certNumber, ...rest } = parsed.data;
+  const started = Date.now();
+  try {
+    const pdf = await renderCourseCertPdf({ certNumber, ...rest });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${certNumber}.pdf"`);
+    res.setHeader('X-Render-Ms', String(Date.now() - started));
+    res.status(200).send(pdf);
+  } catch (err) {
+    console.error('[render:course] failed:', err);
+    res.status(500).json({ error: 'render failed' });
+  }
+});
+
+// Student portfolio PDF snapshot — flowing multi-page document, distinct
+// from the fixed-canvas certificate templates above.
+app.post('/pdf/portfolio', bearerAuth, async (req, res) => {
+  const parsed = portfolioBodySchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'invalid body', issues: parsed.error.issues });
+    return;
+  }
+  const started = Date.now();
+  try {
+    const pdf = await renderPortfolioPdf(parsed.data);
+    const safeName = parsed.data.studentName.replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="fraylon-portfolio-${safeName}.pdf"`);
+    res.setHeader('X-Render-Ms', String(Date.now() - started));
+    res.status(200).send(pdf);
+  } catch (err) {
+    console.error('[render:portfolio] failed:', err);
     res.status(500).json({ error: 'render failed' });
   }
 });

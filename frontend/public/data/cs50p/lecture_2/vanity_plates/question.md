@@ -1,6 +1,6 @@
 # Vanity Plates
 
-In Massachusetts, home to Harvard University, it's possible to request a vanity license plate for your car, with your choice of letters and numbers instead of random ones. Among the requirements, though, are:
+In Massachusetts, it's possible to request a vanity license plate for your car, with your choice of letters and numbers instead of random ones. Among the requirements, though, are:
 
 - All vanity plates must start with at least two letters.
 - Vanity plates may contain a maximum of 6 characters (letters or numbers) and a minimum of 2 characters.

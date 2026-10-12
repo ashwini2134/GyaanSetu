@@ -1,16 +1,24 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { 
-  CheckCircle, ChevronRight, FileText, Play, Send, Terminal, XCircle, 
-  Eye, CheckSquare, Award, Loader2, Trophy, ShieldAlert, Check
+import {
+  ArrowLeft, CheckCircle, ChevronRight, Send, Loader2, Trophy, ShieldAlert, Check, Award, CheckSquare, Terminal
 } from 'lucide-react';
-import MonacoEditor from '@monaco-editor/react';
-import { runInteractive, runValidationTest, type ExecEvent, type ExecResult } from '../utils/pythonRunnerInteractive';
-import VisualPreview from '../components/lesson/VisualPreview';
 import { api } from '../api';
 import { authFetch } from '../authClient';
-import { completeAction } from '../progress';
+import { completeAction, updateOverallProgress } from '../progress';
 import { useAuth } from '../auth';
+import { useProjectStatus } from '../hooks/useProjectStatus';
+import { COURSE_FULL_NAMES } from '../data/courseNames';
+import ProjectOverviewCard from '../components/project/ProjectOverviewCard';
+import FileGuideStep from '../components/project/FileGuideStep';
+import CommonMistakesCard from '../components/project/CommonMistakesCard';
+import GitHubGuideStep from '../components/project/GitHubGuideStep';
+import ReadmeTemplateStep from '../components/project/ReadmeTemplateStep';
+import TaskChecklist from '../components/project/TaskChecklist';
+import TestLocallyStep from '../components/project/TestLocallyStep';
+import SubmissionChecklist from '../components/project/SubmissionChecklist';
+import ReviewPipelineStatus from '../components/project/ReviewPipelineStatus';
+import { deriveMainFile } from '../components/project/deriveMainFile';
 
 type CapstoneProject = {
   id: string;
@@ -27,546 +35,430 @@ type CapstoneProject = {
   evaluationChecklist: { label: string; description: string; check: (staticChecks: any[], dynamicChecks: any[]) => boolean }[];
 };
 
-const PROJECTS: CapstoneProject[] = [
+const AI_PROJECTS: CapstoneProject[] = [
   {
-    id: 'student_management',
-    title: 'Student Management System',
-    description: 'Build a menu-driven records manager that writes, reads, searches, and deletes student records with file persistence.',
-    skills: ['Functions', 'Lists', 'Dictionaries', 'File Handling'],
+    id: 'search_trace',
+    title: 'Search Algorithm Trace',
+    description: 'Trace BFS, DFS, and A* through a given maze. Implement one algorithm in Python and compare the paths each algorithm would find.',
+    skills: ['Search Algorithms', 'BFS', 'DFS', 'A* Search', 'Heuristics'],
     difficulty: 'Intermediate',
     estimatedTime: '2-3 Hours',
-    goal: 'Create a menu-driven application that manages student records. Users can add, view, search, update, and delete student information. Data persists between sessions using file storage.',
+    goal: 'Implement one search algorithm (BFS or A*) in Python (~40 lines), trace all three algorithms manually on a provided maze, and write a short analysis comparing path optimality and nodes explored.',
     features: [
-      'Add a new student with name and grade',
-      'View all students and their details',
-      'Search for a student by name',
-      'Delete a student record',
-      'Save and load data from a file',
+      'Implement BFS or A* in Python for a given grid maze',
+      'Trace BFS, DFS, and A* manually on the same maze',
+      'Compare paths found: optimality and nodes explored',
+      'Explain why A* with Manhattan heuristic finds the optimal path but Greedy Best-First may not',
     ],
     sampleFlow: [
-      'Program loads existing data from a file',
-      'Menu displays: Add, View, Search, Delete, Save & Exit',
-      'User selects an option and interacts with the system',
-      'Changes are written back to the file on save',
+      'Review the provided maze with obstacles, start, and goal',
+      'Implement BFS using a queue or A* with a priority queue',
+      'Manually trace the remaining algorithms on paper/in comments',
+      'Compare path costs and number of nodes explored by each algorithm',
+      'Write a brief analysis connecting to the search lecture concepts (optimality, completeness, heuristics)',
     ],
     requirements: [
-      'Store student records in a file named students.txt.',
-      'Each student record should contain a student name and grade.',
-      'Display a menu until the user chooses to exit.',
-      'Allow users to Add a new student, View all student records, Search for a student by name, and Delete a student record.',
-      'Load previously saved records when the program starts.',
-      'Save all changes before exiting the application.',
+      'Repository must contain one Python implementation of BFS or A* on the provided maze.',
+      'Include a trace (in code comments or a separate text file) showing the order nodes are explored by BFS, DFS, and A*.',
+      'Report the final path and path cost for each algorithm.',
+      'Write a short README analysis: which algorithm found the shortest path? Which explored the fewest nodes? Why?',
+      'Define the Manhattan heuristic used by A* and explain why it is admissible.',
     ],
     guidelines: [
-      { title: 'Functions', description: 'Create separate functions for loading records, saving records, and handling the main menu.' },
-      { title: 'Dictionaries', description: 'Store student records using a dictionary where the student\'s name is the key and the grade is the value.' },
-      { title: 'File Handling', description: 'Read student records from students.txt when the program starts and write updated records back to the file before exiting.' },
-      { title: 'Validation', description: 'Handle missing files gracefully using try-except and validate user menu selections.' },
+      { title: 'Algorithm Choice', description: 'Pick either BFS (guarantees shortest path, uses queue) or A* (uses heuristic, more efficient). You only need to implement one — trace the others manually.' },
+      { title: 'Heuristic', description: 'Explain Manhattan distance and why it is admissible (never overestimates). Show the calculation for at least two cells.' },
+      { title: 'Analysis', description: 'Connect your results to the course: BFS is complete and optimal but explores many nodes; A* is optimal with an admissible heuristic and explores fewer; DFS finds a path but not necessarily the shortest.' },
     ],
     evaluationChecklist: [
-      { label: 'Menu navigation works', description: 'Interactive menu displays and option 5 exits cleanly.', check: (_, dyn) => dyn[0]?.passed === true },
-      { label: 'Add student works', description: 'Successfully captures name and grade input records.', check: (_, dyn) => dyn[1]?.passed === true },
-      { label: 'Search student works', description: 'Correctly matches case-insensitive search queries.', check: (_, dyn) => dyn[3]?.passed === true },
-      { label: 'Delete student works', description: 'Removes target record from database state.', check: (stat, _) => stat.find(c => c.id === 'dictionaries')?.passed === true },
-      { label: 'File handling works', description: 'Uses "students.txt" to read stored records.', check: (stat, _) => stat.find(c => c.id === 'file_handling')?.passed === true },
-      { label: 'Data persists', description: 'Saves database records back to file upon program exit.', check: (_, dyn) => dyn[1]?.passed === true || dyn[2]?.passed === true },
-      { label: 'Clean code & structure', description: 'Code includes helper functions and runs standard entrypoint.', check: (stat, _) => stat.find(c => c.id === 'functions')?.passed === true },
+      { label: 'One algorithm implemented', description: 'BFS or A* working on the maze.', check: () => true },
+      { label: 'All three algorithms traced', description: 'BFS, DFS, A* traces provided.', check: () => true },
+      { label: 'Path costs reported', description: 'Path length and optimality compared.', check: () => true },
+      { label: 'Heuristic explained', description: 'Manhattan distance and admissibility discussed.', check: () => true },
+      { label: 'Analysis connects to lecture', description: 'Optimality, completeness, efficiency discussed.', check: () => true },
     ]
   },
   {
-    id: 'expense_tracker',
-    title: 'Expense Tracker',
-    description: 'Log and summarize transactions with dates, categories, and amounts, persisting data to a filesystem.',
-    skills: ['Functions', 'Lists', 'Dictionaries', 'File Handling'],
+    id: 'logic_puzzle',
+    title: 'Logic Puzzle Formalization',
+    description: 'Formalize a Knights and Knaves puzzle in propositional logic and write a small Python script to solve it by checking all truth assignments.',
+    skills: ['Propositional Logic', 'Knowledge Representation', 'Inference', 'Model Checking'],
     difficulty: 'Intermediate',
     estimatedTime: '2-3 Hours',
-    goal: 'Build an expense logging system where users can add expenses with a category and amount, view summaries, filter by category, and have data persist between sessions.',
+    goal: 'Take a given Knights and Knaves puzzle, translate it into propositional logic sentences, and write a small Python script (~30 lines) that evaluates all truth assignments to find which characters are knights (truth-tellers) and which are knaves (liars).',
     features: [
-      'Add an expense with date, category, description, and amount',
-      'View all recorded expenses',
-      'Filter expenses by category',
-      'Display total spending and per-category totals',
-      'Save expenses to a file and load on startup',
+      'Translate a natural language puzzle into propositional logic symbols',
+      'Represent puzzle statements as logic sentences (implications, biconditionals)',
+      'Write a Python script that enumerates all truth assignments and checks consistency with the knowledge base',
+      'Output the solution: which characters are knights and which are knaves',
     ],
     sampleFlow: [
-      'Program loads expenses from a file',
-      'Menu displays: Add Expense, View All, View by Category, Summary, Save & Exit',
-      'User adds expenses with category, description, and amount',
-      'Reports show spending breakdown by category',
+      'Read a Knights and Knaves puzzle: "A says: B is a knight. B says: A and B are different types."',
+      'Define propositional symbols: A = "A is a knight", B = "B is a knight"',
+      'Translate each statement into logic: A ↔ B, B ↔ (A ↔ ¬B)',
+      'Write a Python script that generates all 4 truth assignments and filters those consistent with both statements',
+      'Output the consistent model(s) and declare who is knight/knave',
     ],
     requirements: [
-      'Store expense records in expenses.txt.',
-      'Each expense should contain: Date, Category, Description, Amount.',
-      'Allow users to Add a new expense, View all expenses, Filter expenses by category, and View total spending and category-wise summary.',
-      'Load existing expenses when the program starts.',
-      'Save all expense data before exiting.',
+      'Repository must contain the puzzle formalization in propositional logic (in README or comments).',
+      'Write a Python script that enumerates all possible truth assignments for the puzzle\'s symbols.',
+      'For each assignment, evaluate whether the knowledge base (all puzzle statements) is true.',
+      'Output which truth assignments are consistent with the puzzle.',
+      'State definitively: who is a knight and who is a knave.',
+      'Explain in the README how model checking works and why enumerating 2^n assignments is feasible for small n but not for large problems.',
     ],
     guidelines: [
-      { title: 'Functions', description: 'Separate the application into loading, saving, and menu functions.' },
-      { title: 'Lists & Dictionaries', description: 'Store each expense as a dictionary inside a list.' },
-      { title: 'File Handling', description: 'Read expense records from the file during startup and update the file before exiting.' },
-      { title: 'Validation', description: 'Validate numeric amount input and handle missing files gracefully.' },
+      { title: 'Puzzle Formalization', description: 'Define a propositional symbol for each person (e.g., A = "A is a knight"). Remember: knights always tell the truth, knaves always lie — so if A says statement S, the logical equivalence is A ↔ S.' },
+      { title: 'Implementation', description: 'Your Python script can use nested loops or itertools.product([True, False], repeat=n) to enumerate all models. For each model, evaluate each sentence and check if all are true.' },
+      { title: 'Connection to Course', description: 'This is model checking — the simplest inference algorithm from the Knowledge lecture. Discuss its limitation: O(2^n) and why resolution or DPLL would be needed for larger problems.' },
     ],
     evaluationChecklist: [
-      { label: 'Menu navigation works', description: 'Menu displays options and option 5 exits cleanly.', check: (_, dyn) => dyn[5]?.passed === true },
-      { label: 'Add expense works', description: 'Captures and appends transaction data to history.', check: (_, dyn) => dyn[0]?.passed === true },
-      { label: 'Category filtering works', description: 'Prints only records belonging to the filtered category.', check: (_, dyn) => dyn[2]?.passed === true },
-      { label: 'Total calculation works', description: 'Aggregates spending total calculations.', check: (_, dyn) => dyn[3]?.passed === true },
-      { label: 'File handling works', description: 'Loads expenses from file and handles disk reading.', check: (stat, _) => stat.find(c => c.id === 'file_handling')?.passed === true },
-      { label: 'Data persists', description: 'Saves transactions back to expenses.txt upon exit.', check: (_, dyn) => dyn[4]?.passed === true },
-      { label: 'Input conversions safe', description: 'Validates numeric input parsing cleanly.', check: (_, dyn) => dyn[6]?.passed === true },
+      { label: 'Puzzle formalized in logic', description: 'Symbols and sentences defined.', check: () => true },
+      { label: 'Python script enumerates models', description: 'All truth assignments checked.', check: () => true },
+      { label: 'Correct solution found', description: 'Knight/knave identities correctly determined.', check: () => true },
+      { label: 'README explains model checking', description: 'O(2^n) complexity and limitations discussed.', check: () => true },
     ]
   },
   {
-    id: 'quiz_app',
-    title: 'Quiz Application',
-    description: 'Develop an interactive quiz app with multi-choice choices, loops, scoring, and percentage diagnostics.',
-    skills: ['Functions', 'Lists', 'Dictionaries', 'Loops'],
-    difficulty: 'Intermediate',
-    estimatedTime: '2-3 Hours',
-    goal: 'Develop an interactive quiz program that presents multiple-choice questions, tracks scores, and provides feedback. Questions and answers are stored in a collection.',
+    id: 'ml_classifier_intro',
+    title: 'Intro to Text Classification',
+    description: 'Use a pre-built classifier (scikit-learn) to classify text data. Focus on understanding the ML pipeline: features, training, evaluation, and the bias-variance tradeoff.',
+    skills: ['Machine Learning', 'NLP', 'Feature Extraction', 'Model Evaluation'],
+    difficulty: 'Advanced',
+    estimatedTime: '3-4 Hours',
+    goal: 'Use scikit-learn to build a text classifier pipeline: load a dataset, extract TF-IDF features, train a k-NN classifier, and evaluate its performance. Focus on understanding each step conceptually rather than implementing from scratch.',
     features: [
-      'Store questions, choices, and correct answers in a dictionary',
-      'Present questions one at a time in a loop',
-      'Accept user input for answer selection',
-      'Track correct and incorrect answers',
-      'Display final score and percentage',
+      'Load a text dataset (e.g., sklearn\'s 20 newsgroups or a CSV file)',
+      'Preprocess text: basic cleaning and TF-IDF vectorization',
+      'Train a k-Nearest Neighbors classifier using scikit-learn',
+      'Evaluate with train/test split and report accuracy',
+      'Experiment with different k values and discuss the bias-variance tradeoff',
+      'Analyze misclassified examples',
     ],
     sampleFlow: [
-      'Program loads quiz questions from a data structure',
-      'Each question is shown one at a time with multiple choices',
-      'User selects an answer and gets immediate feedback',
-      'Final score is displayed at the end',
+      'Load a dataset: e.g., sklearn.datasets.fetch_20newsgroups(subset="train")',
+      'Split into training and test sets',
+      'Create a TF-IDF vectorizer and transform the text data',
+      'Train a k-NN classifier with k=3, 5, 7',
+      'Evaluate each model on the test set and compare accuracy',
+      'Look at specific misclassified documents and discuss why they were wrong',
+      'Write a README explaining the ML pipeline and bias-variance tradeoff',
     ],
     requirements: [
-      'Create a multiple-choice quiz.',
-      'Display one question at a time.',
-      'Accept answers from the user.',
-      'Check whether each answer is correct.',
-      'Keep track of the score.',
-      'Display Total Questions, Correct Answers, and Final Percentage.',
-      'Display the correct answer whenever the user answers incorrectly.',
+      'Repository must contain a Python script using scikit-learn for text classification.',
+      'Load a real text dataset (any public dataset).',
+      'Use TfidfVectorizer to convert text to feature vectors.',
+      'Train a KNeighborsClassifier with at least 3 different k values.',
+      'Split data into training and test sets and report test accuracy for each k.',
+      'Show 2-3 misclassified examples and discuss why the model got them wrong.',
+      'README must explain: what TF-IDF does, how k-NN works, and the bias-variance tradeoff with k.',
     ],
     guidelines: [
-      { title: 'Functions', description: 'Organize quiz logic inside reusable functions where appropriate.' },
-      { title: 'Dictionaries & Lists', description: 'Store questions, options, and correct answers using dictionaries and lists.' },
-      { title: 'Loops', description: 'Loop through every question and process the user\'s answer.' },
-      { title: 'Validation', description: 'Accept answers in a consistent format and compare them correctly.' },
+      { title: 'Feature Extraction', description: 'Use sklearn\'s TfidfVectorizer. Explain in your README that TF-IDF gives higher weight to words that are frequent in a document but rare across documents — connecting to the NLP lecture on text representation.' },
+      { title: 'k-NN and Bias-Variance', description: 'Experiment with k=1, 3, 5, 7. Small k overfits (low bias, high variance), large k underfits (high bias, low variance). Show this empirically and connect to the ML lecture.' },
+      { title: 'Error Analysis', description: 'Pick 2-3 misclassified documents. Are they genuinely ambiguous? Would a human struggle? This connects to the lecture discussion on generalization and the limits of ML.' },
     ],
     evaluationChecklist: [
-      { label: 'Full quiz execution', description: 'Displays all questions and renders final scorecard.', check: (_, dyn) => dyn[0]?.passed === true },
-      { label: 'Scoring tracks answers', description: 'Computes correct answer totals properly.', check: (_, dyn) => dyn[1]?.passed === true },
-      { label: 'Displays choices', description: 'Iterates and prints choices in a loop.', check: (stat, _) => stat.find(c => c.id === 'loops')?.passed === true },
-      { label: 'String matching safe', description: 'Handles inputs case-insensitively.', check: (stat, _) => stat.find(c => c.id === 'conditions')?.passed === true },
+      { label: 'Dataset loaded and split', description: 'Training and test sets created.', check: () => true },
+      { label: 'TF-IDF features extracted', description: 'Text converted to feature vectors.', check: () => true },
+      { label: 'k-NN trained with 3+ k values', description: 'Accuracy reported for each k.', check: () => true },
+      { label: 'Error analysis completed', description: 'Misclassified examples discussed.', check: () => true },
+      { label: 'README explains concepts', description: 'TF-IDF, k-NN, bias-variance tradeoff covered.', check: () => true },
     ]
   },
   {
-    id: 'todo_list',
-    title: 'To-Do List',
-    description: 'Create a task organizer supporting status checks and tasks loading/saving with text persistence.',
-    skills: ['Functions', 'Lists', 'Dictionaries', 'File Handling'],
-    difficulty: 'Intermediate',
-    estimatedTime: '2-3 Hours',
-    goal: 'Build a task management application where users can add tasks, mark them as complete, delete them, and have their task list persist between sessions using file storage.',
+    id: 'csp_formulation',
+    title: 'CSP Problem Formulation',
+    description: 'Formulate a real-world problem as a Constraint Satisfaction Problem. Define variables, domains, and constraints, then use a provided solver to find a solution and analyze the search.',
+    skills: ['CSP', 'Constraint Propagation', 'Backtracking', 'Optimization'],
+    difficulty: 'Advanced',
+    estimatedTime: '3-4 Hours',
+    goal: 'Take a real constraint problem (map coloring, scheduling, or Sudoku), formulate it as a CSP with variables, domains, and constraints, and use a provided backtracking solver to find solutions. Analyze how forward checking and MRV affect search efficiency.',
     features: [
-      'Add a new task with description',
-      'View all tasks with completion status',
-      'Mark a task as complete',
-      'Delete a task',
-      'Save tasks to a file and load on startup',
+      'Choose a problem and define its CSP formulation',
+      'Define variables, their domains, and all constraints',
+      'Use a provided backtracking search solver (starter code given)',
+      'Run the solver with and without forward checking',
+      'Count the number of assignments made in each configuration',
+      'Write an analysis of how constraint propagation reduces the search space',
     ],
     sampleFlow: [
-      'Program loads tasks from a file',
-      'Menu displays: Add Task, View Tasks, Mark Complete, Delete Task, Save & Exit',
-      'User adds tasks with a description and optional priority',
-      'Completed tasks are visually distinguished',
+      'Choose map coloring of Australia (from the course): 7 variables, 3 colors',
+      'Define constraints: adjacent regions cannot share the same color',
+      'Use the provided backtracking solver to find a valid coloring',
+      'Run with plain backtracking, then with forward checking',
+      'Compare the number of assignments made',
+      'Explain why forward checking prunes the search tree earlier',
     ],
     requirements: [
-      'Store tasks inside todo.txt.',
-      'Each task should contain Task Title and Completion Status.',
-      'Allow users to Add a new task, View all tasks, Mark a task as completed, and Delete a task.',
-      'Load saved tasks when the application starts.',
-      'Save all updates before exiting.',
+      'Repository must contain the CSP formulation of your chosen problem.',
+      'Define variables, domains, and constraints clearly (in code or a table in README).',
+      'Use the provided backtracking solver (starter code will be given).',
+      'Run the solver in at least two configurations: plain backtracking and with forward checking.',
+      'Report the number of recursive calls or assignments made in each configuration.',
+      'README must explain: what a CSP is, how backtracking search works, and why constraint propagation improves efficiency.',
     ],
     guidelines: [
-      { title: 'Functions', description: 'Create separate functions for loading tasks, saving tasks, and handling menu operations.' },
-      { title: 'Lists & Dictionaries', description: 'Store tasks as dictionaries inside a list.' },
-      { title: 'File Handling', description: 'Read task data from the file during startup and write updated data before exiting.' },
-      { title: 'Validation', description: 'Handle empty task lists, invalid menu choices, and missing files.' },
+      { title: 'Problem Choice', description: 'Choose map coloring (Australia from the course), a simple weekly schedule (3-4 time slots), or a 4x4 Sudoku. The key is to clearly define variables, domains, and constraints.' },
+      { title: 'Provided Solver', description: 'Starter code will provide a generic backtracking function. Your job is to plug in your problem\'s variables, domains, and constraint function — you do not need to implement the solver from scratch.' },
+      { title: 'Analysis', description: 'Count the number of times the solver assigns a value. Compare plain backtracking vs forward checking. Explain: forward checking detects conflicts earlier, so the solver backtracks sooner and explores fewer dead ends.' },
     ],
     evaluationChecklist: [
-      { label: 'Add task works', description: 'Saves task additions into session list.', check: (_, dyn) => dyn[0]?.passed === true },
-      { label: 'Complete task works', description: 'Toggles completed tasks status flag.', check: (_, dyn) => dyn[1]?.passed === true },
-      { label: 'Checkbox checkboxes', description: 'Prints checkbox markers correctly based on state.', check: (stat, _) => stat.find(c => c.id === 'loops')?.passed === true },
-      { label: 'File handling works', description: 'Uses todo.txt for loading and saving task list.', check: (stat, _) => stat.find(c => c.id === 'file_handling')?.passed === true },
+      { label: 'CSP formulation is correct', description: 'Variables, domains, and constraints defined.', check: () => true },
+      { label: 'Solver runs on the problem', description: 'Produces a valid solution.', check: () => true },
+      { label: 'Forward checking compared', description: 'Assignment counts reported for both configurations.', check: () => true },
+      { label: 'README explains CSP concepts', description: 'Backtracking, forward checking, and constraint propagation discussed.', check: () => true },
     ]
   },
 ];
 
-const STARTER_CODE: Record<string, string> = {
-  student_management: `# Student Management System
-
-def load_students():
-    # TODO: Load students from students.txt into a dictionary
-    # Return a dictionary of {name: grade}
-    # Handle FileNotFoundError gracefully using try-except
-    pass
-
-def save_students(students):
-    # TODO: Save the student dictionary to students.txt in name,grade format
-    pass
-
-def main():
-    # TODO: Load existing student records
-    # TODO: Display the interactive menu:
-    #       1. Add Student
-    #       2. View Students
-    #       3. Search Student
-    #       4. Delete Student
-    #       5. Save and Exit
-    # TODO: Loop to handle user choices and call functions
-    # TODO: Save data to file before exiting and print goodbye/exit message
-    pass
-
-if __name__ == "__main__":
-    main()
-`,
-
-  expense_tracker: `# Expense Tracker
-
-def load_expenses():
-    # TODO: Load expenses from expenses.txt
-    # Return a list of expense dictionaries
-    # Handle FileNotFoundError gracefully
-    pass
-
-def save_expenses(expenses):
-    # TODO: Save expenses list to expenses.txt
-    pass
-
-def main():
-    # TODO: Load existing expenses
-    # TODO: Display the menu:
-    #       1. Add Expense
-    #       2. View All Expenses
-    #       3. View by Category
-    #       4. Summary
-    #       5. Save and Exit
-    # TODO: Loop to handle user choices and call functions
-    # TODO: Save data to file before exiting and print goodbye/exit message
-    pass
-
-if __name__ == "__main__":
-    main()
-`,
-
-  quiz_app: `# Interactive Quiz Application
-
-def main():
-    # TODO: Define a dictionary of questions, options, and correct answers
-    # TODO: Initialize score and total variables
-    # TODO: Iterate through questions and display options
-    # TODO: Get user input, normalize it (strip & lowercase), and check correctness
-    # TODO: Provide instant feedback and update score
-    # TODO: Display final score, percentage, and completion details at the end
-    pass
-
-if __name__ == "__main__":
-    main()
-`,
-
-  todo_list: `# To-Do List Application
-
-def load_tasks():
-    # TODO: Load tasks from todo.txt
-    # Return a list of task dictionaries
-    # Handle FileNotFoundError gracefully
-    pass
-
-def save_tasks(tasks):
-    # TODO: Save tasks list to todo.txt
-    pass
-
-def main():
-    # TODO: Load existing tasks
-    # TODO: Display the menu:
-    #       1. Add Task
-    #       2. View Tasks
-    #       3. Mark Task Complete
-    #       4. Delete Task
-    #       5. Save and Exit
-    # TODO: Loop to handle user choices and call functions
-    # TODO: Save data to file before exiting and print goodbye/exit message
-    pass
-
-if __name__ == "__main__":
-    main()
-`
-};
-
-interface TestCase {
-  name: string;
-  description: string;
-  inputs: string[];
-  verify: (stdout: string, filesAfter: Record<string, string | null>) => { passed: boolean; error?: string };
-}
-
-const TEST_SUITES: Record<string, TestCase[]> = {
-  student_management: [
-    {
-      name: "Menu Navigation & Exit",
-      description: "App should display menu options and exit gracefully when option 5 is selected.",
-      inputs: ["5"],
-      verify: (stdout) => {
-        const passed = stdout.toLowerCase().includes("goodbye") || stdout.toLowerCase().includes("exit");
-        return { passed, error: passed ? undefined : "Program did not print exit or goodbye message." };
-      }
-    },
-    {
-      name: "Add Student Record",
-      description: "Adding a student 'Charlie' with grade 'A+' should persist to 'students.txt'.",
-      inputs: ["1", "Charlie", "A+", "5"],
-      verify: (_stdout, files) => {
-        const fileContent = files["students.txt"] || "";
-        const lines = fileContent.split("\n").map(l => l.trim()).filter(Boolean);
-        const hasRecord = lines.some(l => {
-          const [n, g] = l.split(",");
-          return n === "Charlie" && g === "A+";
-        });
-        return { passed: hasRecord, error: hasRecord ? undefined : "Student record 'Charlie,A+' not found in students.txt." };
-      }
-    },
-    {
-      name: "View Student Records",
-      description: "Viewing students should read and display existing records from 'students.txt'.",
-      inputs: ["2", "5"],
-      verify: (stdout) => {
-        const passed = stdout.includes("Dave") && stdout.includes("B-");
-        return { passed, error: passed ? undefined : "Did not display student Dave's grade." };
-      }
-    },
-    {
-      name: "Search Student Record",
-      description: "Searching for 'Frank' should return their grade if they exist.",
-      inputs: ["3", "Frank", "5"],
-      verify: (stdout) => {
-        const passed = stdout.includes("Frank") && (stdout.includes("C") || stdout.includes("found"));
-        return { passed, error: passed ? undefined : "Did not display correct search result for Frank." };
-      }
-    }
-  ],
-  expense_tracker: [
-    {
-      name: "Add Expense functionality",
-      description: "Adding an expense should prompt for details and update the records.",
-      inputs: ["1", "2026-06-15", "Food", "Dinner", "12.50", "5"],
-      verify: (stdout, files) => {
-        const hasAddedMessage = stdout.includes("Added expense") || stdout.includes("12.5");
-        const fileContent = files["expenses.txt"] || "";
-        const hasInFile = fileContent.includes("Food") && (fileContent.includes("12.5") || fileContent.includes("12.50"));
-        const passed = hasAddedMessage || hasInFile;
-        return { passed, error: passed ? undefined : "Could not verify that expense was successfully added." };
-      }
-    },
-    {
-      name: "View All Expenses",
-      description: "Viewing all expenses should read and display existing records from expenses.txt.",
-      inputs: ["2", "5"],
-      verify: (stdout) => {
-        const passed = stdout.includes("Pizza") && stdout.includes("Movie");
-        return { passed, error: passed ? undefined : "Did not display existing expense records." };
-      }
-    },
-    {
-      name: "Category Filtering",
-      description: "Filtering by category should display only expenses belonging to that category.",
-      inputs: ["3", "Food", "5"],
-      verify: (stdout) => {
-        const hasFood = stdout.includes("Pizza");
-        const hasEnt = stdout.includes("Movie");
-        const passed = hasFood && !hasEnt;
-        return { passed, error: passed ? undefined : "Category filtering did not properly restrict view." };
-      }
-    },
-    {
-      name: "Spending Summary calculations",
-      description: "Selecting Summary should display total spending of entered expenses.",
-      inputs: ["4", "5"],
-      verify: (stdout) => {
-        const passed = stdout.includes("25") || stdout.includes("25.0") || stdout.includes("25.00");
-        return { passed, error: passed ? undefined : "Did not calculate or display correct total spending." };
-      }
-    },
-    {
-      name: "File Persistence (save/load)",
-      description: "Expenses should be saved to 'expenses.txt' upon exit and loaded on startup.",
-      inputs: ["1", "2026-06-15", "Rent", "Monthly", "1200.00", "5"],
-      verify: (_stdout, files) => {
-        const fileContent = files["expenses.txt"] || "";
-        const passed = fileContent.includes("Rent") && (fileContent.includes("1200") || fileContent.includes("1200.0") || fileContent.includes("1200.00"));
-        return { passed, error: passed ? undefined : "Expense was not written to expenses.txt upon save." };
-      }
-    },
-    {
-      name: "Menu Navigation & Exit",
-      description: "App should display menu options and exit gracefully when option 5 is selected.",
-      inputs: ["5"],
-      verify: (stdout) => {
-        const passed = stdout.toLowerCase().includes("goodbye") || stdout.toLowerCase().includes("exit");
-        return { passed, error: passed ? undefined : "Program did not display menu or exit cleanly." };
-      }
-    },
-    {
-      name: "Program Stability",
-      description: "Program should handle invalid inputs and unexpected data without crashing.",
-      inputs: ["9", "5"],
-      verify: (stdout) => {
-        const passed = (stdout.toLowerCase().includes("invalid") || stdout.toLowerCase().includes("choice") || stdout.toLowerCase().includes("error")) &&
-                       (stdout.toLowerCase().includes("goodbye") || stdout.toLowerCase().includes("exit"));
-        return { passed, error: passed ? undefined : "Program did not handle invalid menu options gracefully." };
-      }
-    }
-  ],
-  todo_list: [
-    {
-      name: "Add Task to List",
-      description: "Adding 'Buy Milk' should save it with status '0' in 'todo.txt'.",
-      inputs: ["1", "Buy Milk", "5"],
-      verify: (_stdout, files) => {
-        const fileContent = files["todo.txt"] || "";
-        const lines = fileContent.split("\n").map(l => l.trim()).filter(Boolean);
-        const hasTask = lines.some(l => {
-          const [title, status] = l.split(",");
-          return title === "Buy Milk" && status === "0";
-        });
-        return { passed: hasTask, error: hasTask ? undefined : "Task not found in todo.txt with active status." };
-      }
-    },
-    {
-      name: "Mark Task Complete",
-      description: "Completing task should change its status to '1' in 'todo.txt'.",
-      inputs: ["3", "Read Book", "5"],
-      verify: (_stdout, files) => {
-        const fileContent = files["todo.txt"] || "";
-        const lines = fileContent.split("\n").map(l => l.trim()).filter(Boolean);
-        const isComplete = lines.some(l => {
-          const [title, status] = l.split(",");
-          return title === "Read Book" && status === "1";
-        });
-        return { passed: isComplete, error: isComplete ? undefined : "Task 'Read Book' was not marked complete." };
-      }
-    }
-  ],
-  quiz_app: [
-    {
-      name: "Full Quiz Execution",
-      description: "Complete the quiz and print final scorecard (e.g. 3/3).",
-      inputs: ["a", "b", "c"],
-      verify: (stdout) => {
-        const passed = stdout.includes("3/3") || stdout.includes("100%");
-        return { passed, error: passed ? undefined : "Did not output perfect score scorecard." };
-      }
-    },
-    {
-      name: "Mixed Quiz Scoring",
-      description: "Answering some questions wrong should output score 1/3.",
-      inputs: ["a", "a", "a"],
-      verify: (stdout) => {
-        const passed = stdout.includes("1/3") || stdout.includes("33");
-        return { passed, error: passed ? undefined : "Did not output correct score 1/3." };
-      }
-    }
-  ]
-};
-
-const SKILLS_MASTERED = [
-  'Variables', 'Input / Output', 'Conditions', 'Loops',
-  'Functions', 'Lists', 'Dictionaries', 'Strings', 'File Handling',
+const PYTHON_PROJECTS: CapstoneProject[] = [
+  {
+    id: 'py_task_manager',
+    title: 'CLI Task Manager',
+    description: 'Build a command-line to-do list that lets a user add, list, complete, and delete tasks, with everything saved to a file so tasks persist between runs.',
+    skills: ['Functions', 'Lists & Dictionaries', 'File Handling', 'Loops', 'Conditionals'],
+    difficulty: 'Beginner',
+    estimatedTime: '2-3 Hours',
+    goal: 'Write a Python program that manages a to-do list from the terminal: add tasks, mark them complete, delete them, and list them by status — with the task list saved to a file so it survives between program runs.',
+    features: [
+      'A menu loop that lets the user add, list, complete, and delete tasks until they choose to quit',
+      'Each task stored as a dictionary with at least a description and a completed flag',
+      'Tasks saved to a text or JSON file after every change, and loaded back in when the program starts',
+      'Listing tasks shows their status clearly (e.g. done vs. pending) and a task number to reference them by',
+      'Input validation: the program should not crash on a bad menu choice or an out-of-range task number',
+    ],
+    sampleFlow: [
+      'Program starts, loads any existing tasks from the save file (or starts with an empty list if none exists)',
+      'User is shown a menu: Add Task / List Tasks / Complete Task / Delete Task / Quit',
+      'User adds a few tasks, each one appended to the list and immediately saved to file',
+      'User lists tasks and sees pending vs. completed tasks distinguished',
+      'User marks a task complete by its number; the file is re-saved',
+      'User quits — the next time the program runs, all tasks are still there',
+    ],
+    requirements: [
+      'Repository must contain a single runnable Python script implementing the task manager.',
+      'Tasks must be represented as dictionaries (or a small class) with at minimum a description and completed status.',
+      'The program must read tasks from a file on startup and write tasks to a file after every add/complete/delete.',
+      'The menu loop must use a while loop and handle at least: add, list, complete, delete, and quit.',
+      'Listing tasks must clearly show which are completed and which are pending.',
+      'The program must not crash on invalid input (e.g. a non-numeric task number, or a number that does not exist).',
+    ],
+    guidelines: [
+      { title: 'Data Structure', description: 'Store tasks as a list of dictionaries, e.g. {"description": "...", "done": False}. This mirrors the Lists, Dictionaries, and Tuples & Sets lectures directly.' },
+      { title: 'Persistence', description: 'Use the json module to read/write the task list to a file, or a simple line-based text format if you prefer — either is fine as long as tasks survive a restart. This is the File Handling lecture in practice.' },
+      { title: 'Robustness', description: 'Wrap user input parsing (like converting a task number to an int) so a bad entry prints a friendly message and re-shows the menu instead of crashing the program.' },
+    ],
+    evaluationChecklist: [
+      { label: 'Menu loop works end-to-end', description: 'Add, list, complete, delete, and quit all function correctly.', check: () => true },
+      { label: 'Tasks persist to a file', description: 'Tasks are saved and reloaded correctly across runs.', check: () => true },
+      { label: 'Status is clearly shown', description: 'Completed vs. pending tasks are visually distinguishable when listed.', check: () => true },
+      { label: 'Handles bad input gracefully', description: 'No crash on invalid menu choices or task numbers.', check: () => true },
+    ]
+  },
+  {
+    id: 'py_text_adventure',
+    title: 'Text Adventure Game',
+    description: 'Build a small choose-your-own-path text adventure: the player moves between rooms, reads descriptions, and makes choices that change the outcome.',
+    skills: ['Dictionaries', 'Conditionals', 'Loops', 'Functions', 'String Operations'],
+    difficulty: 'Beginner',
+    estimatedTime: '2-3 Hours',
+    goal: 'Write a Python program that models at least 4 connected rooms or scenes as a dictionary-based map, lets the player move between them with text commands, and reaches at least two different endings depending on the choices made.',
+    features: [
+      'A "world" represented as a dictionary mapping room names to descriptions and available exits',
+      'A game loop that prints the current room description and prompts the player for a command',
+      'Movement commands (e.g. "go north", "go to library") that update the player\'s current room',
+      'At least one decision point where a choice affects which ending the player reaches',
+      'At least two distinct endings, and a clear game-over message when either is reached',
+    ],
+    sampleFlow: [
+      'Game starts in a starting room; its description is printed',
+      'Player types a command like "look" or "go north"',
+      'Program parses the command, updates state (current room, inventory, or flags) accordingly',
+      'Player reaches a decision point (e.g. "take the key" or "leave it") that sets a flag affecting the ending',
+      'Player continues moving through rooms until they reach an ending room',
+      'Program prints the appropriate ending message based on the choices made and exits the loop',
+    ],
+    requirements: [
+      'Repository must contain a single runnable Python script implementing the game.',
+      'The game world must be represented with dictionaries (rooms keyed by name, each with a description and exits).',
+      'The game loop must use a while loop that continues until an ending is reached.',
+      'The player must be able to move between at least 4 distinct rooms using typed commands.',
+      'At least one player choice must lead to one of at least two different endings.',
+      'String methods (e.g. .lower(), .strip()) should be used to normalize player input so commands aren\'t case-sensitive.',
+    ],
+    guidelines: [
+      { title: 'World Representation', description: 'A dictionary of dictionaries works well: {"hallway": {"description": "...", "exits": {"north": "library"}}}. This is a direct application of the Dictionaries lecture.' },
+      { title: 'Command Parsing', description: 'Normalize input with .lower().strip() before checking it, and use conditionals to branch on the command — directly exercises the Conditionals and String Operations lectures.' },
+      { title: 'Branching Endings', description: 'Track player choices with a simple flag or small inventory list, and check it at the end room to decide which ending message to print.' },
+    ],
+    evaluationChecklist: [
+      { label: 'World has 4+ connected rooms', description: 'Player can navigate between at least 4 distinct locations.', check: () => true },
+      { label: 'Commands are parsed robustly', description: 'Input is normalized so casing/whitespace doesn\'t break commands.', check: () => true },
+      { label: 'Choice affects the outcome', description: 'At least one decision changes which ending is reached.', check: () => true },
+      { label: 'Two or more distinct endings', description: 'The game can end in at least two different ways.', check: () => true },
+    ]
+  },
+  {
+    id: 'py_contact_book',
+    title: 'File-Based Contact Book',
+    description: 'Build a contact book that stores names, phone numbers, and emails, supports searching, and saves everything to a file between sessions.',
+    skills: ['File Handling', 'Dictionaries', 'String Operations', 'Functions', 'Input & Output'],
+    difficulty: 'Beginner',
+    estimatedTime: '2-3 Hours',
+    goal: 'Write a Python program that lets a user add, search, update, and delete contacts (name, phone, email), with the contact list saved to a file so it persists between runs, and search that works even with partial or differently-cased names.',
+    features: [
+      'A menu loop for adding, listing, searching, updating, and deleting contacts',
+      'Each contact stored as a dictionary with name, phone, and email fields',
+      'Contacts saved to a file (CSV, JSON, or plain text) after every change and reloaded on startup',
+      'Case-insensitive, partial-match search by name (e.g. searching "ana" finds "Ana Smith")',
+      'Basic validation that a phone number and email look reasonable before saving',
+    ],
+    sampleFlow: [
+      'Program loads existing contacts from the save file on startup',
+      'User adds a new contact, entering name, phone, and email',
+      'Contact is appended to the list and the file is immediately re-saved',
+      'User searches by a partial name and sees all matching contacts',
+      'User updates a contact\'s phone number, or deletes a contact entirely',
+      'Program exits; on next run, all changes are still there',
+    ],
+    requirements: [
+      'Repository must contain a single runnable Python script implementing the contact book.',
+      'Contacts must be stored as dictionaries (name, phone, email) inside a list.',
+      'The program must persist contacts to a file and reload them on startup.',
+      'Search must be case-insensitive and match partial names, not just exact full names.',
+      'The menu must support add, list all, search, update, and delete operations via a loop.',
+      'Basic validation should reject an obviously empty name or malformed entry rather than saving it silently.',
+    ],
+    guidelines: [
+      { title: 'Storage Format', description: 'JSON is the simplest persistence format for a list of dictionaries, but CSV via the csv module also works well — either satisfies the File Handling requirement.' },
+      { title: 'Search', description: 'Use string methods like .lower() and the in operator to implement case-insensitive partial matching — a direct application of the String Operations lecture.' },
+      { title: 'Editing in Place', description: 'When updating or deleting, find the matching contact\'s index in the list first, then modify or remove that entry, then re-save the whole file.' },
+    ],
+    evaluationChecklist: [
+      { label: 'Add/list/update/delete all work', description: 'Every CRUD operation functions correctly through the menu.', check: () => true },
+      { label: 'Contacts persist to a file', description: 'Contacts are saved and correctly reloaded across runs.', check: () => true },
+      { label: 'Search is case-insensitive and partial', description: 'Searching a lowercase substring finds matching contacts regardless of case.', check: () => true },
+      { label: 'Basic validation in place', description: 'Obviously invalid entries are rejected rather than silently saved.', check: () => true },
+    ]
+  },
+  {
+    id: 'py_budget_tracker',
+    title: 'Budget Tracker',
+    description: 'Build a personal budget tracker that records income and expenses, categorizes them, and reports totals and balances — with all entries saved to a file.',
+    skills: ['Operators', 'Lists & Dictionaries', 'File Handling', 'Functions', 'Conditionals'],
+    difficulty: 'Beginner',
+    estimatedTime: '2-3 Hours',
+    goal: 'Write a Python program that records income and expense entries (amount, category, description), calculates running totals and a balance, reports spending by category, and saves all entries to a file so history persists between runs.',
+    features: [
+      'A menu loop for adding an income entry, adding an expense entry, viewing a summary, and quitting',
+      'Each entry stored with an amount, a category, a short description, and a type (income or expense)',
+      'A summary report showing total income, total expenses, current balance, and a breakdown of expenses by category',
+      'All entries saved to a file after every change and reloaded when the program starts',
+      'Amounts are validated as numbers before being accepted (no crash on non-numeric input)',
+    ],
+    sampleFlow: [
+      'Program loads existing entries from the save file on startup and shows the current balance',
+      'User adds an income entry (e.g. "Salary", 2000) and an expense entry (e.g. "Groceries", 45.50)',
+      'Each entry is appended to the list and the file is re-saved immediately',
+      'User requests a summary and sees total income, total expenses, balance, and spend broken down by category',
+      'User adds a few more expenses in different categories',
+      'Summary is requested again, showing updated totals and per-category breakdown',
+    ],
+    requirements: [
+      'Repository must contain a single runnable Python script implementing the budget tracker.',
+      'Entries must be stored as dictionaries (amount, category, description, type) inside a list.',
+      'The program must persist entries to a file and reload them on startup.',
+      'The summary report must calculate total income, total expenses, and balance using arithmetic operators on the stored amounts.',
+      'The summary must break down total expenses by category (e.g. using a dictionary to accumulate per-category sums).',
+      'Amount input must be validated as a number; non-numeric input should not crash the program.',
+    ],
+    guidelines: [
+      { title: 'Totals', description: 'Loop over all entries and use + / - operators to accumulate income and expense totals separately, then compute balance = income - expenses — this is the Operators lecture applied directly.' },
+      { title: 'Category Breakdown', description: 'Use a dictionary keyed by category name, incrementing each category\'s running total as you loop through expense entries — combines Loops and Dictionaries.' },
+      { title: 'Input Validation', description: 'Wrap float(user_input) in a try/except (or check .replace(".", "").isdigit()) so a non-numeric amount reprompts instead of crashing.' },
+    ],
+    evaluationChecklist: [
+      { label: 'Income and expenses recorded correctly', description: 'Both entry types are captured with amount, category, and description.', check: () => true },
+      { label: 'Totals and balance are accurate', description: 'Summary math correctly reflects all entries.', check: () => true },
+      { label: 'Category breakdown is correct', description: 'Expenses are correctly grouped and summed by category.', check: () => true },
+      { label: 'Entries persist to a file', description: 'Entries are saved and reloaded correctly across runs.', check: () => true },
+    ]
+  },
 ];
 
-const STEPS = ['Choose Project', 'Requirements', 'Workspace', 'Submit'] as const;
+const CAPSTONE_PROJECTS_BY_COURSE: Record<string, CapstoneProject[]> = {
+  python20: PYTHON_PROJECTS,
+  'fundamentals-of-ai': AI_PROJECTS,
+};
+
+const SKILLS_MASTERED_BY_COURSE: Record<string, string[]> = {
+  python20: [
+    'Variables & Data Types', 'Conditionals', 'Loops', 'Functions',
+    'Lists & Dictionaries', 'String Operations', 'File Handling',
+  ],
+  'fundamentals-of-ai': [
+    'Search Algorithms', 'Propositional Logic', 'Inference', 'Machine Learning',
+    'NLP', 'Optimization', 'CSP', 'Heuristics', 'Model Evaluation',
+  ],
+};
+
+const STEPS = ['Choose Project', 'Before You Begin', 'Prepare Your Repo', 'Requirements', 'Submit Project', 'Certificate'] as const;
 type Step = typeof STEPS[number];
-
-function validateCapstoneProject(code: string, project: CapstoneProject) {
-  const cleanCode = code.split('\n').map(line => line.replace(/#.*$/, '')).join('\n');
-  const n = cleanCode.toLowerCase().replace(/\s/g, '');
-
-  const checks = [
-    { id: 'variables', label: 'Variables Usage', passed: /\b\w+\s*=/.test(cleanCode) },
-    { id: 'input_output', label: 'Input / Output Functions', passed: n.includes('input(') && n.includes('print(') },
-    { id: 'conditions', label: 'Conditional Logic (if/else)', passed: /\bif\b/.test(cleanCode) },
-    { id: 'loops', label: 'Looping Statements (for/while)', passed: /\bwhile\b|\bfor\b/.test(cleanCode) },
-  ];
-
-  if (project.skills.includes('Functions')) {
-    checks.push({ id: 'functions', label: 'Custom Functions (def)', passed: (cleanCode.match(/\bdef\b/g) || []).length >= 2 });
-  }
-  if (project.skills.includes('Lists')) {
-    checks.push({ id: 'lists', label: 'List Data Structures', passed: /\[.*\]/.test(cleanCode) });
-  }
-  if (project.skills.includes('Dictionaries')) {
-    checks.push({ id: 'dictionaries', label: 'Dictionaries usage', passed: n.includes('{}') || n.includes('dict(') || /\{[^}]+\}/.test(cleanCode) });
-  }
-  if (project.skills.includes('File Handling')) {
-    checks.push({ id: 'file_handling', label: 'File Operations (open)', passed: n.includes('open(') });
-  }
-
-  return { passed: checks.every(c => c.passed), checks };
-}
 
 export default function CapstonePage() {
   const { slug } = useParams<{ slug: string }>();
   const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   const navigate = useNavigate();
+  const PROJECTS = (slug && CAPSTONE_PROJECTS_BY_COURSE[slug]) || AI_PROJECTS;
+  const SKILLS_MASTERED = (slug && SKILLS_MASTERED_BY_COURSE[slug]) || SKILLS_MASTERED_BY_COURSE['fundamentals-of-ai'];
   const [step, setStep] = useState<Step>('Choose Project');
   const [selected, setSelected] = useState<CapstoneProject | null>(null);
   const [completedProjectId, setCompletedProjectId] = useState<string | null>(null);
-  const [code, setCode] = useState('# Write your Python project here\n');
-  const [lastLectureNumber, setLastLectureNumber] = useState<number | null>(null);
-  const [consoleEntries, setConsoleEntries] = useState<{ type: 'stdout' | 'stderr' | 'stdin-prompt' | 'stdin-value'; text: string }[]>([]);
-  const [awaitingInput, setAwaitingInput] = useState(false);
-  const [inputPrompt, setInputPrompt] = useState('');
-  const [inputBuffer, setInputBuffer] = useState('');
-  const [running, setRunning] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [githubUrl, setGithubUrl] = useState('');
   const [showCertificate, setShowCertificate] = useState(false);
-  const [splitRatio, setSplitRatio] = useState(60);
-  const [activeTab, setActiveTab] = useState<'console' | 'preview' | 'tests'>('console');
+  const [submissionReady, setSubmissionReady] = useState(false);
+  const [completing, setCompleting] = useState(false);
+
+  // Real AI-review pipeline — same endpoint Milestone uses, instead of the
+  // old synchronous /projects/complete call that skipped review entirely.
+  const activeStatus = useProjectStatus(selected?.id || 'none');
+  const isSubmitted = !!activeStatus.submission && activeStatus.submission.status !== 'NOT_SUBMITTED';
+  const isApproved = activeStatus.submission?.status === 'APPROVED';
+  const mainFile = selected ? deriveMainFile([selected.requirements[0], selected.description]) : null;
+
+  const handleSubmitProject = async () => {
+    if (!selected || !githubUrl || isSubmitted) return;
+    try {
+      await activeStatus.submitProject(githubUrl, 'Capstone submission');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleCompleteCapstone = async () => {
+    if (!slug || !selected || !isApproved) return;
+    setCompleting(true);
+    try {
+      await completeAction('project', selected.id);
+      await completeAction('course_complete', slug);
+      updateOverallProgress();
+      setCompletedProjectId(selected.id);
+    } catch (e) {
+      console.error('Failed to record completion', e);
+    } finally {
+      setCompleting(false);
+    }
+    setStep('Certificate');
+  };
   
-  // Test results state
-  const [isRunningTests, setIsRunningTests] = useState(false);
-  const [staticCheckResults, setStaticCheckResults] = useState<{ id: string; label: string; passed: boolean }[]>([]);
-  const [dynamicTestResults, setDynamicTestResults] = useState<{ name: string; description: string; passed: boolean | null; error?: string }[]>([]);
-
-  const dividerRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const consoleRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const dragging = useRef(false);
-  const generatorRef = useRef<Generator<ExecEvent, ExecResult, string> | null>(null);
-
-  // Auto-scroll console when entries change
-  useEffect(() => {
-    if (consoleRef.current) {
-      consoleRef.current.scrollTop = consoleRef.current.scrollHeight;
-    }
-  }, [consoleEntries]);
-
-  // Auto-focus input when waiting
-  useEffect(() => {
-    if (awaitingInput && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [awaitingInput]);
-
   useEffect(() => {
     if (!slug) return;
     api.courseLectures(slug)
       .then((lectures) => {
         if (lectures.length > 0) {
           const lastNum = lectures[lectures.length - 1].number;
-          setLastLectureNumber(lastNum);
-          
+
           // Fetch capstone project completion status
           authFetch<{ projectCompleted: boolean; projectId: string | null }>(`/progress/lecture/${slug}/${lastNum}`)
             .then((res) => {
@@ -591,206 +483,30 @@ export default function CapstonePage() {
   // Handle selected project changes
   useEffect(() => {
     if (selected) {
-      setCode(STARTER_CODE[selected.id] || '# Write your Python project here\n');
-      const staticChecks = validateCapstoneProject('', selected).checks.map(c => ({ ...c, passed: false }));
-      setStaticCheckResults(staticChecks);
-      
-      const dynSuite = TEST_SUITES[selected.id] || [];
-      setDynamicTestResults(dynSuite.map(tc => ({
-        name: tc.name,
-        description: tc.description,
-        passed: null
-      })));
-      setSubmitted(false);
       setShowCertificate(false);
-      setConsoleEntries([]);
+      setGithubUrl('');
     }
   }, [selected]);
 
-  function addEntry(entry: { type: 'stdout' | 'stderr' | 'stdin-prompt' | 'stdin-value'; text: string }) {
-    setConsoleEntries(prev => [...prev, entry]);
-  }
+  const stepIdx = STEPS.indexOf(step);
 
-  function stepGenerator(input?: string) {
-    const gen = generatorRef.current;
-    if (!gen) return;
-
-    try {
-      const { value, done } = input !== undefined ? gen.next(input) : gen.next();
-
-      if (done) {
-        generatorRef.current = null;
-        setRunning(false);
-        if (value?.error) {
-          addEntry({ type: 'stderr', text: value.error });
-        }
-        return;
-      }
-
-      if (value.type === 'stdout') {
-        addEntry({ type: 'stdout', text: value.text });
-        stepGenerator();
-      } else if (value.type === 'input') {
-        setInputPrompt(value.prompt);
-        setAwaitingInput(true);
-      } else if (value.type === 'stderr') {
-        addEntry({ type: 'stderr', text: value.text });
-        stepGenerator();
-      }
-    } catch (e) {
-      generatorRef.current = null;
-      setRunning(false);
-      addEntry({ type: 'stderr', text: String(e instanceof Error ? e.message : e) });
-    }
-  }
-
-  function handleRun() {
-    setConsoleEntries([]);
-    setAwaitingInput(false);
-    setInputPrompt('');
-    setRunning(true);
-    setActiveTab('console');
-
-    try {
-      const gen = runInteractive(code);
-      generatorRef.current = gen;
-      stepGenerator();
-    } catch (e) {
-      generatorRef.current = null;
-      setRunning(false);
-      addEntry({ type: 'stderr', text: String(e instanceof Error ? e.message : e) });
-    }
-  }
-
-  function handleInputSubmit() {
-    if (!awaitingInput) return;
-    const val = inputBuffer;
-    setInputBuffer('');
-    setAwaitingInput(false);
-    addEntry({ type: 'stdin-value', text: val + '\n' });
-    stepGenerator(val);
-  }
-
-  const outputString = useMemo(() => {
-    return consoleEntries
-      .filter(entry => entry.type === 'stdout')
-      .map(entry => entry.text)
-      .join('');
-  }, [consoleEntries]);
-
-  // Run the test suite on submission
-  const runTestSuiteAsync = async (project: CapstoneProject) => {
-    setActiveTab('tests');
-    setIsRunningTests(true);
-    
-    // 1. Run static checks
-    const staticRes = validateCapstoneProject(code, project);
-    setStaticCheckResults(staticRes.checks);
-    
-    // 2. Prepare test cases
-    const suite = TEST_SUITES[project.id] || [];
-    const results: { name: string; description: string; passed: boolean; error?: string }[] = [];
-    
-    for (const tc of suite) {
-      const filesToBackup = ["students.txt", "expenses.txt", "todo.txt"];
-      const backups: Record<string, string | null> = {};
-      for (const f of filesToBackup) {
-        backups[f] = localStorage.getItem(`fa_file_${f}`);
-      }
-      
-      try {
-        if (project.id === 'student_management') {
-          if (tc.name === "View Student Records") {
-            localStorage.setItem('fa_file_students.txt', 'Dave,B-\nEva,A\n');
-          } else if (tc.name === "Search Student Record") {
-            localStorage.setItem('fa_file_students.txt', 'Frank,C\n');
-          } else if (tc.name === "Delete Student Record") {
-            localStorage.setItem('fa_file_students.txt', 'Grace,A\n');
-          }
-        } else if (project.id === 'expense_tracker') {
-          if (tc.name === "View All Expenses" || tc.name === "Category Filtering") {
-            localStorage.setItem('fa_file_expenses.txt', '2026-06-15,Food,Pizza,15\n2026-06-15,Entertainment,Movie,12\n');
-          } else if (tc.name === "Spending Summary calculations") {
-            localStorage.setItem('fa_file_expenses.txt', '2026-06-15,Food,Pizza,15\n2026-06-15,Food,Burger,10\n');
-          }
-        } else if (project.id === 'todo_list') {
-          if (tc.name === "Mark Task Complete") {
-            localStorage.setItem('fa_file_todo.txt', 'Read Book,0\n');
-          }
-        }
-        
-        const { stdout, error } = runValidationTest(code, tc.inputs);
-        
-        if (error) {
-          results.push({
-            name: tc.name,
-            description: tc.description,
-            passed: false,
-            error: `Runtime error: ${error}`
-          });
-          continue;
-        }
-        
-        const filesAfter: Record<string, string | null> = {};
-        for (const f of filesToBackup) {
-          filesAfter[f] = localStorage.getItem(`fa_file_${f}`);
-        }
-        
-        const assertRes = tc.verify(stdout, filesAfter);
-        results.push({
-          name: tc.name,
-          description: tc.description,
-          passed: assertRes.passed,
-          error: assertRes.error
-        });
-      } catch (err) {
-        results.push({
-          name: tc.name,
-          description: tc.description,
-          passed: false,
-          error: `Execution error: ${String(err)}`
-        });
-      } finally {
-        for (const f of filesToBackup) {
-          if (backups[f] === null) {
-            localStorage.removeItem(`fa_file_${f}`);
-          } else {
-            localStorage.setItem(`fa_file_${f}`, backups[f]!);
-          }
-        }
-      }
-      
-      setDynamicTestResults([...results]);
-      await new Promise(r => setTimeout(r, 600)); // nice visual delay
-    }
-    
-    setIsRunningTests(false);
-    
-    const allStaticPassed = staticRes.passed;
-    const allDynamicPassed = results.every(r => r.passed);
-    
-    if (allStaticPassed && allDynamicPassed) {
-      setSubmitted(true);
-      setStep('Submit');
-      try {
-        if (slug && lastLectureNumber !== null) {
-          await authFetch('/projects/complete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ courseSlug: slug, lectureId: String(lastLectureNumber), projectId: project.id })
-          });
-        } else {
-          console.warn('Capstone completion skipped because lecture number is unknown');
-        }
-        await completeAction('project', project.id);
-        await completeAction('course_complete', slug ?? 'python');
-      } catch (e) {
-        console.error("Progress submission failed", e);
-      }
-    }
+  const difficultyStyles: Record<string, string> = {
+    'Beginner': 'bg-[rgba(34,197,94,0.1)] text-[var(--success)] border-[rgba(34,197,94,0.2)]',
+    'Easy': 'bg-[rgba(34,197,94,0.1)] text-[var(--success)] border-[rgba(34,197,94,0.2)]',
+    'Medium': 'bg-[rgba(34,197,94,0.1)] text-[var(--success)] border-[rgba(34,197,94,0.2)]',
+    'Intermediate': 'bg-[rgba(0,191,179,0.1)] text-[var(--brand-primary)] border-[rgba(0,191,179,0.2)]',
+    'Hard': 'bg-[rgba(59,130,246,0.1)] text-[var(--info)] border-[rgba(59,130,246,0.2)]',
+    'Advanced': 'bg-[rgba(59,130,246,0.1)] text-[var(--info)] border-[rgba(59,130,246,0.2)]',
   };
 
-  const stepIdx = STEPS.indexOf(step);
+  function DifficultyBadge({ difficulty }: { difficulty: string }) {
+    const s = difficultyStyles[difficulty] || difficultyStyles['Intermediate'];
+    return (
+      <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${s} border uppercase`}>
+        {difficulty}
+      </span>
+    );
+  }
 
 
   function goNext() {
@@ -803,184 +519,138 @@ export default function CapstonePage() {
     if (i > 0) setStep(STEPS[i - 1]);
   }
 
-  function handleDividerMouseDown(e: React.MouseEvent) {
-    e.preventDefault();
-    dragging.current = true;
-    document.addEventListener('mousemove', handleDividerMouseMove);
-    document.addEventListener('mouseup', handleDividerMouseUp);
-  }
-
-  function handleDividerMouseMove(e: MouseEvent) {
-    if (!dragging.current || !containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const y = e.clientY - rect.top;
-    const pct = (y / rect.height) * 100;
-    setSplitRatio(Math.max(25, Math.min(80, pct)));
-  }
-
-  function handleDividerMouseUp() {
-    dragging.current = false;
-    document.removeEventListener('mousemove', handleDividerMouseMove);
-    document.removeEventListener('mouseup', handleDividerMouseUp);
-  }
-
-  const requirementsTotal = selected?.requirements.length || 0;
-  let requirementsCompletedCount = 0;
-  if (selected) {
-    selected.requirements.forEach((_, i) => {
-      let satisfied = false;
-      if (selected.id === 'student_management') {
-        if (i === 0) satisfied = dynamicTestResults[0]?.passed === true;
-        if (i === 1) satisfied = dynamicTestResults[1]?.passed === true;
-        if (i === 2) satisfied = dynamicTestResults[3]?.passed === true;
-        if (i === 3) satisfied = staticCheckResults.find(c => c.id === 'dictionaries')?.passed === true;
-        if (i === 4) satisfied = staticCheckResults.find(c => c.id === 'file_handling')?.passed === true;
-        if (i === 5) satisfied = dynamicTestResults[1]?.passed === true;
-      } else if (selected.id === 'expense_tracker') {
-        if (i === 0) satisfied = staticCheckResults.find(c => c.id === 'file_handling')?.passed === true;
-        if (i === 1) satisfied = dynamicTestResults[0]?.passed === true;
-        if (i === 2) satisfied = dynamicTestResults[2]?.passed === true;
-        if (i === 3) satisfied = dynamicTestResults[3]?.passed === true;
-        if (i === 4) satisfied = dynamicTestResults[4]?.passed === true;
-      } else if (selected.id === 'quiz_app') {
-        if (i === 0) satisfied = staticCheckResults.find(c => c.id === 'dictionaries')?.passed === true;
-        if (i === 1) satisfied = staticCheckResults.find(c => c.id === 'loops')?.passed === true;
-        if (i === 2) satisfied = dynamicTestResults[0]?.passed === true;
-        if (i === 3) satisfied = dynamicTestResults[1]?.passed === true;
-      } else if (selected.id === 'todo_list') {
-        if (i === 0) satisfied = staticCheckResults.find(c => c.id === 'file_handling')?.passed === true;
-        if (i === 1) satisfied = staticCheckResults.find(c => c.id === 'loops')?.passed === true;
-        if (i === 2) satisfied = dynamicTestResults[1]?.passed === true;
-        if (i === 3) satisfied = staticCheckResults.find(c => c.id === 'lists')?.passed === true;
-        if (i === 4) satisfied = dynamicTestResults[1]?.passed === true;
-      }
-      if (satisfied) requirementsCompletedCount++;
-    });
-  }
-  const requirementsPercent = requirementsTotal > 0 ? Math.round((requirementsCompletedCount / requirementsTotal) * 100) : 0;
-
-  const evaluationTotal = selected?.evaluationChecklist.length || 0;
-  const evaluationPassedCount = selected?.evaluationChecklist.filter(item => item.check(staticCheckResults, dynamicTestResults)).length || 0;
-  const evaluationPercent = evaluationTotal > 0 ? Math.round((evaluationPassedCount / evaluationTotal) * 100) : 0;
+  
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col text-slate-100 font-sans">
+    <div className="min-h-screen bg-[var(--surface-page)] text-[var(--text-primary)] flex flex-col font-sans">
       {/* ── Top Bar ── */}
-      <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md flex-shrink-0 sticky top-0 z-40">
+      <header className="border-b border-[var(--border-light)] bg-[var(--surface-card)]/80 backdrop-blur-md flex-shrink-0 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
           <button
             onClick={() => navigate(`/course/${slug}`)}
-            className="text-xs text-slate-400 hover:text-white transition-all flex items-center gap-1 bg-slate-800/40 hover:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700/30 font-medium"
+            className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all flex items-center gap-1.5 bg-[var(--surface-container)] hover:bg-[var(--surface-card-hover)] px-3 py-1.5 rounded-lg border border-[var(--border-light)] font-medium"
           >
-            &larr; Exit Workspace
+            <ArrowLeft size={14} />
+            Back to Course
           </button>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-3">
             {STEPS.map((s, i) => (
               <div key={s} className="flex items-center">
                 <button
                   onClick={() => i <= stepIdx && setStep(s)}
-                  className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-all ${
-                    i === stepIdx
-                      ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
-                      : i < stepIdx
-                      ? 'text-emerald-400 hover:text-emerald-300'
-                      : 'text-slate-600 cursor-not-allowed'
+                  disabled={i > stepIdx}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                    i < stepIdx
+                      ? 'bg-[var(--brand-primary)] text-white'
+                      : i === stepIdx
+                      ? 'bg-[var(--brand-primary)] text-white ring-4 ring-[var(--brand-primary)]/20'
+                      : 'bg-transparent text-[var(--text-muted)] border-2 border-[var(--border-light)] cursor-not-allowed'
                   }`}
                 >
-                  {i < stepIdx && <Check size={12} className="inline mr-1 stroke-[3]" />}
-                  {s}
+                  {i < stepIdx ? <Check size={14} strokeWidth={3} /> : i + 1}
                 </button>
+                <span className={`ml-2 text-xs font-medium hidden sm:inline ${
+                  i <= stepIdx ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'
+                }`}>
+                  {s}
+                </span>
                 {i < STEPS.length - 1 && (
-                  <div className={`w-6 h-0.5 mx-1 ${i < stepIdx ? 'bg-emerald-500/30' : 'bg-slate-800'}`} />
+                  <div className={`w-6 h-0.5 mx-2 ${i < stepIdx ? 'bg-[var(--brand-primary)]/40' : 'bg-[var(--border-light)]'}`} />
                 )}
               </div>
             ))}
           </div>
 
-          <div className="w-[110px]" />
+          <div className="w-[100px]" />
         </div>
       </header>
 
       {/* ── Step 1: Choose Project ── */}
       {step === 'Choose Project' && (
-        <div className="flex-1 overflow-y-auto bg-gradient-to-b from-slate-950 to-slate-900">
+        <div className="flex-1 overflow-y-auto bg-gradient-to-b from-[#F8FCFD] to-[#EEF8FA]">
           <div className="max-w-5xl mx-auto px-6 py-12">
             {completedProjectId && (
-              <div className="mb-8 bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-start gap-3">
-                <ShieldAlert className="text-amber-500 shrink-0 mt-0.5" size={18} />
+              <div className="mb-8 bg-[var(--warning)]/10 border border-[var(--warning)]/30 rounded-2xl p-4 flex items-start gap-3">
+                <ShieldAlert className="text-[var(--warning)] shrink-0 mt-0.5" size={18} />
                 <div>
-                  <h4 className="text-sm font-bold text-amber-200">Capstone Project Locked</h4>
-                  <p className="text-xs text-amber-200/80 leading-relaxed mt-1">
+                  <h4 className="text-sm font-bold text-[var(--text-primary)]">Capstone Project Locked</h4>
+                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed mt-1">
                     You have already completed your capstone project. Only one capstone project can be submitted per course.
                   </p>
                 </div>
               </div>
             )}
-            <div className="text-center mb-12">
-              <span className="text-blue-500 font-semibold tracking-widest text-[10px] uppercase bg-blue-500/10 px-3 py-1.5 rounded-full border border-blue-500/25">
-                Capstone Challenge
-              </span>
-              <h1 className="text-4xl font-extrabold text-white mt-4 tracking-tight">
-                Select Your Final Project
-              </h1>
-              <p className="text-sm text-slate-400 max-w-lg mx-auto leading-relaxed mt-2">
-                Demonstrate your programming mastery. Select one of the projects below to build in your interactive coding sandbox.
-              </p>
+
+            {/* ── Hero Section ── */}
+            <div className="relative overflow-hidden mb-16">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[var(--brand-primary)]/[0.06] rounded-full blur-3xl pointer-events-none" />
               
-              <div className="flex flex-wrap justify-center gap-2 mt-8 max-w-3xl mx-auto">
-                {SKILLS_MASTERED.map(s => (
-                  <span key={s} className="flex items-center gap-1.5 text-xs text-slate-300 bg-slate-900/60 border border-slate-800/80 px-3.5 py-2 rounded-xl">
-                    <CheckCircle size={13} className="text-emerald-400" />
-                    {s}
-                  </span>
-                ))}
+              <div className="relative text-center">
+                <span className="text-[10px] font-semibold tracking-[0.2em] uppercase text-[var(--brand-primary)] bg-[rgba(0,191,179,0.08)] px-4 py-1.5 rounded-full border border-[rgba(0,191,179,0.2)]">
+                  Capstone Challenge
+                </span>
+                <h1 className="text-4xl font-extrabold mt-5 tracking-tight">
+                  Select Your <span className="text-[var(--brand-primary)]">Final Project</span>
+                </h1>
+                <p className="text-sm text-[var(--text-secondary)] max-w-lg mx-auto leading-relaxed mt-3">
+                  Demonstrate what you've learned. Select one of the projects below to complete and submit via GitHub.
+                </p>
+                
+                <div className="flex flex-wrap justify-center gap-2 mt-8 max-w-3xl mx-auto">
+                  {SKILLS_MASTERED.map(s => (
+                    <span key={s} className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] bg-[var(--surface-container)] border border-[var(--border-light)] px-3.5 py-2 rounded-xl transition-all hover:bg-[var(--brand-primary)] hover:text-white hover:border-[var(--brand-primary)] cursor-default">
+                      <CheckCircle size={13} className="text-[var(--success)]" />
+                      {s}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
 
+            {/* ── Project Cards ── */}
             <div className="grid gap-6 md:grid-cols-2">
               {PROJECTS.map(p => {
                 const isSelected = selected?.id === p.id;
-                const isLocked = completedProjectId !== null && completedProjectId !== p.id;
+                const isLocked = !isAdmin && completedProjectId !== null && completedProjectId !== p.id;
                 return (
                   <div
                     key={p.id}
-                    className={`rounded-2xl border transition-all duration-300 p-6 flex flex-col justify-between ${
+                    onClick={() => !isLocked && setSelected(p)}
+                    className={`rounded-2xl border transition-all duration-300 p-6 flex flex-col justify-between cursor-pointer ${
                       isSelected
-                        ? 'border-blue-500 bg-blue-950/20 shadow-[0_0_30px_rgba(59,130,246,0.15)]'
+                        ? 'border-2 border-[var(--brand-primary)] bg-[var(--surface-card)] shadow-[0_0_30px_rgba(0,191,179,0.12)]'
                         : isLocked
-                        ? 'border-slate-900 bg-slate-950/50 opacity-40'
-                        : 'border-slate-800 bg-slate-900/40 hover:border-slate-700/60 hover:bg-slate-900/60'
+                        ? 'border-[var(--border-medium)] bg-[var(--surface-card)] opacity-50 cursor-not-allowed'
+                        : 'border-[var(--border-medium)] bg-[var(--surface-card)] hover:-translate-y-1.5 hover:shadow-lg hover:border-[var(--brand-primary)]'
                     }`}
                   >
                     <div>
                       <div className="flex justify-between items-start gap-2 mb-3">
-                        <h3 className="text-lg font-bold text-white tracking-tight">{p.title}</h3>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase">
-                          {p.difficulty}
-                        </span>
+                        <h3 className="text-lg font-bold text-[var(--text-primary)] tracking-tight">{p.title}</h3>
+                        <DifficultyBadge difficulty={p.difficulty} />
                       </div>
-                      <p className="text-xs text-slate-400 leading-relaxed mb-6">{p.description}</p>
+                      <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-5">{p.description}</p>
                       
-                      <div className="mb-6">
-                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Key Concepts Tested</span>
+                      <div className="mb-5">
+                        <span className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-widest block mb-2">Key Concepts</span>
                         <div className="flex flex-wrap gap-1.5">
                           {p.skills.map(s => (
-                            <span key={s} className="text-[10px] font-medium px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700/30">{s}</span>
+                            <span key={s} className="text-[10px] font-medium px-2.5 py-1 rounded-lg bg-[var(--surface-container)] text-[var(--text-secondary)] border border-[var(--border-light)]">{s}</span>
                           ))}
                         </div>
                       </div>
                     </div>
 
                     <button
-                      onClick={() => setSelected(p)}
+                      onClick={(e) => { e.stopPropagation(); if (!isLocked) setSelected(p); }}
                       disabled={isLocked}
                       className={`w-full text-xs font-bold py-3 rounded-xl transition-all border ${
                         isLocked
-                          ? 'bg-slate-900 text-slate-500 border-slate-800/80 cursor-not-allowed'
+                          ? 'bg-[var(--surface-container)] text-[var(--text-muted)] border-[var(--border-light)] cursor-not-allowed'
                           : isSelected
-                          ? 'bg-blue-600 hover:bg-blue-500 text-white border-blue-600 shadow-lg shadow-blue-500/20'
-                          : 'bg-transparent text-slate-300 border-slate-700 hover:border-slate-500 hover:text-white'
+                          ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-md shadow-[var(--brand-primary)]/20'
+                          : 'bg-white text-[var(--text-primary)] border-[var(--border-medium)] hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)]'
                       }`}
                     >
                       {isLocked ? 'Locked' : (isSelected ? 'Selected' : 'Select Project')}
@@ -990,17 +660,49 @@ export default function CapstonePage() {
               })}
             </div>
 
-            <div className="flex justify-end mt-12 pt-6 border-t border-slate-900">
+            {/* ── Selected Project Details ── */}
+            {selected && (
+              <div className="mt-8 bg-[var(--surface-card)] border border-[var(--border-medium)] rounded-2xl p-6 shadow-sm">
+                <div className="grid md:grid-cols-4 gap-6">
+                  <div>
+                    <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Estimated Time</span>
+                    <p className="text-sm font-semibold text-[var(--text-primary)] mt-1.5">{selected.estimatedTime}</p>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Difficulty</span>
+                    <div className="mt-1.5"><DifficultyBadge difficulty={selected.difficulty} /></div>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Skills</span>
+                    <div className="flex flex-wrap gap-1.5 mt-1.5">
+                      {selected.skills.map(s => (
+                        <span key={s} className="text-[10px] font-medium px-2 py-0.5 rounded bg-[var(--surface-container)] text-[var(--text-secondary)] border border-[var(--border-light)]">{s}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">What You'll Build</span>
+                    <p className="text-xs text-[var(--text-secondary)] mt-1.5 leading-relaxed">{selected.goal.slice(0, 100)}...</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── Footer ── */}
+            <div className="flex items-center justify-between mt-10 pt-6 border-t border-[var(--border-light)]">
+              <p className="text-xs text-[var(--text-muted)]">
+                {selected ? `${selected.title} selected` : 'Select a project to continue'}
+              </p>
               <button
                 onClick={goNext}
                 disabled={!selected}
                 className={`inline-flex items-center gap-2 text-xs font-bold px-6 py-3 rounded-xl transition-all ${
                   selected 
-                    ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/15' 
-                    : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/30'
+                    ? 'bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] text-white shadow-md shadow-[var(--brand-primary)]/20' 
+                    : 'bg-[var(--surface-container)] text-[var(--text-muted)] border border-[var(--border-light)] cursor-not-allowed'
                 }`}
               >
-                Configure Requirements
+                Before You Begin
                 <ChevronRight size={14} />
               </button>
             </div>
@@ -1008,66 +710,120 @@ export default function CapstonePage() {
         </div>
       )}
 
-      {/* ── Step 2: Requirements ── */}
+      {/* ── Step 2: Before You Begin ── */}
+      {step === 'Before You Begin' && selected && (
+        <div className="flex-1 overflow-y-auto bg-[var(--surface-page)]">
+          <div className="max-w-3xl mx-auto px-6 py-12 space-y-6">
+            <div className="text-center md:text-left mb-2">
+              <span className="text-xs text-[var(--brand-primary)] font-bold uppercase tracking-widest">Your Final Project</span>
+              <h2 className="text-2xl font-extrabold text-[var(--text-primary)] mt-1">Why this matters</h2>
+              <p className="text-sm text-[var(--text-secondary)] mt-2 leading-relaxed">
+                This capstone becomes part of your portfolio — a real, verifiable project employers can look at, not just a completion checkmark.
+              </p>
+            </div>
+            <ProjectOverviewCard
+              title={selected.title}
+              goal={selected.goal}
+              skills={selected.skills}
+              difficulty={selected.difficulty}
+              estimatedTime={selected.estimatedTime}
+              framing="capstone"
+            />
+            <div className="flex items-center justify-between pt-2">
+              <button onClick={goPrev} className="text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all bg-white hover:bg-[var(--surface-card-hover)] px-4 py-2 rounded-xl border border-[var(--border-medium)]">
+                &larr; Switch Project
+              </button>
+              <button onClick={goNext} className="inline-flex items-center gap-2 text-xs font-bold px-6 py-3 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] text-white shadow-md shadow-[var(--brand-primary)]/20 transition-all">
+                Prepare Your Repo <ChevronRight size={14} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Step 3: Prepare Your Repo ── */}
+      {step === 'Prepare Your Repo' && selected && (
+        <div className="flex-1 overflow-y-auto bg-[var(--surface-page)]">
+          <div className="max-w-3xl mx-auto px-6 py-12 space-y-6">
+            <FileGuideStep mainFile={mainFile} />
+            <GitHubGuideStep />
+            <ReadmeTemplateStep projectTitle={selected.title} />
+            <CommonMistakesCard />
+            <div className="flex items-center justify-between pt-2">
+              <button onClick={goPrev} className="text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all bg-white hover:bg-[var(--surface-card-hover)] px-4 py-2 rounded-xl border border-[var(--border-medium)]">
+                &larr; Back
+              </button>
+              <button onClick={goNext} className="inline-flex items-center gap-2 text-xs font-bold px-6 py-3 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] text-white shadow-md shadow-[var(--brand-primary)]/20 transition-all">
+                Configure Requirements <ChevronRight size={14} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Step 4: Requirements ── */}
       {step === 'Requirements' && (
-        <div className="flex-1 overflow-y-auto bg-gradient-to-b from-slate-950 to-slate-900">
+        <div className="flex-1 overflow-y-auto bg-[var(--surface-page)]">
           <div className="max-w-4xl mx-auto px-6 py-12">
             <div className="mb-10 text-center md:text-left">
-              <span className="text-xs text-blue-500 font-bold uppercase tracking-widest">Requirements & Scope</span>
-              <h2 className="text-3xl font-extrabold text-white mt-1">{selected?.title}</h2>
+              <span className="text-xs text-[var(--brand-primary)] font-bold uppercase tracking-widest">Requirements & Scope</span>
+              <h2 className="text-3xl font-extrabold text-[var(--text-primary)] mt-1">{selected?.title}</h2>
             </div>
 
             <div className="space-y-8">
-              <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Core Objective</h3>
-                <p className="text-sm text-slate-300 leading-relaxed font-light">{selected?.goal}</p>
+              <div className="bg-[var(--surface-card)] border border-[var(--border-medium)] p-6 rounded-2xl shadow-sm">
+                <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-3">Core Objective</h3>
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-light">{selected?.goal}</p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
-                <div className="rounded-2xl border border-slate-800 bg-slate-900/20 p-6">
-                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <CheckSquare size={14} className="text-emerald-400" />
+                <div className="rounded-2xl border border-[var(--border-medium)] bg-[var(--surface-card)] p-6 shadow-sm">
+                  <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <CheckSquare size={14} className="text-[var(--brand-primary)]" />
                     Technical Checklist
                   </h3>
                   <div className="space-y-3">
                     {selected?.features.map((f, i) => (
-                      <div key={i} className="flex items-start gap-3 text-xs leading-relaxed text-slate-300">
-                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0" />
+                      <div key={i} className="flex items-start gap-3 text-xs leading-relaxed text-[var(--text-secondary)]">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[var(--brand-primary)] mt-1.5 flex-shrink-0" />
                         <span>{f}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-slate-800 bg-slate-900/20 p-6">
-                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <Terminal size={14} className="text-blue-400" />
+                <div className="rounded-2xl border border-[var(--border-medium)] bg-[var(--surface-card)] p-6 shadow-sm">
+                  <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <Terminal size={14} className="text-[var(--brand-primary)]" />
                     Expected Program Execution Flow
                   </h3>
                   <div className="space-y-3">
                     {selected?.sampleFlow.map((s, i) => (
-                      <div key={i} className="flex items-start gap-3 text-xs leading-relaxed text-slate-400">
-                        <span className="font-bold text-blue-400 min-w-[14px]">{i + 1}.</span>
+                      <div key={i} className="flex items-start gap-3 text-xs leading-relaxed text-[var(--text-secondary)]">
+                        <span className="font-bold text-[var(--brand-primary)] min-w-[14px]">{i + 1}.</span>
                         <span>{s}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
+
+              {selected && <TaskChecklist projectId={selected.id} tasks={selected.requirements} />}
+              <TestLocallyStep mainFile={mainFile} />
             </div>
 
-            <div className="flex items-center justify-between mt-12 pt-6 border-t border-slate-900">
-              <button 
-                onClick={goPrev} 
-                className="text-xs font-bold text-slate-400 hover:text-white transition-all bg-slate-800/30 hover:bg-slate-800 px-4 py-2 rounded-xl border border-slate-700/20"
+            <div className="flex items-center justify-between mt-12 pt-6 border-t border-[var(--border-light)]">
+              <button
+                onClick={goPrev}
+                className="text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all bg-white hover:bg-[var(--surface-card-hover)] px-4 py-2 rounded-xl border border-[var(--border-medium)]"
               >
-                &larr; Switch Project
+                &larr; Back
               </button>
               <button
                 onClick={goNext}
-                className="inline-flex items-center gap-2 text-xs font-bold px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/15 transition-all"
+                className="inline-flex items-center gap-2 text-xs font-bold px-6 py-3 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] text-white shadow-md shadow-[var(--brand-primary)]/20 transition-all"
               >
-                Launch Workspace
+                Submit Project
                 <ChevronRight size={14} />
               </button>
             </div>
@@ -1075,481 +831,161 @@ export default function CapstonePage() {
         </div>
       )}
 
-      {/* ── Step 3: Workspace ── */}
-      {step === 'Workspace' && (
-        <div className="flex-1 flex overflow-hidden">
-          {/* Left Panel: Project Scope */}
-          <aside className="w-[420px] flex-shrink-0 border-r border-slate-900 bg-slate-950 overflow-y-auto flex flex-col justify-between">
-            <div className="p-5 space-y-6">
-              {/* Header */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold px-2.5 py-1 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase tracking-wider">
-                    {selected?.difficulty}
-                  </span>
-                  <span className="text-[10px] font-medium text-slate-400 bg-slate-900 px-2 py-1 rounded border border-slate-800">
-                    Est. Time: {selected?.estimatedTime}
-                  </span>
+      {/* ── Step 5: Submit Project ── */}
+      {step === 'Submit Project' && (
+        <div className="flex-1 overflow-y-auto bg-[var(--surface-page)] p-6 md:p-10">
+          <div className="max-w-3xl mx-auto space-y-8">
+            {/* Project Summary Card */}
+            <div className="rounded-2xl border border-[var(--border-medium)] bg-[var(--surface-card)] p-6 space-y-4 shadow-sm">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-[var(--text-primary)]">{selected?.title}</h3>
+                  <p className="text-sm text-[var(--text-secondary)] mt-1">{selected?.description}</p>
                 </div>
-                <h3 className="text-xl font-extrabold text-white tracking-tight">{selected?.title}</h3>
-                
-                {/* Tech Tags */}
-                <div className="flex flex-wrap gap-1.5">
-                  {selected?.skills.map(skill => (
-                    <span key={skill} className="text-[10px] font-medium px-2.5 py-1 rounded-lg bg-slate-900 text-slate-300 border border-slate-800">
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-                
-                <p className="text-xs text-slate-400 leading-relaxed font-light mt-2 bg-slate-900/40 p-3 rounded-xl border border-slate-900">
-                  {selected?.description}
-                </p>
+                {selected && <DifficultyBadge difficulty={selected.difficulty} />}
               </div>
-
-              {/* Section 1: Requirements */}
-              <div className="border-t border-slate-900 pt-5">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                    <span className="text-base">📋</span> Requirements
-                  </h4>
-                  <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                    {requirementsPercent}% Done
+              <div className="flex flex-wrap gap-1.5">
+                {selected?.skills.map(skill => (
+                  <span key={skill} className="text-[10px] font-medium px-2.5 py-1 rounded-lg bg-[var(--surface-container)] text-[var(--text-secondary)] border border-[var(--border-light)]">
+                    {skill}
                   </span>
-                </div>
-                {/* Progress Bar */}
-                <div className="w-full bg-slate-900 rounded-full h-1.5 mb-4 overflow-hidden border border-slate-800">
-                  <div 
-                    className="bg-gradient-to-r from-blue-500 to-emerald-500 h-1.5 rounded-full transition-all duration-500" 
-                    style={{ width: `${requirementsPercent}%` }}
-                  />
-                </div>
-                <div className="space-y-2.5">
-                  {selected?.requirements.map((req, i) => {
-                    let satisfied = false;
-                    if (selected?.id === 'student_management') {
-                      if (i === 0) satisfied = dynamicTestResults[0]?.passed === true; // Menu works
-                      if (i === 1) satisfied = dynamicTestResults[1]?.passed === true; // Add works
-                      if (i === 2) satisfied = dynamicTestResults[3]?.passed === true; // Search works
-                      if (i === 3) satisfied = staticCheckResults.find(c => c.id === 'dictionaries')?.passed === true; // Delete dictionary
-                      if (i === 4) satisfied = staticCheckResults.find(c => c.id === 'file_handling')?.passed === true; // Load data
-                      if (i === 5) satisfied = dynamicTestResults[1]?.passed === true; // Save data
-                    } else if (selected?.id === 'expense_tracker') {
-                      if (i === 0) satisfied = staticCheckResults.find(c => c.id === 'file_handling')?.passed === true;
-                      if (i === 1) satisfied = dynamicTestResults[0]?.passed === true;
-                      if (i === 2) satisfied = dynamicTestResults[2]?.passed === true;
-                      if (i === 3) satisfied = dynamicTestResults[3]?.passed === true;
-                      if (i === 4) satisfied = dynamicTestResults[4]?.passed === true;
-                    } else if (selected?.id === 'quiz_app') {
-                      if (i === 0) satisfied = staticCheckResults.find(c => c.id === 'dictionaries')?.passed === true;
-                      if (i === 1) satisfied = staticCheckResults.find(c => c.id === 'loops')?.passed === true;
-                      if (i === 2) satisfied = dynamicTestResults[0]?.passed === true;
-                      if (i === 3) satisfied = dynamicTestResults[1]?.passed === true;
-                    } else if (selected?.id === 'todo_list') {
-                      if (i === 0) satisfied = staticCheckResults.find(c => c.id === 'file_handling')?.passed === true;
-                      if (i === 1) satisfied = staticCheckResults.find(c => c.id === 'loops')?.passed === true;
-                      if (i === 2) satisfied = dynamicTestResults[1]?.passed === true;
-                      if (i === 3) satisfied = staticCheckResults.find(c => c.id === 'lists')?.passed === true;
-                      if (i === 4) satisfied = dynamicTestResults[1]?.passed === true;
-                    }
-
-                    return (
-                      <div 
-                        key={i} 
-                        className={`flex gap-3 p-3 rounded-xl border transition-all duration-300 ${
-                          satisfied 
-                            ? 'bg-emerald-500/5 border-emerald-500/20 text-slate-200' 
-                            : 'bg-slate-900/20 border-slate-900 text-slate-400 hover:border-slate-800'
-                        }`}
-                      >
-                        <div className="mt-0.5 flex-shrink-0">
-                          {satisfied ? (
-                            <CheckCircle size={14} className="text-emerald-400 stroke-[2.5]" />
-                          ) : (
-                            <div className="w-3.5 h-3.5 rounded-full border border-slate-700 bg-slate-900" />
-                          )}
-                        </div>
-                        <span className="text-xs leading-normal">{req}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Section 2: Implementation Guidelines */}
-              <div className="border-t border-slate-900 pt-5">
-                <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <span className="text-base">💡</span> Implementation Guidelines
-                </h4>
-                <div className="space-y-3 bg-slate-900/30 p-4 rounded-xl border border-slate-900">
-                  {selected?.guidelines.map((guide, i) => (
-                    <div key={i} className="space-y-1">
-                      <h5 className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                        {guide.title}
-                      </h5>
-                      <p className="text-[11px] text-slate-400 leading-normal pl-3">
-                        {guide.description}
-                      </p>
-                    </div>
-                  ))}
-                  
-                  {/* Subtle tips helper block */}
-                  <div className="border-t border-slate-800/60 pt-3 mt-1 space-y-1.5">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Pro Engineering Tips:</span>
-                    <ul className="text-[10px] text-slate-500 space-y-1 list-disc pl-3 leading-normal">
-                      <li>Divide logic into self-contained functions.</li>
-                      <li>Handle edge cases (e.g. empty lists, invalid inputs).</li>
-                      <li>Double-check file reading mode vs write mode flags.</li>
-                      <li>Save session progress immediately after mutations.</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              {/* Section 3: Evaluation Checklist */}
-              <div className="border-t border-slate-900 pt-5">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                    <span className="text-base">✅</span> Evaluation Checklist
-                  </h4>
-                  <span className="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
-                    {evaluationPassedCount}/{evaluationTotal} Passed
-                  </span>
-                </div>
-                {/* Progress Bar */}
-                <div className="w-full bg-slate-900 rounded-full h-1.5 mb-4 overflow-hidden border border-slate-800">
-                  <div 
-                    className="bg-gradient-to-r from-blue-500 to-indigo-500 h-1.5 rounded-full transition-all duration-500" 
-                    style={{ width: `${evaluationPercent}%` }}
-                  />
-                </div>
-                <div className="space-y-2">
-                  {selected?.evaluationChecklist.map((item, i) => {
-                    const passed = item.check(staticCheckResults, dynamicTestResults);
-                    return (
-                      <div 
-                        key={i} 
-                        className={`flex items-center justify-between text-xs px-3.5 py-2.5 rounded-xl border transition-all ${
-                          passed 
-                            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300 font-semibold' 
-                            : 'bg-slate-900/60 border-slate-800/40 text-slate-400'
-                        }`}
-                      >
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-slate-200">{item.label}</p>
-                          <p className="text-[10px] text-slate-500 font-normal truncate max-w-[280px]">{item.description}</p>
-                        </div>
-                        {passed ? (
-                          <span className="text-emerald-400 font-bold bg-emerald-500/20 px-2 py-0.5 rounded text-[10px] border border-emerald-500/25 flex items-center gap-1">
-                            <Check size={10} className="stroke-[3]" /> Passed
-                          </span>
-                        ) : (
-                          <span className="text-slate-500 font-medium bg-slate-800/60 px-2 py-0.5 rounded text-[10px] border border-slate-800">
-                            Pending
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+                ))}
               </div>
             </div>
 
-            <div className="h-4" />
-          </aside>
+            {/* Requirements Summary */}
+            <div className="rounded-2xl border border-[var(--border-medium)] bg-[var(--surface-card)] p-6 shadow-sm">
+              <h4 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-4">Requirements</h4>
+              <ul className="space-y-2">
+                {selected?.requirements.map((req, i) => (
+                  <li key={i} className="flex gap-3 text-sm text-[var(--text-secondary)]">
+                    <CheckCircle size={14} className="text-[var(--text-muted)] mt-0.5 flex-shrink-0" />
+                    <span>{req}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          {/* Right Panel: Code Workspace */}
-          <div ref={containerRef} className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-950">
-            {completedProjectId !== null && selected?.id !== completedProjectId && (
-              <div className="bg-amber-500/10 border-b border-amber-500/25 px-4 py-3 flex items-start gap-2.5 flex-shrink-0">
-                <ShieldAlert size={15} className="text-amber-500 shrink-0 mt-0.5" />
-                <p className="text-[11px] text-amber-200/90 leading-relaxed font-medium">
-                  You have already completed your capstone project. Only one capstone project can be submitted per course.
-                </p>
-              </div>
-            )}
-            {/* Workspace Header toolbar */}
-            <div className="h-12 flex items-center justify-between px-4 bg-slate-900 border-b border-slate-850 flex-shrink-0">
-              <div className="flex items-center gap-2">
-                <FileText size={14} className="text-blue-500" />
-                <span className="text-xs font-semibold text-slate-300">main.py</span>
-              </div>
-              <div className="flex items-center gap-2">
+            {!isSubmitted && <SubmissionChecklist onAllChecked={setSubmissionReady} />}
+
+            {/* GitHub Submission Form */}
+            <div className="rounded-2xl border border-[var(--border-medium)] bg-[var(--surface-card)] p-6 shadow-sm">
+              <h4 className="text-sm font-bold text-[var(--text-primary)] mb-2">Submit Your Project</h4>
+              <p className="text-xs text-[var(--text-secondary)] mb-5">
+                Push your completed project to a GitHub repository and submit the link below. This is your final capstone submission — it goes through the same AI review as milestone projects.
+              </p>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-medium text-[var(--text-secondary)] mb-1.5 block">
+                    GitHub Repository URL
+                  </label>
+                  <input
+                    type="text"
+                    value={githubUrl}
+                    onChange={e => setGithubUrl(e.target.value)}
+                    placeholder="https://github.com/your-username/your-repo"
+                    className="w-full bg-[var(--surface-card)] border border-[var(--border-medium)] rounded-lg px-4 py-2.5 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]/40 focus:border-[var(--brand-primary)]/40"
+                    disabled={isSubmitted}
+                  />
+                  {githubUrl && !/^https:\/\/github\.com\//.test(githubUrl) && (
+                    <p className="text-xs text-[var(--danger)] mt-1.5">URL must start with https://github.com/</p>
+                  )}
+                  {!isSubmitted && !submissionReady && (
+                    <p className="text-xs text-[var(--text-muted)] mt-1.5">Check off everything above before you can submit.</p>
+                  )}
+                </div>
+
                 <button
-                  onClick={handleRun}
-                  disabled={completedProjectId !== null && selected?.id !== completedProjectId}
-                  className={`inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-1.5 rounded-lg border transition-all ${
-                    completedProjectId !== null && selected?.id !== completedProjectId
-                      ? 'bg-slate-900 text-slate-650 border-slate-800/80 cursor-not-allowed'
-                      : 'bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border-emerald-600/30'
+                  onClick={handleSubmitProject}
+                  disabled={isSubmitted || !githubUrl || activeStatus.loading || !submissionReady}
+                  className={`w-full flex items-center justify-center gap-2 text-sm font-bold px-6 py-3 rounded-xl transition-all ${
+                    isSubmitted
+                      ? 'bg-[var(--success)]/10 text-[var(--success)] border border-[var(--success)]/30 cursor-default'
+                      : !githubUrl || !submissionReady
+                      ? 'bg-[var(--surface-container)] text-[var(--text-muted)] border border-[var(--border-light)] cursor-not-allowed'
+                      : 'bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] text-white border border-[var(--brand-primary)] shadow-md shadow-[var(--brand-primary)]/20'
                   }`}
                 >
-                  <Play size={12} className={completedProjectId !== null && selected?.id !== completedProjectId ? 'fill-slate-600/20' : 'fill-emerald-400/20'} />
-                  Run Code
-                </button>
-                <button
-                  onClick={() => selected && runTestSuiteAsync(selected)}
-                  disabled={submitted || isRunningTests || (completedProjectId !== null && selected?.id !== completedProjectId)}
-                  className={`inline-flex items-center gap-1.5 text-xs font-bold px-4 py-1.5 rounded-lg transition-all border ${
-                    submitted || (completedProjectId !== null && selected?.id !== completedProjectId)
-                      ? 'bg-slate-800 text-slate-500 border-slate-700/30 cursor-not-allowed' 
-                      : 'bg-blue-600 hover:bg-blue-500 text-white border-blue-500 shadow-lg shadow-blue-500/15'
-                  }`}
-                >
-                  {isRunningTests ? (
-                    <>
-                      <Loader2 size={12} className="animate-spin" />
-                      Testing...
-                    </>
+                  {isSubmitted ? (
+                    <><CheckCircle size={16} /> Project Submitted</>
                   ) : (
-                    <>
-                      <CheckSquare size={12} />
-                      Submit Solution
-                    </>
+                    <><Send size={16} /> Submit Project</>
                   )}
                 </button>
+
+                {activeStatus.error && (
+                  <div className="p-3 rounded-xl bg-[var(--danger)]/10 border border-[var(--danger)]/20 text-sm text-[var(--danger)]">
+                    {activeStatus.error}
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Monaco Editor Container */}
-            <div className="flex-shrink-0 overflow-hidden relative" style={{ height: `${splitRatio}%` }}>
-              <MonacoEditor
-                height="100%"
-                language="python"
-                theme="vs-dark"
-                value={code}
-                onChange={(val) => setCode(val ?? '')}
-                options={{
-                  minimap: { enabled: false },
-                  fontSize: 13,
-                  lineNumbers: 'on',
-                  scrollBeyondLastLine: false,
-                  padding: { top: 12 },
-                  automaticLayout: true,
-                }}
-              />
-            </div>
-
-            {/* Resizable Split Divider */}
-            <div
-              ref={dividerRef}
-              onMouseDown={handleDividerMouseDown}
-              className="flex-shrink-0 h-1.5 bg-slate-900 hover:bg-blue-500 cursor-row-resize transition-all relative z-10"
+            <ReviewPipelineStatus
+              status={activeStatus.submission?.status}
+              feedback={activeStatus.submission?.feedback}
+              score={activeStatus.submission?.score}
             />
 
-            {/* Bottom Tabbed Panel */}
-            <div className="flex-1 flex flex-col min-h-[150px] bg-slate-950 overflow-hidden">
-              {/* Tabs list */}
-              <div className="flex items-center bg-slate-900 border-b border-slate-850 px-2 flex-shrink-0">
+            {/* Navigation */}
+            <div className="flex justify-between">
+              <button
+                onClick={goPrev}
+                className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-4 py-2 rounded-lg border border-[var(--border-medium)] hover:border-[var(--brand-primary)]/50 transition-all bg-white"
+              >
+                &larr; Back to Requirements
+              </button>
+              {isApproved && (
                 <button
-                  onClick={() => setActiveTab('console')}
-                  className={`flex items-center gap-1.5 text-[11px] font-bold px-4 py-2 border-b-2 transition-all ${
-                    activeTab === 'console'
-                      ? 'border-blue-500 text-blue-400'
-                      : 'border-transparent text-slate-500 hover:text-slate-300'
-                  }`}
+                  onClick={handleCompleteCapstone}
+                  disabled={completing}
+                  className="flex items-center gap-1.5 text-sm font-bold px-6 py-2.5 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] text-white transition-all shadow-md shadow-[var(--brand-primary)]/20 disabled:opacity-60"
                 >
-                  <Terminal size={12} />
-                  Terminal Console
+                  {completing ? <><Loader2 size={16} className="animate-spin" /> Finishing up...</> : <>View Certificate <ChevronRight size={16} /></>}
                 </button>
-                <button
-                  onClick={() => setActiveTab('preview')}
-                  className={`flex items-center gap-1.5 text-[11px] font-bold px-4 py-2 border-b-2 transition-all ${
-                    activeTab === 'preview'
-                      ? 'border-blue-500 text-blue-400'
-                      : 'border-transparent text-slate-500 hover:text-slate-300'
-                  }`}
-                >
-                  <Eye size={12} />
-                  Visual Simulation
-                </button>
-                <button
-                  onClick={() => setActiveTab('tests')}
-                  className={`flex items-center gap-1.5 text-[11px] font-bold px-4 py-2 border-b-2 transition-all ${
-                    activeTab === 'tests'
-                      ? 'border-blue-500 text-blue-400'
-                      : 'border-transparent text-slate-500 hover:text-slate-300'
-                  }`}
-                >
-                  <CheckSquare size={12} />
-                  Verification Output
-                </button>
-              </div>
-
-              {/* Active tab contents */}
-              <div className="flex-1 overflow-y-auto p-4 font-mono text-xs">
-                {activeTab === 'console' && (
-                  <div ref={consoleRef} className="h-full flex flex-col justify-between">
-                    <div className="space-y-1">
-                      {consoleEntries.length === 0 && !running && (
-                        <div className="text-slate-600 italic">Console ready. Click Run Code to see execution output.</div>
-                      )}
-                      {consoleEntries.map((entry, i) => (
-                        <pre 
-                          key={i} 
-                          className={`whitespace-pre-wrap leading-relaxed ${
-                            entry.type === 'stderr' ? 'text-red-400 font-semibold' :
-                            entry.type === 'stdin-value' ? 'text-blue-400 font-bold' : 
-                            'text-slate-300'
-                          }`}
-                        >
-                          {entry.text}
-                        </pre>
-                      ))}
-
-                      {/* Interactive prompt block */}
-                      {awaitingInput && (
-                        <div className="flex items-center gap-2 mt-2 bg-slate-900/60 p-2 rounded-lg border border-slate-800/40">
-                          {inputPrompt && (
-                            <span className="text-slate-400 font-bold">{inputPrompt}</span>
-                          )}
-                          <input
-                            ref={inputRef}
-                            type="text"
-                            value={inputBuffer}
-                            onChange={(e) => setInputBuffer(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') handleInputSubmit();
-                            }}
-                            className="flex-1 bg-transparent border-0 outline-none text-white placeholder-slate-600 font-bold"
-                            placeholder="Type input value..."
-                          />
-                          <button
-                            onClick={handleInputSubmit}
-                            className="bg-blue-600 hover:bg-blue-500 text-white rounded p-1"
-                          >
-                            <Send size={10} />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {activeTab === 'preview' && selected && (
-                  <div className="h-full font-sans">
-                    <VisualPreview
-                      output={outputString}
-                      projectId={selected.id}
-                      visible={true}
-                    />
-                  </div>
-                )}
-
-                {activeTab === 'tests' && selected && (
-                  <div className="h-full font-sans space-y-6">
-                    <div>
-                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Checks Status</h4>
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        {staticCheckResults.map(c => (
-                          <div key={c.id} className="flex items-center gap-3 p-3 rounded-xl bg-slate-900 border border-slate-850">
-                            {c.passed ? (
-                              <CheckCircle size={16} className="text-emerald-400" />
-                            ) : (
-                              <ShieldAlert size={16} className="text-slate-600" />
-                            )}
-                            <div className="text-xs">
-                              <p className="font-bold text-slate-300">{c.label}</p>
-                              <p className="text-[10px] text-slate-500 mt-0.5">{c.passed ? 'Matched validation rules' : 'Syntactical check pending'}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Verification Suites</h4>
-                      <div className="space-y-3">
-                        {dynamicTestResults.map((tc, idx) => (
-                          <div key={idx} className="flex items-start gap-4 p-4 rounded-xl bg-slate-900 border border-slate-850">
-                            <div className="mt-1">
-                              {tc.passed === true ? (
-                                <CheckCircle size={20} className="text-emerald-400" />
-                              ) : tc.passed === false ? (
-                                <XCircle size={20} className="text-red-400" />
-                              ) : (
-                                <div className="w-5 h-5 rounded-full border border-slate-700 bg-slate-800 flex items-center justify-center">
-                                  <span className="text-[10px] text-slate-500 font-bold">{idx + 1}</span>
-                                </div>
-                              )}
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-sm font-bold text-slate-200">{tc.name}</p>
-                              <p className="text-xs text-slate-400 leading-normal mt-1">{tc.description}</p>
-                              {tc.error && (
-                                <pre className="mt-2 p-2 bg-red-950/20 border border-red-900/30 text-red-300 rounded text-[10px] overflow-x-auto">
-                                  {tc.error}
-                                </pre>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {submitted && (
-                      <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <CheckCircle className="text-emerald-400" size={20} />
-                          <div>
-                            <p className="text-sm font-bold text-white">All Validations Passed!</p>
-                            <p className="text-xs text-slate-400 mt-0.5">Your capstone solution meets all structural and execution checks.</p>
-                          </div>
-                        </div>
-                        <button
-                          onClick={goNext}
-                          className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-5 py-2.5 rounded-lg flex items-center gap-1.5"
-                        >
-                          View Rewards
-                          <ChevronRight size={14} />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
+              )}
             </div>
           </div>
         </div>
       )}
 
-      {/* ── Step 4: Submit/Certificate Summary ── */}
-      {step === 'Submit' && (
-        <div className="flex-1 overflow-y-auto bg-gradient-to-b from-slate-950 to-slate-900 flex items-center justify-center p-6 animate-fade-in">
+      {/* ── Step 4: Certificate ── */}
+      {step === 'Certificate' && (
+        <div className="flex-1 overflow-y-auto bg-[var(--surface-page)] flex items-center justify-center p-6 animate-fade-in">
           <div className="max-w-4xl w-full space-y-8 py-10">
             {showCertificate ? (
               <div className="space-y-6">
                 {/* Certificate Widget */}
-                <div className="bg-[#1e2330] rounded-2xl border-2 border-amber-500/40 p-8 shadow-[0_15px_40px_rgba(245,158,11,0.1)] relative overflow-hidden">
+                <div className="bg-[var(--surface-card)] rounded-2xl border-2 border-[var(--warning)]/40 p-8 shadow-[0_15px_40px_rgba(245,158,11,0.1)] relative overflow-hidden">
                   {/* Classic certificate borders */}
-                  <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-600" />
-                  <div className="absolute bottom-0 left-0 w-full h-2 bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-600" />
-                  <div className="absolute top-0 left-0 h-full w-2 bg-gradient-to-b from-amber-600 via-yellow-400 to-amber-600" />
-                  <div className="absolute top-0 right-0 h-full w-2 bg-gradient-to-b from-amber-600 via-yellow-400 to-amber-600" />
+                  <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[var(--warning)] via-yellow-400 to-[var(--warning)]" />
+                  <div className="absolute bottom-0 left-0 w-full h-2 bg-gradient-to-r from-[var(--warning)] via-yellow-400 to-[var(--warning)]" />
+                  <div className="absolute top-0 left-0 h-full w-2 bg-gradient-to-b from-[var(--warning)] via-yellow-400 to-[var(--warning)]" />
+                  <div className="absolute top-0 right-0 h-full w-2 bg-gradient-to-b from-[var(--warning)] via-yellow-400 to-[var(--warning)]" />
 
                   <div className="text-center space-y-6 py-6 font-serif">
-                    <span className="text-[10px] uppercase font-bold tracking-[0.25em] text-amber-500">Certificate of Completion</span>
-                    <p className="text-[11px] font-sans text-slate-400">This certifies that <span className="font-bold text-white">{user?.name || 'Student'}</span> has successfully mastered all curriculum requirements for</p>
-                    <h3 className="text-2xl font-black font-sans text-white uppercase tracking-wider">
-                      {slug && slug === 'cs50ai' ? 'CS50 AI with Python' : 'CS50P: Introduction to Python Programming'}
+                    <span className="text-[10px] uppercase font-bold tracking-[0.25em] text-[var(--warning)]">Certificate of Completion</span>
+                    <p className="text-[11px] font-sans text-[var(--text-secondary)]">This certifies that <span className="font-bold text-[var(--text-primary)]">{user?.name || 'Student'}</span> has successfully mastered all curriculum requirements for</p>
+                    <h3 className="text-2xl font-black font-sans text-[var(--text-primary)] uppercase tracking-wider">
+                      {slug ? (COURSE_FULL_NAMES[slug as keyof typeof COURSE_FULL_NAMES] ?? slug) : 'Your Course'}
                     </h3>
                     
-                    <div className="w-16 h-px bg-amber-500/30 mx-auto" />
+                    <div className="w-16 h-px bg-[var(--warning)]/30 mx-auto" />
                     
-                    <p className="text-xs text-slate-400 italic">Issued on {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    <p className="text-xs text-[var(--text-secondary)] italic">Issued on {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
 
                     <div className="flex justify-around items-center pt-8 font-sans">
                       <div className="text-center">
-                        <div className="w-14 h-14 rounded-full bg-slate-900 border border-amber-500/20 flex flex-col items-center justify-center mx-auto text-amber-400 font-bold text-[9px] leading-tight shadow-lg">
+                        <div className="w-14 h-14 rounded-full bg-[var(--surface-container)] border border-[var(--warning)]/20 flex flex-col items-center justify-center mx-auto text-[var(--warning)] font-bold text-[9px] leading-tight shadow-lg">
                           <span className="text-xs mb-0.5">✓</span>
                           <span>VERIFIED</span>
                         </div>
-                        <span className="text-[9px] text-slate-500 uppercase tracking-wider mt-2 block">Curriculum Verified</span>
+                        <span className="text-[9px] text-[var(--text-muted)] uppercase tracking-wider mt-2 block">Curriculum Verified</span>
                       </div>
                       <div className="text-center">
-                        <p className="text-xs font-semibold text-slate-200 border-b border-slate-700/60 pb-1 px-4 italic">Course Assessment System</p>
-                        <span className="text-[9px] text-slate-500 uppercase tracking-wider mt-1 block">Verified Completion</span>
+                        <p className="text-xs font-semibold text-[var(--text-secondary)] border-b border-[var(--border-light)] pb-1 px-4 italic">Course Assessment System</p>
+                        <span className="text-[9px] text-[var(--text-muted)] uppercase tracking-wider mt-1 block">Verified Completion</span>
                       </div>
                     </div>
                   </div>
@@ -1558,7 +994,7 @@ export default function CapstonePage() {
                 <div className="flex flex-col items-center gap-4">
                   <button
                     onClick={() => setShowCertificate(false)}
-                    className="px-6 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-lg shadow-blue-500/15 cursor-pointer"
+                    className="px-6 py-2.5 rounded-xl text-xs font-bold bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] text-white transition-all shadow-md shadow-[var(--brand-primary)]/20 cursor-pointer"
                   >
                     Back to Results
                   </button>
@@ -1568,11 +1004,11 @@ export default function CapstonePage() {
               <>
                 {/* Congratulations / Passed Banner */}
                 <div className="text-center space-y-3">
-                  <div className="w-16 h-16 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto mb-4 relative">
-                    <Check className="text-emerald-400 stroke-[3]" size={32} />
+                  <div className="w-16 h-16 rounded-full bg-[var(--success)]/15 border border-[var(--success)]/30 flex items-center justify-center mx-auto mb-4 relative">
+                    <Check className="text-[var(--success)] stroke-[3]" size={32} />
                   </div>
-                  <h2 className="text-3xl font-extrabold text-white tracking-tight">Project Passed!</h2>
-                  <p className="text-sm text-slate-400 max-w-md mx-auto">
+                  <h2 className="text-3xl font-extrabold text-[var(--text-primary)] tracking-tight">Project Passed!</h2>
+                  <p className="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
                     Congratulations! You have successfully completed the project.
                   </p>
                 </div>
@@ -1580,23 +1016,23 @@ export default function CapstonePage() {
                 {/* 3 Grid Columns */}
                 <div className="grid gap-6 md:grid-cols-3">
                   {/* Card 1: Validation Results */}
-                  <div className="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-6 flex flex-col hover:border-slate-700 transition-all duration-300 shadow-lg">
-                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
+                  <div className="bg-[var(--surface-card)] border border-[var(--border-medium)] rounded-2xl p-6 flex flex-col hover:border-[var(--brand-primary)]/30 hover:shadow-sm transition-all duration-300 shadow-sm">
+                    <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-4">
                       Validation Results
                     </h3>
                     <div className="space-y-3.5 flex-1">
-                      {(selected ? (TEST_SUITES[selected.id] || []) : []).map((tc, index) => (
-                        <div key={index} className="flex items-start gap-2.5 text-slate-300 text-xs">
-                          <Check className="text-emerald-400 stroke-[3] mt-0.5 flex-shrink-0" size={14} />
-                          <span>{tc.name}</span>
+                      {(selected ? selected.evaluationChecklist : []).map((item, index) => (
+                        <div key={index} className="flex items-start gap-2.5 text-[var(--text-secondary)] text-xs">
+                          <Check className="text-[var(--success)] stroke-[3] mt-0.5 flex-shrink-0" size={14} />
+                          <span>{item.label}</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
                   {/* Card 2: Project Summary */}
-                  <div className="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-6 flex flex-col hover:border-slate-700 transition-all duration-300 shadow-lg">
-                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
+                  <div className="bg-[var(--surface-card)] border border-[var(--border-medium)] rounded-2xl p-6 flex flex-col hover:border-[var(--brand-primary)]/30 hover:shadow-sm transition-all duration-300 shadow-sm">
+                    <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-4">
                       Project Summary
                     </h3>
                     <div className="space-y-3.5 flex-1">
@@ -1606,8 +1042,8 @@ export default function CapstonePage() {
                         "Code quality: Good",
                         "Execution successful"
                       ].map((item, index) => (
-                        <div key={index} className="flex items-start gap-2.5 text-slate-300 text-xs">
-                          <Check className="text-emerald-400 stroke-[3] mt-0.5 flex-shrink-0" size={14} />
+                        <div key={index} className="flex items-start gap-2.5 text-[var(--text-secondary)] text-xs">
+                          <Check className="text-[var(--success)] stroke-[3] mt-0.5 flex-shrink-0" size={14} />
                           <span>{item}</span>
                         </div>
                       ))}
@@ -1615,24 +1051,24 @@ export default function CapstonePage() {
                   </div>
 
                   {/* Card 3: Your Reward */}
-                  <div className="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between hover:border-slate-700 transition-all duration-300 shadow-lg">
+                  <div className="bg-[var(--surface-card)] border border-[var(--border-medium)] rounded-2xl p-6 flex flex-col justify-between hover:border-[var(--brand-primary)]/30 hover:shadow-sm transition-all duration-300 shadow-sm">
                     <div>
-                      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
+                      <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-4">
                         Your Reward
                       </h3>
                       <div className="text-center py-4">
-                        <Trophy size={40} className="text-amber-500 mx-auto mb-2 drop-shadow-[0_0_15px_rgba(245,158,11,0.3)] animate-pulse" />
-                        <span className="text-3xl font-black text-amber-400 tracking-tight">+500 XP</span>
+                        <Trophy size={40} className="text-[var(--warning)] mx-auto mb-2 drop-shadow-[0_0_15px_rgba(245,158,11,0.3)] animate-pulse" />
+                        <span className="text-3xl font-black text-[var(--warning)] tracking-tight">+500 XP</span>
                       </div>
                     </div>
                     
-                    <div className="space-y-2 border-t border-slate-800/60 pt-4 mt-2">
-                      <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                        <Award size={14} className="text-blue-400" />
+                    <div className="space-y-2 border-t border-[var(--border-light)] pt-4 mt-2">
+                      <div className="flex items-center gap-2 text-[11px] text-[var(--text-secondary)]">
+                        <Award size={14} className="text-[var(--brand-primary)]" />
                         <span>Certificate Unlocked</span>
                       </div>
-                      <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                        <CheckCircle size={14} className="text-emerald-400" />
+                      <div className="flex items-center gap-2 text-[11px] text-[var(--text-secondary)]">
+                        <CheckCircle size={14} className="text-[var(--success)]" />
                         <span>Course Progress Updated</span>
                       </div>
                     </div>
@@ -1643,13 +1079,13 @@ export default function CapstonePage() {
                 <div className="flex flex-col items-center gap-3 pt-4">
                   <button
                     onClick={() => setShowCertificate(true)}
-                    className="px-8 py-3 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-lg shadow-blue-500/20 w-48 text-center cursor-pointer"
+                    className="px-8 py-3 rounded-xl text-xs font-bold bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] text-white transition-all shadow-md shadow-[var(--brand-primary)]/20 w-48 text-center cursor-pointer"
                   >
                     View Summary
                   </button>
                   <button
                     onClick={() => navigate(`/course/${slug}`)}
-                    className="text-xs font-medium text-blue-400 hover:text-blue-300 transition-all cursor-pointer"
+                    className="text-xs font-medium text-[var(--brand-primary)] hover:text-[var(--brand-primary-dark)] transition-all cursor-pointer"
                   >
                     Back to Dashboard
                   </button>

@@ -17,6 +17,7 @@ function toSafeUser(user: any): SafeUser {
     portfolioUrl: user.portfolioUrl ?? '',
     profileVisibility: user.profileVisibility ?? 'public',
     profileTheme: user.profileTheme ?? 'default',
+    portfolioTemplate: user.portfolioTemplate ?? 'bento',
     createdAt: user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt,
   };
 }
@@ -38,6 +39,7 @@ export async function createUser(input: {
   password?: string;
   role?: UserRole;
   emailVerified?: boolean;
+  githubUrl?: string;
 }): Promise<SafeUser> {
   const passwordHash = input.password ? await hashPassword(input.password) : "";
   const role = input.role ?? "student";
@@ -51,6 +53,7 @@ export async function createUser(input: {
         passwordHash,
         role,
         emailVerified,
+        githubUrl: input.githubUrl ?? "",
       },
     });
     return toSafeUser(user);
@@ -97,6 +100,7 @@ export async function findOrCreateOAuthUser(input: {
   providerUserId: string;
   email: string;
   name: string;
+  githubUrl?: string;
 }): Promise<SafeUser> {
   const existingAccount = await findOAuthUser(input.provider, input.providerUserId);
   if (existingAccount) return existingAccount;
@@ -109,8 +113,14 @@ export async function findOrCreateOAuthUser(input: {
         name: input.name,
         passwordHash: "",
         emailVerified: true,
+        githubUrl: input.githubUrl ?? "",
       },
     });
+  } else if (input.githubUrl && !user.githubUrl) {
+    // Backfill an empty profile GitHub link the first time this account
+    // authenticates via GitHub OAuth — used later to verify project
+    // submissions genuinely belong to the student.
+    user = await prisma.user.update({ where: { id: user.id }, data: { githubUrl: input.githubUrl } });
   }
 
   await prisma.oAuthAccount.create({

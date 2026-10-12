@@ -1,0 +1,58 @@
+Lecture 1 - Problem to Solve 1 ("AI Tools You Use Daily"): Missing hints.
+Lecture 1 - Problem to Solve 1 ("AI Tools You Use Daily"): Missing test cases.
+Lecture 1 - Problem to Solve 2 ("AI/ML/DL Classifier"): Missing hints.
+Lecture 1 is missing Similar Question 1.
+Lecture 1 is missing Similar Question 2.
+Lecture 2 - Problem to Solve 1 ("Trace BFS Through a Maze"): Missing hints.
+Lecture 2 - Problem to Solve 1 ("Trace BFS Through a Maze"): Missing test cases.
+Lecture 2 - Problem to Solve 2 ("Graph Representation"): Missing hints.
+Lecture 2 is missing Similar Question 1.
+Lecture 2 is missing Similar Question 2.
+Lecture 3 - Problem to Solve 1 ("Logic Puzzle"): Missing hints.
+Lecture 3 - Problem to Solve 1 ("Logic Puzzle"): Missing test cases.
+Lecture 3 - Problem to Solve 2 ("Daily Rules"): Missing hints.
+Lecture 3 - Problem to Solve 2 ("Daily Rules"): Missing test cases.
+Lecture 3 is missing Similar Question 1.
+Lecture 3 is missing Similar Question 2.
+Lecture 4 - Problem to Solve 1 ("Flip a coin 20 times"): Missing hints.
+Lecture 4 - Problem to Solve 1 ("Flip a coin 20 times"): Missing test cases.
+Lecture 4 - Problem to Solve 2 ("Python Coin Simulator"): Missing hints.
+Lecture 4 - Problem to Solve 2 ("Python Coin Simulator"): Missing test cases.
+Lecture 4 is missing Similar Question 1.
+Lecture 4 is missing Similar Question 2.
+Lecture 5 - Problem to Solve 1 ("Simple Sudoku"): Missing hints.
+Lecture 5 - Problem to Solve 1 ("Simple Sudoku"): Missing test cases.
+Lecture 5 - Problem to Solve 2 ("Hill Climbing Code"): Missing hints.
+Lecture 5 - Problem to Solve 2 ("Hill Climbing Code"): Missing test cases.
+Lecture 5 is missing Similar Question 1.
+Lecture 5 is missing Similar Question 2.
+Lecture 6 - Problem to Solve 1 ("ML Workflow Flowchart"): Missing hints.
+Lecture 6 - Problem to Solve 1 ("ML Workflow Flowchart"): Missing test cases.
+Lecture 6 - Problem to Solve 2 ("Simple Classifier"): Missing hints.
+Lecture 6 - Problem to Solve 2 ("Simple Classifier"): Missing test cases.
+Lecture 6 is missing Similar Question 1.
+Lecture 6 is missing Similar Question 2.
+Lecture 7 - Problem to Solve 1 ("Draw a 3-layer neural network"): Missing hints.
+Lecture 7 - Problem to Solve 1 ("Draw a 3-layer neural network"): Missing test cases.
+Lecture 7 - Problem to Solve 2 ("Weighted Sum"): Missing hints.
+Lecture 7 - Problem to Solve 2 ("Weighted Sum"): Missing test cases.
+Lecture 7 is missing Similar Question 1.
+Lecture 7 is missing Similar Question 2.
+Lecture 8 - Problem to Solve 1 ("Ask ChatGPT"): Missing hints.
+Lecture 8 - Problem to Solve 1 ("Ask ChatGPT"): Missing test cases.
+Lecture 8 - Problem to Solve 2 ("Tokenize sentence"): Missing hints.
+Lecture 8 - Problem to Solve 2 ("Tokenize sentence"): Missing test cases.
+Lecture 8 is missing Similar Question 1.
+Lecture 8 is missing Similar Question 2.
+Lecture 9 - Problem to Solve 1 ("News story about AI"): Missing hints.
+Lecture 9 - Problem to Solve 1 ("News story about AI"): Missing test cases.
+Lecture 9 - Problem to Solve 2 ("Medical decisions debate"): Missing hints.
+Lecture 9 - Problem to Solve 2 ("Medical decisions debate"): Missing test cases.
+Lecture 9 is missing Similar Question 1.
+Lecture 9 is missing Similar Question 2.
+Lecture 10 - Problem to Solve 1 ("Write project plan"): Missing hints.
+Lecture 10 - Problem to Solve 1 ("Write project plan"): Missing test cases.
+Lecture 10 - Problem to Solve 2 ("Ethical consideration"): Missing hints.
+Lecture 10 - Problem to Solve 2 ("Ethical consideration"): Missing test cases.
+Lecture 10 is missing Similar Question 1.
+Lecture 10 is missing Similar Question 2.

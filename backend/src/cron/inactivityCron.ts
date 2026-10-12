@@ -1,8 +1,6 @@
 // Fraylon - Phase 2.5 & 3
 import cron from 'node-cron';
-import { PrismaClient } from '@prisma/client';
-import { notificationQueue } from '../lib/queue.js';
-
+import { sendNotification } from '../services/notificationService.js';
 import { prisma } from "../prisma.js";
 
 const isTestEnv = process.env.NODE_ENV === "test";
@@ -27,12 +25,16 @@ export function startCronJobs() {
       });
 
       for (const user of inactiveUsers) {
-        await notificationQueue.add('inactiveReminder', {
-          type: 'INACTIVE_REMINDER',
-          userId: user.id,
-          email: user.email,
-          name: user.name
-        });
+        // sendNotification creates the in-app record and enqueues the email
+        // with the correct { to, subject, body, link, html } format the worker expects.
+        await sendNotification(
+          user.id,
+          'streak',
+          "We miss you",
+          `Hi ${user.name ?? 'there'}, it's been a few days since you last learned something new. Jump back in and keep your streak going!`,
+          '/courses',
+          'low'
+        );
       }
       console.log(`[Cron] Queued ${inactiveUsers.length} inactive reminders.`);
     } catch (err) {

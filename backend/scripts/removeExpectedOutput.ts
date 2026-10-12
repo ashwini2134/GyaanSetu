@@ -4,7 +4,7 @@ import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const dataDir = join(__dirname, "../../frontend/public/data");
-const courses = ["python", "cs50ai"];
+const courses = ["python", "fundamentals-of-ai"];
 
 for (const course of courses) {
   const courseDir = join(dataDir, course);

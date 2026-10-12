@@ -1,35 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from './auth';
 import { authFetch } from './authClient';
-import { Target, Brain, Code, Flame, Zap, Gem, Trophy, FlaskConical, Laptop, Building2, GraduationCap, Star } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { api } from './api';
 
 // ── Constants & Keys ─────────────────────────────────────────────────────────
-const EVENT_NAME = 'fraylon:progress:update';
-
-// ── Types ────────────────────────────────────────────────────────────────────
-export type AchievementDef = {
-  id: string;
-  title: string;
-  icon: LucideIcon;
-  description: string;
-  completedDescription: string;
-};
-
-export const ACHIEVEMENTS: AchievementDef[] = [
-  { id: 'first_lecture', title: 'First Steps', icon: Target, description: 'Complete your first lecture', completedDescription: 'Completed your first lecture' },
-  { id: 'first_quiz', title: 'Quiz Master', icon: Brain, description: 'Pass your first quiz', completedDescription: 'Passed your first quiz' },
-  { id: 'first_problem', title: 'Problem Solver', icon: Code, description: 'Submit your first problem', completedDescription: 'Submitted your first problem' },
-  { id: 'streak_3', title: 'On Fire', icon: Flame, description: 'Reach a 3-day streak', completedDescription: 'Reached a 3-day streak' },
-  { id: 'five_lectures', title: 'Halfway There', icon: Zap, description: 'Complete 5 lectures', completedDescription: 'Completed 5 lectures' },
-  { id: 'first_project', title: 'First Project', icon: Gem, description: 'Submit your first project', completedDescription: 'Submitted your first project' },
-  { id: 'ten_lectures', title: '10 Lectures Done', icon: Trophy, description: 'Complete 10 lectures', completedDescription: 'Completed 10 lectures' },
-  { id: 'ten_quizzes', title: 'Quiz Whiz', icon: FlaskConical, description: 'Pass 10 quizzes', completedDescription: 'Passed 10 quizzes' },
-  { id: 'ten_problems', title: 'Code Crusher', icon: Laptop, description: 'Solve 10 problems', completedDescription: 'Solved 10 problems' },
-  { id: 'two_projects', title: 'Builder', icon: Building2, description: 'Complete 2 projects', completedDescription: 'Completed 2 projects' },
-  { id: 'course_completed', title: 'Course Completed', icon: GraduationCap, description: 'Complete an entire course', completedDescription: 'Completed an entire course' },
-  { id: 'all_courses', title: 'Full Stack', icon: Star, description: 'Complete both courses', completedDescription: 'Completed both courses' },
-];
+const EVENT_NAME = 'gyansetu:progress:update';
+const LEGACY_EVENT_NAME = 'fraylon:progress:update';
+const ACHIEVEMENT_EVENT = 'gyansetu:achievement:unlocked';
+const LEGACY_ACHIEVEMENT_EVENT = 'fraylon:achievement:unlocked';
 
 export type StreakData = {
   currentStreak: number;
@@ -49,58 +27,13 @@ export type StatsData = {
 // ── Core Helpers ─────────────────────────────────────────────────────────────
 function emit() {
   window.dispatchEvent(new CustomEvent(EVENT_NAME));
+  window.dispatchEvent(new CustomEvent(LEGACY_EVENT_NAME));
 }
 
-// ── Toast Queue System ───────────────────────────────────────────────────────
-let toastQueue: Array<{ text: string; type: 'xp' | 'achievement' | 'streak'; duration: number }> = [];
-let isToastRunning = false;
-
-function showToastNext() {
-  if (isToastRunning || toastQueue.length === 0) return;
-  isToastRunning = true;
-  const toast = toastQueue.shift()!;
-  
-  let container = document.getElementById('fraylon-toast-container');
-  if (!container) {
-    container = document.createElement('div');
-    container.id = 'fraylon-toast-container';
-    container.className = 'fixed bottom-4 right-4 z-[9999] flex flex-col gap-2 items-end pointer-events-none';
-    document.body.appendChild(container);
-  }
-
-  const el = document.createElement('div');
-  el.className = `transform transition-all duration-300 translate-y-4 opacity-0 flex items-center gap-3 px-5 py-3 rounded-2xl shadow-xl border backdrop-blur-md text-white font-medium text-sm`;
-  
-  if (toast.type === 'xp') {
-    el.classList.add('bg-cyan-950/90', 'border-cyan-500/50', 'shadow-cyan-500/20');
-  } else if (toast.type === 'achievement') {
-    el.classList.add('bg-amber-950/90', 'border-amber-500/50', 'shadow-amber-500/20');
-  } else {
-    el.classList.add('bg-orange-950/90', 'border-orange-500/50', 'shadow-orange-500/20');
-  }
-
-  el.innerHTML = `<span>${toast.text}</span>`;
-  container.appendChild(el);
-
-  // animate in
-  requestAnimationFrame(() => {
-    el.classList.remove('translate-y-4', 'opacity-0');
-  });
-
-  setTimeout(() => {
-    // animate out
-    el.classList.add('opacity-0', 'translate-x-4');
-    setTimeout(() => {
-      el.remove();
-      isToastRunning = false;
-      showToastNext();
-    }, 300);
-  }, toast.duration);
-}
-
-function queueToast(text: string, type: 'xp' | 'achievement' | 'streak', duration = 3000) {
-  toastQueue.push({ text, type, duration });
-  showToastNext();
+function notifyAchievementsUnlocked(unlocked: unknown[]) {
+  if (!unlocked || unlocked.length === 0) return;
+  window.dispatchEvent(new CustomEvent(ACHIEVEMENT_EVENT, { detail: unlocked }));
+  window.dispatchEvent(new CustomEvent(LEGACY_ACHIEVEMENT_EVENT, { detail: unlocked }));
 }
 
 // ── Gamification Actions ─────────────────────────────────────────────────────
@@ -114,97 +47,56 @@ export async function handleDailyLogin() {
   }
 }
 
-async function unlockAchievement(id: string) {
-  try {
-    await authFetch('/achievements', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ achievementId: id })
-    });
-    
-    const ach = ACHIEVEMENTS.find(a => a.id === id);
-    if (ach) {
-      queueToast(`Achievement Unlocked — ${ach.title}!`, 'achievement', 3000);
-    }
-    emit(); // refetch from backend
-  } catch (err) {
-    console.error("Failed to unlock achievement", err);
-  }
-}
-
-export async function checkAchievements() {
-  try {
-    const [resStats, resAch, resStreak] = await Promise.all([
-      authFetch<{ stats?: StatsData }>('/progress'),
-      authFetch<{ achievements?: string[] }>('/achievements'),
-      authFetch<StreakData>('/streaks')
-    ]);
-
-    const stats = resStats.stats || {
-      coursesStarted: 0,
-      coursesCompleted: 0,
-      lecturesCompleted: 0,
-      quizzesPassed: 0,
-      tasksSubmitted: 0,
-      projectsSolved: 0,
-    };
-
-    const streak = resStreak?.currentStreak ?? 0;
-    const unlocked: string[] = resAch.achievements || [];
-
-    if (stats.lecturesCompleted >= 1 && !unlocked.includes('first_lecture')) await unlockAchievement('first_lecture');
-    if (stats.quizzesPassed >= 1 && !unlocked.includes('first_quiz')) await unlockAchievement('first_quiz');
-    if (stats.tasksSubmitted >= 1 && !unlocked.includes('first_problem')) await unlockAchievement('first_problem');
-    if (stats.projectsSolved >= 1 && !unlocked.includes('first_project')) await unlockAchievement('first_project');
-    if (streak >= 3 && !unlocked.includes('streak_3')) await unlockAchievement('streak_3');
-    if (stats.lecturesCompleted >= 5 && !unlocked.includes('five_lectures')) await unlockAchievement('five_lectures');
-    if (stats.lecturesCompleted >= 10 && !unlocked.includes('ten_lectures')) await unlockAchievement('ten_lectures');
-    if (stats.quizzesPassed >= 10 && !unlocked.includes('ten_quizzes')) await unlockAchievement('ten_quizzes');
-    if (stats.tasksSubmitted >= 10 && !unlocked.includes('ten_problems')) await unlockAchievement('ten_problems');
-    if (stats.projectsSolved >= 2 && !unlocked.includes('two_projects')) await unlockAchievement('two_projects');
-    if (stats.coursesCompleted >= 1 && !unlocked.includes('course_completed')) await unlockAchievement('course_completed');
-    if (stats.coursesCompleted >= 2 && !unlocked.includes('all_courses')) await unlockAchievement('all_courses');
-  } catch (err) {
-    console.error("Failed to check achievements", err);
-  }
-}
-
 export async function completeAction(
   actionType: 'section' | 'lecture' | 'quiz' | 'problem' | 'course_start' | 'course_complete' | 'project',
-  actionId: string
+  actionId: string,
+  difficulty?: string
 ) {
   try {
-    await authFetch('/progress/action', {
+    const res = await authFetch<{ ok: boolean; unlockedAchievements?: unknown[] }>('/progress/action', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ actionType, actionId })
+      body: JSON.stringify({ actionType, actionId, ...(difficulty && { difficulty }) })
     });
 
-    checkAchievements();
+    notifyAchievementsUnlocked(res.unlockedAchievements || []);
     emit();
   } catch (err) {
     console.error("Failed to complete gamification action", err);
   }
 }
 
-export async function updateOverallProgress(totalLecturesAvailable: number) {
+export async function updateOverallProgress() {
   try {
-    const res = await authFetch<{ stats?: StatsData }>('/progress');
+    const [res, courses] = await Promise.all([
+      authFetch<{ stats?: StatsData }>('/progress'),
+      api.courses()
+    ]);
     const stats = res.stats || { lecturesCompleted: 0 };
-    
-    if (totalLecturesAvailable === 0) return 0;
-    const pct = Math.min(100, Math.round((stats.lecturesCompleted / totalLecturesAvailable) * 100));
-    
+
+    let total = 0;
+    for (const c of courses) {
+      const lectures = await api.courseLectures(c.slug);
+      total += lectures.length;
+    }
+
+    if (total === 0) {
+      console.warn("[overallProgress] total lectures is 0 — cannot calculate");
+      return 0;
+    }
+    const pct = Math.min(100, Math.round((stats.lecturesCompleted / total) * 100));
+    console.log(`[overallProgress] ${stats.lecturesCompleted}/${total} = ${pct}%`);
+
     await authFetch('/progress/overall', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ overallProgress: pct })
     });
-    
+
     emit();
     return pct;
   } catch (err) {
-    console.error("Failed to update overall progress", err);
+    console.error("[overallProgress] failed:", err);
     return 0;
   }
 }
@@ -215,7 +107,7 @@ export function useGamification() {
   const { user } = useAuth();
   const [data, setData] = useState({
     xp: 0,
-    achievements: [] as string[],
+    weeklyXp: 0,
     streak: { currentStreak: 0, lastLoginDate: null as string | null, longestStreak: 0 },
     stats: { coursesStarted: 0, coursesCompleted: 0, lecturesCompleted: 0, quizzesPassed: 0, tasksSubmitted: 0, projectsSolved: 0 },
     overallProgress: 0
@@ -225,21 +117,26 @@ export function useGamification() {
     async function loadGamification() {
       if (!user) return;
       try {
-        const [resXp, resAch, resStreak, resStats, resOverall] = await Promise.all([
-          authFetch<{ totalXp?: number }>('/xp'),
-          authFetch<{ achievements?: string[] }>('/achievements'),
+        const [resXp, resStreak, resStats, resOverall] = await Promise.all([
+          authFetch<{ totalXp?: number; weeklyXp?: number }>('/xp'),
           authFetch<StreakData>('/streaks'),
           authFetch<{ stats?: StatsData }>('/progress'),
           authFetch<{ overallProgress?: number }>('/progress/overall')
         ]);
-        
+
         const xp = resXp.totalXp || 0;
-        const achievements = resAch.achievements || [];
+        const weeklyXp = resXp.weeklyXp || 0;
         const streak = resStreak || { currentStreak: 0, lastLoginDate: null, longestStreak: 0 };
         const stats = resStats.stats || { coursesStarted: 0, coursesCompleted: 0, lecturesCompleted: 0, quizzesPassed: 0, tasksSubmitted: 0, projectsSolved: 0 };
         const overallProgress = resOverall.overallProgress || 0;
 
-        setData({ xp, achievements, streak, stats, overallProgress });
+        setData({ xp, weeklyXp, streak, stats, overallProgress });
+
+        // If overallProgress is 0 but user has completed lectures,
+        // calculate and save the correct value
+        if (overallProgress === 0 && (stats.lecturesCompleted > 0 || stats.quizzesPassed > 0)) {
+          updateOverallProgress();
+        }
       } catch (err) {
         console.error("Failed to load gamification data", err);
       }
@@ -251,7 +148,11 @@ export function useGamification() {
       loadGamification();
     };
     window.addEventListener(EVENT_NAME, handler);
-    return () => window.removeEventListener(EVENT_NAME, handler);
+    window.addEventListener(LEGACY_EVENT_NAME, handler);
+    return () => {
+      window.removeEventListener(EVENT_NAME, handler);
+      window.removeEventListener(LEGACY_EVENT_NAME, handler);
+    };
   }, [user]);
 
   return data;

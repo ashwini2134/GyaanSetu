@@ -1,4 +1,5 @@
 import { prisma } from "../prisma.js";
+import { seedPracticeExercises } from "./practiceExercises.js";
 
 interface DragDropZone {
   id: string;
@@ -24,7 +25,7 @@ interface DragDropExerciseConfig {
 
 const DRAG_DROP_EXERCISES: Record<string, DragDropExerciseConfig> = {
   // Lecture 1: Introduction to AI — AI vs Traditional Programs
-  "cs50ai_0_what-is-ai": {
+  "fundamentals-of-ai_0_what-is-ai": {
     title: "AI vs Traditional Programs",
     learningGoal: "Distinguish between AI systems and traditional programs.",
     challenge: "Classify each example as either an AI system or a traditional program.",
@@ -46,7 +47,7 @@ const DRAG_DROP_EXERCISES: Record<string, DragDropExerciseConfig> = {
   },
 
   // Lecture 2: Search Algorithms — BFS vs DFS vs Greedy vs A*
-  "cs50ai_1_bfs-dfs": {
+  "fundamentals-of-ai_1_bfs-dfs": {
     title: "Search Algorithms",
     learningGoal: "Match each scenario to the correct search algorithm.",
     challenge: "Identify which search algorithm best fits each description.",
@@ -66,7 +67,7 @@ const DRAG_DROP_EXERCISES: Record<string, DragDropExerciseConfig> = {
   },
 
   // Lecture 3: Knowledge & Logic — Facts, Rules & Inference
-  "cs50ai_2_knowledge-base": {
+  "fundamentals-of-ai_2_knowledge-bases": {
     title: "Facts, Rules & Inference",
     learningGoal: "Understand how facts and rules are used to make logical conclusions.",
     challenge: "Sort each statement into Fact, Rule, or Inference.",
@@ -90,7 +91,7 @@ const DRAG_DROP_EXERCISES: Record<string, DragDropExerciseConfig> = {
   },
 
   // Lecture 5: Optimization — Simulated Annealing & CSP
-  "cs50ai_4_simulated-annealing": {
+  "fundamentals-of-ai_4_local-search": {
     title: "Optimization vs Constraint Satisfaction",
     learningGoal: "Understand the difference between optimization problems and constraint satisfaction problems.",
     challenge: "Classify each scenario into the correct category.",
@@ -111,8 +112,8 @@ const DRAG_DROP_EXERCISES: Record<string, DragDropExerciseConfig> = {
     ],
   },
 
-  // Lecture 6: Machine Learning — Supervised vs Unsupervised vs Reinforcement
-  "cs50ai_5_unsupervised-rl": {
+  // Lecture 5: Machine Learning — Supervised vs Unsupervised vs Reinforcement
+  "fundamentals-of-ai_5_reinforcement-learning": {
     title: "Machine Learning Paradigms",
     learningGoal: "Identify the three major machine learning paradigms.",
     challenge: "Classify each AI application by its learning type.",
@@ -138,8 +139,8 @@ const DRAG_DROP_EXERCISES: Record<string, DragDropExerciseConfig> = {
     ],
   },
 
-  // Lecture 7: Neural Networks — Neural Network Layers
-  "cs50ai_6_what-is-nn": {
+  // Lecture 6: Neural Networks — Neural Network Layers
+  "fundamentals-of-ai_6_neurons-architecture": {
     title: "Neural Network Layers",
     learningGoal: "Understand the role of each layer in a neural network.",
     challenge: "Place each component into the correct layer.",
@@ -166,7 +167,7 @@ const DRAG_DROP_EXERCISES: Record<string, DragDropExerciseConfig> = {
   },
 
   // Lecture 9: Responsible AI — Bias, Privacy, Hallucination, Deepfake
-  "cs50ai_8_hallucinations-deepfakes": {
+  "fundamentals-of-ai_8_hallucinations-deepfakes": {
     title: "Responsible AI Ethics",
     learningGoal: "Identify the ethical issue shown in each scenario.",
     challenge: "Classify each example by the ethical issue it demonstrates.",
@@ -188,7 +189,7 @@ const DRAG_DROP_EXERCISES: Record<string, DragDropExerciseConfig> = {
 
 function parseKey(key: string): { courseId: string; lectureId: string; sectionId: string | null } {
   const parts = key.split("_");
-  if (key.startsWith("cs50ai")) {
+  if (key.startsWith("fundamentals-of-ai")) {
     const courseId = parts[0];
     const lectureId = parts[1];
     const sectionId = parts.slice(2).join("-") || null;
@@ -285,7 +286,7 @@ interface HierarchyExpandConfig {
 }
 
 const HIERARCHY_EXERCISES: Record<string, HierarchyExpandConfig> = {
-  "cs50ai_0_ai-ml-dl": {
+  "fundamentals-of-ai_0_ai-ml-dl": {
     title: "AI vs ML vs DL",
     learningGoal: "Understand that Artificial Intelligence is the largest field, Machine Learning is a subset of AI, and Deep Learning is a subset of Machine Learning.",
     challenge: "Discover the hierarchy by exploring how each field relates to the others.",
@@ -375,7 +376,7 @@ const HIERARCHY_EXERCISES: Record<string, HierarchyExpandConfig> = {
       nonAIExamples: ["Calculator"],
     },
   },
-  "cs50ai_7_deep-learning-cnn": {
+  "fundamentals-of-ai_6_deep-learning-cnns": {
     title: "Inside the Vision System",
     learningGoal: "Understand that Neural Networks enable Deep Learning, and Deep Learning powers CNNs for image understanding.",
     challenge: "Discover how Neural Networks, Deep Learning, and CNNs work together to help computers see.",
@@ -532,7 +533,7 @@ interface AIConversationSeedConfig {
 }
 
 const AI_CONVERSATION_EXERCISES: Record<string, AIConversationSeedConfig> = {
-  "cs50ai_0_getting-started": {
+  "fundamentals-of-ai_0_getting-started": {
     title: "AI Conversation Practice",
     learningGoal: "Practice communicating with an AI by crafting clear, specific prompts.",
     challenge: "Ask the AI a thoughtful question about how AI learns, then improve your prompt to get an even better answer.",
@@ -675,7 +676,7 @@ interface PathBuilderSeedConfig {
 }
 
 const PATH_BUILDER_EXERCISES: Record<string, PathBuilderSeedConfig> = {
-  "cs50ai_1_search-problem": {
+  "fundamentals-of-ai_1_search-problem": {
     title: "Practice Exercise",
     learningGoal: "Guide a cat to its food by finding a path through a room. Learn what a search problem is.",
     challenge: "Help the cat reach the food bowl. Walls are furniture that cannot be crossed. Find a shorter path on the second round.",
@@ -798,7 +799,7 @@ interface BFSDFSSeedConfig {
 }
 
 const BFSDFS_EXERCISES: Record<string, BFSDFSSeedConfig> = {
-  "cs50ai_1_bfs-dfs": {
+  "fundamentals-of-ai_1_bfs-dfs": {
     title: "BFS & DFS Exploration",
     learningGoal: "Understand how BFS and DFS explore a graph differently by becoming the algorithm yourself.",
     challenge: "Click nodes in the order each search algorithm would choose.",
@@ -945,6 +946,7 @@ export async function seedBFSDFSExercises() {
 const isMain = process.argv[1]?.includes("dragDropExercises");
 if (isMain) {
   (async () => {
+    await seedPracticeExercises();
     await seedDragDropExercises();
     await seedHierarchyExercises();
     await seedAIConversationExercises();

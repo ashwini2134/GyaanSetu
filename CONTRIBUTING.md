@@ -16,7 +16,7 @@ Three people work on this repo: Yuvaraj (lead) and two interns (Ashwini, Priyank
 |-------------|----------------------------------|------------------------------------|
 | `feat/`     | New feature or page              | `feat/quiz-page-keyboard-shortcuts`|
 | `fix/`      | Bug fix                          | `fix/sidebar-overflow-mobile`      |
-| `content/`  | Course notes, problems, quizzes  | `content/cs50ai-lecture-3`          |
+| `content/`  | Course notes, problems, quizzes  | `content/fundamentals-of-ai-lecture-3`          |
 | `chore/`    | Tooling, deps, CI, docs          | `chore/upgrade-vite-7`             |
 | `docs/`     | README / CONTRIBUTING / comments | `docs/add-mentor-architecture`     |
 
@@ -26,11 +26,11 @@ Three people work on this repo: Yuvaraj (lead) and two interns (Ashwini, Priyank
 # Start a new piece of work
 git checkout main
 git pull origin main
-git checkout -b content/cs50ai-lecture-3
+git checkout -b content/fundamentals-of-ai-lecture-3
 
 # ... do your work, commit as you go ...
 
-git push -u origin content/cs50ai-lecture-3
+git push -u origin content/fundamentals-of-ai-lecture-3
 
 # Open the PR via the GitHub web UI, fill out the template, request a review
 ```
@@ -63,10 +63,10 @@ Until branch protection is enabled, the rules above are honour-system — please
 
 To add a problem to CS50 AI lecture 3:
 
-1. `git checkout -b content/cs50ai-lecture-3-problems`
-2. Create `frontend/public/data/cs50ai/lecture_3/problems.json` (look at `lecture_2/problems.json` as a template).
-3. If the lecture has notes, add `frontend/public/data/cs50ai/lecture_3/notes.md`.
-4. Make sure `frontend/public/data/cs50ai/lectures.json` lists lecture 3 (it does — check).
+1. `git checkout -b content/fundamentals-of-ai-lecture-3-problems`
+2. Create `frontend/public/data/fundamentals-of-ai/lecture_3/problems.json` (look at `lecture_2/problems.json` as a template).
+3. If the lecture has notes, add `frontend/public/data/fundamentals-of-ai/lecture_3/notes.md`.
+4. Make sure `frontend/public/data/fundamentals-of-ai/lectures.json` lists lecture 3 (it does — check).
 5. `npm install && npm run dev` in `frontend/`, open the lecture in the browser, verify it loads.
 6. Commit, push, open PR. Tag `@7227Yuvaraj` and the content owner from CODEOWNERS.
 

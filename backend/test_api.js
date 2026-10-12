@@ -30,7 +30,7 @@ async function runTests() {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${accessToken}`
     },
-    body: JSON.stringify({ courseSlug: 'cs50-ai', lectureId: 'lecture_2', practiceAttempted: true })
+    body: JSON.stringify({ courseSlug: 'cs50-ai', lectureId: 'lecture_3', practiceAttempted: true })
   });
   const progData = await progRes.json();
   console.log('Progress Status:', progRes.status);

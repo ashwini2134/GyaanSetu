@@ -6,6 +6,7 @@ import fs from 'fs';
 
 const router = Router();
 import { prisma } from "../../prisma.js";
+import { sendInAppNotification } from "../../services/notificationService.js";
 
 const uploadDir = 'uploads/thumbnails/';
 if (!fs.existsSync(uploadDir)) {
@@ -74,6 +75,8 @@ router.patch("/:id/publish", async (req, res) => {
 
   if (missing.length > 0) return res.status(400).json({ error: "Missing required sections", missing });
 
+  const wasAlreadyPublished = course.status === "PUBLISHED";
+
   const updated = await prisma.course.update({
     where: { id: req.params.id },
     data: { status: "PUBLISHED" }
@@ -87,6 +90,26 @@ router.patch("/:id/publish", async (req, res) => {
       changelog: `Published with ${course.lessons.length} lessons`
     }
   });
+
+  if (!wasAlreadyPublished) {
+    const students = await prisma.user.findMany({
+      where: { role: "student" },
+      select: { id: true },
+    });
+    await Promise.all(
+      students.map((s) =>
+        sendInAppNotification(
+          s.id,
+          "course_released",
+          "New Course Available",
+          `${course.title} is now available.`,
+          `/courses`,
+          "low",
+          `course_released_${s.id}_${course.id}`
+        )
+      )
+    );
+  }
 
   res.json(updated);
 });

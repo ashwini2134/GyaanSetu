@@ -82,7 +82,7 @@ async function runTests() {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${refreshData.access_token}`
     },
-    body: JSON.stringify({ courseSlug: 'cs50-ai', lectureId: 'lecture_3', practiceAttempted: true })
+    body: JSON.stringify({ courseSlug: 'cs50-ai', lectureId: 'lecture_4', practiceAttempted: true })
   });
   const progData = await progRes.json();
   if (progRes.status === 200 && progData.userId === newUserId) {

@@ -1,6 +1,6 @@
 # Felipe's Taqueria
 
-One of the most popular places to eat in Harvard Square is Felipe's Taqueria, which offers a menu of entrees, wherein the value of each key is a price in dollars:
+One of the most popular places to eat in town is Felipe's Taqueria, which offers a menu of entrees, wherein the value of each key is a price in dollars:
 
 ```python
 {

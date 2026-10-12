@@ -102,8 +102,8 @@ export default function AdminCertificationsPage() {
   };
 
   const COURSE_COLORS: Record<string, string> = {
-    cs50ai: "#A855F7",
-    python: "#3B82F6",
+    'fundamentals-of-ai': "#00BFB3",
+    python: "#009E95",
   };
 
   return (

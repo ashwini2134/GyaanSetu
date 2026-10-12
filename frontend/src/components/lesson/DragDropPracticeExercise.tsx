@@ -241,7 +241,7 @@ export default function DragDropPracticeExercise({
             <p className="text-sm text-slate-300 text-center mb-6">You will classify {totalCards} cards.</p>
             <button
               onClick={goNext}
-              className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-sm font-bold shadow-lg shadow-blue-600/20 transition-all"
+              className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-[var(--brand-primary)] text-white text-sm font-bold shadow-lg shadow-[var(--brand-primary)]/20 transition-all duration-[280ms] hover:scale-[1.03] hover:-translate-y-0.5"
             >
               Start Exercise
             </button>
@@ -254,7 +254,7 @@ export default function DragDropPracticeExercise({
             <p className="text-sm text-slate-300 text-center mb-6">You will classify {totalCards} cards.</p>
             <button
               onClick={goNext}
-              className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-sm font-bold shadow-lg shadow-blue-600/20 transition-all"
+              className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-[var(--brand-primary)] text-white text-sm font-bold shadow-lg shadow-[var(--brand-primary)]/20 transition-all duration-[280ms] hover:scale-[1.03] hover:-translate-y-0.5"
             >
               Start Exercise
             </button>
@@ -301,7 +301,7 @@ export default function DragDropPracticeExercise({
             >
               <ArrowLeft size={13} /> Previous
             </button>
-            <span className="text-[10px] text-slate-600 font-mono">
+            <span className="text-[10px] text-slate-300 font-mono">
               {stage + 1} / {instructionCount}
             </span>
             {stage < instructionCount - 1 && (
@@ -329,8 +329,8 @@ export default function DragDropPracticeExercise({
           <div className="flex items-center justify-center mb-6">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/60 border border-slate-700/40">
               <span className="text-sm font-bold text-blue-400">{correctCount}</span>
-              <span className="text-sm text-slate-500">/</span>
-              <span className="text-sm text-slate-400">{totalCards}</span>
+              <span className="text-sm text-slate-300">/</span>
+              <span className="text-sm text-slate-300">{totalCards}</span>
             </div>
           </div>
 
@@ -378,7 +378,7 @@ export default function DragDropPracticeExercise({
                   >
                     <div className="flex items-center gap-3 px-4 py-3">
                       <div className="w-1 h-8 rounded-full bg-slate-600 flex-shrink-0" />
-                      <p className="text-sm font-medium text-slate-600">{card.text}</p>
+                      <p className="text-sm font-medium text-slate-300">{card.text}</p>
                     </div>
                   </div>
                 );
@@ -394,7 +394,7 @@ export default function DragDropPracticeExercise({
             </div>
 
             {activeCard && (
-              <div className="flex items-center gap-1.5 mt-3 text-slate-500">
+              <div className="flex items-center gap-1.5 mt-3 text-slate-300">
                 <GripHorizontal size={14} />
                 <span className="text-xs">Drag to the correct category</span>
               </div>
@@ -408,7 +408,7 @@ export default function DragDropPracticeExercise({
                 {feedbackType === "incorrect" && (
                   <button
                     onClick={() => advanceCard()}
-                    className="text-[10px] text-slate-500 hover:text-slate-300 underline transition-colors"
+                    className="text-[10px] text-slate-300 hover:text-slate-300 underline transition-colors"
                   >
                     Skip this card
                   </button>
@@ -454,7 +454,7 @@ export default function DragDropPracticeExercise({
 
                     <div className="min-h-[40px] space-y-1">
                       {placed.length === 0 && (
-                        <p className="text-[10px] text-slate-600 text-center">
+                        <p className="text-[10px] text-slate-300 text-center">
                           {activeCard ? "Drop here" : "Drop cards here"}
                         </p>
                       )}
@@ -496,7 +496,7 @@ export default function DragDropPracticeExercise({
               <span className="text-sm font-semibold text-emerald-400">Perfect Score!</span>
             </div>
           ) : (
-            <p className="text-sm text-slate-400 mb-8">Try Again to improve your score.</p>
+            <p className="text-sm text-slate-300 mb-8">Try Again to improve your score.</p>
           )}
 
           <div className="flex items-center gap-3">
@@ -508,7 +508,7 @@ export default function DragDropPracticeExercise({
             </button>
             <button
               onClick={handleClose}
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white text-sm font-semibold shadow-lg shadow-emerald-600/20 transition-all"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[var(--brand-primary)] text-white text-sm font-semibold shadow-lg shadow-[var(--brand-primary)]/20 transition-all duration-[280ms] hover:scale-[1.03] hover:-translate-y-0.5"
             >
               Continue
             </button>

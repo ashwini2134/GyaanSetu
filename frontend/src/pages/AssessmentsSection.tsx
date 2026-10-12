@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { authFetch } from "../authClient";
 import { 
   Brain, MessageSquare, Code2, Monitor, Bot, ClipboardList, BarChart2,
   CheckCircle, Clock, CircleDashed, PlayCircle, Target, TrendingUp, AlertCircle,
@@ -25,31 +26,31 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
 };
 
 const CATEGORY_GRADIENTS: Record<string, string> = {
-  "Aptitude": "from-purple-500/10 via-pink-500/5 to-transparent",
-  "Communication Skills": "from-blue-500/10 via-cyan-500/5 to-transparent",
-  "Pseudocode & Problem Solving": "from-orange-500/10 via-yellow-500/5 to-transparent",
-  "Technical Assessments": "from-green-500/10 via-teal-500/5 to-transparent",
-  "AI Interview Practice": "from-red-500/10 via-orange-500/5 to-transparent",
-  "Mock Tests": "from-indigo-500/10 via-purple-500/5 to-transparent",
-  "Reports & Analytics": "from-teal-500/10 via-cyan-500/5 to-transparent"
+  "Aptitude": "from-[#007DAF]/10 via-[#0F9FB6]/5 to-transparent",
+  "Communication Skills": "from-[#0F9FB6]/10 via-[#79C8C2]/5 to-transparent",
+  "Pseudocode & Problem Solving": "from-[#79C8C2]/10 via-[#006491]/5 to-transparent",
+  "Technical Assessments": "from-[#006491]/10 via-[#007DAF]/5 to-transparent",
+  "AI Interview Practice": "from-[#007DAF]/10 via-[#79C8C2]/5 to-transparent",
+  "Mock Tests": "from-[#0F9FB6]/10 via-[#006491]/5 to-transparent",
+  "Reports & Analytics": "from-[#79C8C2]/10 via-[#0F9FB6]/5 to-transparent"
 };
 
 const CARD_GRADIENTS: Record<string, string> = {
-  "Aptitude": "from-purple-600/12 via-pink-600/5 to-slate-900",
-  "Communication Skills": "from-blue-600/12 via-cyan-600/5 to-slate-900",
-  "Pseudocode & Problem Solving": "from-orange-600/12 via-yellow-600/5 to-slate-900",
-  "Technical Assessments": "from-green-600/12 via-teal-600/5 to-slate-900",
-  "AI Interview Practice": "from-red-600/12 via-orange-600/5 to-slate-900",
-  "Mock Tests": "from-indigo-600/12 via-purple-600/5 to-slate-900"
+  "Aptitude": "from-[#007DAF]/12 via-[#0F9FB6]/5 to-slate-900",
+  "Communication Skills": "from-[#0F9FB6]/12 via-[#79C8C2]/5 to-slate-900",
+  "Pseudocode & Problem Solving": "from-[#79C8C2]/12 via-[#006491]/5 to-slate-900",
+  "Technical Assessments": "from-[#006491]/12 via-[#007DAF]/5 to-slate-900",
+  "AI Interview Practice": "from-[#007DAF]/12 via-[#79C8C2]/5 to-slate-900",
+  "Mock Tests": "from-[#0F9FB6]/12 via-[#006491]/5 to-slate-900"
 };
 
 const BORDER_GRADIENTS: Record<string, string> = {
-  "Aptitude": "from-purple-500 to-pink-500",
-  "Communication Skills": "from-blue-500 to-cyan-500",
-  "Pseudocode & Problem Solving": "from-orange-500 to-yellow-500",
-  "Technical Assessments": "from-green-500 to-teal-500",
-  "AI Interview Practice": "from-red-500 to-orange-500",
-  "Mock Tests": "from-indigo-500 to-purple-500"
+  "Aptitude": "from-[#007DAF] to-[#0F9FB6]",
+  "Communication Skills": "from-[#0F9FB6] to-[#79C8C2]",
+  "Pseudocode & Problem Solving": "from-[#79C8C2] to-[#006491]",
+  "Technical Assessments": "from-[#006491] to-[#007DAF]",
+  "AI Interview Practice": "from-[#007DAF] to-[#79C8C2]",
+  "Mock Tests": "from-[#0F9FB6] to-[#006491]"
 };
 
 const TOPIC_TAGS: Record<string, string[]> = {
@@ -95,75 +96,34 @@ interface Category {
   subsections: SubSection[];
 }
 
-const CATEGORIES: Category[] = [
-  {
-    id: "aptitude",
-    name: "Aptitude",
-    subsections: [
-      { name: "Quantitative Aptitude", icon: Calculator, difficulty: "Intermediate", duration: "~20 mins", description: "Test your numerical problem-solving skills." },
-      { name: "Logical Reasoning", icon: Lightbulb, difficulty: "Intermediate", duration: "~20 mins", description: "Evaluate your logical deduction capabilities." },
-      { name: "Analytical Reasoning", icon: PieChart, difficulty: "Advanced", duration: "~25 mins", description: "Solve complex analytical puzzles." },
-      { name: "Verbal Ability", icon: BookOpen, difficulty: "Beginner", duration: "~15 mins", description: "Test your command over the English language." }
-    ]
-  },
-  {
-    id: "communication",
-    name: "Communication Skills",
-    subsections: [
-      { name: "Grammar", icon: Pencil, difficulty: "Beginner", duration: "~15 mins", description: "Assess your knowledge of English grammar rules." },
-      { name: "Vocabulary", icon: BookMarked, difficulty: "Intermediate", duration: "~15 mins", description: "Test your vocabulary and word usage." },
-      { name: "Reading Comprehension", icon: FileText, difficulty: "Intermediate", duration: "~25 mins", description: "Evaluate your ability to understand written passages." },
-      { name: "Email Writing", icon: Mail, difficulty: "Beginner", duration: "~15 mins", description: "Practice professional email formatting." },
-      { name: "Resume Writing", icon: FileUser, difficulty: "Intermediate", duration: "~20 mins", description: "Understand the key components of a strong resume." }
-    ]
-  },
-  {
-    id: "pseudocode",
-    name: "Pseudocode & Problem Solving",
-    subsections: [
-      { name: "Flowcharts", icon: GitBranch, difficulty: "Beginner", duration: "~15 mins", description: "Understand logical flow and visual representations." },
-      { name: "Loops", icon: RefreshCw, difficulty: "Intermediate", duration: "~20 mins", description: "Master iterative control structures." },
-      { name: "Arrays", icon: List, difficulty: "Intermediate", duration: "~20 mins", description: "Work with index-based data collections." },
-      { name: "Functions", icon: FunctionSquare, difficulty: "Intermediate", duration: "~20 mins", description: "Understand modular programming and scope." },
-      { name: "Recursion", icon: RotateCcw, difficulty: "Advanced", duration: "~25 mins", description: "Solve problems using recursive calls." }
-    ]
-  },
-  {
-    id: "technical",
-    name: "Technical Assessments",
-    subsections: [
-      { name: "Python", icon: Terminal, difficulty: "Intermediate", duration: "~30 mins", description: "Test your Python programming knowledge." },
-      { name: "Java", icon: Coffee, difficulty: "Advanced", duration: "~30 mins", description: "Evaluate your core Java skills." },
-      { name: "JavaScript", icon: Braces, difficulty: "Intermediate", duration: "~30 mins", description: "Assess your JavaScript proficiency." },
-      { name: "SQL", icon: Database, difficulty: "Intermediate", duration: "~25 mins", description: "Write and analyze database queries." },
-      { name: "DBMS", icon: Server, difficulty: "Advanced", duration: "~25 mins", description: "Understand database management concepts." },
-      { name: "OS", icon: Cpu, difficulty: "Advanced", duration: "~25 mins", description: "Core concepts of Operating Systems." },
-      { name: "Computer Networks", icon: Network, difficulty: "Advanced", duration: "~25 mins", description: "Networking protocols and architecture." }
-    ]
-  },
-  {
-    id: "ai-interview",
-    name: "AI Interview Practice",
-    subsections: [
-      { name: "HR Questions", icon: Users, difficulty: "Beginner", duration: "~20 mins", description: "Prepare for common HR screening questions." },
-      { name: "Technical Interview", icon: Code, difficulty: "Advanced", duration: "~40 mins", description: "Practice answering technical conceptual questions." },
-      { name: "Behavioral Questions", icon: Heart, difficulty: "Intermediate", duration: "~25 mins", description: "Handle situational and behavioral scenarios." },
-      { name: "Mock Interviews", icon: Video, difficulty: "Expert", duration: "~45 mins", description: "Full simulated interview practice." }
-    ]
-  },
-  {
-    id: "mock-tests",
-    name: "Mock Tests",
-    subsections: [
-      { name: "Full Mock", icon: Trophy, difficulty: "Expert", duration: "~120 mins", description: "A comprehensive full-length exam." }
-    ]
-  },
-  {
-    id: "reports",
-    name: "Reports & Analytics",
-    subsections: [] 
-  }
-];
+const LEGACY_METADATA: Record<string, any> = {
+  "Quantitative Aptitude": { icon: Calculator, difficulty: "Intermediate", duration: "~20 mins", description: "Test your numerical problem-solving skills." },
+  "Logical Reasoning": { icon: Lightbulb, difficulty: "Intermediate", duration: "~20 mins", description: "Evaluate your logical deduction capabilities." },
+  "Analytical Reasoning": { icon: PieChart, difficulty: "Advanced", duration: "~25 mins", description: "Solve complex analytical puzzles." },
+  "Verbal Ability": { icon: BookOpen, difficulty: "Beginner", duration: "~15 mins", description: "Test your command over the English language." },
+  "Grammar": { icon: Pencil, difficulty: "Beginner", duration: "~15 mins", description: "Assess your knowledge of English grammar rules." },
+  "Vocabulary": { icon: BookMarked, difficulty: "Intermediate", duration: "~15 mins", description: "Test your vocabulary and word usage." },
+  "Reading Comprehension": { icon: FileText, difficulty: "Intermediate", duration: "~25 mins", description: "Evaluate your ability to understand written passages." },
+  "Email Writing": { icon: Mail, difficulty: "Beginner", duration: "~15 mins", description: "Practice professional email formatting." },
+  "Resume Writing": { icon: FileUser, difficulty: "Intermediate", duration: "~20 mins", description: "Understand the key components of a strong resume." },
+  "Flowcharts": { icon: GitBranch, difficulty: "Beginner", duration: "~15 mins", description: "Understand logical flow and visual representations." },
+  "Loops": { icon: RefreshCw, difficulty: "Intermediate", duration: "~20 mins", description: "Master iterative control structures." },
+  "Arrays": { icon: List, difficulty: "Intermediate", duration: "~20 mins", description: "Work with index-based data collections." },
+  "Functions": { icon: FunctionSquare, difficulty: "Intermediate", duration: "~20 mins", description: "Understand modular programming and scope." },
+  "Recursion": { icon: RotateCcw, difficulty: "Advanced", duration: "~25 mins", description: "Solve problems using recursive calls." },
+  "Python": { icon: Terminal, difficulty: "Intermediate", duration: "~30 mins", description: "Test your Python programming knowledge." },
+  "Java": { icon: Coffee, difficulty: "Advanced", duration: "~30 mins", description: "Evaluate your core Java skills." },
+  "JavaScript": { icon: Braces, difficulty: "Intermediate", duration: "~30 mins", description: "Assess your JavaScript proficiency." },
+  "SQL": { icon: Database, difficulty: "Intermediate", duration: "~25 mins", description: "Write and analyze database queries." },
+  "DBMS": { icon: Server, difficulty: "Advanced", duration: "~25 mins", description: "Understand database management concepts." },
+  "OS": { icon: Cpu, difficulty: "Advanced", duration: "~25 mins", description: "Core concepts of Operating Systems." },
+  "Computer Networks": { icon: Network, difficulty: "Advanced", duration: "~25 mins", description: "Networking protocols and architecture." },
+  "HR Questions": { icon: Users, difficulty: "Beginner", duration: "~20 mins", description: "Prepare for common HR screening questions." },
+  "Technical Interview": { icon: Code, difficulty: "Advanced", duration: "~40 mins", description: "Practice answering technical conceptual questions." },
+  "Behavioral Questions": { icon: Heart, difficulty: "Intermediate", duration: "~25 mins", description: "Handle situational and behavioral scenarios." },
+  "Mock Interviews": { icon: Video, difficulty: "Expert", duration: "~45 mins", description: "Full simulated interview practice." },
+  "Full Mock": { icon: Trophy, difficulty: "Expert", duration: "~120 mins", description: "A comprehensive full-length exam." }
+};
 
 // --- COMPONENTS ---
 
@@ -173,7 +133,7 @@ function StatusBadge({ status, loading }: { status: string, loading: boolean }) 
       <motion.div 
         animate={{ opacity: [0.5, 1, 0.5] }} 
         transition={{ duration: 1.5, repeat: Infinity }}
-        className="w-24 h-6 bg-white/10 rounded-full"
+        className="w-24 h-6 bg-slate-200 rounded-full"
       />
     );
   }
@@ -181,7 +141,7 @@ function StatusBadge({ status, loading }: { status: string, loading: boolean }) 
     return (
       <motion.span 
         initial={{ scale: 0 }} animate={{ scale: 1 }}
-        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider bg-gradient-to-r from-green-500/20 to-teal-500/20 border border-teal-500/30 text-teal-300 shadow-[0_0_12px_rgba(20,184,166,0.15)]"
+        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider bg-[#00BFB3] text-white border border-transparent"
       >
         <CheckCircle size={12} /> Completed
       </motion.span>
@@ -191,7 +151,7 @@ function StatusBadge({ status, loading }: { status: string, loading: boolean }) 
     return (
       <motion.span 
         initial={{ scale: 0 }} animate={{ scale: 1 }}
-        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-cyan-500/30 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.15)]"
+        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider bg-[#00BFB3] text-white border border-transparent"
       >
         <Clock size={12} /> In Progress
       </motion.span>
@@ -200,7 +160,7 @@ function StatusBadge({ status, loading }: { status: string, loading: boolean }) 
   return (
     <motion.span 
       initial={{ scale: 0 }} animate={{ scale: 1 }}
-      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider bg-slate-800/60 border border-slate-700/40 text-slate-400"
+      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider bg-slate-200 text-slate-500 border border-transparent"
     >
       <CircleDashed size={12} /> Not Started
     </motion.span>
@@ -208,15 +168,8 @@ function StatusBadge({ status, loading }: { status: string, loading: boolean }) 
 }
 
 function DifficultyBadge({ difficulty }: { difficulty: string }) {
-  const colorMap: Record<string, string> = {
-    Beginner: "bg-emerald-500/15 text-emerald-300 border-emerald-500/25",
-    Intermediate: "bg-amber-500/15 text-amber-300 border-amber-500/25",
-    Advanced: "bg-rose-500/15 text-rose-300 border-rose-500/25",
-    Expert: "bg-purple-500/15 text-purple-300 border-purple-500/25",
-  };
-  const cls = colorMap[difficulty] || "bg-slate-500/15 text-slate-300 border-slate-500/25";
   return (
-    <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wider uppercase border ${cls}`}>
+    <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wider uppercase border bg-[#00BFB3] text-white border-transparent">
       {difficulty}
     </span>
   );
@@ -224,7 +177,7 @@ function DifficultyBadge({ difficulty }: { difficulty: string }) {
 
 function SkillPill({ skill }: { skill: string }) {
   return (
-    <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-medium bg-white/5 border border-white/10 text-slate-300">
+    <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] border bg-[#00BFB3]/15 border-[#00BFB3]/30 text-[#1B2B44] font-semibold">
       {skill}
     </span>
   );
@@ -255,11 +208,11 @@ function CarouselCard({ sub, category, isExpanded, status, loading, onHover, onS
   }, []);
 
   const baseGradientColor = category === "Communication Skills" ? "rgba(6,182,212,0.15)" 
-    : category === "Aptitude" ? "rgba(168,85,247,0.15)"
+    : category === "Aptitude" ? "rgba(15,159,182,0.15)"
     : "rgba(59,130,246,0.15)";
 
-  const borderGradientClass = BORDER_GRADIENTS[category] || "from-blue-500 to-cyan-500";
-  const bgGradientClass = CARD_GRADIENTS[category] || "from-blue-600/25 via-cyan-600/10 to-slate-900";
+  const borderGradientClass = BORDER_GRADIENTS[category] || "from-blue-500 to[#007DAF]";
+  const bgGradientClass = CARD_GRADIENTS[category] || "from-blue-600/25 via[#007DAF]/10 to-slate-900";
 
   return (
     <motion.div
@@ -268,45 +221,22 @@ function CarouselCard({ sub, category, isExpanded, status, loading, onHover, onS
       onMouseMove={handleMouseMove}
       animate={{ height: isExpanded ? "auto" : 76 }}
       transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
-      className={`relative rounded-2xl overflow-hidden cursor-pointer border transition-shadow duration-300 ${
-        isExpanded
-          ? `border-transparent bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl shadow-[0_0_40px_-8px_${baseGradientColor}]`
-          : "border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/[0.08] backdrop-blur-md"
-      }`}
+      className={`relative rounded-2xl overflow-hidden cursor-pointer border transition-shadow duration-300 bg-[#F8FAFC] shadow-lg ${isExpanded ? "border-slate-200" : "border-slate-200 hover:border-slate-300"}`}
     >
-      {/* Animated glowing border effect for expanded state */}
-      {isExpanded && (
-        <div className={`absolute inset-0 p-[1px] bg-gradient-to-br ${borderGradientClass} rounded-2xl pointer-events-none opacity-50`} style={{ mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)", maskComposite: "exclude", WebkitMaskComposite: "destination-out" }} />
-      )}
-
-      {isExpanded && (
-        <div className={`absolute inset-0 opacity-30 bg-gradient-to-br ${bgGradientClass} transition-opacity duration-500 pointer-events-none`} />
-      )}
-
       <div className="absolute inset-0 pointer-events-none z-0">
-        <div
-          ref={spotRef}
-          className={`absolute inset-0 bg-[radial-gradient(600px_circle_at_var(--mx,50%)_var(--my,50%),${baseGradientColor}_0%,transparent_60%)] transition-opacity duration-500 opacity-0 group-hover:opacity-100 ${isExpanded ? 'opacity-100' : ''}`}
-        />
       </div>
 
       <div className="relative z-10 flex items-center gap-4 px-6 h-[76px]">
-        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${isExpanded ? borderGradientClass : "from-slate-700/50 to-slate-800/50"} flex items-center justify-center flex-shrink-0 transition-all duration-300 ${isExpanded ? "opacity-20" : ""}`}>
-          <Icon size={18} className={isExpanded ? "text-white" : "text-slate-400"} />
+        <div className="w-10 h-10 rounded-xl bg-[#F1F5F9] border border-slate-200 flex items-center justify-center flex-shrink-0 transition-all duration-300">
+          <Icon size={18} className="text-[#1B2B44]" />
         </div>
         
-        {isExpanded && (
-          <div className="absolute left-6 w-10 h-10 flex items-center justify-center pointer-events-none">
-            <Icon size={18} className="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
-          </div>
-        )}
-
         <div className="flex-1 min-w-0">
-          <h3 className={`text-base font-semibold truncate transition-colors duration-300 ${isExpanded ? "text-white opacity-0" : "text-slate-200"}`}>
+          <h3 className="text-base font-semibold truncate transition-colors duration-300 text-[#0F172A]">
             {sub.name}
           </h3>
           {!isExpanded && (
-            <p className="text-xs text-slate-500 truncate mt-0.5">{sub.description}</p>
+            <p className="text-xs text-slate-500 truncate mt-0.5 font-semibold">{sub.description}</p>
           )}
         </div>
         
@@ -330,24 +260,24 @@ function CarouselCard({ sub, category, isExpanded, status, loading, onHover, onS
               <div className="space-y-4">
                 <div className="flex items-center gap-3 flex-wrap">
                   <DifficultyBadge difficulty={sub.difficulty} />
-                  <span className="inline-flex items-center gap-1.5 text-xs text-slate-400">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00BFB3]/15 border border-[#00BFB3]/30 text-[#1B2B44] font-bold text-[11px]">
                     <Clock size={13} />
                     {sub.duration}
                   </span>
                   <StatusBadge status={status} loading={loading} />
                 </div>
 
-                <h3 className="text-2xl font-bold text-white tracking-tight mt-1 mb-2">
+                <h3 className="text-2xl font-bold text-[#0F172A] tracking-tight mt-1 mb-2">
                   {sub.name}
                 </h3>
 
-                <p className="text-sm text-slate-300 leading-relaxed mb-4">
+                <p className="text-sm text-[#0F172A] font-semibold leading-relaxed mb-4">
                   {sub.description}
                 </p>
 
                 {tags.length > 0 && (
                   <div>
-                    <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Topics</p>
+                    <p className="uppercase tracking-wider mb-2 text-[13px] text-[#1B2B44] font-bold">Topics</p>
                     <div className="flex flex-wrap gap-1.5">
                       {tags.map(t => (
                         <SkillPill key={t} skill={t} />
@@ -358,10 +288,10 @@ function CarouselCard({ sub, category, isExpanded, status, loading, onHover, onS
 
                 <div className="pt-4">
                   <motion.button 
-                    whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(168, 85, 247, 0.5)" }}
+                    whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={(e) => { e.stopPropagation(); onStart(); }}
-                    className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r ${borderGradientClass} text-white font-bold transition-all duration-300 hover:shadow-lg`}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#1B2B44] hover:bg-[#00BFB3] text-[#FFFFFF] text-sm font-bold transition-colors duration-200"
                   >
                     {status === "completed" ? "Review Assessment" : status === "in_progress" ? "Continue Assessment" : "Start Assessment"}
                     <PlayCircle size={18} />
@@ -369,7 +299,7 @@ function CarouselCard({ sub, category, isExpanded, status, loading, onHover, onS
                 </div>
               </div>
 
-              <div className="hidden md:flex items-center justify-center w-48 border-l border-white/5 pl-8">
+              <div className="hidden md:flex items-center justify-center w-48 border-l border-slate-200 pl-8">
                 <motion.div 
                   animate={{ scale: [1, 1.05, 1], rotate: [0, 5, -5, 0] }}
                   transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
@@ -391,9 +321,9 @@ function CarouselCard({ sub, category, isExpanded, status, loading, onHover, onS
 export default function AssessmentsSection() {
   const { user } = useAuth();
   
+  const [categories, setCategories] = useState<Category[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>("Aptitude");
-  const firstSubName = CATEGORIES.find(c => c.name === "Aptitude")?.subsections[0]?.name ?? null;
-  const [expandedSubsection, setExpandedSubsection] = useState<string | null>(firstSubName);
+  const [expandedSubsection, setExpandedSubsection] = useState<string | null>(null);
   const [activePlayer, setActivePlayer] = useState<{category: string, subsection: string} | null>(null);
 
   const [statusData, setStatusData] = useState<Record<string, Record<string, string>>>({});
@@ -403,12 +333,56 @@ export default function AssessmentsSection() {
   const fetchProgress = async () => {
     if (!user) return;
     try {
-      const [statRes, analyticsRes] = await Promise.all([
-        api.client.get(`/api/assessments/subsection-status/${user.id}`),
-        api.client.get(`/api/assessments/analytics/${user.id}`)
+      const [statRes, analyticsRes, catRes] = await Promise.all([
+        authFetch<any>(`/assessments/subsection-status/${user.id}`),
+        authFetch<any>(`/assessments/analytics/${user.id}`),
+        authFetch<any>(`/assessments/categories`)
       ]);
-      setStatusData(statRes.data);
-      setAnalyticsData(analyticsRes.data);
+      setStatusData(statRes);
+      setAnalyticsData(analyticsRes);
+
+      const dynamicCategories = catRes.categories.map((cat: any) => ({
+        ...cat,
+        subsections: cat.subsections.map((sub: any) => {
+          const meta = LEGACY_METADATA[sub.name];
+          return {
+            name: sub.name,
+            icon: meta?.icon || Target,
+            difficulty: meta?.difficulty || "Intermediate",
+            duration: meta?.duration || "~20 mins",
+            description: sub.description || meta?.description || `Assessment on ${sub.name}`
+          };
+        })
+      }));
+
+      // Ensure Reports & Analytics is there
+      if (!dynamicCategories.find((c: any) => c.name === "Reports & Analytics")) {
+        dynamicCategories.push({
+          id: "reports",
+          name: "Reports & Analytics",
+          subsections: []
+        });
+      }
+
+      // Maintain legacy category order roughly, or sort alphabetically
+      // Actually, relying on the API's order is fine, but we can hardcode the specific known order if needed.
+      const order = ["Aptitude", "Communication Skills", "Pseudocode & Problem Solving", "Technical Assessments", "AI Interview Practice", "Mock Tests", "Reports & Analytics"];
+      dynamicCategories.sort((a: any, b: any) => {
+        const idxA = order.indexOf(a.name);
+        const idxB = order.indexOf(b.name);
+        if (idxA === -1 && idxB === -1) return a.name.localeCompare(b.name);
+        if (idxA === -1) return 1;
+        if (idxB === -1) return -1;
+        return idxA - idxB;
+      });
+
+      setCategories(dynamicCategories);
+      
+      setExpandedSubsection(prev => {
+        if (prev) return prev;
+        const apt = dynamicCategories.find((c: any) => c.name === "Aptitude");
+        return apt?.subsections[0]?.name || dynamicCategories[0]?.subsections[0]?.name || null;
+      });
     } catch (err) {
       console.error("Failed to fetch assessment progress", err);
     } finally {
@@ -445,7 +419,7 @@ export default function AssessmentsSection() {
     );
   }
 
-  const currentCategoryData = CATEGORIES.find(c => c.name === activeCategory);
+  const currentCategoryData = categories.find(c => c.name === activeCategory);
   const filteredSubsections = currentCategoryData?.subsections || [];
 
   return (
@@ -456,19 +430,19 @@ export default function AssessmentsSection() {
         <motion.div 
           animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
           transition={{ duration: 15, repeat: Infinity, repeatType: "mirror" }}
-          className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-600/20 blur-[120px] rounded-full" 
+          className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg[#0F9FB6]/20 blur-[120px] rounded-full" 
         />
         <motion.div 
           animate={{ scale: [1, 1.3, 1], opacity: [0.2, 0.4, 0.2] }}
           transition={{ duration: 18, repeat: Infinity, repeatType: "mirror", delay: 2 }}
-          className="absolute bottom-[-10%] right-[-5%] w-[35%] h-[35%] bg-cyan-600/20 blur-[120px] rounded-full" 
+          className="absolute bottom-[-10%] right-[-5%] w-[35%] h-[35%] bg[#007DAF]/20 blur-[120px] rounded-full" 
         />
       </div>
 
       {/* HEADER */}
       <div className="relative z-10 max-w-6xl mx-auto mb-10 px-4 md:px-6 py-6 md:py-10">
         <div className="flex items-center gap-4 mb-2">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/30 flex items-center justify-center text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from[#0F9FB6]/20 to[#79C8C2]/20 border border[#0F9FB6]/30 flex items-center justify-center text[#0F9FB6] shadow-[0_0_15px_rgba(15,159,182,0.2)]">
             <Target size={24} />
           </div>
           <div>
@@ -482,10 +456,36 @@ export default function AssessmentsSection() {
         
         {/* LEFT SIDEBAR */}
         <div className="w-full lg:w-64 flex-shrink-0 flex flex-row lg:flex-col gap-2 overflow-x-auto pb-4 lg:pb-0 scrollbar-hide">
-          {CATEGORIES.map((cat, i) => {
+          {categories.map((cat, i) => {
             const isActive = activeCategory === cat.name;
             const CatIcon = CATEGORY_ICONS[cat.name] || Brain;
             const count = cat.name === "Reports & Analytics" ? "" : cat.subsections.length;
+
+            const getCategoryTextColor = (categoryName: string) => {
+              switch(categoryName) {
+                case "Aptitude": return "text-[#1B2B44]";
+                case "Communication Skills": return "text-[#00BFB3]";
+                case "Pseudocode & Problem Solving": return "text-[#1B2B44]";
+                case "Technical Assessments": return "text-[#00BFB3]";
+                case "AI Interview Practice": return "text-[#1B2B44]";
+                case "Mock Tests": return "text-[#00BFB3]";
+                case "Reports & Analytics": return "text-[#1B2B44]";
+                default: return "text-slate-500";
+              }
+            };
+            
+            const getCategoryHoverBg = (categoryName: string) => {
+              switch(categoryName) {
+                case "Aptitude": return "hover:bg-[#1B2B44]/[0.08]";
+                case "Communication Skills": return "hover:bg-[#00BFB3]/[0.08]";
+                case "Pseudocode & Problem Solving": return "hover:bg-[#1B2B44]/[0.08]";
+                case "Technical Assessments": return "hover:bg-[#00BFB3]/[0.08]";
+                case "AI Interview Practice": return "hover:bg-[#1B2B44]/[0.08]";
+                case "Mock Tests": return "hover:bg-[#00BFB3]/[0.08]";
+                case "Reports & Analytics": return "hover:bg-[#1B2B44]/[0.08]";
+                default: return "hover:bg-slate-100";
+              }
+            };
 
             return (
               <motion.button
@@ -493,25 +493,19 @@ export default function AssessmentsSection() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.08 }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   setActiveCategory(cat.name);
                   setExpandedSubsection(cat.subsections[0]?.name ?? null);
                 }}
-                className={`flex-shrink-0 lg:w-full text-left px-5 py-3 rounded-xl text-sm font-semibold transition-colors duration-300 border ${
-                  isActive
-                    ? "bg-white/10 text-white border-purple-400/50 shadow-[0_4px_20px_rgba(168,85,247,0.15)] backdrop-blur-md"
-                    : "bg-[#0f172a]/50 backdrop-blur-md text-slate-400 border-white/10 hover:bg-white/5 hover:text-white"
-                }`}
+                className={`flex-shrink-0 lg:w-full text-left px-5 py-3 rounded-xl text-sm font-semibold transition-colors duration-200 bg-white border border-slate-200 ${getCategoryTextColor(cat.name)} ${getCategoryHoverBg(cat.name)} ${isActive ? 'ring-2 ring-[#00BFB3]' : ''}`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <CatIcon size={16} className={isActive ? "text-purple-400" : "text-slate-500"} />
+                    <CatIcon size={16} className={getCategoryTextColor(cat.name)} />
                     <span>{cat.name}</span>
                   </div>
                   {count !== "" && (
-                    <span className={`text-[11px] px-2 py-0.5 rounded-full ${isActive ? "bg-purple-500/20 text-purple-300" : "bg-white/10 text-slate-500"}`}>
+                    <span className={`text-[11px] px-2 py-0.5 rounded-full bg-white font-bold shadow-sm ${getCategoryTextColor(cat.name)}`}>
                       {count}
                     </span>
                   )}
@@ -534,7 +528,7 @@ export default function AssessmentsSection() {
                 className="bg-slate-900/40 backdrop-blur-xl border border-slate-700/60 rounded-2xl p-6 md:p-8"
               >
                 <div className="flex items-center gap-4 mb-8 border-b border-slate-700/50 pb-6">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500/20 to-cyan-500/20 text-teal-400 flex items-center justify-center border border-teal-500/30">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500/20 to[#007DAF]/20 text-teal-400 flex items-center justify-center border border-teal-500/30">
                     <BarChart2 size={24} />
                   </div>
                   <div>
@@ -545,7 +539,7 @@ export default function AssessmentsSection() {
 
                 {loading ? (
                   <div className="h-64 flex items-center justify-center">
-                    <div className="w-8 h-8 rounded-full border-2 border-white/20 border-t-purple-500 animate-spin"></div>
+                    <div className="w-8 h-8 rounded-full border-2 border-white/20 border-t-[#0F9FB6] animate-spin"></div>
                   </div>
                 ) : analyticsData && analyticsData.totalAttempted > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -576,7 +570,7 @@ export default function AssessmentsSection() {
 
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
                       <div className="flex items-center gap-3 mb-4 text-slate-400">
-                        <TrendingUp size={18} className="text-purple-400" />
+                        <TrendingUp size={18} className="text[#0F9FB6]" />
                         <span className="font-medium text-sm uppercase tracking-wider">Top Skills</span>
                       </div>
                       <div className="space-y-3 mt-2">
@@ -589,7 +583,7 @@ export default function AssessmentsSection() {
                             <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
                               <motion.div 
                                 initial={{ width: 0 }} animate={{ width: `${score}%` }} transition={{ duration: 1, delay: 0.5 }}
-                                className="h-full bg-gradient-to-r from-purple-400 to-cyan-400 rounded-full" 
+                                className="h-full bg-gradient-to-r from[#0F9FB6] to[#007DAF] rounded-full" 
                               />
                             </div>
                           </div>

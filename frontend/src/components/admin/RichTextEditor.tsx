@@ -40,77 +40,77 @@ export function RichTextEditor({ content, onChange }: { content: string, onChang
   };
 
   return (
-    <div className="border border-white/10 rounded-lg overflow-hidden bg-[#0f172a]">
-      <div className="bg-[#0a0f1e] border-b border-white/10 p-2 flex flex-wrap gap-1 items-center">
+    <div className="border border-[var(--border-light)] rounded-lg overflow-hidden bg-[var(--bg-body)]">
+      <div className="bg-[var(--bg-surface)] border-b border-[var(--border-light)] p-2 flex flex-wrap gap-1 items-center">
         <button
           onClick={() => editor.chain().focus().toggleBold().run()}
-          className={`p-2 rounded hover:bg-slate-200 ${editor.isActive('bold') ? 'bg-slate-200 text-blue-400' : 'text-slate-300'}`}
+          className={`p-2 rounded hover:bg-[var(--bg-dark-surface)] hover:text-[var(--color-primary)] ${editor.isActive('bold') ? 'bg-[var(--bg-dark-surface)] text-[var(--color-primary)]' : 'text-[var(--text-secondary)]'}`}
           title="Bold"
         >
           <Bold className="w-4 h-4" />
         </button>
         <button
           onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={`p-2 rounded hover:bg-slate-200 ${editor.isActive('italic') ? 'bg-slate-200 text-blue-400' : 'text-slate-300'}`}
+          className={`p-2 rounded hover:bg-[var(--bg-dark-surface)] hover:text-[var(--color-primary)] ${editor.isActive('italic') ? 'bg-[var(--bg-dark-surface)] text-[var(--color-primary)]' : 'text-[var(--text-secondary)]'}`}
           title="Italic"
         >
           <Italic className="w-4 h-4" />
         </button>
-        <div className="w-px h-6 bg-slate-300 mx-1" />
+        <div className="w-px h-6 bg-[var(--border-light)] mx-1" />
         <button
           onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-          className={`p-2 rounded hover:bg-slate-200 ${editor.isActive('heading', { level: 1 }) ? 'bg-slate-200 text-blue-400' : 'text-slate-300'}`}
+          className={`p-2 rounded hover:bg-[var(--bg-dark-surface)] hover:text-[var(--color-primary)] ${editor.isActive('heading', { level: 1 }) ? 'bg-[var(--bg-dark-surface)] text-[var(--color-primary)]' : 'text-[var(--text-secondary)]'}`}
           title="Heading 1"
         >
           <Heading1 className="w-4 h-4" />
         </button>
         <button
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={`p-2 rounded hover:bg-slate-200 ${editor.isActive('heading', { level: 2 }) ? 'bg-slate-200 text-blue-400' : 'text-slate-300'}`}
+          className={`p-2 rounded hover:bg-[var(--bg-dark-surface)] hover:text-[var(--color-primary)] ${editor.isActive('heading', { level: 2 }) ? 'bg-[var(--bg-dark-surface)] text-[var(--color-primary)]' : 'text-[var(--text-secondary)]'}`}
           title="Heading 2"
         >
           <Heading2 className="w-4 h-4" />
         </button>
-        <div className="w-px h-6 bg-slate-300 mx-1" />
+        <div className="w-px h-6 bg-[var(--border-light)] mx-1" />
         <button
           onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={`p-2 rounded hover:bg-slate-200 ${editor.isActive('bulletList') ? 'bg-slate-200 text-blue-400' : 'text-slate-300'}`}
+          className={`p-2 rounded hover:bg-[var(--bg-dark-surface)] hover:text-[var(--color-primary)] ${editor.isActive('bulletList') ? 'bg-[var(--bg-dark-surface)] text-[var(--color-primary)]' : 'text-[var(--text-secondary)]'}`}
           title="Bullet List"
         >
           <List className="w-4 h-4" />
         </button>
         <button
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={`p-2 rounded hover:bg-slate-200 ${editor.isActive('orderedList') ? 'bg-slate-200 text-blue-400' : 'text-slate-300'}`}
+          className={`p-2 rounded hover:bg-[var(--bg-dark-surface)] hover:text-[var(--color-primary)] ${editor.isActive('orderedList') ? 'bg-[var(--bg-dark-surface)] text-[var(--color-primary)]' : 'text-[var(--text-secondary)]'}`}
           title="Numbered List"
         >
           <ListOrdered className="w-4 h-4" />
         </button>
         <button
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          className={`p-2 rounded hover:bg-slate-200 ${editor.isActive('blockquote') ? 'bg-slate-200 text-blue-400' : 'text-slate-300'}`}
+          className={`p-2 rounded hover:bg-[var(--bg-dark-surface)] hover:text-[var(--color-primary)] ${editor.isActive('blockquote') ? 'bg-[var(--bg-dark-surface)] text-[var(--color-primary)]' : 'text-[var(--text-secondary)]'}`}
           title="Quote"
         >
           <Quote className="w-4 h-4" />
         </button>
         <button
           onClick={() => editor.chain().focus().setHorizontalRule().run()}
-          className={`p-2 rounded hover:bg-slate-200 text-slate-300`}
+          className={`p-2 rounded hover:bg-[var(--bg-dark-surface)] hover:text-[var(--color-primary)] text-[var(--text-secondary)]`}
           title="Divider"
         >
           <Minus className="w-4 h-4" />
         </button>
-        <div className="w-px h-6 bg-slate-300 mx-1" />
+        <div className="w-px h-6 bg-[var(--border-light)] mx-1" />
         <button
           onClick={addImage}
-          className={`p-2 rounded hover:bg-slate-200 text-slate-300`}
+          className={`p-2 rounded hover:bg-[var(--bg-dark-surface)] hover:text-[var(--color-primary)] text-[var(--text-secondary)]`}
           title="Add Image"
         >
           <ImageIcon className="w-4 h-4" />
         </button>
         <button
           onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-          className={`p-2 rounded hover:bg-slate-200 ${editor.isActive('codeBlock') ? 'bg-slate-200 text-blue-400' : 'text-slate-300'}`}
+          className={`p-2 rounded hover:bg-[var(--bg-dark-surface)] hover:text-[var(--color-primary)] ${editor.isActive('codeBlock') ? 'bg-[var(--bg-dark-surface)] text-[var(--color-primary)]' : 'text-[var(--text-secondary)]'}`}
           title="Code Block"
         >
           <Code className="w-4 h-4" />

@@ -1,60 +1,101 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { authFetch } from '../authClient';
 
-export interface ProjectStatusData {
-  status: string;
+export interface ProjectSubmission {
+  id: string;
+  status: 'NOT_SUBMITTED' | 'PENDING' | 'REVIEWING' | 'APPROVED' | 'REJECTED' | 'ERROR' | 'CANCELLED';
+  score: number | null;
+  feedback: string | null;
+  reviewSteps: Array<{ step: string; passed: boolean; detail: string }> | null;
   githubUrl?: string;
-  liveDemoUrl?: string;
-  description?: string;
+  content?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-export function useProjectStatus() {
-  const [statuses, setStatuses] = useState<Record<string, ProjectStatusData>>({});
+export function useProjectStatus(projectId: string) {
+  const [submission, setSubmission] = useState<ProjectSubmission | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const fetchStatuses = useCallback(async () => {
+  const fetchStatus = useCallback(async () => {
+    if (!projectId || projectId === 'none') return null;
     try {
-      const data = await authFetch<Record<string, ProjectStatusData>>('/projects/status');
-      setStatuses(data || {});
-    } catch (e) {
-      console.error("Failed to fetch project statuses", e);
+      const data = await authFetch(`/student/projects/${projectId}/submission`);
+      // API returns { status: 'NOT_SUBMITTED' } if no submission exists
+      if (data && data.status) {
+        setSubmission(data as ProjectSubmission);
+        return data as ProjectSubmission;
+      }
+      return null;
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch status');
+      return null;
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [projectId]);
 
   useEffect(() => {
-    fetchStatuses();
-  }, [fetchStatuses]);
+    fetchStatus();
+    return () => {
+      if (pollRef.current) {
+        clearInterval(pollRef.current);
+      }
+    };
+  }, [fetchStatus]);
 
-  const startProject = useCallback(async (projectId: string) => {
-    try {
-      setStatuses(prev => ({ ...prev, [projectId]: { status: "IN_PROGRESS" } }));
-      await authFetch(`/projects/${projectId}/start`, { method: 'PATCH' });
-    } catch (e) {
-      console.error("Failed to start project", e);
-      fetchStatuses();
+  useEffect(() => {
+    const isPolling = submission?.status === 'PENDING' || submission?.status === 'REVIEWING';
+    
+    if (isPolling && !pollRef.current) {
+      pollRef.current = setInterval(async () => {
+        const updated = await fetchStatus();
+        if (updated && updated.status !== 'PENDING' && updated.status !== 'REVIEWING') {
+          if (pollRef.current) {
+            clearInterval(pollRef.current);
+            pollRef.current = null;
+          }
+        }
+      }, 5000);
     }
-  }, [fetchStatuses]);
+    
+    if (!isPolling && pollRef.current) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+  }, [submission?.status, fetchStatus]);
 
-  const completeProject = useCallback(async (projectId: string, submission?: { githubUrl: string; liveDemoUrl?: string; description: string }) => {
+  const submitProject = async (githubUrl: string, content: string) => {
+    setError(null);
     try {
-      setStatuses(prev => ({ ...prev, [projectId]: { status: "COMPLETED", ...submission } }));
-      await authFetch(`/projects/${projectId}/complete`, { 
-        method: 'PATCH',
-        body: JSON.stringify(submission || {})
+      const data = await authFetch<{ submissionId: string }>(`/student/projects/${projectId}/submit`, {
+        method: 'POST',
+        body: JSON.stringify({ githubUrl, content })
       });
-    } catch (e) {
-      console.error("Failed to complete project", e);
-      fetchStatuses();
+      
+      setSubmission(prev => ({ 
+        ...(prev || {} as ProjectSubmission), 
+        status: 'PENDING', 
+        id: data.submissionId 
+                      }));
+    } catch (err: any) {
+      setError(err.message || 'Submission failed');
+      throw err;
     }
-  }, [fetchStatuses]);
-
-  return {
-    statuses,
-    loading,
-    startProject,
-    completeProject,
-    refreshStatuses: fetchStatuses
   };
+
+  const cancelSubmission = async () => {
+    setError(null);
+    try {
+      await authFetch<{ message: string }>(`/student/projects/${projectId}/cancel`, { method: 'POST' });
+      setSubmission(prev => prev ? { ...prev, status: 'CANCELLED' as const } : null);
+    } catch (err: any) {
+      setError(err.message || 'Cancel failed');
+      throw err;
+    }
+  };
+
+  return { submission, loading, error, submitProject, cancelSubmission, refetch: fetchStatus };
 }

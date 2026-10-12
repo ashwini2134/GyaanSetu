@@ -31,6 +31,130 @@ class ReturnControl extends Error {
   }
 }
 
+// CPython-compatible Mersenne Twister (MT19937), matching CPython's
+// _randommodule.c bit-for-bit so `random.seed(n)` produces the exact same
+// sequence a real Python interpreter would — required for deterministic,
+// gradeable random-based exercises.
+class MT19937 {
+  private mt: number[] = new Array(624).fill(0);
+  private mti = 625;
+
+  private initGenrand(s: number): void {
+    this.mt[0] = s >>> 0;
+    for (let i = 1; i < 624; i++) {
+      const prev = this.mt[i - 1];
+      this.mt[i] = (Math.imul(1812433253, (prev ^ (prev >>> 30)) >>> 0) + i) >>> 0;
+    }
+    this.mti = 624;
+  }
+
+  private initByArray(key: number[]): void {
+    this.initGenrand(19650218);
+    let i = 1, j = 0;
+    let k = Math.max(624, key.length);
+    for (; k; k--) {
+      const prev = this.mt[i - 1];
+      this.mt[i] = (((this.mt[i] ^ Math.imul((prev ^ (prev >>> 30)) >>> 0, 1664525)) >>> 0) + key[j] + j) >>> 0;
+      i++; j++;
+      if (i >= 624) { this.mt[0] = this.mt[623]; i = 1; }
+      if (j >= key.length) j = 0;
+    }
+    for (k = 623; k; k--) {
+      const prev = this.mt[i - 1];
+      this.mt[i] = (((this.mt[i] ^ Math.imul((prev ^ (prev >>> 30)) >>> 0, 1566083941)) >>> 0) - i) >>> 0;
+      i++;
+      if (i >= 624) { this.mt[0] = this.mt[623]; i = 1; }
+    }
+    this.mt[0] = 0x80000000;
+  }
+
+  // Mirrors CPython's random.seed(int): abs(n) split into little-endian
+  // 32-bit words, fed through init_by_array.
+  seed(n: number): void {
+    n = Math.abs(Math.trunc(n));
+    const key: number[] = [];
+    if (n === 0) {
+      key.push(0);
+    } else {
+      let rem = n;
+      while (rem > 0) {
+        key.push(rem % 0x100000000);
+        rem = Math.floor(rem / 0x100000000);
+      }
+    }
+    this.initByArray(key);
+  }
+
+  private genrandUint32(): number {
+    const N = 624, M = 397;
+    const MATRIX_A = 0x9908b0df;
+    const UPPER_MASK = 0x80000000;
+    const LOWER_MASK = 0x7fffffff;
+    const mag01 = [0, MATRIX_A];
+
+    if (this.mti >= N) {
+      if (this.mti === 625) this.initGenrand(5489); // un-seeded fallback, matches CPython's default
+      let kk: number;
+      for (kk = 0; kk < N - M; kk++) {
+        const y = ((this.mt[kk] & UPPER_MASK) | (this.mt[kk + 1] & LOWER_MASK)) >>> 0;
+        this.mt[kk] = (this.mt[kk + M] ^ (y >>> 1) ^ mag01[y & 1]) >>> 0;
+      }
+      for (; kk < N - 1; kk++) {
+        const y = ((this.mt[kk] & UPPER_MASK) | (this.mt[kk + 1] & LOWER_MASK)) >>> 0;
+        this.mt[kk] = (this.mt[kk + (M - N)] ^ (y >>> 1) ^ mag01[y & 1]) >>> 0;
+      }
+      const y = ((this.mt[N - 1] & UPPER_MASK) | (this.mt[0] & LOWER_MASK)) >>> 0;
+      this.mt[N - 1] = (this.mt[M - 1] ^ (y >>> 1) ^ mag01[y & 1]) >>> 0;
+      this.mti = 0;
+    }
+
+    let y = this.mt[this.mti++];
+    y = (y ^ (y >>> 11)) >>> 0;
+    y = (y ^ ((y << 7) & 0x9d2c5680)) >>> 0;
+    y = (y ^ ((y << 15) & 0xefc60000)) >>> 0;
+    y = (y ^ (y >>> 18)) >>> 0;
+    return y >>> 0;
+  }
+
+  random(): number {
+    const a = this.genrandUint32() >>> 5;
+    const b = this.genrandUint32() >>> 6;
+    return (a * 67108864.0 + b) * (1.0 / 9007199254740992.0);
+  }
+
+  private bitLength(n: number): number {
+    let bits = 0;
+    while (n > 0) { bits++; n = Math.floor(n / 2); }
+    return bits;
+  }
+
+  getrandbits(k: number): number {
+    if (k <= 32) return this.genrandUint32() >>> (32 - k);
+    let result = 0, bitsRemaining = k, shift = 0;
+    while (bitsRemaining > 0) {
+      let r = this.genrandUint32();
+      const take = Math.min(32, bitsRemaining);
+      if (take < 32) r = r >>> (32 - take);
+      result += r * Math.pow(2, shift);
+      shift += 32;
+      bitsRemaining -= 32;
+    }
+    return result;
+  }
+
+  randbelow(n: number): number {
+    if (n <= 0) return 0;
+    const k = this.bitLength(n);
+    let r = this.getrandbits(k);
+    while (r >= n) r = this.getrandbits(k);
+    return r;
+  }
+
+  randint(a: number, b: number): number {
+    return a + this.randbelow(b + 1 - a);
+  }
+}
+
 class MiniPython {
   private globals: Env = new Map();
   private fns: Map<string, FnDef> = new Map();
@@ -39,6 +163,7 @@ class MiniPython {
   private currentLine = 0;
   private inputIdx = 0;
   private prompts: string[] = [];
+  private rng: MT19937 = new MT19937();
 
   constructor(private inputs: string[] = []) {
     // Clear filesystem when creating a new instance to ensure test isolation
@@ -56,7 +181,8 @@ class MiniPython {
     this.prompts = [];
     this.globals = new Map();
     this.fns = new Map();
-    
+    this.rng = new MT19937();
+
     try {
       this.validateSyntax(code);
       const logicalLines = this.reconstructLogicalLines(code);
@@ -242,30 +368,14 @@ class MiniPython {
         const op = augM[2];
         let res: PyVal;
         if (typeof cur === 'string' && op === '+') {
-          res = cur + String(rhs);
+          res = cur + this.str(rhs);
         } else if (typeof cur === 'string' && op === '%') {
           res = this.formatString(cur, rhs);
         } else {
-          if (typeof cur !== 'number' || typeof rhs !== 'number') {
-            throw new Error(`  TypeError: unsupported operand type(s) for ${op}=: '${typeof cur}' and '${typeof rhs}'\n    at line ${i + 1}`);
+          if (!this.isNumeric(cur) || !this.isNumeric(rhs)) {
+            throw new Error(`  TypeError: unsupported operand type(s) for ${op}=: '${this.getTypeName(cur)}' and '${this.getTypeName(rhs)}'\n    at line ${i + 1}`);
           }
-          switch (op) {
-            case '+': res = cur + rhs; break;
-            case '-': res = cur - rhs; break;
-            case '*': res = cur * rhs; break;
-            case '/':
-              if (rhs === 0) throw new Error(`  ZeroDivisionError: division by zero\n    at line ${i + 1}`);
-              res = cur / rhs; break;
-            case '//':
-              if (rhs === 0) throw new Error(`  ZeroDivisionError: integer division or modulo by zero\n    at line ${i + 1}`);
-              res = Math.floor(cur / rhs); break;
-            case '%':
-              if (rhs === 0) throw new Error(`  ZeroDivisionError: modulo by zero\n    at line ${i + 1}`);
-              res = cur % rhs; break;
-            case '**':
-              res = Math.pow(cur, rhs); break;
-            default: res = 0;
-          }
+          res = this.applyArithmetic(op, cur, rhs, `\n    at line ${i + 1}`);
         }
         env.set(augM[1], res);
         i++; continue;
@@ -276,7 +386,7 @@ class MiniPython {
       if (dictAugM) {
         const dict = env.get(dictAugM[1]) ?? this.globals.get(dictAugM[1]);
         if (dict && (this.isDict(dict) || Array.isArray(dict))) {
-          const key = String(this.eval(dictAugM[2].trim(), env));
+          const key = this.str(this.eval(dictAugM[2].trim(), env));
           const op = dictAugM[3];
           const rhs = this.eval(dictAugM[4].trim(), env);
           
@@ -294,28 +404,12 @@ class MiniPython {
 
           let res: PyVal;
           if (typeof cur === 'string' && op === '+') {
-            res = cur + String(rhs);
+            res = cur + this.str(rhs);
           } else {
-            if (typeof cur !== 'number' || typeof rhs !== 'number') {
-              throw new Error(`  TypeError: unsupported operand type(s) for ${op}=: '${typeof cur}' and '${typeof rhs}'\n    at line ${i + 1}`);
+            if (!this.isNumeric(cur) || !this.isNumeric(rhs)) {
+              throw new Error(`  TypeError: unsupported operand type(s) for ${op}=: '${this.getTypeName(cur)}' and '${this.getTypeName(rhs)}'\n    at line ${i + 1}`);
             }
-            switch (op) {
-              case '+': res = cur + rhs; break;
-              case '-': res = cur - rhs; break;
-              case '*': res = cur * rhs; break;
-              case '/':
-                if (rhs === 0) throw new Error(`  ZeroDivisionError: division by zero\n    at line ${i + 1}`);
-                res = cur / rhs; break;
-              case '//':
-                if (rhs === 0) throw new Error(`  ZeroDivisionError: integer division or modulo by zero\n    at line ${i + 1}`);
-                res = Math.floor(cur / rhs); break;
-              case '%':
-                if (rhs === 0) throw new Error(`  ZeroDivisionError: modulo by zero\n    at line ${i + 1}`);
-                res = cur % rhs; break;
-              case '**':
-                res = Math.pow(cur, rhs); break;
-              default: res = 0;
-            }
+            res = this.applyArithmetic(op, cur, rhs, `\n    at line ${i + 1}`);
           }
 
           if (this.isDict(dict)) {
@@ -332,7 +426,7 @@ class MiniPython {
       // if / elif / else
       if (t.startsWith('if ') || t.startsWith('elif ')) {
         const condStr = t.slice(t.startsWith('elif ') ? 5 : 3, t.lastIndexOf(':')).trim();
-        const cond = this.eval(condStr, env);
+        const cond = this.truthy(this.eval(condStr, env));
         const body: string[] = [];
         i++;
         while (i < lines.length) {
@@ -455,9 +549,9 @@ class MiniPython {
           const inner = this.unParen(rangeM[1]);
           const args = inner.split(',').map(s => s.trim()).filter(Boolean);
           let start = 0, stop = 0, step = 1;
-          if (args.length === 1) { stop = Number(this.eval(args[0], env)); }
-          else if (args.length === 2) { start = Number(this.eval(args[0], env)); stop = Number(this.eval(args[1], env)); }
-          else if (args.length === 3) { start = Number(this.eval(args[0], env)); stop = Number(this.eval(args[1], env)); step = Number(this.eval(args[2], env)); }
+          if (args.length === 1) { stop = this.numOf(this.eval(args[0], env)); }
+          else if (args.length === 2) { start = this.numOf(this.eval(args[0], env)); stop = this.numOf(this.eval(args[1], env)); }
+          else if (args.length === 3) { start = this.numOf(this.eval(args[0], env)); stop = this.numOf(this.eval(args[1], env)); step = this.numOf(this.eval(args[2], env)); }
           if (varNames.length > 1) throw new Error(`  ValueError: cannot unpack from range() (expected ${varNames.length} variables)`);
           for (let val = start; step > 0 ? val < stop : val > stop; val += step) {
             env.set(varNames[0], val);
@@ -506,7 +600,7 @@ class MiniPython {
 
         let iterations = 0;
         const maxIter = 10000; // Prevent infinite loops
-        while (this.eval(condStr, env) && iterations < maxIter) {
+        while (this.truthy(this.eval(condStr, env)) && iterations < maxIter) {
           try {
             this.execLines(body, ind + 1, env, inFn);
           } catch (e) {
@@ -536,7 +630,7 @@ class MiniPython {
         if (delDictM) {
           const dict = env.get(delDictM[1]) ?? this.globals.get(delDictM[1]);
           if (dict && this.isDict(dict)) {
-            const key = String(this.eval(delDictM[2].trim(), env));
+            const key = this.str(this.eval(delDictM[2].trim(), env));
             delete (dict as { [key: string]: PyVal })[key];
           } else {
             throw new Error(`  TypeError: '${typeof dict}' object does not support item deletion\n    at line ${i + 1}`);
@@ -553,12 +647,35 @@ class MiniPython {
       if (dictAssignM) {
         const target = env.get(dictAssignM[1]) ?? this.globals.get(dictAssignM[1]);
         if (target && this.isDict(target)) {
-          const key = String(this.eval(dictAssignM[2].trim(), env));
+          const key = this.str(this.eval(dictAssignM[2].trim(), env));
           const val = this.eval(dictAssignM[3].trim(), env);
           (target as { [key: string]: PyVal })[key] = val;
         } else {
           throw new Error(`  TypeError: '${typeof target}' object does not support item assignment\n    at line ${i + 1}`);
         }
+        i++; continue;
+      }
+
+      // Tuple/multi-variable unpacking assignment: a, b, c = expr  (or a, b = 1, 2)
+      const tupleAssignM = t.match(/^([a-zA-Z_]\w*(?:\s*,\s*[a-zA-Z_]\w*)+)\s*=(?!=)\s*(.+)$/);
+      if (tupleAssignM) {
+        const names = tupleAssignM[1].split(',').map(s => s.trim());
+        const rhsStr = tupleAssignM[2].trim();
+        const parts = this.parseArgs(rhsStr, env);
+        let values: PyVal[];
+        if (parts.length === 1) {
+          const list = this.toIterableList(parts[0]);
+          if (list === null) {
+            throw new Error(`  TypeError: cannot unpack non-iterable ${this.getTypeName(parts[0])} object\n    at line ${i + 1}`);
+          }
+          values = list;
+        } else {
+          values = parts;
+        }
+        if (values.length !== names.length) {
+          throw new Error(`  ValueError: ${values.length < names.length ? 'not enough values to unpack (expected ' + names.length + ', got ' + values.length + ')' : 'too many values to unpack (expected ' + names.length + ')'}\n    at line ${i + 1}`);
+        }
+        names.forEach((name, idx) => env.set(name, values[idx]));
         i++; continue;
       }
 
@@ -573,6 +690,10 @@ class MiniPython {
       // Method call: obj.method(args)
       const methodCallM = t.match(/^([a-zA-Z_]\w*(?:\[[^\]]*\])*)\.([a-zA-Z_]\w*)\s*\((.*)?\)\s*$/);
       if (methodCallM) {
+        if (methodCallM[1] === 'random' && !env.has('random') && !this.globals.has('random')) {
+          this.callRandomModule(methodCallM[2], methodCallM[3] ?? '', env);
+          i++; continue;
+        }
         const target = this.eval(methodCallM[1], env);
         const method = methodCallM[2];
         const rawArgs = methodCallM[3] ?? '';
@@ -583,8 +704,14 @@ class MiniPython {
             const idx = target.indexOf(args[0]);
             if (idx >= 0) target.splice(idx, 1);
           }
-          else if (method === 'sort') target.sort((a, b) => Number(a) - Number(b));
-          else if (method === 'pop') target.pop();
+          else if (method === 'sort') target.sort((a, b) => this.numOf(a) - this.numOf(b));
+          else if (method === 'pop') {
+            if (target.length > 0) {
+              let idx = args.length >= 1 ? Math.trunc(this.numOf(args[0])) : -1;
+              if (idx < 0) idx += target.length;
+              if (idx >= 0 && idx < target.length) target.splice(idx, 1);
+            }
+          }
         } else if (this.isSet(target)) {
           const vals = (target as any).values as PyVal[];
           if (method === 'add' && args.length >= 1) {
@@ -653,16 +780,17 @@ class MiniPython {
     if (name === 'repr') return this.repr(this.eval(argsStr, env));
     if (name === 'int') {
       const v = this.eval(argsStr, env);
-      const n = Number(v);
-      if (isNaN(n)) throw new Error(`  ValueError: invalid literal for int() with base 10: '${v}'`);
-      if (typeof v === 'string' && v.includes('.')) return Math.trunc(n);
+      const raw = this.isFloatVal(v) ? v.value : v;
+      const n = Number(raw);
+      if (isNaN(n)) throw new Error(`  ValueError: invalid literal for int() with base 10: '${raw}'`);
       return Math.trunc(n);
     }
     if (name === 'float') {
       const v = this.eval(argsStr, env);
-      const n = Number(v);
-      if (isNaN(n)) throw new Error(`  ValueError: could not convert string to float: '${v}'`);
-      return n;
+      const raw = this.isFloatVal(v) ? v.value : v;
+      const n = Number(raw);
+      if (isNaN(n)) throw new Error(`  ValueError: could not convert string to float: '${raw}'`);
+      return this.mkFloat(n);
     }
     if (name === 'len') {
       const v = this.eval(argsStr, env);
@@ -700,35 +828,41 @@ class MiniPython {
       const args = argsStr.trim() ? this.parseArgs(argsStr, env) : [];
       if (args.length === 0) throw new Error(`  TypeError: sum() takes at least 1 argument (0 given)`);
       const v = args[0];
-      const start = args[1] !== undefined ? Number(args[1]) : 0;
+      const startArg = args[1] !== undefined ? args[1] : 0;
       const list = this.toIterableList(v);
-      if (list === null) throw new Error(`  TypeError: '${v === null ? 'NoneType' : typeof v}' object is not iterable`);
-      return list.reduce((a, b) => Number(a) + Number(b), start);
+      if (list === null) throw new Error(`  TypeError: '${v === null ? 'NoneType' : this.getTypeName(v)}' object is not iterable`);
+      let acc = this.numOf(startArg);
+      let resultIsFloat = this.isFloatVal(startArg);
+      for (const item of list) {
+        acc += this.numOf(item);
+        if (this.isFloatVal(item)) resultIsFloat = true;
+      }
+      return this.wrapNumeric(acc, resultIsFloat);
     }
     if (name === 'min') {
       const args = argsStr.trim() ? this.parseArgs(argsStr, env) : [];
       if (args.length === 0) throw new Error(`  TypeError: min() takes at least 1 argument (0 given)`);
-      const v = args[0];
-      const list = this.toIterableList(v);
-      if (list === null) throw new Error(`  TypeError: '${v === null ? 'NoneType' : typeof v}' object is not iterable`);
-      return Math.min(...list.filter(x => typeof x === 'number'));
+      const list = args.length >= 2 ? args : this.toIterableList(args[0]);
+      if (list === null) throw new Error(`  TypeError: '${args[0] === null ? 'NoneType' : this.getTypeName(args[0])}' object is not iterable`);
+      if (list.length === 0) throw new Error(`  ValueError: min() arg is an empty sequence`);
+      return list.reduce((a, b) => this.numOf(b) < this.numOf(a) ? b : a);
     }
     if (name === 'max') {
       const args = argsStr.trim() ? this.parseArgs(argsStr, env) : [];
       if (args.length === 0) throw new Error(`  TypeError: max() takes at least 1 argument (0 given)`);
-      const v = args[0];
-      const list = this.toIterableList(v);
-      if (list === null) throw new Error(`  TypeError: '${v === null ? 'NoneType' : typeof v}' object is not iterable`);
-      return Math.max(...list.filter(x => typeof x === 'number'));
+      const list = args.length >= 2 ? args : this.toIterableList(args[0]);
+      if (list === null) throw new Error(`  TypeError: '${args[0] === null ? 'NoneType' : this.getTypeName(args[0])}' object is not iterable`);
+      if (list.length === 0) throw new Error(`  ValueError: max() arg is an empty sequence`);
+      return list.reduce((a, b) => this.numOf(b) > this.numOf(a) ? b : a);
     }
     if (name === 'sorted') {
       const args = argsStr.trim() ? this.parseArgs(argsStr, env) : [];
       if (args.length === 0) throw new Error(`  TypeError: sorted() takes at least 1 argument (0 given)`);
       const v = args[0];
       const list = this.toIterableList(v);
-      if (list === null) throw new Error(`  TypeError: '${v === null ? 'NoneType' : typeof v}' object is not iterable`);
+      if (list === null) throw new Error(`  TypeError: '${v === null ? 'NoneType' : this.getTypeName(v)}' object is not iterable`);
       return [...list].sort((a, b) => {
-        if (typeof a === 'number' && typeof b === 'number') return a - b;
+        if (this.isNumeric(a) && this.isNumeric(b)) return this.numOf(a) - this.numOf(b);
         return String(a).localeCompare(String(b));
       });
     }
@@ -771,11 +905,26 @@ class MiniPython {
       if (list === null) throw new Error(`  TypeError: '${v === null ? 'NoneType' : typeof v}' object is not iterable`);
       return list.map((item, idx) => [idx + start, item]);
     }
+    if (name === 'any') {
+      const args = argsStr.trim() ? this.parseArgs(argsStr, env) : [];
+      if (args.length === 0) throw new Error(`  TypeError: any() takes exactly one argument (0 given)`);
+      const list = this.toIterableList(args[0]);
+      if (list === null) throw new Error(`  TypeError: '${args[0] === null ? 'NoneType' : this.getTypeName(args[0])}' object is not iterable`);
+      return list.some(x => this.truthy(x));
+    }
+    if (name === 'all') {
+      const args = argsStr.trim() ? this.parseArgs(argsStr, env) : [];
+      if (args.length === 0) throw new Error(`  TypeError: all() takes exactly one argument (0 given)`);
+      const list = this.toIterableList(args[0]);
+      if (list === null) throw new Error(`  TypeError: '${args[0] === null ? 'NoneType' : this.getTypeName(args[0])}' object is not iterable`);
+      return list.every(x => this.truthy(x));
+    }
     if (name === 'type') {
       const v = this.eval(argsStr, env);
       if (v === null) return "<class 'NoneType'>";
+      if (this.isFloatVal(v)) return "<class 'float'>";
       if (typeof v === 'string') return "<class 'str'>";
-      if (typeof v === 'number') return Number.isInteger(v) ? "<class 'int'>" : "<class 'float'>";
+      if (typeof v === 'number') return "<class 'int'>";
       if (typeof v === 'boolean') return "<class 'bool'>";
       if (Array.isArray(v)) return "<class 'list'>";
       if (this.isSet(v)) return "<class 'set'>";
@@ -784,18 +933,62 @@ class MiniPython {
     }
     if (name === 'abs') {
       const v = this.eval(argsStr, env);
-      if (typeof v !== 'number') throw new Error(`  TypeError: bad operand type for abs(): '${typeof v}'`);
-      return Math.abs(v);
+      if (!this.isNumeric(v)) throw new Error(`  TypeError: bad operand type for abs(): '${this.getTypeName(v)}'`);
+      return this.wrapNumeric(Math.abs(this.numOf(v)), this.isFloatVal(v));
     }
     if (name === 'round') {
       const args = argsStr.trim() ? this.parseArgs(argsStr, env) : [];
       const v = args[0];
-      if (typeof v !== 'number') throw new Error(`  TypeError: '${typeof v}' object cannot be interpreted as an integer`);
+      if (!this.isNumeric(v)) throw new Error(`  TypeError: '${this.getTypeName(v)}' object cannot be interpreted as an integer`);
+      const num = this.numOf(v);
       if (args.length >= 2) {
-        const ndigits = Number(args[1]);
-        return Number(v.toFixed(ndigits));
+        const ndigits = this.numOf(args[1]);
+        return this.mkFloat(Number(num.toFixed(ndigits)));
       }
-      return Math.round(v);
+      return Math.round(num);
+    }
+    if (name === 'map') {
+      const rawParts = this.splitTopLevelArgs(argsStr);
+      if (rawParts.length < 2) throw new Error(`  TypeError: map() must have at least two arguments.`);
+      const funcRef = rawParts[0];
+      const iterables = rawParts.slice(1).map(p => {
+        const v = this.eval(p, env);
+        const list = this.toIterableList(v);
+        if (list === null) throw new Error(`  TypeError: '${v === null ? 'NoneType' : typeof v}' object is not iterable`);
+        return list;
+      });
+      const minLen = Math.min(...iterables.map(l => l.length));
+      const result: PyVal[] = [];
+      for (let idx = 0; idx < minLen; idx++) {
+        result.push(this.applyCallable(funcRef, iterables.map(l => l[idx])));
+      }
+      return result;
+    }
+    if (name === 'zip') {
+      const rawParts = argsStr.trim() ? this.splitTopLevelArgs(argsStr) : [];
+      const iterables = rawParts.map(p => {
+        const v = this.eval(p, env);
+        const list = this.toIterableList(v);
+        if (list === null) throw new Error(`  TypeError: '${v === null ? 'NoneType' : typeof v}' object is not iterable`);
+        return list;
+      });
+      if (iterables.length === 0) return [];
+      const minLen = Math.min(...iterables.map(l => l.length));
+      const result: PyVal[] = [];
+      for (let idx = 0; idx < minLen; idx++) {
+        result.push(iterables.map(l => l[idx]));
+      }
+      return result;
+    }
+    if (name === 'filter') {
+      const rawParts = this.splitTopLevelArgs(argsStr);
+      if (rawParts.length !== 2) throw new Error(`  TypeError: filter expected 2 arguments, got ${rawParts.length}`);
+      const funcRef = rawParts[0];
+      const v = this.eval(rawParts[1], env);
+      const list = this.toIterableList(v);
+      if (list === null) throw new Error(`  TypeError: '${v === null ? 'NoneType' : typeof v}' object is not iterable`);
+      if (funcRef === 'None') return list.filter(x => Boolean(x));
+      return list.filter(x => Boolean(this.applyCallable(funcRef, [x])));
     }
 
     const fn = this.fns.get(name);
@@ -877,6 +1070,7 @@ class MiniPython {
   }
 
   private isEqual(a: PyVal, b: PyVal): boolean {
+    if (this.isNumeric(a) && this.isNumeric(b)) return this.numOf(a) === this.numOf(b);
     if (a === b) return true;
     if (a === null || b === null) return false;
     if (typeof a !== typeof b) return false;
@@ -910,13 +1104,80 @@ class MiniPython {
 
   private getTypeName(v: PyVal): string {
     if (v === null) return 'NoneType';
+    if (this.isFloatVal(v)) return 'float';
     if (this.isSet(v)) return 'set';
     if (this.isDict(v)) return 'dict';
     if (Array.isArray(v)) return 'list';
     if (typeof v === 'string') return 'str';
-    if (typeof v === 'number') return Number.isInteger(v) ? 'int' : 'float';
+    if (typeof v === 'number') return 'int';
     if (typeof v === 'boolean') return 'bool';
     return typeof v;
+  }
+
+  // ── Float representation ──────────────────────────────────────────────
+  // Python distinguishes int/float (1 vs 1.0); this interpreter's PyVal is
+  // backed by plain JS numbers which don't. Floats are tagged with this
+  // wrapper (matching the existing __type__ convention used for set/file)
+  // so whole-number floats still render as "1.0" and float-ness propagates
+  // through arithmetic, while plain ints stay bare JS numbers.
+  private mkFloat(n: number): PyVal {
+    return { __type__: 'float', value: n };
+  }
+
+  private isFloatVal(v: PyVal): v is { __type__: 'float'; value: number } {
+    return typeof v === 'object' && v !== null && !Array.isArray(v) && (v as any).__type__ === 'float';
+  }
+
+  private isNumeric(v: PyVal): boolean {
+    return typeof v === 'number' || this.isFloatVal(v);
+  }
+
+  private numOf(v: PyVal): number {
+    if (this.isFloatVal(v)) return v.value;
+    if (typeof v === 'number') return v;
+    return NaN;
+  }
+
+  private wrapNumeric(n: number, asFloat: boolean): PyVal {
+    return asFloat ? this.mkFloat(n) : n;
+  }
+
+  private formatFloat(n: number): string {
+    if (Number.isNaN(n)) return 'nan';
+    if (!Number.isFinite(n)) return n > 0 ? 'inf' : '-inf';
+    if (Number.isInteger(n)) return `${n}.0`;
+    return String(n);
+  }
+
+  private truthy(v: PyVal): boolean {
+    if (this.isFloatVal(v)) return v.value !== 0;
+    return Boolean(v);
+  }
+
+  // Shared arithmetic for +, -, *, /, //, %, ** — propagates float-ness
+  // (float if either operand is float; / is always float, matching Python 3
+  // true division) and unwraps float-tagged operands transparently.
+  private applyArithmetic(op: string, lv: PyVal, rv: PyVal, lineSuffix: string): PyVal {
+    const a = this.numOf(lv), b = this.numOf(rv);
+    const eitherFloat = this.isFloatVal(lv) || this.isFloatVal(rv);
+    switch (op) {
+      case '+': return this.wrapNumeric(a + b, eitherFloat);
+      case '-': return this.wrapNumeric(a - b, eitherFloat);
+      case '*': return this.wrapNumeric(a * b, eitherFloat);
+      case '/':
+        if (b === 0) throw new Error(`  ZeroDivisionError: division by zero${lineSuffix}`);
+        return this.mkFloat(a / b);
+      case '//':
+        if (b === 0) throw new Error(`  ZeroDivisionError: integer division or modulo by zero${lineSuffix}`);
+        return this.wrapNumeric(Math.floor(a / b), eitherFloat);
+      case '%':
+        if (b === 0) throw new Error(`  ZeroDivisionError: modulo by zero${lineSuffix}`);
+        return this.wrapNumeric(a % b, eitherFloat);
+      case '**':
+        return this.wrapNumeric(Math.pow(a, b), eitherFloat);
+      default:
+        return 0;
+    }
   }
 
   private hasTopLevelColon(inner: string): boolean {
@@ -935,6 +1196,30 @@ class MiniPython {
         else if (ch === ':' && depth === 0 && bracketDepth === 0 && braceDepth === 0) {
           return true;
         }
+      }
+    }
+    return false;
+  }
+
+  // Checks that `expr` starts with `open` and ends with `close` as a single
+  // *matching* pair spanning the whole string — not just matching first/last
+  // characters. Without this, an expression like "(a) + (b)" (which also
+  // starts with '(' and ends with ')') would be wrongly treated as one
+  // parenthesized group and mangled by naively stripping the outer chars.
+  private isWrapped(expr: string, open: string, close: string): boolean {
+    if (!expr.startsWith(open) || !expr.endsWith(close)) return false;
+    let depth = 0, inStr = false, strCh = '';
+    for (let i = 0; i < expr.length; i++) {
+      const ch = expr[i];
+      if (inStr) {
+        if (ch === strCh && expr[i - 1] !== '\\') inStr = false;
+        continue;
+      }
+      if (ch === '"' || ch === "'") { inStr = true; strCh = ch; continue; }
+      if (ch === open) depth++;
+      else if (ch === close) {
+        depth--;
+        if (depth === 0) return i === expr.length - 1;
       }
     }
     return false;
@@ -1015,28 +1300,28 @@ class MiniPython {
             : this.str(val);
           if (!formatSpec) return strVal;
           // Apply format spec
-          const num = Number(val);
+          const num = this.numOf(val);
           if (formatSpec === ',') {
-            if (typeof val === 'number') return Number(val).toLocaleString('en-US');
+            if (this.isNumeric(val)) return num.toLocaleString('en-US');
             return strVal;
           }
           if (formatSpec === '%') {
-            if (typeof val === 'number') return String(Math.round(num * 100)) + '%';
+            if (this.isNumeric(val)) return String(Math.round(num * 100)) + '%';
             return strVal;
           }
           if (formatSpec === 'd') {
-            if (typeof val === 'number') return String(Math.trunc(num));
+            if (this.isNumeric(val)) return String(Math.trunc(num));
             return strVal;
           }
-          if (formatSpec === 'e') return Number(val).toExponential();
-          if (formatSpec === 'E') return Number(val).toExponential().toUpperCase();
+          if (formatSpec === 'e') return num.toExponential();
+          if (formatSpec === 'E') return num.toExponential().toUpperCase();
           if (formatSpec === 'b') return Math.trunc(num).toString(2);
           if (formatSpec === 'x') return Math.trunc(num).toString(16);
           if (formatSpec === 'X') return Math.trunc(num).toString(16).toUpperCase();
           if (formatSpec === 'o') return Math.trunc(num).toString(8);
           // :.Nf - float with N decimals
           const dotF = formatSpec.match(/^\.(\d+)f$/);
-          if (dotF) return Number(val).toFixed(parseInt(dotF[1]));
+          if (dotF) return num.toFixed(parseInt(dotF[1]));
           // :>N, :<N, :^N - alignment with width
           const alignM = formatSpec.match(/^([<>^])(\d+)$/);
           if (alignM) {
@@ -1085,21 +1370,21 @@ class MiniPython {
         const condStr = expr.slice(ifIdx + 4, elseIdx).trim();
         const rhs = expr.slice(elseIdx + 6).trim();
         const condVal = this.eval(condStr, env);
-        return condVal ? this.eval(lhs, env) : this.eval(rhs, env);
+        return this.truthy(condVal) ? this.eval(lhs, env) : this.eval(rhs, env);
       }
     }
 
     // Numbers
     if (/^-?\d+$/.test(expr)) return parseInt(expr, 10);
-    if (/^-?\d*\.\d+$/.test(expr)) return parseFloat(expr);
+    if (/^-?\d*\.\d+$/.test(expr)) return this.mkFloat(parseFloat(expr));
 
     // Unary minus
     if (expr.startsWith('-') && expr.length > 1 && /^-\s*\d/.test(expr) === false) {
       // Only try unary minus if it's NOT a negative number literal
       if (!/^-\d+$/.test(expr) && !/^-\d*\.\d+$/.test(expr)) {
         const val = this.eval(expr.slice(1).trim(), env);
-        if (typeof val === 'number') return -val;
-        throw new Error(`  TypeError: bad operand type for unary -: '${typeof val}'`);
+        if (this.isNumeric(val)) return this.wrapNumeric(-this.numOf(val), this.isFloatVal(val));
+        throw new Error(`  TypeError: bad operand type for unary -: '${this.getTypeName(val)}'`);
       }
     }
 
@@ -1107,27 +1392,32 @@ class MiniPython {
     const mulStrM = expr.match(/^(['"])(.*)\1\s*\*\s*(\d+)$/);
     if (mulStrM) return mulStrM[2].repeat(parseInt(mulStrM[3], 10));
 
-    // List literal: [a, b, c]
-    if (expr.startsWith('[') && expr.endsWith(']')) {
+    // List literal: [a, b, c] or list comprehension: [expr for x in iter (if cond)]
+    if (this.isWrapped(expr, '[', ']')) {
+      const inner = expr.slice(1, -1).trim();
+      if (!inner) return [];
+      const comp = this.evalComprehension(inner, env);
+      if (comp !== null) return comp;
+      return this.parseArgs(inner, env);
+    }
+
+    // Tuple literal: (a, b, c) — treat as list (but not a generator expression)
+    if (this.isWrapped(expr, '(', ')') && expr.includes(',') && this.findWordOutsideStrings(expr.slice(1, -1), ' for ') <= 0) {
       const inner = expr.slice(1, -1).trim();
       if (!inner) return [];
       return this.parseArgs(inner, env);
     }
 
-    // Tuple literal: (a, b, c) — treat as list
-    if (expr.startsWith('(') && expr.endsWith(')') && expr.includes(',')) {
+    // Parenthesized expression: (expr), or a generator expression: (expr for x in iter (if cond))
+    if (this.isWrapped(expr, '(', ')')) {
       const inner = expr.slice(1, -1).trim();
-      if (!inner) return [];
-      return this.parseArgs(inner, env);
-    }
-
-    // Parenthesized expression: (expr)
-    if (expr.startsWith('(') && expr.endsWith(')')) {
-      return this.eval(expr.slice(1, -1).trim(), env);
+      const comp = this.evalComprehension(inner, env);
+      if (comp !== null) return comp;
+      return this.eval(inner, env);
     }
 
     // Dict/Set literal: {key: val, ...} or {val1, val2, ...}
-    if (expr.startsWith('{') && expr.endsWith('}')) {
+    if (this.isWrapped(expr, '{', '}')) {
       const inner = expr.slice(1, -1).trim();
       if (!inner) return {};
       if (this.hasTopLevelColon(inner)) {
@@ -1149,23 +1439,22 @@ class MiniPython {
 
 
     // Logical operators (lowest precedence)
-    const logOps: Array<[string, (a: PyVal, b: PyVal) => PyVal]> = [
-      [' and ', (a, b) => a && b],
-      [' or ', (a, b) => a || b],
-    ];
-    for (const [op, fn] of logOps) {
+    const logOps = [' and ', ' or '];
+    for (const op of logOps) {
       const idx = this.findWordOutsideStrings(expr, op);
       if (idx > 0) {
         const lhs = this.eval(expr.slice(0, idx).trim(), env);
-        if (op === ' and ' && !lhs) return lhs;
-        if (op === ' or ' && lhs) return lhs;
-        return fn(lhs, this.eval(expr.slice(idx + op.length).trim(), env));
+        if (op === ' and ' && !this.truthy(lhs)) return lhs;
+        if (op === ' or ' && this.truthy(lhs)) return lhs;
+        // lhs didn't short-circuit ('and' had a truthy lhs, or 'or' had a
+        // falsy lhs) — Python always returns the rhs in that case.
+        return this.eval(expr.slice(idx + op.length).trim(), env);
       }
     }
 
     // not
     if (expr.startsWith('not ')) {
-      return !this.eval(expr.slice(4).trim(), env);
+      return !this.truthy(this.eval(expr.slice(4).trim(), env));
     }
 
     // Comparison operators (lowest precedence)
@@ -1179,12 +1468,16 @@ class MiniPython {
         const lv = this.eval(lhs, env);
         const rv = this.eval(rhs, env);
         switch (op) {
-          case '==': return lv === rv;
-          case '!=': return lv !== rv;
-          case '>': return Number(lv) > Number(rv);
-          case '<': return Number(lv) < Number(rv);
-          case '>=': return Number(lv) >= Number(rv);
-          case '<=': return Number(lv) <= Number(rv);
+          case '==':
+            if (this.isNumeric(lv) && this.isNumeric(rv)) return this.numOf(lv) === this.numOf(rv);
+            return lv === rv;
+          case '!=':
+            if (this.isNumeric(lv) && this.isNumeric(rv)) return this.numOf(lv) !== this.numOf(rv);
+            return lv !== rv;
+          case '>': return this.numOf(lv) > this.numOf(rv);
+          case '<': return this.numOf(lv) < this.numOf(rv);
+          case '>=': return this.numOf(lv) >= this.numOf(rv);
+          case '<=': return this.numOf(lv) <= this.numOf(rv);
         }
       }
     }
@@ -1250,39 +1543,42 @@ class MiniPython {
         throw new Error(`  TypeError: unsupported operand type(s) for ${op}: '${this.getTypeName(lv)}' and '${this.getTypeName(rv)}'`);
       }
       if (typeof lv === 'string' || typeof rv === 'string') {
-        if (op === '+') return String(lv ?? '') + String(rv ?? '');
+        if (op === '+') return (lv !== null ? this.str(lv) : '') + (rv !== null ? this.str(rv) : '');
         if (op === '%' && typeof lv === 'string') return this.formatString(lv, rv);
         throw new Error(`  TypeError: unsupported operand type(s) for ${op}: '${this.getTypeName(lv)}' and '${this.getTypeName(rv)}'`);
       }
-      if (typeof lv !== 'number' || typeof rv !== 'number') {
+      if (!this.isNumeric(lv) || !this.isNumeric(rv)) {
         throw new Error(`  TypeError: unsupported operand type(s) for ${op}: '${this.getTypeName(lv)}' and '${this.getTypeName(rv)}'`);
       }
-      switch (op) {
-        case '+': return lv + rv;
-        case '-': return lv - rv;
-        case '*': return lv * rv;
-        case '/':
-          if (rv === 0) throw new Error(`  ZeroDivisionError: division by zero`);
-          return lv / rv;
-        case '//':
-          if (rv === 0) throw new Error(`  ZeroDivisionError: integer division or modulo by zero`);
-          return Math.floor(lv / rv);
-        case '%':
-          if (rv === 0) throw new Error(`  ZeroDivisionError: modulo by zero`);
-          return lv % rv;
-        case '**':
-          return Math.pow(lv, rv);
-        case '|':
-          return lv | rv;
-        case '&':
-          return lv & rv;
+      if (op === '|' || op === '&') {
+        const a = this.numOf(lv), b = this.numOf(rv);
+        return op === '|' ? (a | b) : (a & b);
       }
+      return this.applyArithmetic(op, lv, rv, '');
     }
 
 
-    // Function call
-    const fnM = expr.match(/^([a-zA-Z_]\w*)\s*\((.*)?\)$/);
-    if (fnM) return this.call(fnM[1], fnM[2] ?? '', env);
+    // Function/method call: find the call whose closing ')' is the trailing
+    // character, walking back to its matching '(' with depth-tracking so
+    // chained calls like `input().split()` or `len(s.split())` resolve
+    // against the correct pair of parens instead of the first/last in the string.
+    const trailingCall = this.matchTrailingCall(expr);
+    if (trailingCall) {
+      const { calleeExpr, argsStr } = trailingCall;
+      if (/^[a-zA-Z_]\w*$/.test(calleeExpr)) {
+        return this.call(calleeExpr, argsStr, env);
+      }
+      const dotM = calleeExpr.match(/^(.+)\.([a-zA-Z_]\w*)$/);
+      if (dotM) {
+        const targetExpr = dotM[1].trim();
+        if (targetExpr === 'random' && !env.has('random') && !this.globals.has('random')) {
+          return this.callRandomModule(dotM[2], argsStr, env);
+        }
+        return this.callMethod(this.eval(targetExpr, env), dotM[2], argsStr, env);
+      }
+      // calleeExpr is empty (plain parenthesized expression) or otherwise
+      // not a recognizable call target — fall through to later checks.
+    }
 
     // Indexing or slicing: expr[idx] or expr[start:end]
     const idxM = expr.match(/^(.+)\[([^\]]+)\]$/);
@@ -1300,12 +1596,12 @@ class MiniPython {
           throw new Error(`  TypeError: object of type '${typeof target}' is not subscriptable`);
         }
 
-        const step = stepStr ? Number(this.eval(stepStr, env)) : 1;
+        const step = stepStr ? Math.trunc(this.numOf(this.eval(stepStr, env))) : 1;
         if (isNaN(step) || step === 0) throw new Error("  ValueError: slice step cannot be zero");
 
         let start: number;
         if (startStr) {
-          start = Number(this.eval(startStr, env));
+          start = Math.trunc(this.numOf(this.eval(startStr, env)));
           if (start < 0) start = target.length + start;
         } else {
           start = step > 0 ? 0 : target.length - 1;
@@ -1313,7 +1609,7 @@ class MiniPython {
 
         let end: number;
         if (endStr) {
-          end = Number(this.eval(endStr, env));
+          end = Math.trunc(this.numOf(this.eval(endStr, env)));
           if (end < 0) end = target.length + end;
         } else {
           end = step > 0 ? target.length : -1;
@@ -1336,7 +1632,7 @@ class MiniPython {
         return result;
       }
       const index = this.eval(inner, env);
-      const idx = typeof index === 'number' ? index : Number(index);
+      const idx = this.isFloatVal(index) ? Math.trunc(index.value) : (typeof index === 'number' ? index : Number(index));
       if (typeof target === 'string') {
         if (idx < 0) return target[target.length + idx] ?? '';
         return target[idx] ?? '';
@@ -1346,19 +1642,100 @@ class MiniPython {
         return target[idx] ?? null;
       }
       if (this.isDict(target)) {
-        const k = String(index);
+        const k = this.str(index);
         if (k in target) return target[k];
         throw new Error(`  KeyError: '${k}'`);
       }
       throw new Error(`  TypeError: object of type '${typeof target}' is not subscriptable`);
     }
 
-    // Method call: target.method(args)
-    const methodEvalM = expr.match(/^(.+)\.([a-zA-Z_]\w*)\s*\((.*)?\)$/);
-    if (methodEvalM) {
-      const target = this.eval(methodEvalM[1].trim(), env);
-      const methodName = methodEvalM[2];
-      const rawArgs = methodEvalM[3] ?? '';
+    // Variable
+    if (/^[a-zA-Z_]\w*$/.test(expr)) {
+      if (env.has(expr)) return env.get(expr)!;
+      if (this.globals.has(expr)) return this.globals.get(expr)!;
+      throw new Error(`  NameError: name '${expr}' is not defined`);
+    }
+
+    return null;
+  }
+
+  private matchTrailingCall(expr: string): { calleeExpr: string; argsStr: string } | null {
+    if (!expr.endsWith(')')) return null;
+    let depth = 0;
+    let inStr = false, strCh = '';
+    let openIdx = -1;
+    for (let i = expr.length - 1; i >= 0; i--) {
+      const ch = expr[i];
+      if (inStr) {
+        if (ch === strCh) inStr = false;
+        continue;
+      }
+      if (ch === '"' || ch === "'") { inStr = true; strCh = ch; continue; }
+      if (ch === ')') depth++;
+      else if (ch === '(') {
+        depth--;
+        if (depth === 0) { openIdx = i; break; }
+      }
+    }
+    if (openIdx === -1) return null;
+    const argsStr = expr.slice(openIdx + 1, expr.length - 1);
+    const calleeExpr = expr.slice(0, openIdx);
+    return { calleeExpr, argsStr };
+  }
+
+  // random.seed()/random()/randint()/choice()/etc — intercepted before the
+  // generic method-call path since `random` is a module name, not a variable.
+  private callRandomModule(method: string, argsStr: string, env: Env): PyVal {
+    const args = argsStr.trim() ? this.parseArgs(argsStr, env) : [];
+    if (method === 'seed') {
+      const seedVal = args.length > 0 ? this.numOf(args[0]) : Date.now();
+      this.rng.seed(isNaN(seedVal) ? 0 : seedVal);
+      return null;
+    }
+    if (method === 'random') {
+      return this.mkFloat(this.rng.random());
+    }
+    if (method === 'randint') {
+      if (args.length < 2) throw new Error(`  TypeError: randint() missing required arguments`);
+      const a = Math.trunc(this.numOf(args[0]));
+      const b = Math.trunc(this.numOf(args[1]));
+      return this.rng.randint(a, b);
+    }
+    if (method === 'randrange') {
+      let start = 0, stop: number, step = 1;
+      if (args.length === 1) { stop = Math.trunc(this.numOf(args[0])); }
+      else {
+        start = Math.trunc(this.numOf(args[0]));
+        stop = Math.trunc(this.numOf(args[1]));
+        if (args.length >= 3) step = Math.trunc(this.numOf(args[2]));
+      }
+      const width = Math.ceil((stop - start) / step);
+      if (width <= 0) throw new Error(`  ValueError: empty range for randrange()`);
+      return start + step * this.rng.randbelow(width);
+    }
+    if (method === 'choice') {
+      const list = this.toIterableList(args[0]);
+      if (list === null || list.length === 0) throw new Error(`  IndexError: Cannot choose from an empty sequence`);
+      return list[this.rng.randbelow(list.length)];
+    }
+    if (method === 'uniform') {
+      const a = this.numOf(args[0]), b = this.numOf(args[1]);
+      return this.mkFloat(a + (b - a) * this.rng.random());
+    }
+    if (method === 'shuffle') {
+      const list = args[0];
+      if (!Array.isArray(list)) throw new Error(`  TypeError: object doesn't support item assignment`);
+      for (let idx = list.length - 1; idx > 0; idx--) {
+        const j = this.rng.randbelow(idx + 1);
+        const tmp = list[idx]; list[idx] = list[j]; list[j] = tmp;
+      }
+      return null;
+    }
+    throw new Error(`  AttributeError: module 'random' has no attribute '${method}'`);
+  }
+
+  // Method call: target.method(args)
+  private callMethod(target: PyVal, methodName: string, rawArgs: string, env: Env): PyVal {
       const args = rawArgs.trim() ? this.parseArgs(rawArgs, env) : [];
       if (typeof target === 'string') {
         if (methodName === 'upper') return target.toUpperCase();
@@ -1366,6 +1743,11 @@ class MiniPython {
         if (methodName === 'strip') return target.trim();
         if (methodName === 'replace' && args.length >= 2) return target.split(String(args[0])).join(String(args[1]));
         if (methodName === 'find' && args.length >= 1) return target.indexOf(String(args[0]));
+        if (methodName === 'index' && args.length >= 1) {
+          const idx = target.indexOf(String(args[0]));
+          if (idx === -1) throw new Error(`  ValueError: substring not found`);
+          return idx;
+        }
         if (methodName === 'split') {
           if (args.length >= 1) return target.split(String(args[0]));
           return target.split(/\s+/).filter(Boolean);
@@ -1376,14 +1758,28 @@ class MiniPython {
         }
       }
       if (Array.isArray(target)) {
-        if (methodName === 'pop') return target.pop() ?? null;
+        if (methodName === 'pop') {
+          if (target.length === 0) throw new Error(`  IndexError: pop from empty list`);
+          let idx = args.length >= 1 ? Math.trunc(this.numOf(args[0])) : -1;
+          if (idx < 0) idx += target.length;
+          if (idx < 0 || idx >= target.length) throw new Error(`  IndexError: pop index out of range`);
+          return target.splice(idx, 1)[0] ?? null;
+        }
         if (methodName === 'append' && args.length >= 1) { target.push(args[0]); return null; }
         if (methodName === 'remove' && args.length >= 1) {
           const idx = target.indexOf(args[0]);
           if (idx >= 0) target.splice(idx, 1);
           return null;
         }
-        if (methodName === 'sort') { target.sort((a, b) => Number(a) - Number(b)); return null; }
+        if (methodName === 'index' && args.length >= 1) {
+          const idx = target.findIndex(v => this.isEqual(v, args[0]));
+          if (idx === -1) throw new Error(`  ValueError: ${this.repr(args[0])} is not in list`);
+          return idx;
+        }
+        if (methodName === 'count' && args.length >= 1) {
+          return target.filter(v => this.isEqual(v, args[0])).length;
+        }
+        if (methodName === 'sort') { target.sort((a, b) => this.numOf(a) - this.numOf(b)); return null; }
       }
       if (this.isDict(target)) {
         if (methodName === 'keys') return Object.keys(target);
@@ -1395,7 +1791,7 @@ class MiniPython {
         }
         if (methodName === 'get') {
           if (args.length >= 1) {
-            const k = String(args[0]);
+            const k = this.str(args[0]);
             if (k in target) return target[k];
             if (args.length >= 2) return args[1];
             return null;
@@ -1489,16 +1885,6 @@ class MiniPython {
         }
       }
       throw new Error(`  AttributeError: '${typeof target}' object has no attribute '${methodName}'`);
-    }
-
-    // Variable
-    if (/^[a-zA-Z_]\w*$/.test(expr)) {
-      if (env.has(expr)) return env.get(expr)!;
-      if (this.globals.has(expr)) return this.globals.get(expr)!;
-      throw new Error(`  NameError: name '${expr}' is not defined`);
-    }
-
-    return null;
   }
 
   private _contains(container: PyVal, item: PyVal): boolean {
@@ -1565,7 +1951,7 @@ class MiniPython {
     for (const part of parts) {
       const colonIdx = part.indexOf(':');
       if (colonIdx > 0) {
-        const key = String(this.eval(part.slice(0, colonIdx).trim(), env));
+        const key = this.str(this.eval(part.slice(0, colonIdx).trim(), env));
         const val = this.eval(part.slice(colonIdx + 1).trim(), env);
         result[key] = val;
       }
@@ -1606,7 +1992,7 @@ class MiniPython {
     return s.slice(1);
   }
 
-  private parseArgs(argsStr: string, env: Env): PyVal[] {
+  private splitTopLevelArgs(argsStr: string): string[] {
     const parts: string[] = [];
     let cur = '', depth = 0, bracketDepth = 0, braceDepth = 0, inStr = false, strCh = '';
     for (const ch of argsStr) {
@@ -1622,7 +2008,121 @@ class MiniPython {
       else cur += ch;
     }
     if (cur.trim()) parts.push(cur.trim());
-    return parts.map(p => this.eval(p, env));
+    return parts;
+  }
+
+  private parseArgs(argsStr: string, env: Env): PyVal[] {
+    // A bare generator expression as the sole argument, e.g. join(x for x in xs),
+    // isn't wrapped in its own parens — the call's parens delimit it instead.
+    const trimmed = argsStr.trim();
+    if (trimmed) {
+      const comp = this.evalComprehension(trimmed, env);
+      if (comp !== null) return [comp];
+    }
+    return this.splitTopLevelArgs(argsStr).map(p => this.eval(p, env));
+  }
+
+  // Evaluates `expr for VAR[, VAR...] in ITER (if COND)`, the shared body of
+  // list comprehensions `[...]`, generator expressions `(...)`, and bare
+  // generator arguments like `sum(x for x in xs)`. Returns null if `inner`
+  // isn't a comprehension at all (no top-level ' for ').
+  private evalComprehension(inner: string, env: Env): PyVal[] | null {
+    const forIdx = this.findWordOutsideStrings(inner, ' for ');
+    if (forIdx <= 0) return null;
+    const exprPart = inner.slice(0, forIdx).trim();
+    const rest = inner.slice(forIdx + 5);
+    const inIdx = this.findWordOutsideStrings(rest, ' in ');
+    if (inIdx < 0) return null;
+    const varsPart = rest.slice(0, inIdx).trim();
+    const afterIn = rest.slice(inIdx + 4).trim();
+
+    const ifIdx = this.findWordOutsideStrings(afterIn, ' if ');
+    let iterExprPart = afterIn;
+    let condPart: string | null = null;
+    if (ifIdx >= 0) {
+      iterExprPart = afterIn.slice(0, ifIdx).trim();
+      condPart = afterIn.slice(ifIdx + 4).trim();
+    }
+
+    const iterVal = this.eval(iterExprPart, env);
+    const iterList = this.toIterableList(iterVal);
+    if (iterList === null) {
+      throw new Error(`  TypeError: '${iterVal === null ? 'NoneType' : typeof iterVal}' object is not iterable`);
+    }
+
+    const varNames = varsPart.split(',').map(s => s.trim());
+    const result: PyVal[] = [];
+    for (const item of iterList) {
+      if (varNames.length === 1) {
+        env.set(varNames[0], item);
+      } else if (Array.isArray(item)) {
+        for (let vi = 0; vi < varNames.length; vi++) env.set(varNames[vi], item[vi]);
+      } else {
+        throw new Error(`  ValueError: too many values to unpack (expected ${varNames.length})`);
+      }
+      if (condPart !== null && !this.truthy(this.eval(condPart, env))) continue;
+      result.push(this.eval(exprPart, env));
+    }
+    return result;
+  }
+
+  // Apply a callable referenced by name (builtin or user-defined) to already-evaluated args.
+  // Used by map()/filter(), where the first argument is a bare function reference rather
+  // than a value expression.
+  private applyCallable(ref: string, args: PyVal[]): PyVal {
+    const name = ref.trim();
+    if (name === 'float') {
+      const v = args[0];
+      const raw = this.isFloatVal(v) ? v.value : v;
+      const n = Number(raw);
+      if (isNaN(n)) throw new Error(`  ValueError: could not convert string to float: '${raw}'`);
+      return this.mkFloat(n);
+    }
+    if (name === 'int') {
+      const v = args[0];
+      const raw = this.isFloatVal(v) ? v.value : v;
+      const n = Number(raw);
+      if (isNaN(n)) throw new Error(`  ValueError: invalid literal for int() with base 10: '${raw}'`);
+      return Math.trunc(n);
+    }
+    if (name === 'str') return this.str(args[0]);
+    if (name === 'repr') return this.repr(args[0]);
+    if (name === 'abs') {
+      const v = args[0];
+      if (!this.isNumeric(v)) throw new Error(`  TypeError: bad operand type for abs(): '${this.getTypeName(v)}'`);
+      return this.wrapNumeric(Math.abs(this.numOf(v)), this.isFloatVal(v));
+    }
+    if (name === 'len') {
+      const v = args[0];
+      if (typeof v === 'string') return v.length;
+      if (Array.isArray(v)) return v.length;
+      if (this.isSet(v)) return (v as any).values.length;
+      if (this.isDict(v)) return Object.keys(v).length;
+      return 0;
+    }
+    if (name === 'round') {
+      const v = args[0];
+      if (!this.isNumeric(v)) throw new Error(`  TypeError: '${this.getTypeName(v)}' object cannot be interpreted as an integer`);
+      return Math.round(this.numOf(v));
+    }
+
+    const fn = this.fns.get(name);
+    if (fn) {
+      if (args.length !== fn.params.length) {
+        throw new Error(`  TypeError: ${name}() takes ${fn.params.length} positional argument${fn.params.length === 1 ? '' : 's'} but ${args.length} were given`);
+      }
+      const local: Env = new Map(this.globals);
+      fn.params.forEach((p, i) => local.set(p, args[i] ?? null));
+      const baseInd = fn.bodyLines.length > 0 ? this.indent(fn.bodyLines[0]) : 0;
+      try {
+        this.execLines(fn.bodyLines, baseInd, local, true);
+      } catch (e) {
+        if (e instanceof ReturnControl) return e.value;
+        throw e;
+      }
+      return null;
+    }
+    throw new Error(`  NameError: name '${name}' is not defined`);
   }
 
   private findBinOp(expr: string): [string, string, string] | null {
@@ -1856,18 +2356,18 @@ class MiniPython {
       if (type === 's') {
         formatted = this.str(val);
       } else if (type === 'd' || type === 'i') {
-        formatted = String(Math.trunc(Number(val)));
+        formatted = String(Math.trunc(this.numOf(val)));
       } else if (type === 'f' || type === 'F') {
         if (precision !== undefined) {
-          formatted = Number(val).toFixed(parseInt(precision, 10));
+          formatted = this.numOf(val).toFixed(parseInt(precision, 10));
         } else {
-          formatted = Number(val).toFixed(6);
+          formatted = this.numOf(val).toFixed(6);
         }
       } else if (type === 'x' || type === 'X') {
-        const num = Math.trunc(Number(val));
+        const num = Math.trunc(this.numOf(val));
         formatted = type === 'x' ? num.toString(16) : num.toString(16).toUpperCase();
       } else {
-        formatted = String(val);
+        formatted = this.str(val);
       }
       
       if (width) {
@@ -1892,6 +2392,7 @@ class MiniPython {
 
   private repr(v: PyVal): string {
     if (v === null) return 'None';
+    if (this.isFloatVal(v)) return this.formatFloat(v.value);
     if (typeof v === 'boolean') return v ? 'True' : 'False';
     if (typeof v === 'string') {
       const escaped = v

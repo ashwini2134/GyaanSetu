@@ -390,6 +390,7 @@ export const projectsData: Project[] = [
   {
     id: "weather-app",
     title: "Weather App",
+    image: "/images/weather-app.png",
     category: "Beginner Level",
     difficulty: "Beginner",
     shortDescription: "Real-time weather application fetching data from a public API.",
@@ -412,6 +413,7 @@ export const projectsData: Project[] = [
   {
     id: "expense-tracker",
     title: "Expense Tracker",
+    image: "/images/expense-tracker.jpg",
     category: "Intermediate Level",
     difficulty: "Intermediate",
     shortDescription: "Track income and expenses with visual charts and categories.",
@@ -534,6 +536,7 @@ export const projectsData: Project[] = [
   {
     id: "e-commerce-platform",
     title: "E-Commerce Platform",
+    image: "/images/e-commerce-platform.png",
     category: "Advanced Level",
     difficulty: "Advanced",
     shortDescription: "A complete online store with cart, checkout, and payment gateways.",
@@ -574,6 +577,7 @@ export const projectsData: Project[] = [
   {
     id: "online-compiler",
     title: "Online Compiler",
+    image: "/images/online-compiler.png",
     category: "Advanced Level",
     difficulty: "Advanced",
     shortDescription: "Web-based code execution environment for multiple languages.",
@@ -594,6 +598,7 @@ export const projectsData: Project[] = [
   {
     id: "lms-system",
     title: "LMS System",
+    image: "/images/lms-system.jpg",
     category: "Advanced Level",
     difficulty: "Advanced",
     shortDescription: "A learning management system with courses, lectures, and quizzes.",
@@ -616,6 +621,7 @@ export const projectsData: Project[] = [
   {
     id: "sentiment-analysis",
     title: "Sentiment Analysis",
+    image: "/images/sentiment-analysis.jpg",
     category: "AI/ML Projects",
     difficulty: "Intermediate",
     shortDescription: "Analyze text to determine emotional tone using machine learning.",
@@ -636,6 +642,7 @@ export const projectsData: Project[] = [
   {
     id: "resume-analyzer",
     title: "Resume Analyzer",
+    image: "/images/resume-analyzer.jpg",
     category: "AI/ML Projects",
     difficulty: "Advanced",
     shortDescription: "Parse and evaluate resumes against job descriptions automatically.",
@@ -676,6 +683,7 @@ export const projectsData: Project[] = [
   {
     id: "recommendation-system",
     title: "Recommendation System",
+    image: "/images/recommendation-system.png",
     category: "AI/ML Projects",
     difficulty: "Advanced",
     shortDescription: "Suggest products or content based on user behavior patterns.",
@@ -698,6 +706,7 @@ export const projectsData: Project[] = [
   {
     id: "banking-system",
     title: "Banking System",
+    image: "/images/banking-system.png",
     category: "Industry Projects",
     difficulty: "Advanced",
     shortDescription: "Secure transaction processing and account management system.",
@@ -718,6 +727,7 @@ export const projectsData: Project[] = [
   {
     id: "hospital-management-system",
     title: "Hospital Management System",
+    image: "/images/hospital-management-system.png",
     category: "Industry Projects",
     difficulty: "Advanced",
     shortDescription: "Comprehensive platform for patient records and doctor appointments.",
@@ -758,6 +768,7 @@ export const projectsData: Project[] = [
   {
     id: "inventory-management-system",
     title: "Inventory Management System",
+    image: "/images/inventory-management-system.jpg",
     category: "Industry Projects",
     difficulty: "Advanced",
     shortDescription: "Enterprise-grade system for tracking stock levels and orders.",
@@ -775,67 +786,4 @@ export const projectsData: Project[] = [
     prerequisites: ["SQL optimization", "Backend engineering"],
     learningOutcomes: ["ERP concepts", "Background processing", "Reporting/Analytics"]
   },
-
-  // Capstone Projects
-  {
-    id: "full-stack-capstone",
-    title: "Full Stack Masterpiece",
-    category: "Capstone Projects",
-    difficulty: "Expert",
-    shortDescription: "End-to-end applications demonstrating frontend, backend, and database integration.",
-    longDescription: "This is your final project. Choose a problem domain you are passionate about and build a complete SaaS (Software as a Service) application from scratch. You will handle everything from UI/UX design to DevOps deployment.",
-    technologies: ["React/Next.js", "Node/Go/Python", "PostgreSQL/MongoDB", "AWS/Docker", "CI/CD"],
-    features: ["Complete authentication flow", "Subscription/Payment integration", "Automated testing (Unit/E2E)", "CI/CD Pipeline"],
-    instructions: [
-      "Draft a Product Requirements Document (PRD) and wireframes.",
-      "Set up your repository with ESLint, Prettier, and GitHub Actions.",
-      "Develop the backend API and frontend client iteratively.",
-      "Write comprehensive tests.",
-      "Deploy the application to a cloud provider using Docker."
-    ],
-    expectedOutput: "A fully functional, deployed SaaS application with a custom domain.",
-    estimatedDuration: "80-120 hours",
-    prerequisites: ["Proficiency in all stack layers", "System Design basics"],
-    learningOutcomes: ["Software Development Lifecycle (SDLC)", "DevOps basics", "Product Management"]
-  },
-  {
-    id: "team-agile-project",
-    title: "Agile Team Project",
-    category: "Capstone Projects",
-    difficulty: "Expert",
-    shortDescription: "Collaborative applications built using agile methodologies and version control.",
-    longDescription: "Work in a team of 3-5 developers to build a large-scale application. The focus is not just on the code, but on communication, Git workflows, PR reviews, and Agile project management.",
-    technologies: ["Git/GitHub", "Jira/Trello", "Full Stack Tech of Choice"],
-    features: ["Sprint planning and execution", "Branching strategies (GitFlow)", "Code Review processes", "Conflict resolution"],
-    instructions: [
-      "Form a team and designate roles (Scrum Master, Lead Dev, etc).",
-      "Break down the project into user stories and estimate story points.",
-      "Execute 2-week sprints, holding daily standups.",
-      "Use Pull Requests for every feature, requiring approvals before merging."
-    ],
-    expectedOutput: "A collaboratively built application and a well-documented Git history.",
-    estimatedDuration: "4-6 weeks",
-    prerequisites: ["Git collaboration", "Agile concepts"],
-    learningOutcomes: ["Teamwork", "Agile/Scrum", "Advanced Git Workflows"]
-  },
-  {
-    id: "portfolio-masterpiece",
-    title: "Portfolio Masterpiece",
-    category: "Capstone Projects",
-    difficulty: "Expert",
-    shortDescription: "Polished, production-ready projects designed to impress employers.",
-    longDescription: "Refine one of your existing projects to an extreme level of polish. Focus on accessibility (a11y), performance optimization, SEO, flawless responsive design, and comprehensive documentation.",
-    technologies: ["Lighthouse", "Jest/Cypress", "Web Vitals", "Accessibility Tools"],
-    features: ["100/100 Lighthouse scores", "Keyboard navigability and screen reader support", "Sub-second load times", "Extensive README and architecture diagrams"],
-    instructions: [
-      "Audit your application using Chrome Lighthouse.",
-      "Implement code splitting, image optimization, and caching strategies.",
-      "Fix all accessibility violations.",
-      "Write a technical blog post explaining the architecture and challenges overcome."
-    ],
-    expectedOutput: "An elite-tier application that stands out to senior engineers and hiring managers.",
-    estimatedDuration: "30-50 hours",
-    prerequisites: ["An existing completed project", "Understanding of Web Performance"],
-    learningOutcomes: ["Web Performance Optimization", "Accessibility (a11y)", "Technical Writing"]
-  }
 ];

@@ -52,7 +52,7 @@ export default function LearningExperienceSection() {
 
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {features.map((feature, idx) => (
-          <div key={idx} className="group p-8 border border-white/10 bg-[#0d121f]/30 rounded-2xl text-left hover:border-blue-500/30 hover:bg-[#0d121f]/60 hover:shadow-[0_0_25px_-5px_rgba(59,130,246,0.15)] transition-all duration-300">
+          <div key={idx} className="group p-8 border border-white/10 bg-[#0d121f]/30 rounded-2xl text-left hover:border-[#0F9FB6]/30 hover:bg-[#0d121f]/60 hover:shadow-[0_0_16px_-5px_rgba(15,159,182,0.12)] transition-all duration-300">
             <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
               {feature.icon}
             </div>

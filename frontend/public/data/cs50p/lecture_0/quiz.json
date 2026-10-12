@@ -2,10 +2,10 @@
   {
     "question": "Which function is used to display output in Python?",
     "options": [
-      "print()",
       "input()",
-      "show()",
-      "display()"
+      "print()",
+      "display()",
+      "show()"
     ],
     "answer": "print()",
     "explanation": "The print() function is used to display output on the screen in Python."
@@ -13,10 +13,10 @@
   {
     "question": "What will this code print?\n\nname = \"David\"\nprint(f\"Hello, {name}\")",
     "options": [
-      "Error",
-      "name",
+      "Hello name",
       "Hello, David",
-      "Hello name"
+      "name",
+      "Error"
     ],
     "answer": "Hello, David",
     "explanation": "f-strings allow variables to be inserted directly into strings using curly braces."
@@ -25,9 +25,9 @@
     "question": "Which symbol is used for comments in Python?",
     "options": [
       "//",
+      "#",
       "/*",
-      "--",
-      "#"
+      "--"
     ],
     "answer": "#",
     "explanation": "Python uses the # symbol to write comments that are ignored during execution."
@@ -37,8 +37,8 @@
     "options": [
       "Prints text on the screen",
       "Stops the program",
-      "Creates a variable",
-      "Takes input from the user"
+      "Takes input from the user",
+      "Creates a variable"
     ],
     "answer": "Takes input from the user",
     "explanation": "The input() function allows the user to enter data while the program is running."
@@ -46,10 +46,10 @@
   {
     "question": "Which line correctly adds a comment in Python?",
     "options": [
-      "# This is a comment",
-      "/* comment */",
       "// This is a comment",
-      "<!-- comment -->"
+      "<!-- comment -->",
+      "# This is a comment",
+      "/* comment */"
     ],
     "answer": "# This is a comment",
     "explanation": "Python uses the # symbol to write single-line comments."

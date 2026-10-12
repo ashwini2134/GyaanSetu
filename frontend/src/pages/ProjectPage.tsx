@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { Zap, Search } from 'lucide-react';
 import { getCompletedProjects, getProjectMetadata } from "../api";
 import { ProjectCard } from "../components";
+import { COURSE_FULL_NAMES } from "../data/courseNames";
 
 interface Project {
   id: string;
@@ -39,7 +40,7 @@ export default function ProjectPage() {
     loadProjects();
   }, [slug, number]);
 
-  const courseTitle = slug === "cs50p" ? "CS50 Python" : slug === "cs50ai" ? "AI" : slug?.toUpperCase();
+  const courseTitle = slug ? (COURSE_FULL_NAMES[slug] ?? slug.toUpperCase()) : undefined;
 
   // Helper to determine project status
   const getProjectStatus = (projectId: string) => {

@@ -623,7 +623,7 @@ router.get("/settings", async (_req: AuthenticatedRequest, res, next) => {
     const { join } = await import("path");
     const _dirname = new URL(".", import.meta.url).pathname;
     const settingsPath = join(_dirname, "..", "..", "settings.json");
-    const settings = existsSync(settingsPath) ? JSON.parse(readFileSync(settingsPath, "utf-8")) : { siteName: "Fraylon Academy", maintenanceMode: false, allowRegistrations: true };
+    const settings = existsSync(settingsPath) ? JSON.parse(readFileSync(settingsPath, "utf-8")) : { siteName: "GyanSetu", maintenanceMode: false, allowRegistrations: true };
     res.json(settings);
   } catch (err) { next(err); }
 });
@@ -638,4 +638,104 @@ router.put("/settings", async (req: AuthenticatedRequest, res, next) => {
     res.json({ success: true });
   } catch (err) { next(err); }
 });
+// ── Content Assessments (Admin) ──
+
+const assessmentSchema = z.object({
+  title: z.string().min(1),
+  category: z.string().min(1),
+  subsection: z.string().min(1),
+  description: z.string().optional(),
+  isPublished: z.boolean().default(false),
+});
+
+const assessmentQuestionSchema = z.object({
+  category: z.string().min(1),
+  subsection: z.string().min(1),
+  type: z.string().min(1),
+  question: z.string().min(1),
+  options: z.array(z.string()).default([]),
+  correctAnswer: z.string().min(1),
+  starterCode: z.string().optional(),
+  language: z.string().optional(),
+  difficulty: z.string().default("medium"),
+});
+
+router.get("/content-assessments", async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const assessments = await prisma.assessment.findMany({
+      orderBy: { createdAt: "desc" },
+      include: { _count: { select: { questions: true } } },
+    });
+    res.json({ assessments });
+  } catch (err) { next(err); }
+});
+
+router.get("/content-assessments/:id", async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const id = req.params.id as string;
+    const assessment = await prisma.assessment.findUnique({
+      where: { id },
+      include: { questions: true },
+    });
+    if (!assessment) return res.status(404).json({ error: "Assessment not found" });
+    res.json({ assessment });
+  } catch (err) { next(err); }
+});
+
+router.post("/content-assessments", async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const data = assessmentSchema.parse(req.body);
+    const assessment = await prisma.assessment.create({ data });
+    res.json({ assessment });
+  } catch (err) { next(err); }
+});
+
+router.put("/content-assessments/:id", async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const id = req.params.id as string;
+    const data = assessmentSchema.partial().parse(req.body);
+    const assessment = await prisma.assessment.update({ where: { id }, data });
+    res.json({ assessment });
+  } catch (err) { next(err); }
+});
+
+router.delete("/content-assessments/:id", async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const id = req.params.id as string;
+    await prisma.assessment.delete({ where: { id } });
+    res.json({ success: true });
+  } catch (err) { next(err); }
+});
+
+router.post("/content-assessments/:id/questions", async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const assessmentId = req.params.id as string;
+    const data = assessmentQuestionSchema.parse(req.body);
+    const question = await prisma.assessmentQuestion.create({
+      data: { ...data, assessmentId },
+    });
+    res.json({ question });
+  } catch (err) { next(err); }
+});
+
+router.put("/content-assessments/:id/questions/:questionId", async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const questionId = req.params.questionId as string;
+    const data = assessmentQuestionSchema.partial().parse(req.body);
+    const question = await prisma.assessmentQuestion.update({
+      where: { id: questionId },
+      data,
+    });
+    res.json({ question });
+  } catch (err) { next(err); }
+});
+
+router.delete("/content-assessments/:id/questions/:questionId", async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const questionId = req.params.questionId as string;
+    await prisma.assessmentQuestion.delete({ where: { id: questionId } });
+    res.json({ success: true });
+  } catch (err) { next(err); }
+});
+
 export default router;

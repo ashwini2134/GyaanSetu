@@ -27,114 +27,106 @@ const STYLES = `
   .ib-particle { animation: ib-drift 8s ease-out infinite; }
 `;
 
-// ── Left-page visuals ───────────────────────────────────────────────────
+// ── Left-page visuals (data-driven from spread.left) ────────────────────
 
-function ChapterHeader() {
-  return (
-    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'100%', gap:'10px', padding:'28px' }}>
-      <div style={{ width:'28px', height:'1.5px', background:ACCENT }} />
-      <p style={{ fontFamily:'Georgia,serif', fontSize:'10px', letterSpacing:'4px', color:'#9a8070', textTransform:'uppercase', margin:0 }}>Chapter</p>
-      <p style={{ fontFamily:'Georgia,serif', fontSize:'76px', fontWeight:700, color:'#e8ddd0', lineHeight:0.9, margin:0 }}>01</p>
-      <p style={{ fontFamily:'Georgia,serif', fontSize:'14px', color:MUTED, fontStyle:'italic', margin:0, textAlign:'center' }}>What is AI?</p>
-      <div style={{ width:'28px', height:'1.5px', background:ACCENT }} />
-      <p style={{ marginTop:'20px', fontFamily:'Georgia,serif', fontSize:'9px', letterSpacing:'3px', color:'#b0a090', textTransform:'uppercase' }}>Fraylon Academy</p>
-    </div>
-  );
-}
+function LeftPageContent({ spread }: { spread: BookSpread }) {
+  const left = spread.left;
+  if (!left) return null;
 
-function InboxStatPage() {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    const t = setInterval(() => setCount(c => Math.min(c + 1, 8)), 380);
-    return () => clearInterval(t);
-  }, []);
-  const rows = ['Team meeting at 3pm', 'Your order shipped!', 'New message from Alex', 'URGENT: Review now', 'Weekly newsletter', 'Security alert', 'Invoice #4421', 'Daily digest'];
-  return (
-    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'100%', padding:'20px 24px', gap:'6px' }}>
-      <p style={{ fontFamily:'Georgia,serif', fontSize:'34px', fontWeight:700, color:INK, letterSpacing:'-1px', lineHeight:1, margin:0 }}>300B</p>
-      <p style={{ fontFamily:'Georgia,serif', fontSize:'10px', color:MUTED, letterSpacing:'1px', margin:0 }}>emails every day</p>
-      <div style={{ width:'20px', height:'1px', background:ACCENT, margin:'6px 0' }} />
-      <div style={{ width:'100%', display:'flex', flexDirection:'column', gap:'3px' }}>
-        {rows.slice(0, count).map((r, i) => (
-          <div key={i} className="ib-drop" style={{ animationDelay:`${i*40}ms`, display:'flex', alignItems:'center', gap:'6px', background:'rgba(0,0,0,0.035)', borderRadius:'4px', padding:'3px 7px' }}>
-            <div style={{ width:'5px', height:'5px', borderRadius:'50%', background:'#5b8adc', flexShrink:0 }} />
-            <span style={{ fontSize:'9px', color:'#555', fontFamily:'system-ui', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:'140px' }}>{r}</span>
-          </div>
-        ))}
-        {count >= 8 && <p style={{ fontSize:'9px', color:'#aaa', textAlign:'center', fontFamily:'system-ui', margin:'2px 0 0' }}>+ 299,999,999,992 more…</p>}
+  const lc = (left.image ?? '').toLowerCase();
+  const paragraphs = left.paragraphs ?? [];
+
+  // ── Chapter header ──
+  if (lc.startsWith('chapter')) {
+    const num = left.image?.slice(7) || '01';
+    return (
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'100%', gap:'10px', padding:'28px' }}>
+        <div style={{ width:'28px', height:'1.5px', background:ACCENT }} />
+        <p style={{ fontFamily:'Georgia,serif', fontSize:'10px', letterSpacing:'4px', color:'#9a8070', textTransform:'uppercase', margin:0 }}>{left.title ?? 'Chapter'}</p>
+        <p style={{ fontFamily:'Georgia,serif', fontSize:'76px', fontWeight:700, color:'#e8ddd0', lineHeight:0.9, margin:0 }}>{num}</p>
+        <p style={{ fontFamily:'Georgia,serif', fontSize:'14px', color:MUTED, fontStyle:'italic', margin:0, textAlign:'center' }}>{paragraphs[0] || ''}</p>
+        <div style={{ width:'28px', height:'1.5px', background:ACCENT }} />
+        <p style={{ marginTop:'20px', fontFamily:'Georgia,serif', fontSize:'9px', letterSpacing:'3px', color:'#b0a090', textTransform:'uppercase' }}>GyanSetu</p>
       </div>
-    </div>
-  );
-}
-
-function HumanVsMachinePage() {
-  return (
-    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'100%', padding:'24px', gap:'10px' }}>
-      <p style={{ fontFamily:'Georgia,serif', fontSize:'10px', color:'#9a8070', letterSpacing:'3px', textTransform:'uppercase', margin:0 }}>The problem</p>
-      <div style={{ display:'flex', gap:'18px', alignItems:'center', padding:'10px 0' }}>
-        <div style={{ textAlign:'center', display:'flex', flexDirection:'column', gap:'5px', flex:1 }}>
-          <span style={{ fontSize:'44px', lineHeight:1 }}>😵</span>
-          <span style={{ fontSize:'9px', fontFamily:'system-ui', fontWeight:700, color:'#cc4444', letterSpacing:'1px', textTransform:'uppercase' }}>Human</span>
-          <span style={{ fontSize:'9px', fontFamily:'system-ui', color:'#aaa', lineHeight:1.4 }}>~40 emails<br/>per hour</span>
-        </div>
-        <span style={{ fontFamily:'Georgia,serif', fontSize:'18px', color:ACCENT, flexShrink:0 }}>vs</span>
-        <div style={{ textAlign:'center', display:'flex', flexDirection:'column', gap:'5px', flex:1 }}>
-          <span style={{ fontSize:'44px', lineHeight:1 }}>🖥️</span>
-          <span style={{ fontSize:'9px', fontFamily:'system-ui', fontWeight:700, color:'#44aa44', letterSpacing:'1px', textTransform:'uppercase' }}>Machine</span>
-          <span style={{ fontSize:'9px', fontFamily:'system-ui', color:'#aaa', lineHeight:1.4 }}>1M emails<br/>per second</span>
-        </div>
-      </div>
-      <div style={{ width:'24px', height:'1px', background:ACCENT }} />
-      <p style={{ fontFamily:'Georgia,serif', fontSize:'11px', color:MUTED, textAlign:'center', fontStyle:'italic', margin:0, lineHeight:1.6 }}>Someone had to build<br/>a smarter approach.</p>
-    </div>
-  );
-}
-
-function AILettersPage() {
-  return (
-    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'100%', padding:'24px', gap:'8px' }}>
-      <p style={{ fontFamily:'Georgia,serif', fontSize:'10px', color:'#9a8070', letterSpacing:'3px', textTransform:'uppercase', margin:0 }}>The answer</p>
-      <p style={{ fontFamily:'Georgia,serif', fontSize:'72px', fontWeight:700, letterSpacing:'-2px', lineHeight:0.9, margin:0, background:'linear-gradient(135deg,#2a1a0a 0%,#6a4a2a 50%,#2a1a0a 100%)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>AI</p>
-      <p style={{ fontFamily:'Georgia,serif', fontSize:'11px', color:MUTED, fontStyle:'italic', textAlign:'center', lineHeight:1.6, margin:0 }}>two letters that<br/>changed everything</p>
-    </div>
-  );
-}
-
-function ExampleTile({ icon, title, desc }: { icon: string; title: string; desc: string }) {
-  return (
-    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'100%', padding:'24px', gap:'10px' }}>
-      <span style={{ fontSize:'52px', lineHeight:1 }}>{icon}</span>
-      <p style={{ fontFamily:'Georgia,serif', fontSize:'16px', fontWeight:700, color:INK, margin:0 }}>{title}</p>
-      <div style={{ width:'22px', height:'1px', background:ACCENT }} />
-      <p style={{ fontFamily:'Georgia,serif', fontSize:'11px', color:MUTED, textAlign:'center', lineHeight:1.7, fontStyle:'italic', margin:0 }}>{desc}</p>
-    </div>
-  );
-}
-
-function CompletedPage() {
-  return (
-    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'100%', padding:'24px', gap:'10px' }}>
-      <div style={{ width:'44px', height:'44px', borderRadius:'50%', border:`2px solid ${ACCENT}`, display:'flex', alignItems:'center', justifyContent:'center' }}>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={MUTED} strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-      </div>
-      <p style={{ fontFamily:'Georgia,serif', fontSize:'13px', color:MUTED, textAlign:'center', lineHeight:1.7, margin:0 }}>You've completed<br/><strong style={{ color:INK }}>Chapter 1</strong></p>
-      <div style={{ width:'22px', height:'1px', background:ACCENT }} />
-      <p style={{ fontFamily:'Georgia,serif', fontSize:'9px', color:'#b0a090', letterSpacing:'3px', textTransform:'uppercase', margin:0 }}>Fraylon Academy</p>
-    </div>
-  );
-}
-
-function LeftPageContent({ idx }: { idx: number }) {
-  switch (idx) {
-    case 0: return <ChapterHeader />;
-    case 1: return <InboxStatPage />;
-    case 2: return <HumanVsMachinePage />;
-    case 3: return <AILettersPage />;
-    case 4: return <ExampleTile icon="📧" title="Spam Filter" desc="Studies millions of emails to learn which ones are junk." />;
-    case 5: return <ExampleTile icon="🗺️" title="Google Maps" desc="Searches billions of routes to find the fastest path." />;
-    case 6: return <CompletedPage />;
-    default: return null;
+    );
   }
+
+  // ── Big stat page ──
+  if (lc.startsWith('stat')) {
+    const stat = paragraphs[0] || '';
+    const unit = paragraphs[1] || '';
+    return (
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'100%', padding:'20px 24px', gap:'6px' }}>
+        <p style={{ fontFamily:'Georgia,serif', fontSize:'34px', fontWeight:700, color:INK, letterSpacing:'-1px', lineHeight:1, margin:0 }}>{stat}</p>
+        <p style={{ fontFamily:'Georgia,serif', fontSize:'10px', color:MUTED, letterSpacing:'1px', margin:0 }}>{unit}</p>
+      </div>
+    );
+  }
+
+  // ── Comparison (human vs machine) ──
+  if (lc.startsWith('compare')) {
+    const [leftLabel, leftEmoji, leftStat, rightLabel, rightEmoji, rightStat] = paragraphs;
+    return (
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'100%', padding:'24px', gap:'10px' }}>
+        <p style={{ fontFamily:'Georgia,serif', fontSize:'10px', color:'#9a8070', letterSpacing:'3px', textTransform:'uppercase', margin:0 }}>{left.title || 'The problem'}</p>
+        <div style={{ display:'flex', gap:'18px', alignItems:'center', padding:'10px 0' }}>
+          <div style={{ textAlign:'center', display:'flex', flexDirection:'column', gap:'5px', flex:1 }}>
+            <span style={{ fontSize:'44px', lineHeight:1 }}>{leftEmoji || '😵'}</span>
+            <span style={{ fontSize:'9px', fontFamily:'system-ui', fontWeight:700, color:'#cc4444', letterSpacing:'1px', textTransform:'uppercase' }}>{leftLabel || 'Human'}</span>
+            <span style={{ fontSize:'9px', fontFamily:'system-ui', color:'#aaa', lineHeight:1.4 }}>{leftStat || ''}</span>
+          </div>
+          <span style={{ fontFamily:'Georgia,serif', fontSize:'18px', color:ACCENT, flexShrink:0 }}>vs</span>
+          <div style={{ textAlign:'center', display:'flex', flexDirection:'column', gap:'5px', flex:1 }}>
+            <span style={{ fontSize:'44px', lineHeight:1 }}>{rightEmoji || '🖥️'}</span>
+            <span style={{ fontSize:'9px', fontFamily:'system-ui', fontWeight:700, color:'#44aa44', letterSpacing:'1px', textTransform:'uppercase' }}>{rightLabel || 'Machine'}</span>
+            <span style={{ fontSize:'9px', fontFamily:'system-ui', color:'#aaa', lineHeight:1.4 }}>{rightStat || ''}</span>
+          </div>
+        </div>
+        <div style={{ width:'24px', height:'1px', background:ACCENT }} />
+        <p style={{ fontFamily:'Georgia,serif', fontSize:'11px', color:MUTED, textAlign:'center', fontStyle:'italic', margin:0, lineHeight:1.6 }}>{paragraphs[6] || ''}</p>
+      </div>
+    );
+  }
+
+  // ── Big reveal (two letters / short text) ──
+  if (lc.startsWith('reveal')) {
+    return (
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'100%', padding:'24px', gap:'8px' }}>
+        {left.title && <p style={{ fontFamily:'Georgia,serif', fontSize:'10px', color:'#9a8070', letterSpacing:'3px', textTransform:'uppercase', margin:0 }}>{left.title}</p>}
+        <p style={{ fontFamily:'Georgia,serif', fontSize:'72px', fontWeight:700, letterSpacing:'-2px', lineHeight:0.9, margin:0, background:'linear-gradient(135deg,#2a1a0a 0%,#6a4a2a 50%,#2a1a0a 100%)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>{paragraphs[0] || ''}</p>
+        <p style={{ fontFamily:'Georgia,serif', fontSize:'11px', color:MUTED, fontStyle:'italic', textAlign:'center', lineHeight:1.6, margin:0 }}>{paragraphs[1] || ''}</p>
+      </div>
+    );
+  }
+
+  // ── Emoji tile (example) ──
+  if (lc.startsWith('tile')) {
+    const emoji = left.image?.slice(4) || '📧';
+    return (
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'100%', padding:'24px', gap:'10px' }}>
+        <span style={{ fontSize:'52px', lineHeight:1 }}>{emoji}</span>
+        <p style={{ fontFamily:'Georgia,serif', fontSize:'16px', fontWeight:700, color:INK, margin:0 }}>{left.title || ''}</p>
+        <div style={{ width:'22px', height:'1px', background:ACCENT }} />
+        <p style={{ fontFamily:'Georgia,serif', fontSize:'11px', color:MUTED, textAlign:'center', lineHeight:1.7, fontStyle:'italic', margin:0 }}>{paragraphs[0] || ''}</p>
+      </div>
+    );
+  }
+
+  // ── Completed ──
+  if (lc.startsWith('done')) {
+    return (
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'100%', padding:'24px', gap:'10px' }}>
+        <div style={{ width:'44px', height:'44px', borderRadius:'50%', border:`2px solid ${ACCENT}`, display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={MUTED} strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+        </div>
+        <p style={{ fontFamily:'Georgia,serif', fontSize:'13px', color:MUTED, textAlign:'center', lineHeight:1.7, margin:0 }}>You've completed<br/><strong style={{ color:INK }}>{left.title || 'Chapter'}</strong></p>
+        <div style={{ width:'22px', height:'1px', background:ACCENT }} />
+        <p style={{ fontFamily:'Georgia,serif', fontSize:'9px', color:'#b0a090', letterSpacing:'3px', textTransform:'uppercase', margin:0 }}>GyanSetu</p>
+      </div>
+    );
+  }
+
+  return null;
 }
 
 // ── Typewriter ──────────────────────────────────────────────────────────
@@ -379,7 +371,7 @@ function BookCover({ onOpen, exiting }: { onOpen: () => void; exiting: boolean }
         <div style={{ position:'absolute', left:0, top:0, bottom:0, width:'16px', background:'linear-gradient(to right,rgba(0,0,0,0.5),transparent)', pointerEvents:'none' }} />
 
         <div style={{ textAlign:'center', padding:'0 32px', zIndex:1 }}>
-          <p style={{ fontFamily:'Georgia,serif', fontSize:'9px', letterSpacing:'5px', color:'rgba(200,184,154,0.45)', textTransform:'uppercase', margin:'0 0 20px' }}>Fraylon Academy</p>
+          <p style={{ fontFamily:'Georgia,serif', fontSize:'9px', letterSpacing:'5px', color:'rgba(200,184,154,0.45)', textTransform:'uppercase', margin:'0 0 20px' }}>GyanSetu</p>
           <div style={{ width:'32px', height:'1px', background:'rgba(200,184,154,0.3)', margin:'0 auto 18px' }} />
           <p style={{ fontFamily:'Georgia,serif', fontSize:'11px', letterSpacing:'3px', color:'rgba(200,184,154,0.5)', textTransform:'uppercase', margin:'0 0 12px' }}>Chapter One</p>
           <p style={{ fontFamily:'Georgia,serif', fontSize:'clamp(20px, 4vw, 30px)', fontWeight:700, color:'rgba(240,230,210,0.9)', lineHeight:1.3, margin:'0 0 8px' }}>What is<br/>Artificial<br/>Intelligence?</p>
@@ -460,7 +452,7 @@ function OpenBook({ spreads, displayIdx, leftVisualIdx, turningToIdx, turning, f
             flexShrink: 0,
           }}
         >
-          <LeftPageContent idx={leftVisualIdx} />
+          <LeftPageContent spread={spreads[leftVisualIdx]} />
         </div>
 
         {/* Spine */}

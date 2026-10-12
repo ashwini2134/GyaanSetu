@@ -67,14 +67,15 @@ export default function BetaTesting() {
           </div>
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium text-slate-300">Beta Mode:</span>
-            <label className="relative inline-flex items-center cursor-pointer">
+            <label className="ai-toggle">
               <input 
                 type="checkbox" 
-                className="sr-only peer" 
                 checked={betaActive}
                 onChange={toggleBeta}
               />
-              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#0f172a] after:border-white/10 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              <span className="ai-toggle-track">
+                <span className="ai-toggle-thumb"></span>
+              </span>
             </label>
           </div>
         </div>

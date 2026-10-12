@@ -1,10 +1,16 @@
 // Fraylon Admin - Phase 1
+import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { BookOpen, Activity, BarChart2, Settings, LogOut } from "lucide-react";
 import { useAuth } from "../../auth";
+import LogoutOverlay from "../auth/LogoutOverlay";
+
+import { useBranding } from "../../context/BrandingContext";
 
 export function AdminLayout() {
   const { user, logout } = useAuth();
+  const { branding } = useBranding();
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const navItems = [
     { label: "Content Studio", path: "/admin/content-studio", icon: BookOpen },
@@ -18,9 +24,13 @@ export function AdminLayout() {
       {/* Sidebar */}
       <aside className="w-16 md:w-64 bg-slate-900 text-slate-300 flex flex-col justify-between shrink-0 transition-all duration-300 shadow-xl z-10">
         <div>
-          <div className="h-16 flex items-center justify-center md:justify-start md:px-6 border-b border-slate-800">
-            <span className="font-bold text-white text-xl hidden md:block tracking-tight">Fraylon Admin</span>
-            <span className="font-bold text-white text-xl md:hidden">FA</span>
+          <div className="h-16 flex items-center justify-center md:justify-start md:px-6 border-b border-slate-800 gap-2">
+            <img
+              src={branding?.logoUrl || "/logo.svg"}
+              alt={branding?.platformName || "Platform Logo"}
+              className="h-8 w-auto object-contain flex-shrink-0"
+            />
+            <span className="font-bold text-white text-xl hidden md:block tracking-tight">{branding?.platformName || "GyanSetu"} Admin</span>
           </div>
 
           <nav className="mt-6 flex flex-col gap-2 px-3">
@@ -54,7 +64,7 @@ export function AdminLayout() {
           </div>
           
           <button
-            onClick={logout}
+            onClick={() => setLoggingOut(true)}
             className="flex items-center justify-center md:justify-start gap-3 w-full px-3 py-2.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-400/10 transition-colors"
             title="Log out"
           >
@@ -68,6 +78,8 @@ export function AdminLayout() {
       <main className="flex-1 overflow-auto bg-[#0a0f1e] w-full relative">
         <Outlet />
       </main>
+
+      {loggingOut && <LogoutOverlay onComplete={logout} />}
     </div>
   );
 }

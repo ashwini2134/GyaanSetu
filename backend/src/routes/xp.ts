@@ -2,6 +2,7 @@ import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
 import { prisma } from "../prisma.js";
 import type { AuthenticatedRequest } from "../middleware/auth.js";
+import { getCurrentWeekXp, getWeekBounds } from "../services/weeklyXpService.js";
 
 const router = Router();
 
@@ -9,14 +10,19 @@ router.get("/", requireAuth, async (req: AuthenticatedRequest, res, next) => {
   try {
     const userId = req.user!.id;
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { totalXp: true }
-    });
+    const [user, weeklyXp] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: { totalXp: true }
+      }),
+      getCurrentWeekXp(userId),
+    ]);
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
+
+    const { weekStart, weekEnd, weekNumber } = getWeekBounds();
 
     const history = await prisma.xpTransaction.findMany({
       where: { userId },
@@ -25,6 +31,10 @@ router.get("/", requireAuth, async (req: AuthenticatedRequest, res, next) => {
 
     res.json({
       totalXp: user.totalXp,
+      weeklyXp,
+      weekStart: weekStart.toISOString(),
+      weekEnd: weekEnd.toISOString(),
+      weekNumber,
       history: history.map(tx => ({
         id: tx.id,
         action: tx.reason,

@@ -1,0 +1,27 @@
+# Fraylon LMS — Railway deployment configuration
+# ---------------------------------------------------------------------------
+# HOW TO DEPLOY ON RAILWAY
+# ---------------------------------------------------------------------------
+# 1. Create a Railway project and link this repo.
+# 2. Add a Redis plugin — Railway will set REDIS_URL automatically.
+# 3. Add a PostgreSQL plugin — Railway will set DATABASE_URL automatically.
+# 4. Service 1 (Web API):
+#      Start command : npm run start:web
+#      Env var       : DISABLE_WORKERS=true
+# 5. Service 2 (Worker):
+#      Start command : npm run start:worker
+#      (No DISABLE_WORKERS — workers run here)
+# ---------------------------------------------------------------------------
+
+[build]
+builder      = "nixpacks"
+buildCommand = "npm run build"
+
+[deploy]
+startCommand     = "npm run start:web"
+healthcheckPath  = "/api/health"
+healthcheckTimeout = 30
+
+[deploy.restartPolicy]
+type       = "on_failure"
+maxRetries = 5

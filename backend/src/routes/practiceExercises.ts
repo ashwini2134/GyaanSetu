@@ -119,10 +119,19 @@ router.get("/config/:courseId/:lectureId", requireAuth, async (req: Authenticate
     };
     if (sectionId) where.sectionId = sectionId;
 
-    const exercise = await prisma.practiceExercise.findFirst({
-      where,
+    // Prefer interactive exercise types over generic "ai" chat exercises
+    const interactiveTypes = ["drag_drop", "hierarchy_expand", "ai_conversation", "path_builder", "bfs_dfs", "search_problem_builder", "bfs_dfs_game", "warehouse_ai_game"];
+    let exercise = await prisma.practiceExercise.findFirst({
+      where: { ...where, type: { in: interactiveTypes } },
       orderBy: { updatedAt: "desc" },
     });
+
+    if (!exercise) {
+      exercise = await prisma.practiceExercise.findFirst({
+        where,
+        orderBy: { updatedAt: "desc" },
+      });
+    }
 
     if (!exercise) {
       res.json({ exercise: null });

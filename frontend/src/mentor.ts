@@ -1,10 +1,10 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════════
- * FRAYLON MENTOR - Problem-Aware Socratic Hints System
+ * GYANSETU MENTOR - Problem-Aware Socratic Hints System
  * ═══════════════════════════════════════════════════════════════════════════════
  * 
  * This system provides targeted, problem-specific Socratic hints based on:
- * - Course (cs50p, cs50ai)
+ * - Course (cs50p, fundamentals-of-ai)
  * - Lecture number
  * - Problem slug
  * - Student code analysis
@@ -25,7 +25,7 @@
 
 
 export interface MentorContext {
-  courseSlug: string;  // 'cs50p', 'cs50ai'
+  courseSlug: string;  // 'cs50p', 'fundamentals-of-ai'
   lectureNum: number;  // 0-9
   problemSlug: string; // 'indoor_voice', 'making_faces', etc.
   studentCode: string; // Raw student submission
