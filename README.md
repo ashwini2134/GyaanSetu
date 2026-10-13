@@ -6,10 +6,10 @@ LLM, and issues verifiable certificates at the end.
 
 | | |
 |---|---|
-| **Student app** | https://academy.fraylontech.com (GitHub Pages) |
-| **Repository** | https://github.com/yuvaraj-dudukuru/LMS |
+| **Student app** | https://gyaan-setu-sigma.vercel.app ) |
+| **Repository** | https://github.com/ashwini2134/GyaanSetu |
 | **Version** | 3.0.0 — *Phase 3: Automated Student Pipeline* |
-| **Courses live** | Python Beginner (14 lectures) · Fundamentals of AI (9 lectures) |
+
 
 ---
 
