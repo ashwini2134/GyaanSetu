@@ -57,6 +57,7 @@ LMS/
 # Local database backups
 backups/
 *.sql
+!backend/prisma/migrations/20261013_add_user_notification_prefs/migration.sql
 *.dump
 *.backup
 
@@ -77,6 +78,7 @@ frontend/.env*
 # Database backups and exports
 backups/
 *.sql
+!backend/prisma/migrations/20261013_add_user_notification_prefs/migration.sql
 *.dump
 *.backup
 
