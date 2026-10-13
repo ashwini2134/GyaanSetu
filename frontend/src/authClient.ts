@@ -27,11 +27,11 @@ function ensureAbsoluteUrl(url: string | undefined, defaultUrl: string) {
   return url;
 }
 
-const API_BASE = ensureAbsoluteUrl(
+export const API_BASE = ensureAbsoluteUrl(
   import.meta.env.VITE_API_URL, 
   "http://localhost:3001/api"
 );
-const BACKEND_BASE = ensureAbsoluteUrl(
+export const BACKEND_BASE = ensureAbsoluteUrl(
   import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_URL?.replace('/api', ''), 
   "http://localhost:3001"
 );
@@ -76,12 +76,38 @@ export class AuthApiError extends Error {
   }
 }
 
-async function parseResponse<T>(res: Response): Promise<T> {
-  const data = (await res.json().catch(() => ({}))) as { error?: string } & T;
-  if (!res.ok) {
-    throw new AuthApiError(data.error ?? res.statusText, res.status);
+export async function parseResponse<T>(res: Response): Promise<T> {
+  const contentType = res.headers.get("content-type") || "";
+  let data: any = {};
+
+  if (contentType.includes("application/json")) {
+    try {
+      data = await res.json();
+    } catch {
+      data = {};
+    }
+  } else {
+    // Non-JSON response (e.g. text/html, text/plain from reverse proxy, 404, or 502/504)
+    const rawText = await res.text().catch(() => "");
+    const cleanText = rawText.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+    if (!res.ok) {
+      const errorMsg = cleanText
+        ? (cleanText.length > 150 ? `${cleanText.slice(0, 150)}...` : cleanText)
+        : (res.statusText || `Request failed with status ${res.status}`);
+      throw new AuthApiError(errorMsg, res.status);
+    }
+    try {
+      data = JSON.parse(rawText);
+    } catch {
+      data = { text: rawText };
+    }
   }
-  return data;
+
+  if (!res.ok) {
+    const errorMsg = data.error ?? data.message ?? res.statusText ?? `Request failed with status ${res.status}`;
+    throw new AuthApiError(errorMsg, res.status);
+  }
+  return data as T;
 }
 
 export async function authFetchBlob(path: string): Promise<Blob> {

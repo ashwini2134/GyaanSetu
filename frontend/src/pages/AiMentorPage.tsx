@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../auth';
-import { getToken } from '../authClient';
+import { getToken, authFetch, API_BASE } from '../authClient';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -113,9 +113,15 @@ export default function AiMentorPage() {
     let isMounted = true;
     const checkHealth = async () => {
       try {
-        const response = await fetch('/api/ai-mentor/health');
+        const response = await fetch(`${API_BASE}/ai-mentor/health`);
         if (!response.ok) throw new Error('Health endpoint returned status ' + response.status);
-        const data = await response.json();
+        const contentType = response.headers.get('content-type') || '';
+        let data: any = {};
+        if (contentType.includes('application/json')) {
+          data = await response.json();
+        } else {
+          throw new Error('Health check returned non-JSON response');
+        }
         if (isMounted) {
           const isQdrantOk = Boolean(data.qdrant?.connected);
           const isLyzrOk = Boolean(data.lyzr?.configured);
@@ -260,22 +266,17 @@ export default function AiMentorPage() {
     setStatusMessage('Searching course materials & generating response...');
 
     try {
-      const response = await fetch('/api/ai-mentor/ask', {
+      const data = await authFetch<{
+        success?: boolean;
+        answer?: string;
+        error?: string;
+        context?: SearchResult[];
+      }>('/ai-mentor/ask', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
         body: JSON.stringify({
           query: textToSend,
         }),
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to receive response from AI Learning Assistant');
-      }
 
       if (data.success === false && !data.answer) {
         throw new Error(data.error || 'The AI assistant was unable to process this request.');
@@ -325,20 +326,13 @@ export default function AiMentorPage() {
     setDirectSearchSubmitted(true);
 
     try {
-      const response = await fetch('/api/ai-mentor/search', {
+      const data = await authFetch<{
+        results?: SearchResult[];
+        error?: string;
+      }>('/ai-mentor/search', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
         body: JSON.stringify({ query: q, limit: 6 }),
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Search failed');
-      }
 
       if (data.error) {
         throw new Error(data.error);

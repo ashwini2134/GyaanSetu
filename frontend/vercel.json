@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/api/:match*", "destination": "https://gyansetu-api-cuk9.onrender.com/api/:match*" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
