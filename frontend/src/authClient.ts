@@ -32,7 +32,7 @@ const API_BASE = ensureAbsoluteUrl(
   "http://localhost:3001/api"
 );
 const BACKEND_BASE = ensureAbsoluteUrl(
-  import.meta.env.VITE_BACKEND_URL, 
+  import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_URL?.replace('/api', ''), 
   "http://localhost:3001"
 );
 
