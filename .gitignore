@@ -58,6 +58,7 @@ LMS/
 backups/
 *.sql
 !backend/prisma/migrations/20261013_add_user_notification_prefs/migration.sql
+!backend/prisma/migrations/20261014000000_add_missing_user_columns/migration.sql
 *.dump
 *.backup
 
@@ -79,6 +80,7 @@ frontend/.env*
 backups/
 *.sql
 !backend/prisma/migrations/20261013_add_user_notification_prefs/migration.sql
+!backend/prisma/migrations/20261014000000_add_missing_user_columns/migration.sql
 *.dump
 *.backup
 
